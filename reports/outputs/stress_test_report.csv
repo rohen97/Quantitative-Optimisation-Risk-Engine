@@ -1,8 +1,8 @@
 scenario,portfolio_loss_usd,portfolio_loss_pct,worst_contributing_stock,residual_risk
-global_risk_off,-204432.71372784424,-0.2,WLF008,High
-europe_recession,-126431.77409662092,-0.12369035443606755,WLF006,Moderate
-china_policy_property_stress,-107456.87886140024,-0.10512689177961478,WLF008,Moderate
-india_fx_stress,-15983.437110377377,-0.015636868306366757,WLF005,Moderate
-financial_stress,-18656.04971251529,-0.018251530659962364,WLF004,Moderate
-dividend_cut_shock,-51108.17843196106,-0.05,WLF008,Moderate
-meta_wolf_shock,-255540.89215980528,-0.25,WLF008,High
+global_risk_off,-9907.0,-0.2,SIE.DE,High
+europe_recession,-6972.0,-0.14074896537801554,SIE.DE,Moderate
+china_policy_property_stress,-4103.75,-0.08284546280407792,000651.SZ,Moderate
+india_fx_stress,-621.0,-0.012536590289694156,HDFCBANK.NS,Moderate
+financial_stress,-2255.0,-0.04552336731603916,0005.HK,Moderate
+dividend_cut_shock,-2476.75,-0.05,SIE.DE,Moderate
+meta_wolf_shock,-12383.75,-0.25,SIE.DE,High

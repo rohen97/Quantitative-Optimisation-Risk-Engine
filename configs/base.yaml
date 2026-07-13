@@ -2,7 +2,7 @@ project_name: The Wolf Quant Model
 random_seed: 42
 base_currency: USD
 output_dir: reports/outputs
-current_portfolio_path: data/raw/current_portfolio.csv
+current_portfolio_path: data/external/current_portfolio_template.csv
 mock_data:
   enabled: true
   securities: 24

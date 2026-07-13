@@ -13,3 +13,4 @@ data/processed/*
 !data/processed/.gitkeep
 data/external/*
 !data/external/.gitkeep
+!data/external/current_portfolio_template.csv

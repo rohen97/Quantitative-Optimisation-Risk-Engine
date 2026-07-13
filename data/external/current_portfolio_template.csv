@@ -1,0 +1,9 @@
+ticker,company_name,country,region,currency,sector,shares,current_price,market_value_usd,dividend_yield,beta,volatility
+NESN.SW,Nestle SA,Switzerland,DACH,CHF,Consumer Staples,100,105.00,10500.00,0.031,0.65,0.18
+NOVN.SW,Novartis AG,Switzerland,DACH,CHF,Healthcare,90,98.00,8820.00,0.036,0.72,0.20
+SIE.DE,Siemens AG,Germany,DACH,EUR,Industrials,60,185.00,11100.00,0.028,1.05,0.24
+000651.SZ,Gree Electric Appliances,China,Mainland China,CNY,Consumer Discretionary,800,5.80,4640.00,0.045,0.95,0.30
+000001.SS,SSE Composite Proxy,China,Mainland China,CNY,Financials,1000,4.20,4200.00,0.032,1.10,0.28
+0005.HK,HSBC Holdings,Hong Kong,Hong Kong,HKD,Financials,500,8.75,4375.00,0.055,1.15,0.27
+0002.HK,CLP Holdings,Hong Kong,Hong Kong,HKD,Utilities,400,8.00,3200.00,0.048,0.55,0.16
+HDFCBANK.NS,HDFC Bank,India,India,INR,Financials,120,22.50,2700.00,0.012,1.05,0.26

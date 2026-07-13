@@ -6,7 +6,6 @@ import pandas as pd
 
 from src.alternative_data.alt_features import build_alt_features
 from src.data_ingestion.fundamental_ingestion import load_fundamentals
-from src.data_ingestion.mock_data import generate_mock_current_portfolio
 from src.data_ingestion.price_ingestion import load_prices
 from src.data_ingestion.universe import build_universe
 from src.features.feature_store import build_feature_store
@@ -15,7 +14,7 @@ from src.models.forecasting import generate_mock_forecasts
 from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.optimisation.portfolio_builder import build_proposed_portfolio
-from src.portfolio.portfolio_diagnostics import build_portfolio_diagnostics
+from src.portfolio.portfolio_diagnostics import build_concentration_summary, build_portfolio_diagnostics
 from src.portfolio.portfolio_loader import load_current_portfolio
 from src.regime.regime_classifier import build_regime_features
 from src.reporting.report_writer import write_csv, write_markdown
@@ -32,9 +31,9 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
     prices = load_prices(universe)
     fundamentals = load_fundamentals(universe)
-    mock_portfolio = generate_mock_current_portfolio(universe)
-    portfolio = load_current_portfolio(mock_portfolio=mock_portfolio)
+    portfolio = load_current_portfolio(config.get("current_portfolio_path", "data/external/current_portfolio_template.csv"))
     diagnostics, exposures = build_portfolio_diagnostics(portfolio)
+    concentration = build_concentration_summary(portfolio)
     sentiment = build_alt_features(universe)
     regime = build_regime_features(universe)
     features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, regime)
@@ -45,8 +44,10 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     hedge_report = build_hedge_recommendations(portfolio)
 
     write_csv(diagnostics, out, "current_portfolio_diagnostics.csv")
+    write_csv(portfolio, out, "current_portfolio_enriched.csv")
+    write_csv(concentration, out, "concentration_summary.csv")
     for name, frame in exposures.items():
-        write_csv(frame, out, f"current_portfolio_{name}_exposure.csv")
+        write_csv(frame, out, f"{name}_exposure.csv")
     write_csv(scorecard, out, "stock_scorecard.csv")
     recommendations = {}
     for horizon in HORIZONS_MONTHS:
@@ -65,6 +66,8 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     return {
         "portfolio": portfolio,
         "diagnostics": diagnostics,
+        "concentration": concentration,
+        "exposures": pd.concat(exposures, names=["exposure_type"]),
         "features": features,
         "scorecard": scorecard,
         "proposed_portfolio": proposed,
