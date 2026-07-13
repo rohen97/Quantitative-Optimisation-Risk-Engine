@@ -1,4 +1,4 @@
-# Pipeline Branching Update — EU/UK Universe and Competing Model Branches
+# Pipeline Branching Update - EU/UK Universe and Competing Model Branches
 
 ## Update Summary
 
@@ -14,57 +14,33 @@ The stock-selection universe is listed equities only and now covers:
 - Mainland China / Shanghai listed equities
 - Hong Kong listed equities
 
-Removed from the active universe:
-
-- India
+India has been removed from the active equity universe. Options and ETFs remain out of scope unless explicitly configured later.
 
 ## Revised Pipeline Architecture
 
-The pipeline should branch before the main modelling stack so the model can generate and compare three separate recommendation pathways.
+The pipeline branches before final optimisation, risk, stress and hedge outputs so the model can compare three separate recommendation pathways.
 
 ```text
 Data Ingestion + Feature Store
-        ↓
+        |
 Universe: DACH + EU ex-DACH + UK + Shanghai/China + Hong Kong
-        ↓
+        |
 Branch 1: Portfolio-Aware Quant Model
-        - Uses the current portfolio
-        - Scores candidate equities by marginal portfolio contribution
-        - Measures changes in concentration, income, VaR, CVaR and stress losses
-
+        |
 Branch 2: Clean-Sheet Quant Model
-        - Ignores the current portfolio
-        - Builds a fresh conservative equity portfolio from cash
-        - Useful as a benchmark against the portfolio-aware recommendation
-
+        |
 Branch 3: LLM Analyst Benchmark Model
-        - Uses OpenAI / Claude-style models as competing analyst engines
-        - Produces structured thesis, risk, sentiment and valuation narratives
-        - Does not directly override the quant model
-        - Used for comparison, contradiction detection and qualitative risk review
-
-        ↓
+        |
 Branch Comparison Engine
-        - Compare recommended stocks
-        - Compare sector/country/currency exposure
-        - Compare VaR/CVaR and stress losses
-        - Compare dividend income and cash-flow quality
-        - Identify consensus buys, disagreement names and rejected names
-
-        ↓
-Final Portfolio Construction
-        - Optimisation
-        - Risk management
-        - Stress testing
-        - Hedge recommendation
-        - Dashboard and report outputs
+        |
+Final Recommendations
+        |
+Optimisation + Risk + Stress + Hedge Outputs
 ```
 
 ## Branch 1: Portfolio-Aware Quant Model
 
-Objective:
-
-> Recommend stocks that improve the current portfolio.
+Objective: recommend stocks that improve the current portfolio.
 
 Inputs:
 
@@ -73,61 +49,48 @@ Inputs:
 - Sector/country/currency exposure
 - Concentration metrics
 - Current dividend income
-- Current VaR/CVaR
-- Current stress-test profile
+- Current risk metrics where available
+- Conservative scorecard
 
 Outputs:
 
 - Buy/Hold/Avoid recommendation
-- Target weight
-- Incremental VaR/CVaR
+- Portfolio-aware target weight
 - Incremental dividend income
 - Incremental concentration impact
 - Incremental sector/country/currency impact
+- Incremental risk impact
 - Portfolio fit score
+
+Output file:
+
+- `recommendations_portfolio_aware.csv`
 
 ## Branch 2: Clean-Sheet Quant Model
 
-Objective:
-
-> Build the best conservative equity portfolio without being constrained by current holdings.
+Objective: build the best conservative equity portfolio without being constrained by current holdings.
 
 Inputs:
 
-- Same universe and features as the portfolio-aware model
+- Same universe and scorecard features as the portfolio-aware model
 - No current holdings constraint
 - Starts from cash allocation
 
 Outputs:
 
-- Clean-sheet target portfolio
-- Best conservative income equities
-- Risk-adjusted expected return
-- Dividend yield
-- VaR/CVaR
-- Stress-test behaviour
+- Clean-sheet recommendation
+- Clean-sheet rank
+- Clean-sheet target weight
 
-Use case:
+Output file:
 
-- Benchmark the current-portfolio-aware recommendation against an unconstrained optimal portfolio.
+- `recommendations_clean_sheet.csv`
 
 ## Branch 3: LLM Analyst Benchmark Model
 
-Objective:
+Objective: use OpenAI / Claude-style models as competing analyst engines to generate structured investment views.
 
-> Use OpenAI / Claude-style models as competing analyst engines to generate structured investment views.
-
-This branch should not replace the quant model. It should act as an independent qualitative and reasoning benchmark.
-
-Inputs:
-
-- Company fundamentals
-- Dividend data
-- Cash-flow metrics
-- Valuation data
-- Sentiment and event signals
-- Regime context
-- Risk metrics
+This branch is currently mock-only. It does not call real provider APIs, does not require API keys and cannot override hard quant risk controls.
 
 Structured output per stock:
 
@@ -141,15 +104,13 @@ Structured output per stock:
 - Recommendation: Buy / Hold / Avoid
 - Confidence score
 
-Use case:
+Output file:
 
-- Identify when the quant model and LLM analyst model disagree.
-- Flag names where the quantitative score is high but qualitative risks are severe.
-- Produce investor-facing explanations for final recommendations.
+- `recommendations_llm_benchmark.csv`
 
 ## Branch Comparison Logic
 
-The model should classify stocks into:
+The model classifies stocks into:
 
 | Category | Meaning |
 |---|---|
@@ -160,50 +121,36 @@ The model should classify stocks into:
 | Clean-Sheet Only | Stock is attractive generally but does not improve current portfolio enough |
 | Reject | Fails risk, quality, liquidity or dividend-safety filters |
 
+Output files:
+
+- `branch_comparison_report.csv`
+- `final_recommendations.csv`
+
 ## Final Recommendation Rule
 
-The final model should prioritise:
+The final model prioritises:
 
 1. Risk-adjusted portfolio improvement
 2. Dividend safety
 3. Free cash-flow quality
 4. Balance-sheet strength
-5. Regime suitability
-6. Stress-test resilience
-7. Hedgeability
-8. Agreement or disagreement across model branches
+5. Stress-test resilience
+6. Agreement or disagreement across model branches
 
-The LLM branch should influence explanation, risk flags and disagreement analysis, but should not bypass hard quantitative risk controls.
+LLM agreement can increase confidence. LLM disagreement should trigger review. LLM output cannot bypass quant hard filters.
 
-## Required Code Refactor
+## MVP Implementation Status
 
-Update configs:
-
-- Remove India from allowed regions/countries/exchanges.
-- Add EU ex-DACH and UK.
-- Add branch configuration for:
-  - `portfolio_aware_quant`
-  - `clean_sheet_quant`
-  - `llm_analyst_benchmark`
-
-Update modules:
-
-- `src/data_ingestion/universe.py`
-- `src/models/scorecard.py`
-- `src/optimisation/portfolio_builder.py`
-- `src/reporting/report_writer.py`
-
-Add modules:
+Implemented:
 
 - `src/branches/portfolio_aware.py`
 - `src/branches/clean_sheet.py`
 - `src/branches/llm_benchmark.py`
 - `src/branches/branch_comparison.py`
+- `configs/branching.yaml`
+- Branch output wiring in `src/pipeline.py`
 
-Add outputs:
+Verified:
 
-- `recommendations_portfolio_aware.csv`
-- `recommendations_clean_sheet.csv`
-- `recommendations_llm_benchmark.csv`
-- `branch_comparison_report.csv`
-- `final_recommendations.csv`
+- `python scripts/run_full_pipeline.py`
+- `pytest`

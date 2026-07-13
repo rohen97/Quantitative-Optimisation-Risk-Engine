@@ -8,7 +8,7 @@ def run_stress_tests(portfolio: pd.DataFrame) -> pd.DataFrame:
         "global_risk_off": {"all": -0.20},
         "europe_recession": {"DACH": -0.20, "EUR": -0.08},
         "china_policy_property_stress": {"Mainland China": -0.25, "Hong Kong": -0.25},
-        "india_fx_stress": {"India": -0.15, "INR": -0.08},
+        "uk_rate_fx_stress": {"UK": -0.15, "GBP": -0.08},
         "financial_stress": {"Financials": -0.20},
         "dividend_cut_shock": {"all": -0.05},
         "meta_wolf_shock": {"all": -0.25},

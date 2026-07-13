@@ -53,7 +53,7 @@ Acceptance criteria:
 ## Sprint 3 - Universe and Data Ingestion
 
 Deliverables:
-- DACH, Shanghai/China, Hong Kong and India universe engine.
+- DACH, EU ex-DACH, UK, Shanghai/China and Hong Kong universe engine.
 - Security master.
 - Price ingestion.
 - Fundamental ingestion.

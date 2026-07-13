@@ -1,0 +1,11 @@
+branches:
+  portfolio_aware_quant:
+    enabled: true
+  clean_sheet_quant:
+    enabled: true
+  llm_analyst_benchmark:
+    enabled: true
+    providers:
+      - openai
+      - claude
+    mode: mock

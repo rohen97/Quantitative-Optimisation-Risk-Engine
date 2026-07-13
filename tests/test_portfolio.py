@@ -29,9 +29,9 @@ def sample_portfolio_frame() -> pd.DataFrame:
             {
                 "ticker": "BBB",
                 "company_name": "Beta Ltd",
-                "country": "India",
-                "region": "India",
-                "currency": "INR",
+                "country": "United Kingdom",
+                "region": "UK",
+                "currency": "GBP",
                 "sector": "Financials",
                 "shares": 20,
                 "current_price": 50,

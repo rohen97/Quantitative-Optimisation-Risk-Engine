@@ -7,9 +7,9 @@ scenarios:
   china_policy_property_stress:
     Mainland China: -0.25
     Hong Kong: -0.25
-  india_fx_stress:
-    India: -0.15
-    INR: -0.08
+  uk_rate_fx_stress:
+    UK: -0.15
+    GBP: -0.08
   financial_stress:
     Financials: -0.20
     Insurance: -0.15

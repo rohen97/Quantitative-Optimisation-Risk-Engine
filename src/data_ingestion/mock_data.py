@@ -8,9 +8,11 @@ SECTORS = ["Healthcare", "Consumer Staples", "Utilities", "Financials", "Industr
 REGIONS = [
     ("DACH", "Germany", "EUR"),
     ("DACH", "Switzerland", "CHF"),
+    ("EU ex-DACH", "France", "EUR"),
+    ("EU ex-DACH", "Netherlands", "EUR"),
+    ("UK", "United Kingdom", "GBP"),
     ("Mainland China", "China", "CNY"),
     ("Hong Kong", "Hong Kong", "HKD"),
-    ("India", "India", "INR"),
 ]
 
 
@@ -77,8 +79,24 @@ def generate_mock_current_portfolio(universe: pd.DataFrame, seed: int = 42) -> p
     holdings["shares"] = rng.integers(150, 1400, len(holdings))
     holdings["current_price"] = rng.uniform(20, 180, len(holdings))
     holdings["market_value_usd"] = holdings["shares"] * holdings["current_price"]
+    holdings["dividend_yield"] = rng.uniform(0.02, 0.055, len(holdings))
+    holdings["beta"] = rng.uniform(0.55, 1.25, len(holdings))
+    holdings["volatility"] = rng.uniform(0.16, 0.32, len(holdings))
     return holdings[
-        ["ticker", "company_name", "country", "region", "currency", "sector", "shares", "current_price", "market_value_usd"]
+        [
+            "ticker",
+            "company_name",
+            "country",
+            "region",
+            "currency",
+            "sector",
+            "shares",
+            "current_price",
+            "market_value_usd",
+            "dividend_yield",
+            "beta",
+            "volatility",
+        ]
     ]
 
 

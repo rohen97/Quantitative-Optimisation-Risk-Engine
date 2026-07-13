@@ -2,13 +2,23 @@ regions:
   DACH:
     countries: [Germany, Austria, Switzerland]
     currencies: [EUR, CHF]
+    exchanges: [XETRA, Vienna, SIX]
+  EU ex-DACH:
+    countries: [France, Netherlands, Spain, Italy, Sweden, Denmark, Finland, Belgium, Ireland]
+    currencies: [EUR, SEK, DKK]
+    exchanges: [Euronext, BME, Borsa Italiana, Nasdaq Nordic]
+  UK:
+    countries: [United Kingdom]
+    currencies: [GBP]
+    exchanges: [London Stock Exchange]
   Mainland China:
     countries: [China]
     currencies: [CNY]
+    exchanges: [Shanghai Stock Exchange, Shenzhen Stock Exchange]
   Hong Kong:
     countries: [Hong Kong]
     currencies: [HKD]
-  India:
-    countries: [India]
-    currencies: [INR]
+    exchanges: [Hong Kong Stock Exchange]
 listed_equities_only: true
+allow_options: false
+allow_etfs: false
