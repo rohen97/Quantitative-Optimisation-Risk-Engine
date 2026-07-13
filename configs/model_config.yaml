@@ -9,6 +9,7 @@ scorecard:
     diversification_benefit_score: 0.08
     liquidity_score: 0.05
     sentiment_alt_signal_score: 0.07
+  neutral_placeholder_score: 50
 forecasts:
   horizons_months: [3, 6, 9, 12]
   validation: walk_forward_only

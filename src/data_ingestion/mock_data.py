@@ -54,15 +54,34 @@ def generate_mock_prices(universe: pd.DataFrame, days: int = 756, seed: int = 42
 def generate_mock_fundamentals(universe: pd.DataFrame, seed: int = 42) -> pd.DataFrame:
     rng = np.random.default_rng(seed + 2)
     data = universe[["security_id", "ticker", "sector"]].copy()
+    revenue = rng.uniform(1_000_000_000, 120_000_000_000, len(data))
+    ebitda_margin = rng.uniform(0.08, 0.38, len(data))
+    net_income_margin = rng.uniform(0.03, 0.22, len(data))
+    fcf_margin = rng.uniform(0.04, 0.28, len(data))
+    data["revenue"] = revenue
+    data["revenue_growth"] = rng.uniform(-0.06, 0.16, len(data))
+    data["ebitda"] = revenue * ebitda_margin
+    data["ebitda_margin"] = ebitda_margin
+    data["net_income"] = revenue * net_income_margin
+    data["net_income_margin"] = net_income_margin
+    data["operating_cash_flow"] = data["net_income"] * rng.uniform(0.9, 1.8, len(data))
+    data["capex"] = revenue * rng.uniform(0.02, 0.10, len(data))
+    data["free_cash_flow"] = revenue * fcf_margin
+    data["total_debt"] = data["ebitda"] * rng.uniform(0.0, 4.0, len(data))
+    data["cash"] = data["total_debt"] * rng.uniform(0.05, 0.70, len(data))
+    data["shareholders_equity"] = revenue * rng.uniform(0.20, 0.80, len(data))
+    data["enterprise_value"] = universe["market_cap_usd"].to_numpy() + data["total_debt"] - data["cash"]
     data["dividend_yield"] = rng.uniform(0.015, 0.065, len(data))
+    data["trailing_12m_dps"] = rng.uniform(0.25, 4.5, len(data))
+    data["dividend_growth_3y"] = rng.uniform(-0.02, 0.08, len(data))
     data["dividend_growth_5y"] = rng.uniform(-0.03, 0.10, len(data))
     data["payout_ratio"] = rng.uniform(0.25, 0.85, len(data))
     data["positive_fcf_years_5"] = rng.integers(2, 6, len(data))
-    data["free_cash_flow_yield"] = rng.uniform(0.015, 0.11, len(data))
-    data["fcf_margin"] = rng.uniform(0.04, 0.28, len(data))
+    data["free_cash_flow_yield"] = data["free_cash_flow"] / universe["market_cap_usd"].to_numpy()
+    data["fcf_margin"] = fcf_margin
     data["fcf_stability"] = rng.uniform(35, 95, len(data))
-    data["cfo_to_net_income"] = rng.uniform(0.7, 1.8, len(data))
-    data["net_debt_to_ebitda"] = rng.uniform(0.0, 4.0, len(data))
+    data["cfo_to_net_income"] = data["operating_cash_flow"] / data["net_income"].replace(0, np.nan)
+    data["net_debt_to_ebitda"] = (data["total_debt"] - data["cash"]) / data["ebitda"].replace(0, np.nan)
     data["interest_coverage"] = rng.uniform(2.0, 20.0, len(data))
     data["roe"] = rng.uniform(0.04, 0.24, len(data))
     data["roic"] = rng.uniform(0.03, 0.20, len(data))
@@ -70,6 +89,10 @@ def generate_mock_fundamentals(universe: pd.DataFrame, seed: int = 42) -> pd.Dat
     data["pb_ratio"] = rng.uniform(0.7, 5.0, len(data))
     data["ev_ebitda"] = rng.uniform(4, 18, len(data))
     data["dividend_cut_flag_3y"] = rng.choice([0, 1], len(data), p=[0.85, 0.15])
+    data["cet1_ratio"] = np.where(data["sector"].eq("Financials"), rng.uniform(0.10, 0.18, len(data)), np.nan)
+    data["solvency_ratio"] = np.where(data["sector"].isin(["Financials", "Insurance"]), rng.uniform(1.2, 2.4, len(data)), np.nan)
+    data["npl_ratio"] = np.where(data["sector"].eq("Financials"), rng.uniform(0.005, 0.06, len(data)), np.nan)
+    data["book_value_growth"] = np.where(data["sector"].eq("Financials"), rng.uniform(-0.02, 0.12, len(data)), np.nan)
     return data
 
 

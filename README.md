@@ -18,6 +18,12 @@ Run the mock-data pipeline:
 python scripts/run_full_pipeline.py
 ```
 
+Build the feature store and scorecard outputs:
+
+```bash
+python scripts/build_features.py
+```
+
 Run tests:
 
 ```bash
@@ -25,3 +31,13 @@ pytest
 ```
 
 Outputs are saved in `reports/outputs/`.
+
+Key Sprint 4 outputs:
+
+- `features_monthly.csv`
+- `stock_scorecard.csv`
+- `recommendations_portfolio_aware.csv`
+- `recommendations_clean_sheet.csv`
+- `recommendations_llm_benchmark.csv`
+- `branch_comparison_report.csv`
+- `final_recommendations.csv`

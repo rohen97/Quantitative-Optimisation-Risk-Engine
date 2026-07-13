@@ -10,14 +10,29 @@ from src.features.risk_features import build_price_risk_features
 from src.features.valuation_features import build_valuation_features
 
 
-def build_feature_store(universe: pd.DataFrame, prices: pd.DataFrame, fundamentals: pd.DataFrame, sentiment: pd.DataFrame, portfolio: pd.DataFrame, regime: pd.DataFrame) -> pd.DataFrame:
+def build_feature_store(
+    universe: pd.DataFrame,
+    prices: pd.DataFrame,
+    fundamentals: pd.DataFrame,
+    sentiment: pd.DataFrame,
+    portfolio: pd.DataFrame,
+    regime: pd.DataFrame,
+) -> pd.DataFrame:
+    """Build stock-level monthly features from raw/mock inputs."""
     data = universe.merge(fundamentals.drop(columns=["sector"], errors="ignore"), on=["security_id", "ticker"], how="left")
+    data["instrument_type"] = data.get("instrument_type", "Equity")
+    data["listing_status"] = data.get("listing_status", "Active")
     data = build_financial_features(data)
     data = build_dividend_features(data)
     data = build_valuation_features(data)
     data = data.merge(build_price_risk_features(prices), on="ticker", how="left")
-    data = data.merge(build_liquidity_features(universe), on="ticker", how="left")
+    data = data.merge(build_liquidity_features(universe, float(portfolio["market_value_usd"].sum())), on="ticker", how="left")
     data = data.merge(sentiment, on=["security_id", "ticker"], how="left")
+    if "liquidity_stress_score_x" in data.columns or "liquidity_stress_score_y" in data.columns:
+        data["liquidity_stress_score"] = data.get("liquidity_stress_score_y", pd.Series(index=data.index, dtype="float64")).fillna(
+            data.get("liquidity_stress_score_x", pd.Series(index=data.index, dtype="float64"))
+        )
+        data = data.drop(columns=["liquidity_stress_score_x", "liquidity_stress_score_y"], errors="ignore")
     data = data.merge(regime, on="ticker", how="left")
     data["sentiment_alt_signal_score"] = (
         50
@@ -25,5 +40,9 @@ def build_feature_store(universe: pd.DataFrame, prices: pd.DataFrame, fundamenta
         - 0.25 * data["negative_news_intensity"].fillna(0)
         - 0.15 * data["controversy_score"].fillna(0)
     ).clip(0, 100)
+    data["sentiment_alt_data_score"] = data["sentiment_alt_signal_score"]
     data["ml_expected_risk_adjusted_return_score"] = (55 + 25 * data["momentum_6m"] - 80 * data["volatility_1y"]).clip(0, 100)
+    data["ml_expected_risk_adjusted_score"] = data["ml_expected_risk_adjusted_return_score"]
+    data["regime_suitability_score"] = data["regime_suitability_score"].fillna(50)
+    data["feature_month"] = pd.Timestamp.today().normalize().replace(day=1)
     return build_portfolio_fit_features(data, portfolio)

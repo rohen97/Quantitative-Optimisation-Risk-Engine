@@ -27,3 +27,15 @@ The pipeline runs three deterministic MVP branches before final optimisation/ris
 3. OpenAI / Claude Analyst Benchmark Model: mock structured analyst output for future provider integration.
 
 The branch comparison engine flags agreement, disagreement and final review requirements. LLM agreement can increase confidence, but LLM output cannot override quant hard filters.
+
+## Feature Store
+
+The feature store converts mock or future vendor data into stock-level monthly features. Current modules cover dividend quality, cash-flow quality, balance-sheet strength, valuation, risk, liquidity and portfolio fit.
+
+The output is `reports/outputs/features_monthly.csv`. Missing ML, regime and sentiment production signals use neutral placeholder scores until those engines are implemented.
+
+## Conservative Scorecard
+
+The scorecard applies hard filters before scoring. Filters cover equity instrument type, active listing status, market cap, liquidity, dividend yield, positive free cash flow, payout ratio, leverage, severe risk flags and incremental CVaR where available.
+
+Scoring weights are configured around dividend safety, cash-flow quality, balance-sheet strength, valuation, regime suitability, ML expected risk-adjusted return, portfolio diversification benefit, liquidity and sentiment/alternative-data signal.

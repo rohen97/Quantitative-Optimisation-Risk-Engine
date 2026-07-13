@@ -60,6 +60,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     write_csv(concentration, out, "concentration_summary.csv")
     for name, frame in exposures.items():
         write_csv(frame, out, f"{name}_exposure.csv")
+    write_csv(features, out, "features_monthly.csv")
     write_csv(scorecard, out, "stock_scorecard.csv")
     write_csv(portfolio_aware, out, "recommendations_portfolio_aware.csv")
     write_csv(clean_sheet, out, "recommendations_clean_sheet.csv")

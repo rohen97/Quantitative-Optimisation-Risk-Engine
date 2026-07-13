@@ -1,25 +1,25 @@
 ticker,company_name,region,country,currency,sector,clean_sheet_score,clean_sheet_recommendation,clean_sheet_target_weight,clean_sheet_rank
-WLF011,Wolf Netherlands Industrials 11,EU ex-DACH,Netherlands,EUR,Industrials,61.88564945495078,Avoid,0.0,1
-WLF012,Wolf United Kingdom Technology 12,UK,United Kingdom,GBP,Technology,61.64197328935243,Hold,0.0,2
-WLF022,Wolf Germany Financials 22,DACH,Germany,EUR,Financials,60.26594781327551,Avoid,0.0,3
-WLF004,Wolf Netherlands Financials 4,EU ex-DACH,Netherlands,EUR,Financials,59.941762346393155,Hold,0.0,4
-WLF013,Wolf China Healthcare 13,Mainland China,China,CNY,Healthcare,59.45986259263505,Avoid,0.0,5
-WLF019,Wolf United Kingdom Healthcare 19,UK,United Kingdom,GBP,Healthcare,59.33954780139019,Avoid,0.0,6
-WLF023,Wolf Switzerland Industrials 23,DACH,Switzerland,CHF,Industrials,58.6381512912676,Hold,0.0,7
-WLF020,Wolf China Consumer Staples 20,Mainland China,China,CNY,Consumer Staples,55.60018485404865,Avoid,0.0,8
-WLF007,Wolf Hong Kong Healthcare 7,Hong Kong,Hong Kong,HKD,Healthcare,55.197875179247426,Avoid,0.0,9
-WLF016,Wolf Switzerland Financials 16,DACH,Switzerland,CHF,Financials,55.175792281683506,Hold,0.0,10
-WLF009,Wolf Switzerland Utilities 9,DACH,Switzerland,CHF,Utilities,54.2237900962354,Avoid,0.0,11
-WLF001,Wolf Germany Healthcare 1,DACH,Germany,EUR,Healthcare,53.73819926511898,Avoid,0.0,12
-WLF015,Wolf Germany Utilities 15,DACH,Germany,EUR,Utilities,53.57812943186442,Avoid,0.0,13
-WLF003,Wolf France Utilities 3,EU ex-DACH,France,EUR,Utilities,52.84884293915124,Avoid,0.0,14
-WLF006,Wolf China Technology 6,Mainland China,China,CNY,Technology,51.860727818792924,Avoid,0.0,15
-WLF021,Wolf Hong Kong Utilities 21,Hong Kong,Hong Kong,HKD,Utilities,50.979896846204184,Hold,0.0,16
-WLF024,Wolf France Technology 24,EU ex-DACH,France,EUR,Technology,50.53641630098356,Avoid,0.0,17
-WLF002,Wolf Switzerland Consumer Staples 2,DACH,Switzerland,CHF,Consumer Staples,50.51169400019089,Hold,0.0,18
-WLF008,Wolf Germany Consumer Staples 8,DACH,Germany,EUR,Consumer Staples,50.42949672715846,Avoid,0.0,19
-WLF018,Wolf Netherlands Technology 18,EU ex-DACH,Netherlands,EUR,Technology,49.947802513401726,Avoid,0.0,20
-WLF005,Wolf United Kingdom Industrials 5,UK,United Kingdom,GBP,Industrials,49.35725996384924,Hold,0.0,21
-WLF010,Wolf France Financials 10,EU ex-DACH,France,EUR,Financials,48.77490198806889,Avoid,0.0,22
-WLF017,Wolf France Industrials 17,EU ex-DACH,France,EUR,Industrials,45.68933298179364,Avoid,0.0,23
-WLF014,Wolf Hong Kong Consumer Staples 14,Hong Kong,Hong Kong,HKD,Consumer Staples,42.00386786780386,Avoid,0.0,24
+WLF019,Wolf United Kingdom Healthcare 19,UK,United Kingdom,GBP,Healthcare,68.70732405587489,Buy,0.05,1
+WLF003,Wolf France Utilities 3,EU ex-DACH,France,EUR,Utilities,67.78591879178074,Avoid,0.0,2
+WLF006,Wolf China Technology 6,Mainland China,China,CNY,Technology,67.43478621535068,Buy,0.05,3
+WLF021,Wolf Hong Kong Utilities 21,Hong Kong,Hong Kong,HKD,Utilities,66.11510106991082,Buy,0.05,4
+WLF024,Wolf France Technology 24,EU ex-DACH,France,EUR,Technology,64.1156495593873,Avoid,0.0,5
+WLF007,Wolf Hong Kong Healthcare 7,Hong Kong,Hong Kong,HKD,Healthcare,63.03242933508916,Hold,0.0,6
+WLF018,Wolf Netherlands Technology 18,EU ex-DACH,Netherlands,EUR,Technology,61.93686382263886,Avoid,0.0,7
+WLF009,Wolf Switzerland Utilities 9,DACH,Switzerland,CHF,Utilities,59.90754027174581,Avoid,0.0,8
+WLF022,Wolf Germany Financials 22,DACH,Germany,EUR,Financials,59.88575034245564,Avoid,0.0,9
+WLF012,Wolf United Kingdom Technology 12,UK,United Kingdom,GBP,Technology,59.697902606314194,Hold,0.0,10
+WLF002,Wolf Switzerland Consumer Staples 2,DACH,Switzerland,CHF,Consumer Staples,58.34387591080693,Hold,0.0,11
+WLF015,Wolf Germany Utilities 15,DACH,Germany,EUR,Utilities,58.1130830912989,Hold,0.0,12
+WLF017,Wolf France Industrials 17,EU ex-DACH,France,EUR,Industrials,57.71078454009175,Avoid,0.0,13
+WLF013,Wolf China Healthcare 13,Mainland China,China,CNY,Healthcare,57.292024844965624,Avoid,0.0,14
+WLF005,Wolf United Kingdom Industrials 5,UK,United Kingdom,GBP,Industrials,56.945142503585515,Hold,0.0,15
+WLF008,Wolf Germany Consumer Staples 8,DACH,Germany,EUR,Consumer Staples,56.36674348829269,Avoid,0.0,16
+WLF011,Wolf Netherlands Industrials 11,EU ex-DACH,Netherlands,EUR,Industrials,56.029881598498086,Avoid,0.0,17
+WLF001,Wolf Germany Healthcare 1,DACH,Germany,EUR,Healthcare,54.10413535349587,Hold,0.0,18
+WLF014,Wolf Hong Kong Consumer Staples 14,Hong Kong,Hong Kong,HKD,Consumer Staples,52.68606453163642,Avoid,0.0,19
+WLF023,Wolf Switzerland Industrials 23,DACH,Switzerland,CHF,Industrials,49.79747979273896,Hold,0.0,20
+WLF004,Wolf Netherlands Financials 4,EU ex-DACH,Netherlands,EUR,Financials,48.455199730979096,Hold,0.0,21
+WLF020,Wolf China Consumer Staples 20,Mainland China,China,CNY,Consumer Staples,47.91397963524233,Avoid,0.0,22
+WLF010,Wolf France Financials 10,EU ex-DACH,France,EUR,Financials,44.236657899584564,Avoid,0.0,23
+WLF016,Wolf Switzerland Financials 16,DACH,Switzerland,CHF,Financials,42.35148291053051,Avoid,0.0,24
