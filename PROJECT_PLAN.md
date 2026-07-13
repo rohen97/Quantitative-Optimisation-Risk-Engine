@@ -1,4 +1,17 @@
-# The Wolf Quant Model — 6-Month Project Management Plan
+# The Wolf Quant Model - 6-Month Project Management Plan
+
+## Current MVP Status
+
+The repository now contains a runnable mock-data MVP scaffold. It includes modular source packages, configs, scripts, pytest coverage, generated sample outputs, and a basic dashboard skeleton.
+
+Validated commands:
+
+```bash
+python scripts/run_full_pipeline.py
+pytest
+```
+
+The next engineering issue should replace mock data with point-in-time CSV/vendor fixtures and validation tests.
 
 ## Project Objective
 
@@ -50,19 +63,19 @@ Recommended custom fields:
 
 ```text
 main
-  └── protected stable branch
+  protected stable branch
 
 develop
-  └── integration branch
+  integration branch
 
 feature/<issue-number>-short-name
-  └── feature branches
+  feature branches
 
 bugfix/<issue-number>-short-name
-  └── debugging branches
+  debugging branches
 
 release/v0.x
-  └── release stabilisation branches
+  release stabilisation branches
 ```
 
 Example workflow:
@@ -71,7 +84,6 @@ Example workflow:
 git checkout main
 git pull origin main
 git checkout -b feature/portfolio-ingestion
-# build module
 git add .
 git commit -m "Build current portfolio ingestion module"
 git push origin feature/portfolio-ingestion
@@ -107,7 +119,7 @@ Then open a pull request into `main` or `develop`, depending on whether a `devel
 | Sprint 11 | Weeks 21-22 | Dashboard and production hardening | v0.9-rc2 |
 | Sprint 12 | Weeks 23-24 | Final docs, final debugging and v1.0 release | v1.0.0 |
 
-## Month 1 — Foundation, Database and Current Portfolio Engine
+## Month 1 - Foundation, Database and Current Portfolio Engine
 
 ### Goal
 
@@ -129,15 +141,7 @@ Set up the project properly and make the system understand the current portfolio
 - The system calculates portfolio weights, HHI, effective holdings, top holdings, sector exposure, country exposure and currency exposure.
 - Outputs are saved to `reports/outputs/`.
 
-### Core Issues
-
-- Set up repository structure and documentation.
-- Build current portfolio ingestion module.
-- Build portfolio diagnostics module.
-- Design database schema v0.
-- Add basic GitHub Actions CI.
-
-## Month 2 — Feature Store and Conservative Stock Scorecard
+## Month 2 - Feature Store and Conservative Stock Scorecard
 
 ### Goal
 
@@ -159,7 +163,7 @@ Build the core conservative equity selection layer using dividends, cash flow, b
 - Each stock has dividend yield, FCF yield, payout ratio, ROE/ROIC, leverage, volatility, beta and liquidity features.
 - Conservative hard filters are applied before scoring.
 
-## Month 3 — Sentiment, Alternative Data and Regime Engine
+## Month 3 - Sentiment, Alternative Data and Regime Engine
 
 ### Goal
 
@@ -181,7 +185,7 @@ Add an early-warning layer that detects sentiment deterioration, dividend risk, 
 - Event flags exist for dividend cuts, profit warnings, buybacks, management changes, capital raises and regulatory probes.
 - Regime suitability is included in the final stock score.
 
-## Month 4 — ML Forecasting, Portfolio Optimisation and DRL Prototype
+## Month 4 - ML Forecasting, Portfolio Optimisation and DRL Prototype
 
 ### Goal
 
@@ -205,7 +209,7 @@ Build the main forecasting and allocation layer. This is the last month for new 
 - DRL is treated as an overlay and compared against simpler baselines.
 - Feature freeze is declared at the end of Month 4.
 
-## Month 5 — Finalisation, Integration and Debugging I
+## Month 5 - Finalisation, Integration and Debugging I
 
 ### Goal
 
@@ -230,7 +234,7 @@ No major new features. Stabilise the system and validate it.
 - Hedge recommendations are generated.
 - P0/P1 bugs are tracked and actively resolved.
 
-## Month 6 — Final Debugging, Deployment and Investment Committee Pack
+## Month 6 - Final Debugging, Deployment and Investment Committee Pack
 
 ### Goal
 

@@ -1,0 +1,9 @@
+project_name: The Wolf Quant Model
+random_seed: 42
+base_currency: USD
+output_dir: reports/outputs
+current_portfolio_path: data/raw/current_portfolio.csv
+mock_data:
+  enabled: true
+  securities: 24
+  price_days: 756

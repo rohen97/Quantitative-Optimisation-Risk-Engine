@@ -1,0 +1,19 @@
+scenarios:
+  global_risk_off:
+    global_equity_shock: -0.20
+  europe_recession:
+    DACH: -0.20
+    EUR: -0.08
+  china_policy_property_stress:
+    Mainland China: -0.25
+    Hong Kong: -0.25
+  india_fx_stress:
+    India: -0.15
+    INR: -0.08
+  financial_stress:
+    Financials: -0.20
+    Insurance: -0.15
+  dividend_cut_shock:
+    high_payout_dividend_income: -0.30
+  meta_wolf_shock:
+    Meta Wolf: -0.25

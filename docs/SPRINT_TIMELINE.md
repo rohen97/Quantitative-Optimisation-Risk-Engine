@@ -1,4 +1,8 @@
-# Sprint Timeline — The Wolf Quant Model
+# Sprint Timeline - The Wolf Quant Model
+
+## Current MVP Note
+
+A runnable mock-data MVP has been scaffolded ahead of the full roadmap. Treat it as the baseline for Sprint 1/Sprint 2 validation and iterate issue-by-issue from here.
 
 ## Sprint Overview
 
@@ -17,7 +21,7 @@
 | Sprint 11 | Weeks 21-22 | Month 6 | Dashboard and production hardening | v0.9-rc2 |
 | Sprint 12 | Weeks 23-24 | Month 6 | Final docs, final debugging and v1.0 release | v1.0.0 |
 
-## Sprint 1 — Repo, Architecture and Project Setup
+## Sprint 1 - Repo, Architecture and Project Setup
 
 Deliverables:
 - Repo skeleton.
@@ -33,7 +37,7 @@ Acceptance criteria:
 - Folder structure exists.
 - Documentation explains the intended engine architecture.
 
-## Sprint 2 — Database Schema and Current Portfolio Diagnostics
+## Sprint 2 - Database Schema and Current Portfolio Diagnostics
 
 Deliverables:
 - Current portfolio ingestion.
@@ -46,7 +50,7 @@ Acceptance criteria:
 - A CSV/Excel current portfolio file can be loaded.
 - Diagnostics outputs are generated in `reports/outputs/`.
 
-## Sprint 3 — Universe and Data Ingestion
+## Sprint 3 - Universe and Data Ingestion
 
 Deliverables:
 - DACH, Shanghai/China, Hong Kong and India universe engine.
@@ -59,7 +63,7 @@ Acceptance criteria:
 - Initial universe loads successfully.
 - Price/fundamental/dividend tables can be created or mocked.
 
-## Sprint 4 — Feature Store and Conservative Scorecard
+## Sprint 4 - Feature Store and Conservative Scorecard
 
 Deliverables:
 - Feature store v0.
@@ -74,7 +78,7 @@ Acceptance criteria:
 - Ranked stock scorecard is generated.
 - Hard filters remove unsafe or insufficient-quality equities.
 
-## Sprint 5 — Sentiment and Alternative Data Ingestion
+## Sprint 5 - Sentiment and Alternative Data Ingestion
 
 Deliverables:
 - Text ingestion module.
@@ -87,7 +91,7 @@ Acceptance criteria:
 - Text documents can be mapped to securities.
 - Sentiment and event signals are generated.
 
-## Sprint 6 — Regime Engine and Score Integration
+## Sprint 6 - Regime Engine and Score Integration
 
 Deliverables:
 - Regime variables.
@@ -99,7 +103,7 @@ Deliverables:
 Acceptance criteria:
 - Each stock has regime and sentiment-adjusted scores.
 
-## Sprint 7 — ML Forecasting and Quantile Outputs
+## Sprint 7 - ML Forecasting and Quantile Outputs
 
 Deliverables:
 - Forward return target generator.
@@ -113,7 +117,7 @@ Acceptance criteria:
 - 3M/6M/9M/12M forecasts are produced.
 - P5/P50/P95 expected return is produced per stock.
 
-## Sprint 8 — Optimisation, DRL Prototype and Feature Freeze
+## Sprint 8 - Optimisation, DRL Prototype and Feature Freeze
 
 Deliverables:
 - Portfolio-aware ranking.
@@ -129,7 +133,7 @@ Acceptance criteria:
 - DRL output is compared against simpler baselines.
 - Feature freeze is declared.
 
-## Sprint 9 — Full Integration and Validation
+## Sprint 9 - Full Integration and Validation
 
 Deliverables:
 - End-to-end pipeline script.
@@ -141,7 +145,7 @@ Deliverables:
 Acceptance criteria:
 - `scripts/run_full_pipeline.py` works without manual notebook edits.
 
-## Sprint 10 — Risk, Stress Tests, Hedging and Debugging
+## Sprint 10 - Risk, Stress Tests, Hedging and Debugging
 
 Deliverables:
 - Risk engine v1.
@@ -153,7 +157,7 @@ Deliverables:
 Acceptance criteria:
 - Stress tests and hedge recommendations are produced for current and recommended portfolios.
 
-## Sprint 11 — Dashboard and Production Hardening
+## Sprint 11 - Dashboard and Production Hardening
 
 Deliverables:
 - Dashboard v1.
@@ -166,7 +170,7 @@ Deliverables:
 Acceptance criteria:
 - Dashboard can be run locally and produces key IC-ready views.
 
-## Sprint 12 — Final Docs, Final Debugging and v1.0 Release
+## Sprint 12 - Final Docs, Final Debugging and v1.0 Release
 
 Deliverables:
 - Final documentation.

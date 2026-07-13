@@ -1,0 +1,9 @@
+market_data:
+  default_adapter: mock
+  supported_adapters: [csv, yahoo_style, alpha_vantage_style, institutional_placeholder, mock]
+fundamentals:
+  default_adapter: mock
+sentiment:
+  default_adapter: local_csv
+api_keys:
+  policy: never_commit_keys

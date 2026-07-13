@@ -1,4 +1,4 @@
-# GitHub Projects Setup — The Wolf Quant Model
+# GitHub Projects Setup - The Wolf Quant Model
 
 ## Recommended GitHub Project
 
@@ -38,7 +38,7 @@ Use it to manage the 6-month build across 12 two-week sprints.
 ## Suggested Status Flow
 
 ```text
-Backlog → Ready → In Progress → Review → Done
+Backlog -> Ready -> In Progress -> Review -> Done
 ```
 
 Use `Blocked` only when a task is waiting on missing data, unavailable APIs, broken dependencies, or unresolved design decisions.
@@ -49,13 +49,28 @@ Use this hierarchy:
 
 ```text
 Monthly epic issue
-    ↓
+    |
 Sprint issue
-    ↓
+    |
 Module task issue
-    ↓
+    |
 PR / commit
 ```
+
+## Seed Epics
+
+- Current portfolio engine.
+- Database and security master.
+- Universe and data ingestion.
+- Feature store.
+- Conservative scorecard.
+- Sentiment and alternative-data engine.
+- Regime engine.
+- ML forecasting.
+- Portfolio optimisation.
+- DRL overlay prototype.
+- Risk, stress testing and hedging.
+- Reporting and dashboard.
 
 ## Feature Freeze
 

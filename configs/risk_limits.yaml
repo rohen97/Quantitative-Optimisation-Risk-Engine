@@ -1,0 +1,12 @@
+max_new_position_weight: 0.05
+max_sector_weight: 0.25
+max_country_weight: 0.30
+max_currency_weight: 0.35
+min_liquidity_score: 40
+max_portfolio_var_5: 0.08
+max_portfolio_cvar_5: 0.12
+max_dividend_risk_score: 80
+max_regulatory_risk_score: 85
+max_credit_stress_score: 85
+max_liquidity_stress_score: 80
+min_portfolio_dividend_yield: 0.03

@@ -1,0 +1,14 @@
+scorecard:
+  weights:
+    dividend_safety_score: 0.18
+    cash_flow_quality_score: 0.18
+    balance_sheet_strength_score: 0.14
+    valuation_score: 0.10
+    regime_suitability_score: 0.10
+    ml_expected_risk_adjusted_return_score: 0.10
+    diversification_benefit_score: 0.08
+    liquidity_score: 0.05
+    sentiment_alt_signal_score: 0.07
+forecasts:
+  horizons_months: [3, 6, 9, 12]
+  validation: walk_forward_only

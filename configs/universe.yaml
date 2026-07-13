@@ -1,0 +1,14 @@
+regions:
+  DACH:
+    countries: [Germany, Austria, Switzerland]
+    currencies: [EUR, CHF]
+  Mainland China:
+    countries: [China]
+    currencies: [CNY]
+  Hong Kong:
+    countries: [Hong Kong]
+    currencies: [HKD]
+  India:
+    countries: [India]
+    currencies: [INR]
+listed_equities_only: true
