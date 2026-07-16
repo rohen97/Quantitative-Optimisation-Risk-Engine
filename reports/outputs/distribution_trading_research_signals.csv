@@ -1,0 +1,25 @@
+ticker,distribution_research_signal_score,research_signal,research_only_flag,signal_commentary
+WLF001,20.437339895305144,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF002,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF003,100.0,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF004,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF005,34.18243924240451,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF006,66.2351464349323,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF007,69.38066402815912,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF008,7.390274299328427,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF009,60.27019037760326,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF010,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF011,99.04380407954301,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF012,56.4041961668234,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF013,100.0,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF014,2.2386102496809244,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF015,67.15317290979338,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF016,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF017,99.82644919572706,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF018,93.4892668188466,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF019,100.0,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF020,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF021,100.0,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF022,67.91467248758687,constructive_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF023,0.0,avoid_research,True,Distribution-derived research signal only; not an automated trading instruction.
+WLF024,100.0,high_conviction_research,True,Distribution-derived research signal only; not an automated trading instruction.

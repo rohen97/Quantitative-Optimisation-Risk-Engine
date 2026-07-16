@@ -42,6 +42,12 @@ Run the mock regime analysis and market-state engine:
 python scripts/run_regime_engine.py
 ```
 
+Run the mock ML Forecasting & Distributional Risk Engine:
+
+```bash
+python scripts/run_ml_forecasting.py
+```
+
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
 ```bash
@@ -77,6 +83,17 @@ Key Sprint 4 outputs:
 - `regime_transition_matrix.csv`
 - `regime_suitability_scores.csv`
 - `regime_dashboard_summary.csv`
+- `ml_forecasts_3m.csv`
+- `ml_forecasts_6m.csv`
+- `ml_forecasts_9m.csv`
+- `ml_forecasts_12m.csv`
+- `return_distribution_forecasts.csv`
+- `dividend_cut_probability.csv`
+- `drawdown_probability.csv`
+- `probabilistic_validation.csv`
+- `var_es_backtest_report.csv`
+- `distribution_sensitivity_analysis.csv`
+- `distribution_trading_research_signals.csv`
 - `stock_scorecard.csv`
 - `recommendations_portfolio_aware.csv`
 - `recommendations_clean_sheet.csv`

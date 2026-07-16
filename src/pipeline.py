@@ -15,6 +15,7 @@ from src.data_ingestion.universe import build_universe
 from src.features.feature_store import build_feature_store
 from src.hedging.hedge_report import build_hedge_recommendations
 from src.models.forecasting import generate_mock_forecasts
+from src.models.ml_pipeline import run_ml_forecasting_engine
 from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.narrative.pipeline import run_narrative_pipeline
@@ -49,6 +50,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     alternative_data_config = load_yaml("configs/alternative_data.yaml")
     narrative_config = load_yaml("configs/narrative.yaml")
     regime_config = load_yaml("configs/regime.yaml")
+    ml_config = load_yaml("configs/ml_forecasting.yaml")
     out = Path(output_dir) if output_dir else ensure_output_dir(config)
 
     universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
@@ -76,6 +78,64 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     )
     regime = regime_outputs["regime_suitability_scores"][REGIME_FEATURE_COLUMNS]
     features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, regime)
+    ml_outputs = run_ml_forecasting_engine(features, prices, regime_outputs["regime_dashboard_summary"], ml_config)
+    ml_merge_columns = [
+        "ticker",
+        "expected_total_return_3m",
+        "expected_total_return_6m",
+        "expected_total_return_9m",
+        "expected_total_return_12m",
+        "expected_price_return_3m",
+        "expected_price_return_6m",
+        "expected_price_return_9m",
+        "expected_price_return_12m",
+        "expected_dividend_return_3m",
+        "expected_dividend_return_6m",
+        "expected_dividend_return_9m",
+        "expected_dividend_return_12m",
+        "expected_volatility_3m",
+        "expected_volatility_6m",
+        "expected_volatility_9m",
+        "expected_volatility_12m",
+        "expected_max_drawdown_3m",
+        "expected_max_drawdown_6m",
+        "expected_max_drawdown_9m",
+        "expected_max_drawdown_12m",
+        "p5_return_3m",
+        "p50_return_3m",
+        "p95_return_3m",
+        "p5_return_6m",
+        "p50_return_6m",
+        "p95_return_6m",
+        "p5_return_9m",
+        "p50_return_9m",
+        "p95_return_9m",
+        "p5_return_12m",
+        "p50_return_12m",
+        "p95_return_12m",
+        "dividend_cut_probability",
+        "large_drawdown_probability_12m",
+        "ml_expected_risk_adjusted_score",
+        "ml_expected_risk_adjusted_return_score",
+        "forecast_uncertainty_score",
+        "downside_risk_score",
+        "upside_potential_score",
+        "distribution_name_12m",
+        "distribution_mu_12m",
+        "distribution_sigma_12m",
+        "distribution_nu_12m",
+        "distribution_xi_12m",
+        "var_5_12m",
+        "var_1_12m",
+        "cvar_5_12m",
+        "cvar_1_12m",
+        "expected_shortfall_5_12m",
+        "expected_shortfall_1_12m",
+        "tail_risk_score",
+        "skewness_risk_score",
+        "distribution_model_confidence",
+    ]
+    features = features.merge(ml_outputs["ml_features"][ml_merge_columns], on="ticker", how="left")
     scorecard = build_scorecard(features, risk_limits)
     risk_report = build_risk_report(prices, portfolio)
     branches = branch_config.get("branches", {})
@@ -120,6 +180,22 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "regime_dashboard_summary.csv": regime_outputs["regime_dashboard_summary"],
     }.items():
         write_csv(frame, out, filename)
+    for filename, frame in {
+        "ml_forecasts_3m.csv": ml_outputs["ml_forecasts_3m"],
+        "ml_forecasts_6m.csv": ml_outputs["ml_forecasts_6m"],
+        "ml_forecasts_9m.csv": ml_outputs["ml_forecasts_9m"],
+        "ml_forecasts_12m.csv": ml_outputs["ml_forecasts_12m"],
+        "return_distribution_forecasts.csv": ml_outputs["return_distribution_forecasts"],
+        "dividend_cut_probability.csv": ml_outputs["dividend_cut_probability"],
+        "drawdown_probability.csv": ml_outputs["drawdown_probability"],
+        "model_registry.csv": ml_outputs["model_registry"],
+        "probabilistic_validation.csv": ml_outputs["probabilistic_validation"],
+        "var_es_backtest_report.csv": ml_outputs["var_es_backtest_report"],
+        "distribution_sensitivity_analysis.csv": ml_outputs["distribution_sensitivity_analysis"],
+        "distribution_trading_research_signals.csv": ml_outputs["distribution_trading_research_signals"],
+        "distribution_research_extension_points.csv": ml_outputs["distribution_research_extension_points"],
+    }.items():
+        write_csv(frame, out, filename)
     write_csv(features, out, "features_monthly.csv")
     write_csv(scorecard, out, "stock_scorecard.csv")
     write_csv(portfolio_aware, out, "recommendations_portfolio_aware.csv")
@@ -136,11 +212,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     write_csv(risk_report, out, "portfolio_risk_report.csv")
     write_csv(stress_report, out, "stress_test_report.csv")
     write_csv(hedge_report, out, "hedge_recommendations.csv")
-    write_markdown(
-        "# Model Validation Report\n\nMVP uses deterministic mock data, rule-based scorecards, placeholder forecasts and walk-forward-ready interfaces.\n",
-        out,
-        "model_validation_report.md",
-    )
+    write_markdown(ml_outputs["model_validation_report"], out, "model_validation_report.md")
     return {
         "portfolio": portfolio,
         "diagnostics": diagnostics,
@@ -150,6 +222,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         **alt_outputs,
         **narrative_outputs,
         **regime_outputs,
+        **ml_outputs,
         "scorecard": scorecard,
         "recommendations_portfolio_aware": portfolio_aware,
         "recommendations_clean_sheet": clean_sheet,

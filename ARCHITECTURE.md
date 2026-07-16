@@ -9,7 +9,7 @@ The repository is organised as a modular quant platform, with production logic i
 - `sentiment` and `alternative_data`: mock/local text ingestion, entity mapping, rule-based sentiment, event classification, rolling alternative-data features and risk overlays.
 - `narrative`: financial concept extraction, occurrence/reoccurrence tracking, narrative frame construction, mock embeddings, semantic distance, temporal reframing and Markov transition analysis.
 - `regime`: factor-regime lens, Wolf Chaos Index, informational regime drivers, fused dashboard, transition matrix and stock-level regime suitability scoring.
-- `models`: conservative scorecard, placeholder forecasts and walk-forward interfaces.
+- `models`: conservative scorecard, ML forecasting, distributional risk forecasts, probabilistic validation, VaR/ES backtesting and walk-forward interfaces.
 - `optimisation`: proposed portfolio construction and constraint checks.
 - `risk`: VaR, CVaR, drawdown, risk reports and stress tests.
 - `hedging`: equity-only and optional institutional hedge recommendations.
@@ -40,6 +40,14 @@ The output is `reports/outputs/features_monthly.csv`. Missing ML, regime and sen
 The scorecard applies hard filters before scoring. Filters cover equity instrument type, active listing status, market cap, liquidity, dividend yield, positive free cash flow, payout ratio, leverage, severe risk flags and incremental CVaR where available.
 
 Scoring weights are configured around dividend safety, cash-flow quality, balance-sheet strength, valuation, regime suitability, ML expected risk-adjusted return, portfolio diversification benefit, liquidity and sentiment/alternative-data signal.
+
+## ML Forecasting And Distributional Risk
+
+The ML engine forecasts conditional return distributions rather than only point returns. In mock mode it estimates expected total return, volatility, dividend-cut probability, large-drawdown probability and distribution parameters for Normal, Student-t and an upgradeable skewed Student-t placeholder.
+
+Inspired by distributional deep-learning research, the architecture is designed for future CNN, LSTM, Transformer and xLSTM forecasters that output `mu`, `sigma`, `nu` and `xi`. The current implementation does not add TensorFlow or PyTorch and does not train deep models. It derives P5/P50/P95, VaR, CVaR, Expected Shortfall, tail-risk scores, skewness-risk scores, PIT/LPS/CRPS-style validation proxies and VaR/ES backtest reports from deterministic mock inputs.
+
+Research-only extension outputs cover sensitivity analysis, additional asset-class hooks, quantile-forecasting placeholders and distribution-driven trading signal scaffolding. These are not execution instructions and do not override hard filters.
 
 ## Sentiment And Alternative Data
 

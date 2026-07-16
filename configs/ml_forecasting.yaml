@@ -1,0 +1,111 @@
+ml_forecasting:
+  enabled: true
+  mode: mock
+
+  horizons_months: [3, 6, 9, 12]
+
+  models:
+    baseline: ridge
+    alternative_models:
+      - elastic_net
+      - random_forest
+      - gradient_boosting
+    fallback_mode: deterministic_mock
+
+  validation:
+    method: walk_forward
+    embargo_days: 21
+    min_train_periods: 12
+    test_periods: 3
+
+  quantiles:
+    enabled: true
+    levels: [0.05, 0.50, 0.95]
+    fallback_mode: residual_bootstrap
+
+  risk_models:
+    dividend_cut_threshold: 0.35
+    large_drawdown_threshold: 0.30
+    severe_p5_return_threshold: -0.20
+    high_uncertainty_threshold: 75
+
+  scoring:
+    neutral_score: 50
+    ml_score_weight: 0.10
+
+  distributional_forecasting:
+    enabled: true
+    mode: mock
+    default_distribution: student_t
+    supported_distributions:
+      - normal
+      - student_t
+      - skewed_student_t_placeholder
+
+    parameter_constraints:
+      min_sigma: 0.0001
+      min_nu: 2.01
+      min_xi: 0.1
+      max_xi: 10.0
+
+    quantiles:
+      levels: [0.01, 0.05, 0.50, 0.95, 0.99]
+
+    risk_metrics:
+      var_levels: [0.01, 0.05]
+      es_levels: [0.01, 0.05]
+
+    probabilistic_validation:
+      enabled: true
+      metrics:
+        - lps
+        - crps
+        - pit
+        - quantile_coverage
+        - calibration_error
+
+    deep_distributional_models:
+      enabled: false
+      architectures:
+        - cnn_1d
+        - lstm
+        - transformer_encoder
+        - xlstm
+      default_architecture: lstm
+      sequence_length: 10
+      output_distribution: skewed_student_t
+      n_epochs: 300
+      batch_size: 128
+      early_stopping: true
+
+    research_extensions:
+      enabled: true
+      additional_asset_classes:
+        enabled: false
+        candidates:
+          - equity_index
+          - rates
+          - fx
+          - commodities
+          - credit
+      sensitivity_analysis:
+        enabled: true
+        shocks:
+          nu: [-0.25, 0.25]
+          sigma: [0.25]
+          xi: [-0.25]
+      quantile_based_forecasting:
+        enabled: false
+        candidates:
+          - quantile_regression
+          - conformal_prediction
+          - quantile_neural_network
+      trading_strategy_research:
+        enabled: true
+        execution_enabled: false
+
+    scoring:
+      neutral_score: 50
+      high_tail_risk_threshold: 75
+      high_skewness_risk_threshold: 75
+      high_uncertainty_threshold: 75

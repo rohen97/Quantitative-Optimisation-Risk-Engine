@@ -18,6 +18,7 @@ Feature groups:
 - Sentiment and alternative data: rolling news sentiment, controversy, dividend risk, cash-flow deterioration, management confidence, regulatory risk, litigation risk, governance flags, credit stress, abnormal attention and event severity.
 - Narrative reframing: financial concept extraction, first occurrence/reoccurrence tracking, frame construction, semantic drift, risk-anchor similarity, temporal narrative states and Markov transition probabilities.
 - Regime analysis: factor-regime probabilities, Wolf Chaos Index, informational regime drivers, fused market-state dashboard, transition matrix and stock-level regime suitability.
+- Distributional ML forecasting: expected total return, volatility, dividend-cut probability, drawdown probability, Normal/Student-t/skewed Student-t parameters, VaR, CVaR, Expected Shortfall, tail risk and skewness risk.
 
 Output:
 
@@ -102,6 +103,20 @@ Current process:
 7. Feed suitability, review/exclusion flags and target-weight adjustments into the scorecard, branches, stress tests and hedge recommendations.
 
 Regime output is a risk and sizing overlay. It can reduce exposure, add reviews or exclude severe mismatch names, but it cannot override hard filters.
+
+## ML Forecasting And Distributional Risk Methodology
+
+The ML layer follows the paper-inspired idea that financial models should forecast return distributions rather than only point estimates. In the current mock implementation, the engine estimates distribution parameters:
+
+- Normal: `mu`, `sigma`
+- Student-t: `mu`, `sigma`, `nu`
+- Skewed Student-t placeholder: `mu`, `sigma`, `nu`, `xi`
+
+`mu` is conditional expected total return, `sigma` is conditional volatility, `nu` controls tail thickness and `xi` controls skewness. The current skewed Student-t implementation is documented as an approximation: it widens downside or upside tails around a Student-t base and is designed to be replaced later with a full implementation.
+
+The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-risk score, skewness-risk score, forecast uncertainty and distribution model confidence. Probabilistic validation includes Log Predictive Score, CRPS approximation, PIT diagnostics, quantile coverage and calibration error. VaR/ES backtesting includes exceedance rates and a Kupiec test, with placeholders for Christoffersen independence and richer ES tests.
+
+Future research hooks are present but disabled or research-only: additional asset classes, Transformer/xLSTM/CNN/LSTM distributional forecasters, sensitivity analysis, quantile-based forecasting, conformal prediction and distribution-derived trading signal research. No automated trading, DRL or deep-learning dependency is enabled.
 
 Output:
 

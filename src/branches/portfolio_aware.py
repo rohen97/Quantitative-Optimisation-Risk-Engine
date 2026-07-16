@@ -27,9 +27,34 @@ def run_portfolio_aware_branch(
     data["incremental_country_exposure"] = data["target_weight"].fillna(0)
     data["incremental_currency_exposure"] = data["target_weight"].fillna(0)
     data["incremental_risk_impact"] = data.get("incremental_portfolio_cvar", pd.Series(0, index=data.index)).fillna(0)
+    data["incremental_expected_return"] = data.get("expected_total_return_12m", pd.Series(0, index=data.index)).fillna(0) * data["target_weight"].fillna(0)
+    data["incremental_downside_risk"] = (-data.get("p5_return_12m", pd.Series(0, index=data.index)).fillna(0)).clip(lower=0) * data["target_weight"].fillna(0)
+    data["incremental_dividend_cut_risk"] = data.get("dividend_cut_probability", pd.Series(0.15, index=data.index)).fillna(0.15) * data["target_weight"].fillna(0)
+    data["incremental_drawdown_risk"] = data.get("large_drawdown_probability_12m", pd.Series(0.15, index=data.index)).fillna(0.15) * data["target_weight"].fillna(0)
+    data["incremental_var"] = (-data.get("var_5_12m", pd.Series(-0.10, index=data.index)).fillna(-0.10)).clip(lower=0) * data["target_weight"].fillna(0)
+    data["incremental_cvar"] = (-data.get("cvar_5_12m", pd.Series(-0.12, index=data.index)).fillna(-0.12)).clip(lower=0) * data["target_weight"].fillna(0)
+    data["incremental_expected_shortfall"] = (
+        -data.get("expected_shortfall_5_12m", pd.Series(-0.12, index=data.index)).fillna(-0.12)
+    ).clip(lower=0) * data["target_weight"].fillna(0)
+    data["incremental_tail_risk"] = data.get("tail_risk_score", pd.Series(50, index=data.index)).fillna(50) / 100 * data["target_weight"].fillna(0)
+    data["portfolio_forecast_improvement_score"] = (
+        50
+        + 180 * data.get("expected_total_return_12m", pd.Series(0, index=data.index)).fillna(0)
+        - 80 * data["incremental_downside_risk"]
+        - 50 * data["incremental_dividend_cut_risk"]
+        - 50 * data["incremental_drawdown_risk"]
+    ).clip(0, 100)
+    data["portfolio_distribution_improvement_score"] = (
+        data["portfolio_forecast_improvement_score"]
+        - 40 * data["incremental_var"]
+        - 45 * data["incremental_cvar"]
+        - 45 * data["incremental_expected_shortfall"]
+        - 25 * data["incremental_tail_risk"]
+    ).clip(0, 100)
     data["portfolio_aware_score"] = (
         0.55 * data["standalone_score"]
-        + 0.25 * data["portfolio_fit_score"]
+        + 0.20 * data["portfolio_fit_score"]
+        + 0.05 * data["portfolio_distribution_improvement_score"]
         + 0.12 * data["dividend_safety_score"].fillna(0)
         + 0.08 * data["regime_suitability_score"]
         - 100 * data["incremental_risk_impact"].clip(lower=0)
@@ -69,6 +94,16 @@ def run_portfolio_aware_branch(
         "incremental_country_exposure",
         "incremental_currency_exposure",
         "incremental_risk_impact",
+        "incremental_expected_return",
+        "incremental_downside_risk",
+        "incremental_dividend_cut_risk",
+        "incremental_drawdown_risk",
+        "incremental_var",
+        "incremental_cvar",
+        "incremental_expected_shortfall",
+        "incremental_tail_risk",
+        "portfolio_forecast_improvement_score",
+        "portfolio_distribution_improvement_score",
         "recommendation",
         "target_weight_portfolio_aware",
         "portfolio_aware_score",

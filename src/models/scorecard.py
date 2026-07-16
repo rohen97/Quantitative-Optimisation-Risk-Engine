@@ -38,6 +38,27 @@ def apply_hard_filters(features: pd.DataFrame, risk_limits: dict | None = None) 
     data["regime_deterioration_probability"] = _series(data, "regime_deterioration_probability", 0).fillna(0)
     data["dominant_regime"] = _series(data, "dominant_regime", "steady_state_low_chaos").fillna("steady_state_low_chaos")
     data["ml_expected_risk_adjusted_return_score"] = _series(data, "ml_expected_risk_adjusted_return_score", neutral).fillna(neutral)
+    data["ml_expected_risk_adjusted_score"] = _series(data, "ml_expected_risk_adjusted_score", data["ml_expected_risk_adjusted_return_score"]).fillna(neutral)
+    data["ml_expected_risk_adjusted_return_score"] = data["ml_expected_risk_adjusted_score"]
+    data["expected_total_return_12m"] = _series(data, "expected_total_return_12m", 0).fillna(0)
+    data["expected_volatility_12m"] = _series(data, "expected_volatility_12m", data.get("volatility_1y", neutral / 250)).fillna(0.2)
+    data["expected_max_drawdown_12m"] = _series(data, "expected_max_drawdown_12m", data.get("max_drawdown_1y", -0.15)).fillna(-0.15)
+    data["p5_return_12m"] = _series(data, "p5_return_12m", -0.10).fillna(-0.10)
+    data["p50_return_12m"] = _series(data, "p50_return_12m", data["expected_total_return_12m"]).fillna(data["expected_total_return_12m"])
+    data["p95_return_12m"] = _series(data, "p95_return_12m", 0.15).fillna(0.15)
+    data["dividend_cut_probability"] = _series(data, "dividend_cut_probability", 0.15).fillna(0.15)
+    data["large_drawdown_probability_12m"] = _series(data, "large_drawdown_probability_12m", 0.15).fillna(0.15)
+    data["forecast_uncertainty_score"] = _series(data, "forecast_uncertainty_score", neutral).fillna(neutral)
+    data["distribution_mu_12m"] = _series(data, "distribution_mu_12m", data["expected_total_return_12m"]).fillna(data["expected_total_return_12m"])
+    data["distribution_sigma_12m"] = _series(data, "distribution_sigma_12m", data["expected_volatility_12m"]).fillna(data["expected_volatility_12m"])
+    data["distribution_nu_12m"] = _series(data, "distribution_nu_12m", 8).fillna(8)
+    data["distribution_xi_12m"] = _series(data, "distribution_xi_12m", 1).fillna(1)
+    data["var_5_12m"] = _series(data, "var_5_12m", data["p5_return_12m"]).fillna(data["p5_return_12m"])
+    data["cvar_5_12m"] = _series(data, "cvar_5_12m", data["var_5_12m"] - 0.05).fillna(data["var_5_12m"] - 0.05)
+    data["expected_shortfall_5_12m"] = _series(data, "expected_shortfall_5_12m", data["cvar_5_12m"]).fillna(data["cvar_5_12m"])
+    data["tail_risk_score"] = _series(data, "tail_risk_score", neutral).fillna(neutral)
+    data["skewness_risk_score"] = _series(data, "skewness_risk_score", neutral).fillna(neutral)
+    data["distribution_model_confidence"] = _series(data, "distribution_model_confidence", 70).fillna(70)
     data["sentiment_alt_signal_score"] = _series(data, "sentiment_alt_signal_score", neutral).fillna(neutral)
     data["sentiment_alt_data_score"] = _series(data, "sentiment_alt_data_score", data["sentiment_alt_signal_score"]).fillna(neutral)
     data["sentiment_alt_signal_score"] = data["sentiment_alt_data_score"]
@@ -101,6 +122,18 @@ def build_scorecard(features: pd.DataFrame, risk_limits: dict | None = None) -> 
     data.loc[data["dividend_risk_similarity_score"] > 85, "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
     data.loc[data["risk_reframing_score"] > 80, "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
     data.loc[data["regime_review_required_flag"].astype(bool), "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
+    data.loc[data["dividend_cut_probability"] > 0.35, "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
+    data.loc[data["large_drawdown_probability_12m"] > 0.30, "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
+    data.loc[data["p5_return_12m"] < -0.20, "final_recommendation_score"] = np.minimum(data["final_recommendation_score"], 64)
+    data.loc[(data["expected_total_return_12m"] > 0.12) & (data["p5_return_12m"] < -0.20), "final_recommendation_score"] = np.minimum(
+        data["final_recommendation_score"], 64
+    )
+    data.loc[(data["cvar_5_12m"] < -0.25) | (data["expected_shortfall_5_12m"] < -0.25), "final_recommendation_score"] = np.minimum(
+        data["final_recommendation_score"], 64
+    )
+    data.loc[(data["distribution_nu_12m"] < 4) | (data["distribution_xi_12m"] < 0.65), "final_recommendation_score"] = np.minimum(
+        data["final_recommendation_score"], 64
+    )
     data.loc[data["regulatory_risk_score"] > 85, "passes_hard_filters"] = False
     data.loc[data["credit_stress_score"] > 85, "passes_hard_filters"] = False
     data.loc[data["regulatory_risk_similarity_score"] > 85, "passes_hard_filters"] = False
@@ -120,6 +153,10 @@ def build_scorecard(features: pd.DataFrame, risk_limits: dict | None = None) -> 
         data["net_debt_to_ebitda"].fillna(0) > 3
     ) | (data["liquidity_score"].fillna(50) < 45)
     data.loc[(data["regime_deterioration_probability"] > 0.70) & cyclical_or_levered, "target_weight"] *= 0.5
+    data.loc[data["large_drawdown_probability_12m"] > 0.30, "target_weight"] *= 0.5
+    data.loc[data["forecast_uncertainty_score"] > 75, "target_weight"] *= 0.75
+    data.loc[(data["tail_risk_score"] > 75) | (data["skewness_risk_score"] > 75), "target_weight"] *= 0.75
+    data.loc[data["distribution_model_confidence"] < 45, "target_weight"] *= 0.5
     data["target_weight"] = (data["target_weight"] + data["regime_weight_adjustment"].clip(-0.03, 0.03)).clip(lower=0)
     data.loc[~data["recommendation"].str.contains("Buy"), "target_weight"] = 0.0
     data["risk_management_flags"] = ""
@@ -133,4 +170,14 @@ def build_scorecard(features: pd.DataFrame, risk_limits: dict | None = None) -> 
     data.loc[data["regime_review_required_flag"].astype(bool), "risk_management_flags"] += "regime_review;"
     data.loc[data["regime_exclusion_flag"].astype(bool), "risk_management_flags"] += "regime_exclusion;"
     data.loc[data["regime_deterioration_probability"] > 0.70, "risk_management_flags"] += "regime_deterioration;"
+    data.loc[data["dividend_cut_probability"] > 0.35, "risk_management_flags"] += "ml_dividend_cut_risk;"
+    data.loc[data["large_drawdown_probability_12m"] > 0.30, "risk_management_flags"] += "ml_drawdown_risk;"
+    data.loc[data["p5_return_12m"] < -0.20, "risk_management_flags"] += "ml_downside_tail_risk;"
+    data.loc[data["forecast_uncertainty_score"] > 75, "risk_management_flags"] += "ml_forecast_uncertainty;"
+    data.loc[(data["expected_total_return_12m"] > 0.12) & (data["p5_return_12m"] < -0.20), "risk_management_flags"] += "ml_asymmetric_downside;"
+    data.loc[data["cvar_5_12m"] < -0.25, "risk_management_flags"] += "ml_cvar_risk;"
+    data.loc[data["expected_shortfall_5_12m"] < -0.25, "risk_management_flags"] += "ml_expected_shortfall_risk;"
+    data.loc[data["distribution_nu_12m"] < 4, "risk_management_flags"] += "ml_fat_tail_risk;"
+    data.loc[data["distribution_xi_12m"] < 0.65, "risk_management_flags"] += "ml_downside_skew;"
+    data.loc[data["distribution_model_confidence"] < 45, "risk_management_flags"] += "ml_low_distribution_confidence;"
     return data.sort_values("final_recommendation_score", ascending=False).reset_index(drop=True)

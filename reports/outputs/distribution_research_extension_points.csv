@@ -1,0 +1,5 @@
+extension_area,status,supported_values,notes
+asset_classes,placeholder,"listed_equity, equity_index, rates, fx, commodities, credit",Only listed equities are active in the current Wolf model.
+deep_architectures,placeholder,"cnn_1d, lstm, transformer_encoder, xlstm",TensorFlow/PyTorch are not hard dependencies; architectures are disabled by default.
+quantile_forecasting,placeholder,"quantile_regression, conformal_prediction, quantile_neural_networks",Current quantiles are derived from distribution parameters.
+trading_strategy_research,placeholder,"distribution_score, tail_adjusted_expected_return, risk_budget_signal",Research-only signal scaffolding; no automated trading or DRL is implemented.

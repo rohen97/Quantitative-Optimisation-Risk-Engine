@@ -36,6 +36,12 @@ Run regime analysis outputs:
 python scripts/run_regime_engine.py
 ```
 
+Run ML distributional forecasting outputs:
+
+```bash
+python scripts/run_ml_forecasting.py
+```
+
 Validate Alpaca credentials:
 
 ```bash
@@ -109,6 +115,24 @@ Regime outputs:
 - `regime_dashboard_summary.csv`
 
 The regime engine runs in mock mode only. It uses deterministic local factor, price, alternative-data and narrative proxies, then feeds regime suitability into scorecard scoring, recommendation branches, stress tests and hedge recommendations.
+
+ML distributional outputs:
+
+- `ml_forecasts_3m.csv`
+- `ml_forecasts_6m.csv`
+- `ml_forecasts_9m.csv`
+- `ml_forecasts_12m.csv`
+- `return_distribution_forecasts.csv`
+- `dividend_cut_probability.csv`
+- `drawdown_probability.csv`
+- `probabilistic_validation.csv`
+- `var_es_backtest_report.csv`
+- `model_registry.csv`
+- `distribution_sensitivity_analysis.csv`
+- `distribution_trading_research_signals.csv`
+- `distribution_research_extension_points.csv`
+
+The ML layer is mock-first and forecasts distribution parameters, not just point returns. It derives VaR, CVaR, Expected Shortfall, tail risk, skewness risk and validation diagnostics. Transformer/xLSTM/CNN/LSTM ideas are present as disabled research placeholders; no deep-learning dependency or automated trading engine is active.
 
 Alpaca integration:
 

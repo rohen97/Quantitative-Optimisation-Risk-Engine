@@ -46,6 +46,31 @@ def run_llm_benchmark_branch(scorecard: pd.DataFrame, mode: str = "mock") -> pd.
     data.loc[credit_reframing, "key_risks"] += " Credit/refinancing pressure is increasingly central to the equity story."
     data.loc[regime_risk > 70, "key_risks"] += " Market-state risk is elevated under the fused regime model."
     data.loc[data.get("regime_review_required_flag", pd.Series(False, index=data.index)).astype(bool), "key_risks"] += " Regime suitability requires review."
+    expected_return = data.get("expected_total_return_12m", pd.Series(0, index=data.index)).fillna(0)
+    p5_return = data.get("p5_return_12m", pd.Series(0, index=data.index)).fillna(0)
+    dividend_cut_probability = data.get("dividend_cut_probability", pd.Series(0, index=data.index)).fillna(0)
+    forecast_uncertainty = data.get("forecast_uncertainty_score", pd.Series(50, index=data.index)).fillna(50)
+    ml_score = data.get("ml_expected_risk_adjusted_score", pd.Series(50, index=data.index)).fillna(50)
+    var_5 = data.get("var_5_12m", pd.Series(-0.10, index=data.index)).fillna(-0.10)
+    cvar_5 = data.get("cvar_5_12m", pd.Series(-0.12, index=data.index)).fillna(-0.12)
+    nu = data.get("distribution_nu_12m", pd.Series(8, index=data.index)).fillna(8)
+    skewness_risk = data.get("skewness_risk_score", pd.Series(50, index=data.index)).fillna(50)
+    distribution_confidence = data.get("distribution_model_confidence", pd.Series(70, index=data.index)).fillna(70)
+    data.loc[(expected_return > 0.12) & ((p5_return < -0.20) | (var_5 < -0.20) | (cvar_5 < -0.25)), "key_risks"] += (
+        " Distributional ML forecast shows attractive upside but asymmetric downside risk."
+    )
+    data.loc[dividend_cut_probability > 0.35, "key_risks"] += " ML dividend-cut probability is elevated."
+    data.loc[forecast_uncertainty > 75, "key_risks"] += " Forecast uncertainty is high; analyst placeholder treats this as Watchlist risk."
+    data.loc[nu < 4, "key_risks"] += " Forecast distribution has fat-tail risk."
+    data.loc[skewness_risk > 75, "key_risks"] += " Forecast distribution has downside skew risk."
+    data.loc[distribution_confidence < 45, "key_risks"] += " Distribution model confidence is low."
+    data.loc[(ml_score > 65) & (data["final_recommendation_score"] > 65), "investment_thesis"] += " ML forecast and quant score are aligned."
+    data.loc[forecast_uncertainty > 75, "llm_recommendation"] = np.where(data.loc[forecast_uncertainty > 75, "llm_recommendation"].eq("Buy"), "Hold", data.loc[forecast_uncertainty > 75, "llm_recommendation"])
+    data.loc[distribution_confidence < 45, "llm_recommendation"] = np.where(
+        data.loc[distribution_confidence < 45, "llm_recommendation"].eq("Buy"),
+        "Hold",
+        data.loc[distribution_confidence < 45, "llm_recommendation"],
+    )
     data["dividend_safety_view"] = np.where(data["dividend_safety_score"] >= 65, "Constructive", "Needs review")
     data["cashflow_quality_view"] = np.where(data["cash_flow_quality_score"] >= 65, "Constructive", "Mixed")
     data["regulatory_governance_view"] = np.where(data["regulatory_risk_score"] > 75, "Elevated risk", "No major mock concern")
