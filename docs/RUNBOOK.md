@@ -48,6 +48,14 @@ Run portfolio optimisation outputs:
 python scripts/run_portfolio_optimisation.py
 ```
 
+Run risk, stress and hedge outputs:
+
+```bash
+python scripts/run_risk_engine.py
+python scripts/run_stress_tests.py
+python scripts/run_hedge_engine.py
+```
+
 Validate Alpaca credentials:
 
 ```bash
@@ -154,6 +162,18 @@ Portfolio optimisation outputs:
 - `portfolio_optimisation_summary.csv`
 
 The optimiser uses distributional forecasts, regime suitability, dividend risk, drawdown risk, narrative flags, alternative-data flags and current weights. In dry-run mode, if all names are excluded by upstream mock flags, a clearly marked fallback eligibility path selects the least-risky liquid names so optimisation outputs remain inspectable.
+
+Risk, stress and hedge outputs:
+
+- `portfolio_risk_report.csv`
+- `risk_contribution_report.csv`
+- `stress_test_report.csv`
+- `stress_test_contribution_report.csv`
+- `hedge_recommendations.csv`
+- `defensive_substitution_recommendations.csv`
+- `risk_stress_hedge_summary.md`
+
+The risk engine uses the recommended optimised portfolio. Stress scenarios are deterministic mock shocks and optional institutional hedges are placeholders only.
 
 Alpaca integration:
 

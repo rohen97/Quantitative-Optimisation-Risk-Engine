@@ -1,0 +1,21 @@
+risk_engine:
+  enabled: true
+  mode: mock
+
+  risk_limits:
+    maximum_portfolio_volatility: 0.20
+    maximum_var_5: -0.15
+    maximum_cvar_5: -0.25
+    maximum_expected_shortfall_5: -0.25
+    maximum_drawdown_probability: 0.35
+    maximum_dividend_cut_risk: 0.35
+    maximum_hhi: 0.15
+    minimum_effective_number_of_holdings: 15
+
+  fallback:
+    use_diagonal_covariance_if_returns_missing: true
+    same_sector_correlation: 0.60
+    same_country_correlation: 0.50
+    same_region_correlation: 0.40
+    same_currency_correlation: 0.35
+    base_correlation: 0.25

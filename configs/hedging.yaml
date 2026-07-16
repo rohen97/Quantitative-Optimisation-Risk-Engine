@@ -1,0 +1,21 @@
+hedging:
+  enabled: true
+  mode: mock
+
+  equity_only_hedges:
+    enabled: true
+    defensive_basket_max_weight: 0.15
+    cash_allocation_max_weight: 0.10
+
+  institutional_hedges:
+    enabled: true
+    optional_only: true
+    allow_index_hedges: true
+    allow_fx_hedges: true
+    allow_rate_hedges: true
+    allow_option_hedges: true
+
+  thresholds:
+    hedge_required_loss_threshold: -0.10
+    severe_loss_threshold: -0.20
+    high_risk_contribution_threshold: 0.10

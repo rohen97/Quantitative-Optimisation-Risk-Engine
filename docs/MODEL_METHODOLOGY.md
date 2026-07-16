@@ -136,6 +136,16 @@ Hard constraints include long-only weights, single-name caps, liquidity, active 
 
 The trade list compares current and target weights and assigns Buy, Increase, Reduce, Sell, Hold or Avoid actions. Optimisation cannot override hard exclusions or use high expected return alone to justify high-risk names. Future upgrades can add Hierarchical Risk Parity, Black-Litterman, transaction-cost models, tax constraints, robust covariance estimation, robust optimisation and a DRL allocation overlay.
 
+## Risk, Stress Testing And Hedge Methodology
+
+The Risk, Stress Testing and Hedge Recommendation Engine evaluates what can break the recommended optimised portfolio. Portfolio risk metrics include expected return, dividend yield, volatility, VaR, CVaR, Expected Shortfall, drawdown probability, dividend-cut risk, tail risk, skewness risk, liquidity risk, regime risk, narrative risk, HHI and effective holdings.
+
+Risk contributions allocate expected return, dividend income, volatility, VaR, CVaR, Expected Shortfall, drawdown risk, dividend-cut risk, tail risk, liquidity risk, regime risk, narrative risk and alternative-data risk to individual holdings.
+
+Stress testing uses a deterministic scenario library covering global risk-off, crisis/high-chaos, Europe recession, China policy stress, UK rate shock, inflation shock, credit stress, dividend-cut shock, liquidity shock, Meta Wolf shock, FX shock and correlation spike. Each scenario produces portfolio-level losses and stock-level contribution rows.
+
+Hedge recommendations are split into equity-only actions and optional institutional placeholders. Defensive substitutions identify safer equity replacements by balance-sheet quality, dividend safety, CVaR/ES, regime suitability, narrative risk and liquidity. Optional institutional hedges are not executable without real pricing, liquidity and mandate data.
+
 Output:
 
 - `reports/outputs/stock_scorecard.csv`

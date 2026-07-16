@@ -11,8 +11,8 @@ The repository is organised as a modular quant platform, with production logic i
 - `regime`: factor-regime lens, Wolf Chaos Index, informational regime drivers, fused dashboard, transition matrix and stock-level regime suitability scoring.
 - `models`: conservative scorecard, ML forecasting, distributional risk forecasts, probabilistic validation, VaR/ES backtesting and walk-forward interfaces.
 - `optimisation`: score-weighted, risk-parity, mean-variance, CVaR/ES, dividend-income and regime-aware portfolio construction, trade-list generation and constraint reporting.
-- `risk`: VaR, CVaR, drawdown, risk reports and stress tests.
-- `hedging`: equity-only and optional institutional hedge recommendations.
+- `risk`: VaR, CVaR, Expected Shortfall, drawdown, risk contributions, scenario library, risk reports and stress tests.
+- `hedging`: equity-only hedges, optional institutional hedge placeholders and defensive substitution recommendations.
 - `reporting`: CSV and Markdown output writers.
 
 ## Active Universe
@@ -54,6 +54,14 @@ Research-only extension outputs cover sensitivity analysis, additional asset-cla
 The optimiser converts scorecard, distributional forecasts, regime suitability, narrative risk, alternative-data risk and current holdings into target weights and trade actions. It runs equal-weight fallback, score-weighted, risk-parity, mean-variance, CVaR/Expected Shortfall constrained, dividend-income and regime-aware constructors.
 
 Hard constraints cover long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints report portfolio dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration exposures. The final trade list translates current weight versus target weight into Buy, Increase, Reduce, Sell, Hold or Avoid actions with risk flags and rationale.
+
+## Risk, Stress Testing And Hedges
+
+The risk engine evaluates the recommended optimised portfolio using distributional forecasts, VaR, CVaR, Expected Shortfall, dividend-cut risk, drawdown probability, tail risk, skewness risk, liquidity, regime, narrative and alternative-data risk. It produces portfolio-level metrics and stock-level risk contribution ranks.
+
+The stress engine applies deterministic mock scenarios including global risk-off, crisis/high-chaos, Europe recession, China policy stress, UK rate shock, inflation shock, credit stress, dividend-cut shock, liquidity shock, FX shock, correlation spike and Meta Wolf shock. It reports scenario losses and stock-level loss contributors.
+
+The hedge engine separates equity-only recommendations from optional institutional hedges. It also suggests defensive substitutions for high-risk holdings. Optional institutional hedges are placeholders only and are not executable without mandate, pricing and market data.
 
 ## Sentiment And Alternative Data
 

@@ -13,7 +13,7 @@ from src.data_ingestion.fundamental_ingestion import load_fundamentals
 from src.data_ingestion.price_ingestion import load_prices
 from src.data_ingestion.universe import build_universe
 from src.features.feature_store import build_feature_store
-from src.hedging.hedge_report import build_hedge_recommendations
+from src.hedging.hedge_report import build_hedge_outputs
 from src.models.forecasting import generate_mock_forecasts
 from src.models.ml_pipeline import run_ml_forecasting_engine
 from src.models.scorecard import build_scorecard
@@ -26,6 +26,8 @@ from src.regime.regime_classifier import build_regime_features
 from src.regime.pipeline import run_regime_pipeline
 from src.reporting.report_writer import write_csv, write_markdown
 from src.risk.risk_metrics import build_risk_report
+from src.risk.risk_contributions import build_risk_contribution_report
+from src.risk.risk_report import build_risk_stress_hedge_summary
 from src.risk.stress_testing import run_stress_tests
 from src.utils.config import ensure_output_dir, load_yaml
 
@@ -138,9 +140,9 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     ]
     features = features.merge(ml_outputs["ml_features"][ml_merge_columns], on="ticker", how="left")
     scorecard = build_scorecard(features, risk_limits)
-    risk_report = build_risk_report(prices, portfolio)
+    current_risk_report = build_risk_report(prices, portfolio)
     branches = branch_config.get("branches", {})
-    portfolio_aware = run_portfolio_aware_branch(diagnostics, scorecard, universe, risk_report)
+    portfolio_aware = run_portfolio_aware_branch(diagnostics, scorecard, universe, current_risk_report)
     clean_sheet = run_clean_sheet_branch(scorecard)
     llm_mode = branches.get("llm_analyst_benchmark", {}).get("mode", "mock")
     llm_benchmark = run_llm_benchmark_branch(scorecard, mode=llm_mode)
@@ -148,8 +150,27 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     optimisation_outputs = run_portfolio_optimisation(scorecard, portfolio, optimisation_config, branch_comparison, regime_outputs["regime_dashboard_summary"])
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
     proposed = build_proposed_portfolio(portfolio, scorecard)
-    stress_report = run_stress_tests(portfolio, regime_outputs["regime_dashboard_summary"])
-    hedge_report = build_hedge_recommendations(portfolio, regime_outputs["regime_dashboard_summary"])
+    risk_portfolio = optimisation_outputs["recommended_optimised_portfolio"]
+    risk_report = build_risk_report(prices, risk_portfolio)
+    risk_contribution_report = build_risk_contribution_report(risk_portfolio)
+    stress_report, stress_contribution_report = run_stress_tests(
+        risk_portfolio,
+        regime_outputs["regime_dashboard_summary"],
+        return_contributions=True,
+    )
+    hedge_report, defensive_substitutions = build_hedge_outputs(
+        risk_portfolio,
+        regime_outputs["regime_dashboard_summary"],
+        stress_report,
+        optimisation_outputs["optimiser_input_dataset"],
+    )
+    risk_stress_hedge_summary = build_risk_stress_hedge_summary(
+        risk_report,
+        risk_contribution_report,
+        stress_report,
+        hedge_report,
+        defensive_substitutions,
+    )
 
     write_csv(diagnostics, out, "current_portfolio_diagnostics.csv")
     write_csv(portfolio, out, "current_portfolio_enriched.csv")
@@ -225,8 +246,12 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         write_csv(forecast, out, f"recommendations_{horizon}m.csv")
     write_csv(proposed, out, "proposed_portfolio.csv")
     write_csv(risk_report, out, "portfolio_risk_report.csv")
+    write_csv(risk_contribution_report, out, "risk_contribution_report.csv")
     write_csv(stress_report, out, "stress_test_report.csv")
+    write_csv(stress_contribution_report, out, "stress_test_contribution_report.csv")
     write_csv(hedge_report, out, "hedge_recommendations.csv")
+    write_csv(defensive_substitutions, out, "defensive_substitution_recommendations.csv")
+    write_markdown(risk_stress_hedge_summary, out, "risk_stress_hedge_summary.md")
     write_markdown(ml_outputs["model_validation_report"], out, "model_validation_report.md")
     return {
         "portfolio": portfolio,
@@ -247,7 +272,11 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "final_recommendations": final_recommendations,
         "proposed_portfolio": proposed,
         "risk_report": risk_report,
+        "risk_contribution_report": risk_contribution_report,
         "stress_report": stress_report,
+        "stress_test_contribution_report": stress_contribution_report,
         "hedge_recommendations": hedge_report,
+        "defensive_substitution_recommendations": defensive_substitutions,
+        "risk_stress_hedge_summary": pd.DataFrame([{"markdown": risk_stress_hedge_summary}]),
         **{f"recommendations_{h}m": frame for h, frame in recommendations.items()},
     }

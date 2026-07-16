@@ -54,6 +54,14 @@ Run the portfolio optimisation and constraint engine:
 python scripts/run_portfolio_optimisation.py
 ```
 
+Run risk, stress testing and hedge engines:
+
+```bash
+python scripts/run_risk_engine.py
+python scripts/run_stress_tests.py
+python scripts/run_hedge_engine.py
+```
+
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
 ```bash
@@ -109,6 +117,13 @@ Key Sprint 4 outputs:
 - `portfolio_trade_list.csv`
 - `portfolio_constraint_report.csv`
 - `portfolio_optimisation_summary.csv`
+- `portfolio_risk_report.csv`
+- `risk_contribution_report.csv`
+- `stress_test_report.csv`
+- `stress_test_contribution_report.csv`
+- `hedge_recommendations.csv`
+- `defensive_substitution_recommendations.csv`
+- `risk_stress_hedge_summary.md`
 - `stock_scorecard.csv`
 - `recommendations_portfolio_aware.csv`
 - `recommendations_clean_sheet.csv`

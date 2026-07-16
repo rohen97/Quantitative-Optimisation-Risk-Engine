@@ -1,0 +1,289 @@
+scenario_name,security_id,ticker,company_name,sector,country,region,currency,target_weight,shock_pct,position_loss_pct,position_loss_usd,contribution_to_portfolio_loss,stress_driver
+global_risk_off,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.2,-0.009999999999999997,-999999.9999999997,-0.009999999999999997,base
+global_risk_off,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,liquidity
+global_risk_off,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,liquidity
+global_risk_off,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,liquidity
+global_risk_off,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.2,-0.009999999999999997,-999999.9999999997,-0.009999999999999997,base
+global_risk_off,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.25,-0.0,-0.0,-0.0,liquidity
+global_risk_off,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,liquidity
+global_risk_off,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.25,-0.0,-0.0,-0.0,liquidity
+global_risk_off,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.25,-0.0,-0.0,-0.0,liquidity
+global_risk_off,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,liquidity
+global_risk_off,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.2,-0.009999999999999997,-999999.9999999997,-0.009999999999999997,base
+global_risk_off,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+global_risk_off,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.25,-0.0,-0.0,-0.0,liquidity
+global_risk_off,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,liquidity
+global_risk_off,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.2,-0.009999999999999997,-999999.9999999997,-0.009999999999999997,base
+global_risk_off,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,base
+crisis_high_chaos,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+crisis_high_chaos,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.325,-0.016249999999999994,-1624999.9999999995,-0.016249999999999994,liquidity
+crisis_high_chaos,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.325,-0.016249999999999994,-1624999.9999999995,-0.016249999999999994,liquidity
+crisis_high_chaos,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.325,-0.016249999999999994,-1624999.9999999995,-0.016249999999999994,liquidity
+crisis_high_chaos,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+crisis_high_chaos,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.325,-0.0,-0.0,-0.0,liquidity
+crisis_high_chaos,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.325,-0.01625,-1625000.0,-0.01625,liquidity
+crisis_high_chaos,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.325,-0.0,-0.0,-0.0,liquidity
+crisis_high_chaos,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.325,-0.0,-0.0,-0.0,liquidity
+crisis_high_chaos,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.42500000000000004,-0.021249999999999995,-2124999.9999999995,-0.021249999999999995,liquidity;low_quality
+crisis_high_chaos,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+crisis_high_chaos,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+crisis_high_chaos,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.325,-0.0,-0.0,-0.0,liquidity
+crisis_high_chaos,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.325,-0.016249999999999994,-1624999.9999999995,-0.016249999999999994,liquidity
+crisis_high_chaos,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.35,-0.01749999999999999,-1749999.9999999993,-0.01749999999999999,low_quality
+crisis_high_chaos,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.35,-0.017499999999999998,-1750000.0,-0.017499999999999998,low_quality
+europe_recession,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.08,-0.004,-400000.0,-0.004,sector:Utilities
+europe_recession,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.36000000000000004,-0.017999999999999995,-1799999.9999999995,-0.017999999999999995,region:EU ex-DACH;sector:Utilities;currency:EUR
+europe_recession,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,0.0,0.0,0.0,0.0,base
+europe_recession,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,0.0,0.0,0.0,0.0,base
+europe_recession,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.08,-0.004,-400000.0,-0.004,sector:Healthcare
+europe_recession,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.28,-0.013999999999999997,-1399999.9999999995,-0.013999999999999997,region:EU ex-DACH;currency:EUR
+europe_recession,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.28,-0.013999999999999997,-1399999.9999999995,-0.013999999999999997,region:DACH;currency:EUR
+europe_recession,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.28,-0.013999999999999997,-1399999.9999999995,-0.013999999999999997,region:EU ex-DACH;currency:EUR
+europe_recession,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.36000000000000004,-0.017999999999999995,-1799999.9999999995,-0.017999999999999995,region:DACH;sector:Utilities;currency:EUR
+europe_recession,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.08,-0.0,-0.0,-0.0,sector:Healthcare
+europe_recession,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,sector:Industrials
+europe_recession,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.08,-0.004,-400000.0,-0.004,sector:Healthcare
+europe_recession,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.08,-0.004,-400000.0,-0.004,sector:Consumer Staples
+europe_recession,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.28,-0.0,-0.0,-0.0,region:DACH;sector:Utilities
+europe_recession,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.48000000000000004,-0.0,-0.0,-0.0,region:EU ex-DACH;sector:Industrials;currency:EUR
+europe_recession,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.48000000000000004,-0.023999999999999994,-2399999.999999999,-0.023999999999999994,region:EU ex-DACH;sector:Industrials;currency:EUR
+europe_recession,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.28,-0.014000000000000002,-1400000.0000000002,-0.014000000000000002,region:DACH;sector:Consumer Staples
+europe_recession,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.08,-0.004,-400000.0,-0.004,sector:Consumer Staples
+europe_recession,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.28,-0.013999999999999997,-1399999.9999999995,-0.013999999999999997,region:EU ex-DACH;currency:EUR
+europe_recession,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.4,-0.020000000000000004,-2000000.0,-0.020000000000000004,region:DACH;sector:Industrials
+europe_recession,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.36000000000000004,-0.0,-0.0,-0.0,region:DACH;sector:Consumer Staples;currency:EUR
+europe_recession,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.36000000000000004,-0.017999999999999995,-1799999.9999999995,-0.017999999999999995,region:DACH;sector:Healthcare;currency:EUR
+europe_recession,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.28,-0.013999999999999997,-1399999.9999999995,-0.013999999999999997,region:EU ex-DACH;currency:EUR
+europe_recession,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.2,-0.010000000000000002,-1000000.0,-0.010000000000000002,region:DACH
+china_policy_stress,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,region:Hong Kong
+china_policy_stress,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,region:Mainland China
+china_policy_stress,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.25,-0.0,-0.0,-0.0,region:Mainland China
+china_policy_stress,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,region:Hong Kong
+china_policy_stress,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,region:Hong Kong
+china_policy_stress,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,region:Mainland China
+china_policy_stress,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+china_policy_stress,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.16999999999999998,-0.008499999999999999,-849999.9999999999,-0.008499999999999999,region:UK;currency:GBP
+uk_rate_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.16999999999999998,-0.008499999999999999,-849999.9999999999,-0.008499999999999999,region:UK;currency:GBP
+uk_rate_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.16999999999999998,-0.008499999999999999,-849999.9999999999,-0.008499999999999999,region:UK;currency:GBP
+uk_rate_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,base
+uk_rate_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,base
+inflation_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+inflation_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,sector:Technology
+inflation_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,sector:Technology
+inflation_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,sector:Technology
+inflation_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,sector:Financials
+inflation_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,sector:Technology
+inflation_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+inflation_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.05,-0.0,-0.0,-0.0,base
+inflation_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.05,-0.0,-0.0,-0.0,base
+inflation_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+inflation_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+inflation_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,sector:Financials
+inflation_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+inflation_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+inflation_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+inflation_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,0.0,0.0,0.0,0.0,sector:Financials
+inflation_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,0.0,0.0,0.0,0.0,sector:Financials
+credit_stress,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.05,-0.0,-0.0,-0.0,base
+credit_stress,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.05,-0.0,-0.0,-0.0,base
+credit_stress,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+credit_stress,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+credit_stress,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+credit_stress,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+credit_stress,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,dividend_cut_probability
+dividend_cut_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.05,-0.0,-0.0,-0.0,base
+dividend_cut_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.05,-0.0,-0.0,-0.0,base
+dividend_cut_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+dividend_cut_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+dividend_cut_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.05,-0.0,-0.0,-0.0,base
+dividend_cut_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,dividend_cut_probability
+dividend_cut_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+dividend_cut_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,dividend_cut_probability
+liquidity_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+liquidity_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.3,-0.014999999999999994,-1499999.9999999993,-0.014999999999999994,liquidity
+liquidity_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.3,-0.014999999999999994,-1499999.9999999993,-0.014999999999999994,liquidity
+liquidity_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.3,-0.014999999999999994,-1499999.9999999993,-0.014999999999999994,liquidity
+liquidity_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+liquidity_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.3,-0.0,-0.0,-0.0,liquidity
+liquidity_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.3,-0.015,-1500000.0,-0.015,liquidity
+liquidity_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.3,-0.0,-0.0,-0.0,liquidity
+liquidity_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.3,-0.0,-0.0,-0.0,liquidity
+liquidity_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.3,-0.014999999999999994,-1499999.9999999993,-0.014999999999999994,liquidity
+liquidity_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+liquidity_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+liquidity_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.3,-0.0,-0.0,-0.0,liquidity
+liquidity_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.3,-0.014999999999999994,-1499999.9999999993,-0.014999999999999994,liquidity
+liquidity_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.05,-0.002499999999999999,-249999.9999999999,-0.002499999999999999,base
+liquidity_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.05,-0.0025000000000000005,-250000.0,-0.0025000000000000005,base
+meta_wolf_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.25,-0.0,-0.0,-0.0,base
+meta_wolf_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.25,-0.0,-0.0,-0.0,base
+meta_wolf_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.25,-0.0,-0.0,-0.0,base
+meta_wolf_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+meta_wolf_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.25,-0.0,-0.0,-0.0,base
+meta_wolf_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.25,-0.012499999999999995,-1249999.9999999995,-0.012499999999999995,base
+meta_wolf_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.25,-0.0125,-1250000.0,-0.0125,base
+fx_shock,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.03,-0.0015,-150000.0,-0.0015,currency:HKD
+fx_shock,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.07,-0.0035000000000000005,-350000.00000000006,-0.0035000000000000005,currency:GBP
+fx_shock,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.06,-0.003,-300000.0,-0.003,currency:CNY
+fx_shock,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.07,-0.0035000000000000005,-350000.00000000006,-0.0035000000000000005,currency:GBP
+fx_shock,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.06,-0.0,-0.0,-0.0,currency:CNY
+fx_shock,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.07,-0.0035000000000000005,-350000.00000000006,-0.0035000000000000005,currency:GBP
+fx_shock,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.03,-0.0015,-150000.0,-0.0015,currency:HKD
+fx_shock,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.03,-0.0015,-150000.0,-0.0015,currency:HKD
+fx_shock,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,0.05,0.0,0.0,0.0,currency:CHF
+fx_shock,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.08,-0.0,-0.0,-0.0,currency:EUR
+fx_shock,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,0.05,0.0025000000000000005,250000.0,0.0025000000000000005,currency:CHF
+fx_shock,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.06,-0.003,-300000.0,-0.003,currency:CNY
+fx_shock,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,0.05,0.0025000000000000005,250000.0,0.0025000000000000005,currency:CHF
+fx_shock,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.08,-0.0,-0.0,-0.0,currency:EUR
+fx_shock,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,currency:EUR
+fx_shock,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,0.05,0.0025000000000000005,250000.0,0.0025000000000000005,currency:CHF
+correlation_spike,WOLF021,WLF021,Wolf Hong Kong Utilities 21,Utilities,Hong Kong,Hong Kong,HKD,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF003,WLF003,Wolf France Utilities 3,Utilities,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF012,WLF012,Wolf United Kingdom Technology 12,Technology,United Kingdom,UK,GBP,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF006,WLF006,Wolf China Technology 6,Technology,China,Mainland China,CNY,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,Healthcare,United Kingdom,UK,GBP,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF024,WLF024,Wolf France Technology 24,Technology,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF022,WLF022,Wolf Germany Financials 22,Financials,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF018,WLF018,Wolf Netherlands Technology 18,Technology,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF015,WLF015,Wolf Germany Utilities 15,Utilities,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF013,WLF013,Wolf China Healthcare 13,Healthcare,China,Mainland China,CNY,0.0,-0.08,-0.0,-0.0,-0.0,base
+correlation_spike,WOLF005,WLF005,Wolf United Kingdom Industrials 5,Industrials,United Kingdom,UK,GBP,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,Healthcare,Hong Kong,Hong Kong,HKD,0.05,-0.08,-0.004,-400000.0,-0.004,base
+correlation_spike,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,Consumer Staples,Hong Kong,Hong Kong,HKD,0.05,-0.16,-0.008,-800000.0,-0.008,tail_risk
+correlation_spike,WOLF009,WLF009,Wolf Switzerland Utilities 9,Utilities,Switzerland,DACH,CHF,0.0,-0.08,-0.0,-0.0,-0.0,base
+correlation_spike,WOLF011,WLF011,Wolf Netherlands Industrials 11,Industrials,Netherlands,EU ex-DACH,EUR,0.0,-0.08,-0.0,-0.0,-0.0,base
+correlation_spike,WOLF017,WLF017,Wolf France Industrials 17,Industrials,France,EU ex-DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,Consumer Staples,Switzerland,DACH,CHF,0.05,-0.16,-0.008,-800000.0,-0.008,tail_risk
+correlation_spike,WOLF020,WLF020,Wolf China Consumer Staples 20,Consumer Staples,China,Mainland China,CNY,0.05,-0.16,-0.008,-800000.0,-0.008,tail_risk
+correlation_spike,WOLF004,WLF004,Wolf Netherlands Financials 4,Financials,Netherlands,EU ex-DACH,EUR,0.04999999999999998,-0.16,-0.007999999999999997,-799999.9999999998,-0.007999999999999997,tail_risk
+correlation_spike,WOLF023,WLF023,Wolf Switzerland Industrials 23,Industrials,Switzerland,DACH,CHF,0.05,-0.16,-0.008,-800000.0,-0.008,tail_risk
+correlation_spike,WOLF008,WLF008,Wolf Germany Consumer Staples 8,Consumer Staples,Germany,DACH,EUR,0.0,-0.08,-0.0,-0.0,-0.0,base
+correlation_spike,WOLF001,WLF001,Wolf Germany Healthcare 1,Healthcare,Germany,DACH,EUR,0.04999999999999998,-0.08,-0.003999999999999998,-399999.9999999999,-0.003999999999999998,base
+correlation_spike,WOLF010,WLF010,Wolf France Financials 10,Financials,France,EU ex-DACH,EUR,0.04999999999999998,-0.16,-0.007999999999999997,-799999.9999999998,-0.007999999999999997,tail_risk
+correlation_spike,WOLF016,WLF016,Wolf Switzerland Financials 16,Financials,Switzerland,DACH,CHF,0.05,-0.16,-0.008,-800000.0,-0.008,tail_risk

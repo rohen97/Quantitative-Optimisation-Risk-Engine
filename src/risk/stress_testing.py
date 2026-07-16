@@ -1,53 +1,134 @@
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 
-
-def _regime_scenario(regime_summary: pd.DataFrame | None) -> tuple[str, dict[str, float]] | None:
-    """Map the fused regime dashboard to an additional portfolio stress."""
-    if regime_summary is None or regime_summary.empty or "dominant_regime" not in regime_summary:
-        return None
-    regime = str(regime_summary.iloc[0]["dominant_regime"])
-    mapping = {
-        "crisis_high_chaos": ("regime_crisis_high_chaos", {"all": -0.28, "Financials": -0.08}),
-        "inflation_pressure": ("regime_inflation_pressure", {"all": -0.10, "Utilities": -0.06, "Consumer Staples": -0.04}),
-        "europe_recession": ("regime_europe_recession", {"DACH": -0.24, "EU ex-DACH": -0.24, "EUR": -0.08}),
-        "china_policy_stress": ("regime_china_policy_stress", {"Mainland China": -0.30, "Hong Kong": -0.24}),
-        "uk_rate_pressure": ("regime_uk_rate_pressure", {"UK": -0.20, "GBP": -0.10}),
-        "credit_stress": ("regime_credit_stress", {"all": -0.14, "Financials": -0.14}),
-        "risk_on_fragile": ("regime_risk_on_fragile", {"all": -0.12, "Technology": -0.08}),
-    }
-    return mapping.get(regime)
+from src.risk.scenario_library import build_scenario_library
 
 
-def run_stress_tests(portfolio: pd.DataFrame, regime_summary: pd.DataFrame | None = None) -> pd.DataFrame:
-    scenarios = {
-        "global_risk_off": {"all": -0.20},
-        "europe_recession": {"DACH": -0.20, "EUR": -0.08},
-        "china_policy_property_stress": {"Mainland China": -0.25, "Hong Kong": -0.25},
-        "uk_rate_fx_stress": {"UK": -0.15, "GBP": -0.08},
-        "financial_stress": {"Financials": -0.20},
-        "dividend_cut_shock": {"all": -0.05},
-        "meta_wolf_shock": {"all": -0.25},
-    }
-    regime_case = _regime_scenario(regime_summary)
-    if regime_case:
-        scenarios[regime_case[0]] = regime_case[1]
+def _scenario_shock(row: pd.Series, scenario: dict) -> tuple[float, str]:
+    shock = float(scenario.get("base_shock", 0.0))
+    drivers = []
+    for key, col in [("region_shocks", "region"), ("country_shocks", "country"), ("sector_shocks", "sector"), ("currency_shocks", "currency")]:
+        value = scenario.get(key, {}).get(row.get(col), 0.0)
+        if value:
+            shock += value
+            drivers.append(f"{col}:{row.get(col)}")
+    if scenario.get("beta_extra") and row.get("beta_local_market", 1) > 1.1:
+        shock += scenario["beta_extra"]
+        drivers.append("high_beta")
+    if scenario.get("liquidity_extra") and row.get("liquidity_score", 50) < 45:
+        shock += scenario["liquidity_extra"]
+        drivers.append("liquidity")
+    if scenario.get("low_quality_extra") and row.get("balance_sheet_strength_score", 50) < 45:
+        shock += scenario["low_quality_extra"]
+        drivers.append("low_quality")
+    if scenario.get("regulatory_extra") and row.get("regulatory_risk_score", 0) > 60:
+        shock += scenario["regulatory_extra"]
+        drivers.append("regulatory")
+    if scenario.get("debt_extra") and row.get("net_debt_to_ebitda", 2) > 3:
+        shock += scenario["debt_extra"]
+        drivers.append("high_debt")
+    if scenario.get("credit_extra") and row.get("credit_stress_score", 0) > 50:
+        shock += scenario["credit_extra"]
+        drivers.append("credit_stress")
+    if scenario.get("dividend_cut_extra") and row.get("dividend_cut_probability", 0.1) > 0.35:
+        shock += scenario["dividend_cut_extra"]
+        drivers.append("dividend_cut_probability")
+    if scenario.get("payout_extra") and row.get("payout_ratio", 0.55) > 0.85:
+        shock += scenario["payout_extra"]
+        drivers.append("high_payout")
+    if scenario.get("low_adv_extra") and row.get("average_daily_value_usd", 5_000_000) < 5_000_000:
+        shock += scenario["low_adv_extra"]
+        drivers.append("low_adv")
+    if scenario.get("meta_wolf_extra") and "META WOLF" in str(row.get("company_name", "")).upper():
+        shock += scenario["meta_wolf_extra"]
+        drivers.append("meta_wolf")
+    if scenario.get("tail_risk_extra") and row.get("tail_risk_score", 50) > 70:
+        shock += scenario["tail_risk_extra"]
+        drivers.append("tail_risk")
+    return max(shock, -0.85), ";".join(drivers) or "base"
+
+
+def run_stress_test_contributions(
+    portfolio: pd.DataFrame,
+    regime_summary: pd.DataFrame | None = None,
+    nav_usd: float | None = None,
+) -> pd.DataFrame:
+    """Run all scenario shocks and return stock-level contribution rows."""
+    data = portfolio.copy()
+    if "target_weight" not in data:
+        if "market_value_usd" in data and data["market_value_usd"].sum() > 0:
+            data["target_weight"] = data["market_value_usd"] / data["market_value_usd"].sum()
+        else:
+            data["target_weight"] = 0.0
+    nav = float(nav_usd or data.get("market_value_usd", pd.Series([100_000_000])).sum() or 100_000_000)
     rows = []
-    for scenario, shocks in scenarios.items():
-        shocked = portfolio.copy()
-        shocked["shock"] = shocks.get("all", 0.0)
-        shocked["shock"] += shocked["region"].map(shocks).fillna(0)
-        shocked["shock"] += shocked["currency"].map(shocks).fillna(0)
-        shocked["shock"] += shocked["sector"].map(shocks).fillna(0)
-        shocked["loss_usd"] = shocked["market_value_usd"] * shocked["shock"]
+    for scenario in build_scenario_library(regime_summary):
+        for _, row in data.iterrows():
+            shock, driver = _scenario_shock(row, scenario)
+            loss_usd = float(row["target_weight"] * nav * shock)
+            rows.append(
+                {
+                    "scenario_name": scenario["scenario_name"],
+                    "security_id": row.get("security_id", ""),
+                    "ticker": row.get("ticker", ""),
+                    "company_name": row.get("company_name", ""),
+                    "sector": row.get("sector", ""),
+                    "country": row.get("country", ""),
+                    "region": row.get("region", ""),
+                    "currency": row.get("currency", ""),
+                    "target_weight": row.get("target_weight", 0),
+                    "shock_pct": shock,
+                    "position_loss_pct": row.get("target_weight", 0) * shock,
+                    "position_loss_usd": loss_usd,
+                    "contribution_to_portfolio_loss": row.get("target_weight", 0) * shock,
+                    "stress_driver": driver,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def build_stress_test_report(contributions: pd.DataFrame, nav_usd: float = 100_000_000) -> pd.DataFrame:
+    """Aggregate stock-level stress contributions into scenario-level report."""
+    rows = []
+    for scenario, frame in contributions.groupby("scenario_name"):
+        loss_pct = float(frame["contribution_to_portfolio_loss"].sum())
+        loss_usd = float(frame["position_loss_usd"].sum())
+        top = frame.sort_values("position_loss_usd").head(5)
+        sector = frame.groupby("sector")["position_loss_usd"].sum().sort_values().to_dict()
+        country = frame.groupby("country")["position_loss_usd"].sum().sort_values().to_dict()
+        currency = frame.groupby("currency")["position_loss_usd"].sum().sort_values().to_dict()
         rows.append(
             {
-                "scenario": scenario,
-                "portfolio_loss_usd": float(shocked["loss_usd"].sum()),
-                "portfolio_loss_pct": float(shocked["loss_usd"].sum() / shocked["market_value_usd"].sum()),
-                "worst_contributing_stock": shocked.sort_values("loss_usd").iloc[0]["ticker"],
-                "residual_risk": "High" if shocked["loss_usd"].sum() / shocked["market_value_usd"].sum() < -0.15 else "Moderate",
+                "scenario_name": scenario,
+                "portfolio_loss_pct": loss_pct,
+                "portfolio_loss_usd": loss_usd,
+                "post_stress_portfolio_value": nav_usd + loss_usd,
+                "post_stress_var_5": loss_pct * 0.85,
+                "post_stress_cvar_5": loss_pct * 1.10,
+                "post_stress_expected_shortfall_5": loss_pct * 1.15,
+                "post_stress_dividend_income_impact": min(loss_pct * 0.25, 0),
+                "post_stress_drawdown_probability": min(max(abs(loss_pct) * 2.2, 0), 1),
+                "top_5_loss_contributors": ", ".join(top["ticker"].astype(str)),
+                "sector_loss_contribution": json.dumps(sector, sort_keys=True),
+                "country_loss_contribution": json.dumps(country, sort_keys=True),
+                "currency_loss_contribution": json.dumps(currency, sort_keys=True),
+                "risk_level": "Severe" if loss_pct < -0.20 else "High" if loss_pct < -0.10 else "Moderate",
+                "hedge_required_flag": loss_pct < -0.10,
+                "stress_commentary": "Stress scenario estimates deterministic mock portfolio loss and main loss contributors.",
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows).sort_values("portfolio_loss_pct").reset_index(drop=True)
+
+
+def run_stress_tests(
+    portfolio: pd.DataFrame,
+    regime_summary: pd.DataFrame | None = None,
+    return_contributions: bool = False,
+    nav_usd: float | None = None,
+):
+    contributions = run_stress_test_contributions(portfolio, regime_summary, nav_usd)
+    report = build_stress_test_report(contributions, nav_usd or 100_000_000)
+    return (report, contributions) if return_contributions else report
