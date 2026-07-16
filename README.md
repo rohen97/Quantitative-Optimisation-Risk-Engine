@@ -48,6 +48,12 @@ Run the mock ML Forecasting & Distributional Risk Engine:
 python scripts/run_ml_forecasting.py
 ```
 
+Run the portfolio optimisation and constraint engine:
+
+```bash
+python scripts/run_portfolio_optimisation.py
+```
+
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
 ```bash
@@ -94,6 +100,15 @@ Key Sprint 4 outputs:
 - `var_es_backtest_report.csv`
 - `distribution_sensitivity_analysis.csv`
 - `distribution_trading_research_signals.csv`
+- `optimised_portfolio_score_weighted.csv`
+- `optimised_portfolio_risk_parity.csv`
+- `optimised_portfolio_mean_variance.csv`
+- `optimised_portfolio_cvar_constrained.csv`
+- `optimised_portfolio_dividend_income.csv`
+- `optimised_portfolio_regime_aware.csv`
+- `portfolio_trade_list.csv`
+- `portfolio_constraint_report.csv`
+- `portfolio_optimisation_summary.csv`
 - `stock_scorecard.csv`
 - `recommendations_portfolio_aware.csv`
 - `recommendations_clean_sheet.csv`

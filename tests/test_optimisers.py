@@ -1,0 +1,69 @@
+import pandas as pd
+
+from src.optimisation.optimisers import cvar_constrained_portfolio, dividend_income_portfolio, risk_parity_portfolio, score_weighted_portfolio
+
+
+def _data():
+    rows = []
+    for i in range(20):
+        rows.append(
+            {
+                "ticker": f"T{i:02d}",
+                "company_name": f"Company {i}",
+                "country": f"C{i % 5}",
+                "region": f"R{i % 4}",
+                "sector": f"S{i % 5}",
+                "currency": f"CUR{i % 4}",
+                "current_weight": 0.0,
+                "instrument_type": "Equity",
+                "listing_status": "Active",
+                "final_recommendation": "Buy",
+                "final_recommendation_score": 90 - i,
+                "portfolio_fit_score": 70,
+                "regime_suitability_score": 70,
+                "dividend_safety_score": 70,
+                "cashflow_quality_score": 70,
+                "balance_sheet_strength_score": 70,
+                "expected_total_return_12m": 0.08,
+                "expected_dividend_return_12m": 0.03,
+                "expected_volatility_12m": 0.10 + i * 0.01,
+                "var_5_12m": -0.10 - i * 0.005,
+                "cvar_5_12m": -0.12 - i * 0.01,
+                "expected_shortfall_5_12m": -0.12 - i * 0.01,
+                "dividend_yield": 0.04 if i < 10 else 0.02,
+                "dividend_cut_probability": 0.05 if i < 10 else 0.30,
+                "large_drawdown_probability_12m": 0.10,
+                "tail_risk_score": 20,
+                "skewness_risk_score": 20,
+                "forecast_uncertainty_score": 30,
+                "liquidity_score": 80,
+                "average_daily_value_usd": 10_000_000,
+                "regime_exclusion_flag": False,
+                "reframing_exclusion_flag": False,
+                "alt_data_exclusion_flag": False,
+                "regime_review_required_flag": False,
+                "reframing_review_required_flag": False,
+                "alt_data_review_required_flag": False,
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+def test_score_weighted_weights_sum_and_respect_cap():
+    portfolio = score_weighted_portfolio(_data(), {"max_single_name_weight": 0.05})
+    assert round(portfolio["target_weight"].sum(), 6) == 1.0
+    assert portfolio["target_weight"].max() <= 0.05 + 1e-9
+    assert portfolio.loc[portfolio["ticker"].eq("T00"), "target_weight"].iloc[0] >= portfolio.loc[portfolio["ticker"].eq("T19"), "target_weight"].iloc[0]
+
+
+def test_risk_parity_gives_lower_weight_to_high_volatility_stock():
+    portfolio = risk_parity_portfolio(_data(), {"max_single_name_weight": 0.10})
+    assert portfolio.loc[portfolio["ticker"].eq("T00"), "target_weight"].iloc[0] > portfolio.loc[portfolio["ticker"].eq("T19"), "target_weight"].iloc[0]
+
+
+def test_cvar_and_dividend_optimisers_penalise_risky_names():
+    data = _data()
+    cvar = cvar_constrained_portfolio(data, {"max_single_name_weight": 0.10})
+    income = dividend_income_portfolio(data, {"max_single_name_weight": 0.10})
+    assert cvar.loc[cvar["ticker"].eq("T00"), "target_weight"].iloc[0] > cvar.loc[cvar["ticker"].eq("T19"), "target_weight"].iloc[0]
+    assert income.loc[income["ticker"].eq("T00"), "target_weight"].iloc[0] > income.loc[income["ticker"].eq("T19"), "target_weight"].iloc[0]

@@ -118,6 +118,24 @@ The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-ri
 
 Future research hooks are present but disabled or research-only: additional asset classes, Transformer/xLSTM/CNN/LSTM distributional forecasters, sensitivity analysis, quantile-based forecasting, conformal prediction and distribution-derived trading signal research. No automated trading, DRL or deep-learning dependency is enabled.
 
+## Portfolio Optimisation Methodology
+
+The Portfolio Optimisation and Constraint Engine turns model outputs into target weights and trade recommendations. It consumes current holdings, scorecard scores, portfolio-fit features, sentiment and narrative risk flags, regime suitability and distributional ML forecasts including expected return, volatility, VaR, CVaR, Expected Shortfall, dividend-cut probability, drawdown probability, tail risk and skewness risk.
+
+Implemented constructors:
+
+- Equal-weight eligible fallback.
+- Score-weighted portfolio.
+- Risk-parity portfolio using volatility proxies.
+- Mean-variance baseline using expected return and variance penalty.
+- CVaR / Expected Shortfall constrained portfolio.
+- Dividend-income constrained portfolio.
+- Regime-aware portfolio.
+
+Hard constraints include long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints include dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration limits. The constraint report records breaches rather than hiding them.
+
+The trade list compares current and target weights and assigns Buy, Increase, Reduce, Sell, Hold or Avoid actions. Optimisation cannot override hard exclusions or use high expected return alone to justify high-risk names. Future upgrades can add Hierarchical Risk Parity, Black-Litterman, transaction-cost models, tax constraints, robust covariance estimation, robust optimisation and a DRL allocation overlay.
+
 Output:
 
 - `reports/outputs/stock_scorecard.csv`

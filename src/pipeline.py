@@ -19,7 +19,7 @@ from src.models.ml_pipeline import run_ml_forecasting_engine
 from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.narrative.pipeline import run_narrative_pipeline
-from src.optimisation.portfolio_builder import build_proposed_portfolio
+from src.optimisation.portfolio_builder import build_proposed_portfolio, run_portfolio_optimisation
 from src.portfolio.portfolio_diagnostics import build_concentration_summary, build_portfolio_diagnostics
 from src.portfolio.portfolio_loader import load_current_portfolio
 from src.regime.regime_classifier import build_regime_features
@@ -51,6 +51,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     narrative_config = load_yaml("configs/narrative.yaml")
     regime_config = load_yaml("configs/regime.yaml")
     ml_config = load_yaml("configs/ml_forecasting.yaml")
+    optimisation_config = load_yaml("configs/optimisation.yaml")
     out = Path(output_dir) if output_dir else ensure_output_dir(config)
 
     universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
@@ -144,6 +145,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     llm_mode = branches.get("llm_analyst_benchmark", {}).get("mode", "mock")
     llm_benchmark = run_llm_benchmark_branch(scorecard, mode=llm_mode)
     branch_comparison = compare_branches(portfolio_aware, clean_sheet, llm_benchmark)
+    optimisation_outputs = run_portfolio_optimisation(scorecard, portfolio, optimisation_config, branch_comparison, regime_outputs["regime_dashboard_summary"])
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
     proposed = build_proposed_portfolio(portfolio, scorecard)
     stress_report = run_stress_tests(portfolio, regime_outputs["regime_dashboard_summary"])
@@ -202,6 +204,19 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     write_csv(clean_sheet, out, "recommendations_clean_sheet.csv")
     write_csv(llm_benchmark, out, "recommendations_llm_benchmark.csv")
     write_csv(branch_comparison, out, "branch_comparison_report.csv")
+    for filename, frame in {
+        "optimiser_input_dataset.csv": optimisation_outputs["optimiser_input_dataset"],
+        "optimised_portfolio_score_weighted.csv": optimisation_outputs["optimised_portfolio_score_weighted"],
+        "optimised_portfolio_risk_parity.csv": optimisation_outputs["optimised_portfolio_risk_parity"],
+        "optimised_portfolio_mean_variance.csv": optimisation_outputs["optimised_portfolio_mean_variance"],
+        "optimised_portfolio_cvar_constrained.csv": optimisation_outputs["optimised_portfolio_cvar_constrained"],
+        "optimised_portfolio_dividend_income.csv": optimisation_outputs["optimised_portfolio_dividend_income"],
+        "optimised_portfolio_regime_aware.csv": optimisation_outputs["optimised_portfolio_regime_aware"],
+        "portfolio_trade_list.csv": optimisation_outputs["portfolio_trade_list"],
+        "portfolio_constraint_report.csv": optimisation_outputs["portfolio_constraint_report"],
+        "portfolio_optimisation_summary.csv": optimisation_outputs["portfolio_optimisation_summary"],
+    }.items():
+        write_csv(frame, out, filename)
     write_csv(final_recommendations, out, "final_recommendations.csv")
     recommendations = {}
     for horizon in HORIZONS_MONTHS:
@@ -228,6 +243,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "recommendations_clean_sheet": clean_sheet,
         "recommendations_llm_benchmark": llm_benchmark,
         "branch_comparison_report": branch_comparison,
+        **optimisation_outputs,
         "final_recommendations": final_recommendations,
         "proposed_portfolio": proposed,
         "risk_report": risk_report,

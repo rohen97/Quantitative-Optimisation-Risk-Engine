@@ -25,20 +25,20 @@ def estimate_drawdown_probability(features: pd.DataFrame, regime_dashboard: pd.D
     regime_risk = data.get("regime_risk_score", pd.Series(50, index=data.index)).fillna(50)
     deterioration = data.get("regime_deterioration_probability", pd.Series(0, index=data.index)).fillna(0)
     base = (
-        0.06
-        + 0.35 * (vol / 0.45).clip(0, 1)
-        + 0.12 * ((beta + global_beta) / 2 - 1).clip(0, 1.5) / 1.5
-        + 0.15 * (max_dd / 0.45).clip(0, 1)
-        + 0.10 * (downside / 0.35).clip(0, 1)
-        + 0.08 * (cvar / 0.25).clip(0, 1)
-        + 0.08 * (liquidity / 100).clip(0, 1)
-        + 0.08 * (risk_frame / 100).clip(0, 1)
-        + 0.08 * (distress / 100).clip(0, 1)
-        + 0.08 * (credit / 100).clip(0, 1)
-        + 0.08 * (regime_risk / 100).clip(0, 1)
-        + 0.08 * deterioration.clip(0, 1)
-        + 0.08 * high_chaos
-        + 0.05 * chaos / 100
+        0.03
+        + 0.16 * (vol / 0.45).clip(0, 1)
+        + 0.06 * ((beta + global_beta) / 2 - 1).clip(0, 1.5) / 1.5
+        + 0.07 * (max_dd / 0.45).clip(0, 1)
+        + 0.05 * (downside / 0.35).clip(0, 1)
+        + 0.04 * (cvar / 0.25).clip(0, 1)
+        + 0.04 * (liquidity / 100).clip(0, 1)
+        + 0.04 * (risk_frame / 100).clip(0, 1)
+        + 0.04 * (distress / 100).clip(0, 1)
+        + 0.04 * (credit / 100).clip(0, 1)
+        + 0.04 * (regime_risk / 100).clip(0, 1)
+        + 0.04 * deterioration.clip(0, 1)
+        + 0.04 * high_chaos
+        + 0.03 * chaos / 100
     ).clip(0, 0.95)
     output = data[[col for col in ["security_id", "ticker", "company_name"] if col in data]].copy()
     for months, scale in {3: 0.55, 6: 0.75, 9: 0.90, 12: 1.0}.items():

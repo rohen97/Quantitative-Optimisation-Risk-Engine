@@ -42,6 +42,12 @@ Run ML distributional forecasting outputs:
 python scripts/run_ml_forecasting.py
 ```
 
+Run portfolio optimisation outputs:
+
+```bash
+python scripts/run_portfolio_optimisation.py
+```
+
 Validate Alpaca credentials:
 
 ```bash
@@ -133,6 +139,21 @@ ML distributional outputs:
 - `distribution_research_extension_points.csv`
 
 The ML layer is mock-first and forecasts distribution parameters, not just point returns. It derives VaR, CVaR, Expected Shortfall, tail risk, skewness risk and validation diagnostics. Transformer/xLSTM/CNN/LSTM ideas are present as disabled research placeholders; no deep-learning dependency or automated trading engine is active.
+
+Portfolio optimisation outputs:
+
+- `optimiser_input_dataset.csv`
+- `optimised_portfolio_score_weighted.csv`
+- `optimised_portfolio_risk_parity.csv`
+- `optimised_portfolio_mean_variance.csv`
+- `optimised_portfolio_cvar_constrained.csv`
+- `optimised_portfolio_dividend_income.csv`
+- `optimised_portfolio_regime_aware.csv`
+- `portfolio_trade_list.csv`
+- `portfolio_constraint_report.csv`
+- `portfolio_optimisation_summary.csv`
+
+The optimiser uses distributional forecasts, regime suitability, dividend risk, drawdown risk, narrative flags, alternative-data flags and current weights. In dry-run mode, if all names are excluded by upstream mock flags, a clearly marked fallback eligibility path selects the least-risky liquid names so optimisation outputs remain inspectable.
 
 Alpaca integration:
 

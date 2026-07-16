@@ -10,7 +10,7 @@ The repository is organised as a modular quant platform, with production logic i
 - `narrative`: financial concept extraction, occurrence/reoccurrence tracking, narrative frame construction, mock embeddings, semantic distance, temporal reframing and Markov transition analysis.
 - `regime`: factor-regime lens, Wolf Chaos Index, informational regime drivers, fused dashboard, transition matrix and stock-level regime suitability scoring.
 - `models`: conservative scorecard, ML forecasting, distributional risk forecasts, probabilistic validation, VaR/ES backtesting and walk-forward interfaces.
-- `optimisation`: proposed portfolio construction and constraint checks.
+- `optimisation`: score-weighted, risk-parity, mean-variance, CVaR/ES, dividend-income and regime-aware portfolio construction, trade-list generation and constraint reporting.
 - `risk`: VaR, CVaR, drawdown, risk reports and stress tests.
 - `hedging`: equity-only and optional institutional hedge recommendations.
 - `reporting`: CSV and Markdown output writers.
@@ -48,6 +48,12 @@ The ML engine forecasts conditional return distributions rather than only point 
 Inspired by distributional deep-learning research, the architecture is designed for future CNN, LSTM, Transformer and xLSTM forecasters that output `mu`, `sigma`, `nu` and `xi`. The current implementation does not add TensorFlow or PyTorch and does not train deep models. It derives P5/P50/P95, VaR, CVaR, Expected Shortfall, tail-risk scores, skewness-risk scores, PIT/LPS/CRPS-style validation proxies and VaR/ES backtest reports from deterministic mock inputs.
 
 Research-only extension outputs cover sensitivity analysis, additional asset-class hooks, quantile-forecasting placeholders and distribution-driven trading signal scaffolding. These are not execution instructions and do not override hard filters.
+
+## Portfolio Optimisation And Constraints
+
+The optimiser converts scorecard, distributional forecasts, regime suitability, narrative risk, alternative-data risk and current holdings into target weights and trade actions. It runs equal-weight fallback, score-weighted, risk-parity, mean-variance, CVaR/Expected Shortfall constrained, dividend-income and regime-aware constructors.
+
+Hard constraints cover long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints report portfolio dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration exposures. The final trade list translates current weight versus target weight into Buy, Increase, Reduce, Sell, Hold or Avoid actions with risk flags and rationale.
 
 ## Sentiment And Alternative Data
 

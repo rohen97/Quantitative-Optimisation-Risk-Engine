@@ -12,4 +12,4 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
 if __name__ == "__main__":
     outputs = run_full_pipeline()
-    logging.info("Built proposed portfolio with %s new candidates.", len(outputs["proposed_portfolio"]))
+    logging.info("Built optimised trade list with %s rows.", len(outputs["portfolio_trade_list"]))

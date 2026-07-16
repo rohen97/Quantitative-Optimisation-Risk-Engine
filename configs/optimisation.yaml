@@ -1,0 +1,54 @@
+optimisation:
+  enabled: true
+  mode: mock
+
+  base_currency: USD
+  long_only: true
+  fully_invested: true
+
+  methods:
+    equal_weight:
+      enabled: true
+    score_weighted:
+      enabled: true
+    risk_parity:
+      enabled: true
+    mean_variance:
+      enabled: true
+      risk_aversion_lambda: 5.0
+    cvar_constrained:
+      enabled: true
+    dividend_income:
+      enabled: true
+    regime_aware:
+      enabled: true
+
+  constraints:
+    max_single_name_weight: 0.05
+    max_new_position_weight: 0.03
+    max_sector_weight: 0.25
+    max_country_weight: 0.30
+    max_region_weight: 0.40
+    max_currency_weight: 0.40
+    minimum_liquidity_score: 40
+    minimum_average_daily_value_usd: 5000000
+    minimum_portfolio_dividend_yield: 0.03
+    maximum_portfolio_volatility: 0.20
+    maximum_portfolio_var_5: -0.15
+    maximum_portfolio_cvar_5: -0.25
+    maximum_portfolio_expected_shortfall_5: -0.25
+    maximum_turnover: 0.35
+    maximum_hhi: 0.15
+    minimum_effective_number_of_holdings: 15
+    maximum_dividend_cut_probability: 0.35
+    maximum_large_drawdown_probability: 0.35
+    maximum_forecast_uncertainty_score: 80
+    maximum_tail_risk_score: 80
+
+  trade_list:
+    min_trade_weight_threshold: 0.0025
+    portfolio_nav_usd_fallback: 100000000
+
+  fallback:
+    use_score_weighted_if_optimisation_fails: true
+    use_equal_weight_if_no_scores: true
