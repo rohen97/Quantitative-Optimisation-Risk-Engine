@@ -1,0 +1,6 @@
+transition_order,from_state,intermediate_state,to_state,min_probability
+1,positive_stable,,governance_risk,1.0
+1,governance_risk,,distress,1.0
+1,distress,,credit_stress,1.0
+2,positive_stable,governance_risk,distress,1.0
+2,governance_risk,distress,credit_stress,1.0

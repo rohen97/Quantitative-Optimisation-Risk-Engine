@@ -7,3 +7,10 @@ mock_data:
   enabled: true
   securities: 24
   price_days: 756
+data_provider:
+  name: mock
+  alpaca:
+    enabled: false
+    env: paper
+    data_feed: iex
+    lookback_days: 756

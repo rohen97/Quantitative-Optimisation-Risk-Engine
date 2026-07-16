@@ -1,0 +1,29 @@
+narrative:
+  enabled: true
+  mode: mock
+  embedding_provider: mock
+  min_concept_confidence: 60
+  min_frame_confidence: 60
+  rolling_windows_days: [7, 30, 90, 180]
+
+  semantic_distance:
+    metric: cosine
+    drift_review_threshold: 75
+    risk_reframing_threshold: 80
+    dividend_risk_threshold: 85
+    credit_stress_threshold: 85
+    regulatory_risk_threshold: 85
+    governance_risk_threshold: 85
+
+  markov:
+    enabled: true
+    transition_orders: [1, 2]
+    min_transition_count: 2
+    distress_probability_threshold: 0.35
+
+  outputs:
+    concepts: reports/outputs/narrative_concepts.csv
+    frames: reports/outputs/narrative_frames.csv
+    semantic_distances: reports/outputs/narrative_semantic_distances.csv
+    markov_transitions: reports/outputs/narrative_markov_transitions.csv
+    features: reports/outputs/narrative_reframing_features.csv

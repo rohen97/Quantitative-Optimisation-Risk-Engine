@@ -1,0 +1,13 @@
+regime_type,from_regime,to_regime,transition_probability,transition_count,window_days,regime_persistence_score,regime_switch_probability,regime_deterioration_transition_probability
+factor,crisis,walking_on_ice,0.2,1,180,20.0,0.8,0.0
+factor,walking_on_ice,inflation,1.0,1,180,100.0,0.0,0.0
+factor,inflation,steady_state,0.5714285714285714,4,180,57.14285714285714,0.4285714285714286,0.0
+factor,steady_state,inflation,0.4,4,180,40.0,0.6,0.0
+factor,inflation,crisis,0.14285714285714285,1,180,14.285714285714285,0.8571428571428572,0.14285714285714285
+factor,crisis,steady_state,0.6,3,180,60.0,0.4,0.0
+factor,steady_state,steady_state,0.4,4,180,40.0,0.6,0.0
+factor,steady_state,crisis,0.2,2,180,20.0,0.8,0.2
+factor,crisis,crisis,0.2,1,180,20.0,0.8,0.2
+factor,inflation,inflation,0.2857142857142857,2,180,28.57142857142857,0.7142857142857143,0.0
+chaos,intermediate_chaos,intermediate_chaos,1.0,1,180,100.0,0.0,0.0
+fused,steady_state_low_chaos,steady_state_low_chaos,1.0,1,180,100.0,0.0,0.0

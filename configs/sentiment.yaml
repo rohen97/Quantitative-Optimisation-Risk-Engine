@@ -1,0 +1,7 @@
+sentiment:
+  mode: mock
+  enabled: true
+  model_name: rule_based_financial_sentiment
+  model_version: v0.1
+  min_entity_confidence: 0.70
+  rolling_windows_days: [7, 30, 90]

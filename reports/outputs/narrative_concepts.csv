@@ -1,0 +1,641 @@
+document_id,security_id,ticker,concept_id,concept_text,concept_category,concept_polarity,concept_severity,concept_confidence,publication_timestamp,source_type
+NARR-001-1,WOLF001,WLF001,NARR-001-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-resilient_demand,resilient demand,demand,positive,35,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-margin_expansion,margin expansion,margin,positive,35,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-guidance_raised,guidance raised,guidance,positive,40,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-share_buyback,share buyback,buyback,positive,35,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-major_contract_win,major contract win,order_book,positive,40,80,2026-07-16,news
+NARR-001-1,WOLF001,WLF001,NARR-001-1-pricing_power,pricing power,pricing_power,positive,35,80,2026-07-16,news
+NARR-001-2,WOLF001,WLF001,NARR-001-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-06-25,news
+NARR-001-2,WOLF001,WLF001,NARR-001-2-annual_report_released,annual report released,growth,neutral,20,80,2026-06-25,news
+NARR-001-2,WOLF001,WLF001,NARR-001-2-board_meeting_update,board meeting update,management,neutral,20,80,2026-06-25,news
+NARR-001-2,WOLF001,WLF001,NARR-001-2-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-06-25,news
+NARR-001-3,WOLF001,WLF001,NARR-001-3-weak_demand,weak demand,demand,negative,70,80,2026-06-04,analyst_commentary
+NARR-001-3,WOLF001,WLF001,NARR-001-3-margin_pressure,margin pressure,margin,negative,70,80,2026-06-04,analyst_commentary
+NARR-001-3,WOLF001,WLF001,NARR-001-3-guidance_cut,guidance cut,guidance,negative,75,80,2026-06-04,analyst_commentary
+NARR-001-3,WOLF001,WLF001,NARR-001-3-profit_warning,profit warning,profit_warning,negative,85,80,2026-06-04,analyst_commentary
+NARR-001-3,WOLF001,WLF001,NARR-001-3-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-06-04,analyst_commentary
+NARR-001-4,WOLF001,WLF001,NARR-001-4-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-05-14,news
+NARR-001-4,WOLF001,WLF001,NARR-001-4-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-05-14,news
+NARR-001-4,WOLF001,WLF001,NARR-001-4-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-05-14,news
+NARR-001-4,WOLF001,WLF001,NARR-001-4-impairment,impairment,impairment,negative,75,80,2026-05-14,news
+NARR-001-4,WOLF001,WLF001,NARR-001-4-distress,distress,distress,negative,90,80,2026-05-14,news
+NARR-001-5,WOLF001,WLF001,NARR-001-5-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-04-23,news
+NARR-001-5,WOLF001,WLF001,NARR-001-5-litigation_risk,litigation risk,litigation,negative,80,80,2026-04-23,news
+NARR-001-5,WOLF001,WLF001,NARR-001-5-governance_concern,governance concern,governance,negative,85,80,2026-04-23,news
+NARR-001-5,WOLF001,WLF001,NARR-001-5-management_resignation,management resignation,management,negative,75,80,2026-04-23,news
+NARR-002-1,WOLF002,WLF002,NARR-002-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-07-11,news
+NARR-002-1,WOLF002,WLF002,NARR-002-1-annual_report_released,annual report released,growth,neutral,20,80,2026-07-11,news
+NARR-002-1,WOLF002,WLF002,NARR-002-1-board_meeting_update,board meeting update,management,neutral,20,80,2026-07-11,news
+NARR-002-1,WOLF002,WLF002,NARR-002-1-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-07-11,news
+NARR-002-2,WOLF002,WLF002,NARR-002-2-weak_demand,weak demand,demand,negative,70,80,2026-06-20,analyst_commentary
+NARR-002-2,WOLF002,WLF002,NARR-002-2-margin_pressure,margin pressure,margin,negative,70,80,2026-06-20,analyst_commentary
+NARR-002-2,WOLF002,WLF002,NARR-002-2-guidance_cut,guidance cut,guidance,negative,75,80,2026-06-20,analyst_commentary
+NARR-002-2,WOLF002,WLF002,NARR-002-2-profit_warning,profit warning,profit_warning,negative,85,80,2026-06-20,analyst_commentary
+NARR-002-2,WOLF002,WLF002,NARR-002-2-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-06-20,analyst_commentary
+NARR-002-3,WOLF002,WLF002,NARR-002-3-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-05-30,news
+NARR-002-3,WOLF002,WLF002,NARR-002-3-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-05-30,news
+NARR-002-3,WOLF002,WLF002,NARR-002-3-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-05-30,news
+NARR-002-3,WOLF002,WLF002,NARR-002-3-impairment,impairment,impairment,negative,75,80,2026-05-30,news
+NARR-002-3,WOLF002,WLF002,NARR-002-3-distress,distress,distress,negative,90,80,2026-05-30,news
+NARR-002-4,WOLF002,WLF002,NARR-002-4-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-05-09,news
+NARR-002-4,WOLF002,WLF002,NARR-002-4-litigation_risk,litigation risk,litigation,negative,80,80,2026-05-09,news
+NARR-002-4,WOLF002,WLF002,NARR-002-4-governance_concern,governance concern,governance,negative,85,80,2026-05-09,news
+NARR-002-4,WOLF002,WLF002,NARR-002-4-management_resignation,management resignation,management,negative,75,80,2026-05-09,news
+NARR-002-5,WOLF002,WLF002,NARR-002-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-18,news
+NARR-002-5,WOLF002,WLF002,NARR-002-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-18,news
+NARR-002-5,WOLF002,WLF002,NARR-002-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-18,news
+NARR-002-5,WOLF002,WLF002,NARR-002-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-18,news
+NARR-002-5,WOLF002,WLF002,NARR-002-5-deleveraging,deleveraging,debt,positive,35,80,2026-04-18,news
+NARR-003-1,WOLF003,WLF003,NARR-003-1-weak_demand,weak demand,demand,negative,70,80,2026-07-06,analyst_commentary
+NARR-003-1,WOLF003,WLF003,NARR-003-1-margin_pressure,margin pressure,margin,negative,70,80,2026-07-06,analyst_commentary
+NARR-003-1,WOLF003,WLF003,NARR-003-1-guidance_cut,guidance cut,guidance,negative,75,80,2026-07-06,analyst_commentary
+NARR-003-1,WOLF003,WLF003,NARR-003-1-profit_warning,profit warning,profit_warning,negative,85,80,2026-07-06,analyst_commentary
+NARR-003-1,WOLF003,WLF003,NARR-003-1-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-07-06,analyst_commentary
+NARR-003-2,WOLF003,WLF003,NARR-003-2-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-06-15,news
+NARR-003-2,WOLF003,WLF003,NARR-003-2-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-06-15,news
+NARR-003-2,WOLF003,WLF003,NARR-003-2-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-06-15,news
+NARR-003-2,WOLF003,WLF003,NARR-003-2-impairment,impairment,impairment,negative,75,80,2026-06-15,news
+NARR-003-2,WOLF003,WLF003,NARR-003-2-distress,distress,distress,negative,90,80,2026-06-15,news
+NARR-003-3,WOLF003,WLF003,NARR-003-3-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-05-25,news
+NARR-003-3,WOLF003,WLF003,NARR-003-3-litigation_risk,litigation risk,litigation,negative,80,80,2026-05-25,news
+NARR-003-3,WOLF003,WLF003,NARR-003-3-governance_concern,governance concern,governance,negative,85,80,2026-05-25,news
+NARR-003-3,WOLF003,WLF003,NARR-003-3-management_resignation,management resignation,management,negative,75,80,2026-05-25,news
+NARR-003-4,WOLF003,WLF003,NARR-003-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-04,news
+NARR-003-4,WOLF003,WLF003,NARR-003-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-04,news
+NARR-003-4,WOLF003,WLF003,NARR-003-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-04,news
+NARR-003-4,WOLF003,WLF003,NARR-003-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-04,news
+NARR-003-4,WOLF003,WLF003,NARR-003-4-deleveraging,deleveraging,debt,positive,35,80,2026-05-04,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-resilient_demand,resilient demand,demand,positive,35,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-margin_expansion,margin expansion,margin,positive,35,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-guidance_raised,guidance raised,guidance,positive,40,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-share_buyback,share buyback,buyback,positive,35,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-major_contract_win,major contract win,order_book,positive,40,80,2026-04-13,news
+NARR-003-5,WOLF003,WLF003,NARR-003-5-pricing_power,pricing power,pricing_power,positive,35,80,2026-04-13,news
+NARR-004-1,WOLF004,WLF004,NARR-004-1-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-07-01,news
+NARR-004-1,WOLF004,WLF004,NARR-004-1-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-07-01,news
+NARR-004-1,WOLF004,WLF004,NARR-004-1-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-07-01,news
+NARR-004-1,WOLF004,WLF004,NARR-004-1-impairment,impairment,impairment,negative,75,80,2026-07-01,news
+NARR-004-1,WOLF004,WLF004,NARR-004-1-distress,distress,distress,negative,90,80,2026-07-01,news
+NARR-004-2,WOLF004,WLF004,NARR-004-2-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-06-10,news
+NARR-004-2,WOLF004,WLF004,NARR-004-2-litigation_risk,litigation risk,litigation,negative,80,80,2026-06-10,news
+NARR-004-2,WOLF004,WLF004,NARR-004-2-governance_concern,governance concern,governance,negative,85,80,2026-06-10,news
+NARR-004-2,WOLF004,WLF004,NARR-004-2-management_resignation,management resignation,management,negative,75,80,2026-06-10,news
+NARR-004-3,WOLF004,WLF004,NARR-004-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-20,news
+NARR-004-3,WOLF004,WLF004,NARR-004-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-20,news
+NARR-004-3,WOLF004,WLF004,NARR-004-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-20,news
+NARR-004-3,WOLF004,WLF004,NARR-004-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-20,news
+NARR-004-3,WOLF004,WLF004,NARR-004-3-deleveraging,deleveraging,debt,positive,35,80,2026-05-20,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-resilient_demand,resilient demand,demand,positive,35,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-margin_expansion,margin expansion,margin,positive,35,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-guidance_raised,guidance raised,guidance,positive,40,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-share_buyback,share buyback,buyback,positive,35,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-major_contract_win,major contract win,order_book,positive,40,80,2026-04-29,news
+NARR-004-4,WOLF004,WLF004,NARR-004-4-pricing_power,pricing power,pricing_power,positive,35,80,2026-04-29,news
+NARR-004-5,WOLF004,WLF004,NARR-004-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-08,news
+NARR-004-5,WOLF004,WLF004,NARR-004-5-annual_report_released,annual report released,growth,neutral,20,80,2026-04-08,news
+NARR-004-5,WOLF004,WLF004,NARR-004-5-board_meeting_update,board meeting update,management,neutral,20,80,2026-04-08,news
+NARR-004-5,WOLF004,WLF004,NARR-004-5-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-04-08,news
+NARR-005-1,WOLF005,WLF005,NARR-005-1-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-06-26,news
+NARR-005-1,WOLF005,WLF005,NARR-005-1-litigation_risk,litigation risk,litigation,negative,80,80,2026-06-26,news
+NARR-005-1,WOLF005,WLF005,NARR-005-1-governance_concern,governance concern,governance,negative,85,80,2026-06-26,news
+NARR-005-1,WOLF005,WLF005,NARR-005-1-management_resignation,management resignation,management,negative,75,80,2026-06-26,news
+NARR-005-2,WOLF005,WLF005,NARR-005-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-06-05,news
+NARR-005-2,WOLF005,WLF005,NARR-005-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-06-05,news
+NARR-005-2,WOLF005,WLF005,NARR-005-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-06-05,news
+NARR-005-2,WOLF005,WLF005,NARR-005-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-06-05,news
+NARR-005-2,WOLF005,WLF005,NARR-005-2-deleveraging,deleveraging,debt,positive,35,80,2026-06-05,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-resilient_demand,resilient demand,demand,positive,35,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-margin_expansion,margin expansion,margin,positive,35,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-guidance_raised,guidance raised,guidance,positive,40,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-share_buyback,share buyback,buyback,positive,35,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-major_contract_win,major contract win,order_book,positive,40,80,2026-05-15,news
+NARR-005-3,WOLF005,WLF005,NARR-005-3-pricing_power,pricing power,pricing_power,positive,35,80,2026-05-15,news
+NARR-005-4,WOLF005,WLF005,NARR-005-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-24,news
+NARR-005-4,WOLF005,WLF005,NARR-005-4-annual_report_released,annual report released,growth,neutral,20,80,2026-04-24,news
+NARR-005-4,WOLF005,WLF005,NARR-005-4-board_meeting_update,board meeting update,management,neutral,20,80,2026-04-24,news
+NARR-005-4,WOLF005,WLF005,NARR-005-4-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-04-24,news
+NARR-005-5,WOLF005,WLF005,NARR-005-5-weak_demand,weak demand,demand,negative,70,80,2026-04-03,analyst_commentary
+NARR-005-5,WOLF005,WLF005,NARR-005-5-margin_pressure,margin pressure,margin,negative,70,80,2026-04-03,analyst_commentary
+NARR-005-5,WOLF005,WLF005,NARR-005-5-guidance_cut,guidance cut,guidance,negative,75,80,2026-04-03,analyst_commentary
+NARR-005-5,WOLF005,WLF005,NARR-005-5-profit_warning,profit warning,profit_warning,negative,85,80,2026-04-03,analyst_commentary
+NARR-005-5,WOLF005,WLF005,NARR-005-5-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-04-03,analyst_commentary
+NARR-006-1,WOLF006,WLF006,NARR-006-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-06-21,news
+NARR-006-1,WOLF006,WLF006,NARR-006-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-06-21,news
+NARR-006-1,WOLF006,WLF006,NARR-006-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-06-21,news
+NARR-006-1,WOLF006,WLF006,NARR-006-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-06-21,news
+NARR-006-1,WOLF006,WLF006,NARR-006-1-deleveraging,deleveraging,debt,positive,35,80,2026-06-21,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-resilient_demand,resilient demand,demand,positive,35,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-margin_expansion,margin expansion,margin,positive,35,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-guidance_raised,guidance raised,guidance,positive,40,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-share_buyback,share buyback,buyback,positive,35,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-major_contract_win,major contract win,order_book,positive,40,80,2026-05-31,news
+NARR-006-2,WOLF006,WLF006,NARR-006-2-pricing_power,pricing power,pricing_power,positive,35,80,2026-05-31,news
+NARR-006-3,WOLF006,WLF006,NARR-006-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-10,news
+NARR-006-3,WOLF006,WLF006,NARR-006-3-annual_report_released,annual report released,growth,neutral,20,80,2026-05-10,news
+NARR-006-3,WOLF006,WLF006,NARR-006-3-board_meeting_update,board meeting update,management,neutral,20,80,2026-05-10,news
+NARR-006-3,WOLF006,WLF006,NARR-006-3-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-05-10,news
+NARR-006-4,WOLF006,WLF006,NARR-006-4-weak_demand,weak demand,demand,negative,70,80,2026-04-19,analyst_commentary
+NARR-006-4,WOLF006,WLF006,NARR-006-4-margin_pressure,margin pressure,margin,negative,70,80,2026-04-19,analyst_commentary
+NARR-006-4,WOLF006,WLF006,NARR-006-4-guidance_cut,guidance cut,guidance,negative,75,80,2026-04-19,analyst_commentary
+NARR-006-4,WOLF006,WLF006,NARR-006-4-profit_warning,profit warning,profit_warning,negative,85,80,2026-04-19,analyst_commentary
+NARR-006-4,WOLF006,WLF006,NARR-006-4-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-04-19,analyst_commentary
+NARR-006-5,WOLF006,WLF006,NARR-006-5-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-03-29,news
+NARR-006-5,WOLF006,WLF006,NARR-006-5-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-03-29,news
+NARR-006-5,WOLF006,WLF006,NARR-006-5-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-03-29,news
+NARR-006-5,WOLF006,WLF006,NARR-006-5-impairment,impairment,impairment,negative,75,80,2026-03-29,news
+NARR-006-5,WOLF006,WLF006,NARR-006-5-distress,distress,distress,negative,90,80,2026-03-29,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-resilient_demand,resilient demand,demand,positive,35,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-margin_expansion,margin expansion,margin,positive,35,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-guidance_raised,guidance raised,guidance,positive,40,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-share_buyback,share buyback,buyback,positive,35,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-major_contract_win,major contract win,order_book,positive,40,80,2026-06-16,news
+NARR-007-1,WOLF007,WLF007,NARR-007-1-pricing_power,pricing power,pricing_power,positive,35,80,2026-06-16,news
+NARR-007-2,WOLF007,WLF007,NARR-007-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-26,news
+NARR-007-2,WOLF007,WLF007,NARR-007-2-annual_report_released,annual report released,growth,neutral,20,80,2026-05-26,news
+NARR-007-2,WOLF007,WLF007,NARR-007-2-board_meeting_update,board meeting update,management,neutral,20,80,2026-05-26,news
+NARR-007-2,WOLF007,WLF007,NARR-007-2-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-05-26,news
+NARR-007-3,WOLF007,WLF007,NARR-007-3-weak_demand,weak demand,demand,negative,70,80,2026-05-05,analyst_commentary
+NARR-007-3,WOLF007,WLF007,NARR-007-3-margin_pressure,margin pressure,margin,negative,70,80,2026-05-05,analyst_commentary
+NARR-007-3,WOLF007,WLF007,NARR-007-3-guidance_cut,guidance cut,guidance,negative,75,80,2026-05-05,analyst_commentary
+NARR-007-3,WOLF007,WLF007,NARR-007-3-profit_warning,profit warning,profit_warning,negative,85,80,2026-05-05,analyst_commentary
+NARR-007-3,WOLF007,WLF007,NARR-007-3-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-05-05,analyst_commentary
+NARR-007-4,WOLF007,WLF007,NARR-007-4-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-04-14,news
+NARR-007-4,WOLF007,WLF007,NARR-007-4-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-04-14,news
+NARR-007-4,WOLF007,WLF007,NARR-007-4-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-04-14,news
+NARR-007-4,WOLF007,WLF007,NARR-007-4-impairment,impairment,impairment,negative,75,80,2026-04-14,news
+NARR-007-4,WOLF007,WLF007,NARR-007-4-distress,distress,distress,negative,90,80,2026-04-14,news
+NARR-007-5,WOLF007,WLF007,NARR-007-5-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-03-24,news
+NARR-007-5,WOLF007,WLF007,NARR-007-5-litigation_risk,litigation risk,litigation,negative,80,80,2026-03-24,news
+NARR-007-5,WOLF007,WLF007,NARR-007-5-governance_concern,governance concern,governance,negative,85,80,2026-03-24,news
+NARR-007-5,WOLF007,WLF007,NARR-007-5-management_resignation,management resignation,management,negative,75,80,2026-03-24,news
+NARR-008-1,WOLF008,WLF008,NARR-008-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-06-11,news
+NARR-008-1,WOLF008,WLF008,NARR-008-1-annual_report_released,annual report released,growth,neutral,20,80,2026-06-11,news
+NARR-008-1,WOLF008,WLF008,NARR-008-1-board_meeting_update,board meeting update,management,neutral,20,80,2026-06-11,news
+NARR-008-1,WOLF008,WLF008,NARR-008-1-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-06-11,news
+NARR-008-2,WOLF008,WLF008,NARR-008-2-weak_demand,weak demand,demand,negative,70,80,2026-05-21,analyst_commentary
+NARR-008-2,WOLF008,WLF008,NARR-008-2-margin_pressure,margin pressure,margin,negative,70,80,2026-05-21,analyst_commentary
+NARR-008-2,WOLF008,WLF008,NARR-008-2-guidance_cut,guidance cut,guidance,negative,75,80,2026-05-21,analyst_commentary
+NARR-008-2,WOLF008,WLF008,NARR-008-2-profit_warning,profit warning,profit_warning,negative,85,80,2026-05-21,analyst_commentary
+NARR-008-2,WOLF008,WLF008,NARR-008-2-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-05-21,analyst_commentary
+NARR-008-3,WOLF008,WLF008,NARR-008-3-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-04-30,news
+NARR-008-3,WOLF008,WLF008,NARR-008-3-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-04-30,news
+NARR-008-3,WOLF008,WLF008,NARR-008-3-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-04-30,news
+NARR-008-3,WOLF008,WLF008,NARR-008-3-impairment,impairment,impairment,negative,75,80,2026-04-30,news
+NARR-008-3,WOLF008,WLF008,NARR-008-3-distress,distress,distress,negative,90,80,2026-04-30,news
+NARR-008-4,WOLF008,WLF008,NARR-008-4-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-04-09,news
+NARR-008-4,WOLF008,WLF008,NARR-008-4-litigation_risk,litigation risk,litigation,negative,80,80,2026-04-09,news
+NARR-008-4,WOLF008,WLF008,NARR-008-4-governance_concern,governance concern,governance,negative,85,80,2026-04-09,news
+NARR-008-4,WOLF008,WLF008,NARR-008-4-management_resignation,management resignation,management,negative,75,80,2026-04-09,news
+NARR-008-5,WOLF008,WLF008,NARR-008-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-19,news
+NARR-008-5,WOLF008,WLF008,NARR-008-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-19,news
+NARR-008-5,WOLF008,WLF008,NARR-008-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-19,news
+NARR-008-5,WOLF008,WLF008,NARR-008-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-19,news
+NARR-008-5,WOLF008,WLF008,NARR-008-5-deleveraging,deleveraging,debt,positive,35,80,2026-03-19,news
+NARR-009-1,WOLF009,WLF009,NARR-009-1-weak_demand,weak demand,demand,negative,70,80,2026-06-06,analyst_commentary
+NARR-009-1,WOLF009,WLF009,NARR-009-1-margin_pressure,margin pressure,margin,negative,70,80,2026-06-06,analyst_commentary
+NARR-009-1,WOLF009,WLF009,NARR-009-1-guidance_cut,guidance cut,guidance,negative,75,80,2026-06-06,analyst_commentary
+NARR-009-1,WOLF009,WLF009,NARR-009-1-profit_warning,profit warning,profit_warning,negative,85,80,2026-06-06,analyst_commentary
+NARR-009-1,WOLF009,WLF009,NARR-009-1-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-06-06,analyst_commentary
+NARR-009-2,WOLF009,WLF009,NARR-009-2-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-05-16,news
+NARR-009-2,WOLF009,WLF009,NARR-009-2-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-05-16,news
+NARR-009-2,WOLF009,WLF009,NARR-009-2-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-05-16,news
+NARR-009-2,WOLF009,WLF009,NARR-009-2-impairment,impairment,impairment,negative,75,80,2026-05-16,news
+NARR-009-2,WOLF009,WLF009,NARR-009-2-distress,distress,distress,negative,90,80,2026-05-16,news
+NARR-009-3,WOLF009,WLF009,NARR-009-3-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-04-25,news
+NARR-009-3,WOLF009,WLF009,NARR-009-3-litigation_risk,litigation risk,litigation,negative,80,80,2026-04-25,news
+NARR-009-3,WOLF009,WLF009,NARR-009-3-governance_concern,governance concern,governance,negative,85,80,2026-04-25,news
+NARR-009-3,WOLF009,WLF009,NARR-009-3-management_resignation,management resignation,management,negative,75,80,2026-04-25,news
+NARR-009-4,WOLF009,WLF009,NARR-009-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-04,news
+NARR-009-4,WOLF009,WLF009,NARR-009-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-04,news
+NARR-009-4,WOLF009,WLF009,NARR-009-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-04,news
+NARR-009-4,WOLF009,WLF009,NARR-009-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-04,news
+NARR-009-4,WOLF009,WLF009,NARR-009-4-deleveraging,deleveraging,debt,positive,35,80,2026-04-04,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-resilient_demand,resilient demand,demand,positive,35,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-margin_expansion,margin expansion,margin,positive,35,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-guidance_raised,guidance raised,guidance,positive,40,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-share_buyback,share buyback,buyback,positive,35,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-major_contract_win,major contract win,order_book,positive,40,80,2026-03-14,news
+NARR-009-5,WOLF009,WLF009,NARR-009-5-pricing_power,pricing power,pricing_power,positive,35,80,2026-03-14,news
+NARR-010-1,WOLF010,WLF010,NARR-010-1-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-06-01,news
+NARR-010-1,WOLF010,WLF010,NARR-010-1-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-06-01,news
+NARR-010-1,WOLF010,WLF010,NARR-010-1-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-06-01,news
+NARR-010-1,WOLF010,WLF010,NARR-010-1-impairment,impairment,impairment,negative,75,80,2026-06-01,news
+NARR-010-1,WOLF010,WLF010,NARR-010-1-distress,distress,distress,negative,90,80,2026-06-01,news
+NARR-010-2,WOLF010,WLF010,NARR-010-2-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-05-11,news
+NARR-010-2,WOLF010,WLF010,NARR-010-2-litigation_risk,litigation risk,litigation,negative,80,80,2026-05-11,news
+NARR-010-2,WOLF010,WLF010,NARR-010-2-governance_concern,governance concern,governance,negative,85,80,2026-05-11,news
+NARR-010-2,WOLF010,WLF010,NARR-010-2-management_resignation,management resignation,management,negative,75,80,2026-05-11,news
+NARR-010-3,WOLF010,WLF010,NARR-010-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-20,news
+NARR-010-3,WOLF010,WLF010,NARR-010-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-20,news
+NARR-010-3,WOLF010,WLF010,NARR-010-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-20,news
+NARR-010-3,WOLF010,WLF010,NARR-010-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-20,news
+NARR-010-3,WOLF010,WLF010,NARR-010-3-deleveraging,deleveraging,debt,positive,35,80,2026-04-20,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-resilient_demand,resilient demand,demand,positive,35,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-margin_expansion,margin expansion,margin,positive,35,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-guidance_raised,guidance raised,guidance,positive,40,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-share_buyback,share buyback,buyback,positive,35,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-major_contract_win,major contract win,order_book,positive,40,80,2026-03-30,news
+NARR-010-4,WOLF010,WLF010,NARR-010-4-pricing_power,pricing power,pricing_power,positive,35,80,2026-03-30,news
+NARR-010-5,WOLF010,WLF010,NARR-010-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-09,news
+NARR-010-5,WOLF010,WLF010,NARR-010-5-annual_report_released,annual report released,growth,neutral,20,80,2026-03-09,news
+NARR-010-5,WOLF010,WLF010,NARR-010-5-board_meeting_update,board meeting update,management,neutral,20,80,2026-03-09,news
+NARR-010-5,WOLF010,WLF010,NARR-010-5-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-03-09,news
+NARR-011-1,WOLF011,WLF011,NARR-011-1-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-05-27,news
+NARR-011-1,WOLF011,WLF011,NARR-011-1-litigation_risk,litigation risk,litigation,negative,80,80,2026-05-27,news
+NARR-011-1,WOLF011,WLF011,NARR-011-1-governance_concern,governance concern,governance,negative,85,80,2026-05-27,news
+NARR-011-1,WOLF011,WLF011,NARR-011-1-management_resignation,management resignation,management,negative,75,80,2026-05-27,news
+NARR-011-2,WOLF011,WLF011,NARR-011-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-06,news
+NARR-011-2,WOLF011,WLF011,NARR-011-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-06,news
+NARR-011-2,WOLF011,WLF011,NARR-011-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-06,news
+NARR-011-2,WOLF011,WLF011,NARR-011-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-06,news
+NARR-011-2,WOLF011,WLF011,NARR-011-2-deleveraging,deleveraging,debt,positive,35,80,2026-05-06,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-resilient_demand,resilient demand,demand,positive,35,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-margin_expansion,margin expansion,margin,positive,35,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-guidance_raised,guidance raised,guidance,positive,40,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-share_buyback,share buyback,buyback,positive,35,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-major_contract_win,major contract win,order_book,positive,40,80,2026-04-15,news
+NARR-011-3,WOLF011,WLF011,NARR-011-3-pricing_power,pricing power,pricing_power,positive,35,80,2026-04-15,news
+NARR-011-4,WOLF011,WLF011,NARR-011-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-25,news
+NARR-011-4,WOLF011,WLF011,NARR-011-4-annual_report_released,annual report released,growth,neutral,20,80,2026-03-25,news
+NARR-011-4,WOLF011,WLF011,NARR-011-4-board_meeting_update,board meeting update,management,neutral,20,80,2026-03-25,news
+NARR-011-4,WOLF011,WLF011,NARR-011-4-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-03-25,news
+NARR-011-5,WOLF011,WLF011,NARR-011-5-weak_demand,weak demand,demand,negative,70,80,2026-03-04,analyst_commentary
+NARR-011-5,WOLF011,WLF011,NARR-011-5-margin_pressure,margin pressure,margin,negative,70,80,2026-03-04,analyst_commentary
+NARR-011-5,WOLF011,WLF011,NARR-011-5-guidance_cut,guidance cut,guidance,negative,75,80,2026-03-04,analyst_commentary
+NARR-011-5,WOLF011,WLF011,NARR-011-5-profit_warning,profit warning,profit_warning,negative,85,80,2026-03-04,analyst_commentary
+NARR-011-5,WOLF011,WLF011,NARR-011-5-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-03-04,analyst_commentary
+NARR-012-1,WOLF012,WLF012,NARR-012-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-22,news
+NARR-012-1,WOLF012,WLF012,NARR-012-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-22,news
+NARR-012-1,WOLF012,WLF012,NARR-012-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-22,news
+NARR-012-1,WOLF012,WLF012,NARR-012-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-22,news
+NARR-012-1,WOLF012,WLF012,NARR-012-1-deleveraging,deleveraging,debt,positive,35,80,2026-05-22,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-resilient_demand,resilient demand,demand,positive,35,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-margin_expansion,margin expansion,margin,positive,35,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-guidance_raised,guidance raised,guidance,positive,40,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-share_buyback,share buyback,buyback,positive,35,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-major_contract_win,major contract win,order_book,positive,40,80,2026-05-01,news
+NARR-012-2,WOLF012,WLF012,NARR-012-2-pricing_power,pricing power,pricing_power,positive,35,80,2026-05-01,news
+NARR-012-3,WOLF012,WLF012,NARR-012-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-10,news
+NARR-012-3,WOLF012,WLF012,NARR-012-3-annual_report_released,annual report released,growth,neutral,20,80,2026-04-10,news
+NARR-012-3,WOLF012,WLF012,NARR-012-3-board_meeting_update,board meeting update,management,neutral,20,80,2026-04-10,news
+NARR-012-3,WOLF012,WLF012,NARR-012-3-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-04-10,news
+NARR-012-4,WOLF012,WLF012,NARR-012-4-weak_demand,weak demand,demand,negative,70,80,2026-03-20,analyst_commentary
+NARR-012-4,WOLF012,WLF012,NARR-012-4-margin_pressure,margin pressure,margin,negative,70,80,2026-03-20,analyst_commentary
+NARR-012-4,WOLF012,WLF012,NARR-012-4-guidance_cut,guidance cut,guidance,negative,75,80,2026-03-20,analyst_commentary
+NARR-012-4,WOLF012,WLF012,NARR-012-4-profit_warning,profit warning,profit_warning,negative,85,80,2026-03-20,analyst_commentary
+NARR-012-4,WOLF012,WLF012,NARR-012-4-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-03-20,analyst_commentary
+NARR-012-5,WOLF012,WLF012,NARR-012-5-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-02-27,news
+NARR-012-5,WOLF012,WLF012,NARR-012-5-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-02-27,news
+NARR-012-5,WOLF012,WLF012,NARR-012-5-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-02-27,news
+NARR-012-5,WOLF012,WLF012,NARR-012-5-impairment,impairment,impairment,negative,75,80,2026-02-27,news
+NARR-012-5,WOLF012,WLF012,NARR-012-5-distress,distress,distress,negative,90,80,2026-02-27,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-resilient_demand,resilient demand,demand,positive,35,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-margin_expansion,margin expansion,margin,positive,35,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-guidance_raised,guidance raised,guidance,positive,40,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-share_buyback,share buyback,buyback,positive,35,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-major_contract_win,major contract win,order_book,positive,40,80,2026-05-17,news
+NARR-013-1,WOLF013,WLF013,NARR-013-1-pricing_power,pricing power,pricing_power,positive,35,80,2026-05-17,news
+NARR-013-2,WOLF013,WLF013,NARR-013-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-26,news
+NARR-013-2,WOLF013,WLF013,NARR-013-2-annual_report_released,annual report released,growth,neutral,20,80,2026-04-26,news
+NARR-013-2,WOLF013,WLF013,NARR-013-2-board_meeting_update,board meeting update,management,neutral,20,80,2026-04-26,news
+NARR-013-2,WOLF013,WLF013,NARR-013-2-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-04-26,news
+NARR-013-3,WOLF013,WLF013,NARR-013-3-weak_demand,weak demand,demand,negative,70,80,2026-04-05,analyst_commentary
+NARR-013-3,WOLF013,WLF013,NARR-013-3-margin_pressure,margin pressure,margin,negative,70,80,2026-04-05,analyst_commentary
+NARR-013-3,WOLF013,WLF013,NARR-013-3-guidance_cut,guidance cut,guidance,negative,75,80,2026-04-05,analyst_commentary
+NARR-013-3,WOLF013,WLF013,NARR-013-3-profit_warning,profit warning,profit_warning,negative,85,80,2026-04-05,analyst_commentary
+NARR-013-3,WOLF013,WLF013,NARR-013-3-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-04-05,analyst_commentary
+NARR-013-4,WOLF013,WLF013,NARR-013-4-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-03-15,news
+NARR-013-4,WOLF013,WLF013,NARR-013-4-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-03-15,news
+NARR-013-4,WOLF013,WLF013,NARR-013-4-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-03-15,news
+NARR-013-4,WOLF013,WLF013,NARR-013-4-impairment,impairment,impairment,negative,75,80,2026-03-15,news
+NARR-013-4,WOLF013,WLF013,NARR-013-4-distress,distress,distress,negative,90,80,2026-03-15,news
+NARR-013-5,WOLF013,WLF013,NARR-013-5-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-02-22,news
+NARR-013-5,WOLF013,WLF013,NARR-013-5-litigation_risk,litigation risk,litigation,negative,80,80,2026-02-22,news
+NARR-013-5,WOLF013,WLF013,NARR-013-5-governance_concern,governance concern,governance,negative,85,80,2026-02-22,news
+NARR-013-5,WOLF013,WLF013,NARR-013-5-management_resignation,management resignation,management,negative,75,80,2026-02-22,news
+NARR-014-1,WOLF014,WLF014,NARR-014-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-05-12,news
+NARR-014-1,WOLF014,WLF014,NARR-014-1-annual_report_released,annual report released,growth,neutral,20,80,2026-05-12,news
+NARR-014-1,WOLF014,WLF014,NARR-014-1-board_meeting_update,board meeting update,management,neutral,20,80,2026-05-12,news
+NARR-014-1,WOLF014,WLF014,NARR-014-1-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-05-12,news
+NARR-014-2,WOLF014,WLF014,NARR-014-2-weak_demand,weak demand,demand,negative,70,80,2026-04-21,analyst_commentary
+NARR-014-2,WOLF014,WLF014,NARR-014-2-margin_pressure,margin pressure,margin,negative,70,80,2026-04-21,analyst_commentary
+NARR-014-2,WOLF014,WLF014,NARR-014-2-guidance_cut,guidance cut,guidance,negative,75,80,2026-04-21,analyst_commentary
+NARR-014-2,WOLF014,WLF014,NARR-014-2-profit_warning,profit warning,profit_warning,negative,85,80,2026-04-21,analyst_commentary
+NARR-014-2,WOLF014,WLF014,NARR-014-2-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-04-21,analyst_commentary
+NARR-014-3,WOLF014,WLF014,NARR-014-3-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-03-31,news
+NARR-014-3,WOLF014,WLF014,NARR-014-3-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-03-31,news
+NARR-014-3,WOLF014,WLF014,NARR-014-3-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-03-31,news
+NARR-014-3,WOLF014,WLF014,NARR-014-3-impairment,impairment,impairment,negative,75,80,2026-03-31,news
+NARR-014-3,WOLF014,WLF014,NARR-014-3-distress,distress,distress,negative,90,80,2026-03-31,news
+NARR-014-4,WOLF014,WLF014,NARR-014-4-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-03-10,news
+NARR-014-4,WOLF014,WLF014,NARR-014-4-litigation_risk,litigation risk,litigation,negative,80,80,2026-03-10,news
+NARR-014-4,WOLF014,WLF014,NARR-014-4-governance_concern,governance concern,governance,negative,85,80,2026-03-10,news
+NARR-014-4,WOLF014,WLF014,NARR-014-4-management_resignation,management resignation,management,negative,75,80,2026-03-10,news
+NARR-014-5,WOLF014,WLF014,NARR-014-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-17,news
+NARR-014-5,WOLF014,WLF014,NARR-014-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-17,news
+NARR-014-5,WOLF014,WLF014,NARR-014-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-17,news
+NARR-014-5,WOLF014,WLF014,NARR-014-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-17,news
+NARR-014-5,WOLF014,WLF014,NARR-014-5-deleveraging,deleveraging,debt,positive,35,80,2026-02-17,news
+NARR-015-1,WOLF015,WLF015,NARR-015-1-weak_demand,weak demand,demand,negative,70,80,2026-05-07,analyst_commentary
+NARR-015-1,WOLF015,WLF015,NARR-015-1-margin_pressure,margin pressure,margin,negative,70,80,2026-05-07,analyst_commentary
+NARR-015-1,WOLF015,WLF015,NARR-015-1-guidance_cut,guidance cut,guidance,negative,75,80,2026-05-07,analyst_commentary
+NARR-015-1,WOLF015,WLF015,NARR-015-1-profit_warning,profit warning,profit_warning,negative,85,80,2026-05-07,analyst_commentary
+NARR-015-1,WOLF015,WLF015,NARR-015-1-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-05-07,analyst_commentary
+NARR-015-2,WOLF015,WLF015,NARR-015-2-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-04-16,news
+NARR-015-2,WOLF015,WLF015,NARR-015-2-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-04-16,news
+NARR-015-2,WOLF015,WLF015,NARR-015-2-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-04-16,news
+NARR-015-2,WOLF015,WLF015,NARR-015-2-impairment,impairment,impairment,negative,75,80,2026-04-16,news
+NARR-015-2,WOLF015,WLF015,NARR-015-2-distress,distress,distress,negative,90,80,2026-04-16,news
+NARR-015-3,WOLF015,WLF015,NARR-015-3-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-03-26,news
+NARR-015-3,WOLF015,WLF015,NARR-015-3-litigation_risk,litigation risk,litigation,negative,80,80,2026-03-26,news
+NARR-015-3,WOLF015,WLF015,NARR-015-3-governance_concern,governance concern,governance,negative,85,80,2026-03-26,news
+NARR-015-3,WOLF015,WLF015,NARR-015-3-management_resignation,management resignation,management,negative,75,80,2026-03-26,news
+NARR-015-4,WOLF015,WLF015,NARR-015-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-05,news
+NARR-015-4,WOLF015,WLF015,NARR-015-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-05,news
+NARR-015-4,WOLF015,WLF015,NARR-015-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-05,news
+NARR-015-4,WOLF015,WLF015,NARR-015-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-05,news
+NARR-015-4,WOLF015,WLF015,NARR-015-4-deleveraging,deleveraging,debt,positive,35,80,2026-03-05,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-resilient_demand,resilient demand,demand,positive,35,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-margin_expansion,margin expansion,margin,positive,35,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-guidance_raised,guidance raised,guidance,positive,40,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-share_buyback,share buyback,buyback,positive,35,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-major_contract_win,major contract win,order_book,positive,40,80,2026-02-12,news
+NARR-015-5,WOLF015,WLF015,NARR-015-5-pricing_power,pricing power,pricing_power,positive,35,80,2026-02-12,news
+NARR-016-1,WOLF016,WLF016,NARR-016-1-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-05-02,news
+NARR-016-1,WOLF016,WLF016,NARR-016-1-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-05-02,news
+NARR-016-1,WOLF016,WLF016,NARR-016-1-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-05-02,news
+NARR-016-1,WOLF016,WLF016,NARR-016-1-impairment,impairment,impairment,negative,75,80,2026-05-02,news
+NARR-016-1,WOLF016,WLF016,NARR-016-1-distress,distress,distress,negative,90,80,2026-05-02,news
+NARR-016-2,WOLF016,WLF016,NARR-016-2-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-04-11,news
+NARR-016-2,WOLF016,WLF016,NARR-016-2-litigation_risk,litigation risk,litigation,negative,80,80,2026-04-11,news
+NARR-016-2,WOLF016,WLF016,NARR-016-2-governance_concern,governance concern,governance,negative,85,80,2026-04-11,news
+NARR-016-2,WOLF016,WLF016,NARR-016-2-management_resignation,management resignation,management,negative,75,80,2026-04-11,news
+NARR-016-3,WOLF016,WLF016,NARR-016-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-21,news
+NARR-016-3,WOLF016,WLF016,NARR-016-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-21,news
+NARR-016-3,WOLF016,WLF016,NARR-016-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-21,news
+NARR-016-3,WOLF016,WLF016,NARR-016-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-21,news
+NARR-016-3,WOLF016,WLF016,NARR-016-3-deleveraging,deleveraging,debt,positive,35,80,2026-03-21,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-resilient_demand,resilient demand,demand,positive,35,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-margin_expansion,margin expansion,margin,positive,35,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-guidance_raised,guidance raised,guidance,positive,40,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-share_buyback,share buyback,buyback,positive,35,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-major_contract_win,major contract win,order_book,positive,40,80,2026-02-28,news
+NARR-016-4,WOLF016,WLF016,NARR-016-4-pricing_power,pricing power,pricing_power,positive,35,80,2026-02-28,news
+NARR-016-5,WOLF016,WLF016,NARR-016-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-07,news
+NARR-016-5,WOLF016,WLF016,NARR-016-5-annual_report_released,annual report released,growth,neutral,20,80,2026-02-07,news
+NARR-016-5,WOLF016,WLF016,NARR-016-5-board_meeting_update,board meeting update,management,neutral,20,80,2026-02-07,news
+NARR-016-5,WOLF016,WLF016,NARR-016-5-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-02-07,news
+NARR-017-1,WOLF017,WLF017,NARR-017-1-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-04-27,news
+NARR-017-1,WOLF017,WLF017,NARR-017-1-litigation_risk,litigation risk,litigation,negative,80,80,2026-04-27,news
+NARR-017-1,WOLF017,WLF017,NARR-017-1-governance_concern,governance concern,governance,negative,85,80,2026-04-27,news
+NARR-017-1,WOLF017,WLF017,NARR-017-1-management_resignation,management resignation,management,negative,75,80,2026-04-27,news
+NARR-017-2,WOLF017,WLF017,NARR-017-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-06,news
+NARR-017-2,WOLF017,WLF017,NARR-017-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-06,news
+NARR-017-2,WOLF017,WLF017,NARR-017-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-06,news
+NARR-017-2,WOLF017,WLF017,NARR-017-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-06,news
+NARR-017-2,WOLF017,WLF017,NARR-017-2-deleveraging,deleveraging,debt,positive,35,80,2026-04-06,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-resilient_demand,resilient demand,demand,positive,35,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-margin_expansion,margin expansion,margin,positive,35,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-guidance_raised,guidance raised,guidance,positive,40,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-share_buyback,share buyback,buyback,positive,35,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-major_contract_win,major contract win,order_book,positive,40,80,2026-03-16,news
+NARR-017-3,WOLF017,WLF017,NARR-017-3-pricing_power,pricing power,pricing_power,positive,35,80,2026-03-16,news
+NARR-017-4,WOLF017,WLF017,NARR-017-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-23,news
+NARR-017-4,WOLF017,WLF017,NARR-017-4-annual_report_released,annual report released,growth,neutral,20,80,2026-02-23,news
+NARR-017-4,WOLF017,WLF017,NARR-017-4-board_meeting_update,board meeting update,management,neutral,20,80,2026-02-23,news
+NARR-017-4,WOLF017,WLF017,NARR-017-4-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-02-23,news
+NARR-017-5,WOLF017,WLF017,NARR-017-5-weak_demand,weak demand,demand,negative,70,80,2026-02-02,analyst_commentary
+NARR-017-5,WOLF017,WLF017,NARR-017-5-margin_pressure,margin pressure,margin,negative,70,80,2026-02-02,analyst_commentary
+NARR-017-5,WOLF017,WLF017,NARR-017-5-guidance_cut,guidance cut,guidance,negative,75,80,2026-02-02,analyst_commentary
+NARR-017-5,WOLF017,WLF017,NARR-017-5-profit_warning,profit warning,profit_warning,negative,85,80,2026-02-02,analyst_commentary
+NARR-017-5,WOLF017,WLF017,NARR-017-5-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-02-02,analyst_commentary
+NARR-018-1,WOLF018,WLF018,NARR-018-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-22,news
+NARR-018-1,WOLF018,WLF018,NARR-018-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-22,news
+NARR-018-1,WOLF018,WLF018,NARR-018-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-22,news
+NARR-018-1,WOLF018,WLF018,NARR-018-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-22,news
+NARR-018-1,WOLF018,WLF018,NARR-018-1-deleveraging,deleveraging,debt,positive,35,80,2026-04-22,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-resilient_demand,resilient demand,demand,positive,35,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-margin_expansion,margin expansion,margin,positive,35,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-guidance_raised,guidance raised,guidance,positive,40,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-share_buyback,share buyback,buyback,positive,35,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-major_contract_win,major contract win,order_book,positive,40,80,2026-04-01,news
+NARR-018-2,WOLF018,WLF018,NARR-018-2-pricing_power,pricing power,pricing_power,positive,35,80,2026-04-01,news
+NARR-018-3,WOLF018,WLF018,NARR-018-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-11,news
+NARR-018-3,WOLF018,WLF018,NARR-018-3-annual_report_released,annual report released,growth,neutral,20,80,2026-03-11,news
+NARR-018-3,WOLF018,WLF018,NARR-018-3-board_meeting_update,board meeting update,management,neutral,20,80,2026-03-11,news
+NARR-018-3,WOLF018,WLF018,NARR-018-3-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-03-11,news
+NARR-018-4,WOLF018,WLF018,NARR-018-4-weak_demand,weak demand,demand,negative,70,80,2026-02-18,analyst_commentary
+NARR-018-4,WOLF018,WLF018,NARR-018-4-margin_pressure,margin pressure,margin,negative,70,80,2026-02-18,analyst_commentary
+NARR-018-4,WOLF018,WLF018,NARR-018-4-guidance_cut,guidance cut,guidance,negative,75,80,2026-02-18,analyst_commentary
+NARR-018-4,WOLF018,WLF018,NARR-018-4-profit_warning,profit warning,profit_warning,negative,85,80,2026-02-18,analyst_commentary
+NARR-018-4,WOLF018,WLF018,NARR-018-4-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-02-18,analyst_commentary
+NARR-018-5,WOLF018,WLF018,NARR-018-5-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-01-28,news
+NARR-018-5,WOLF018,WLF018,NARR-018-5-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-01-28,news
+NARR-018-5,WOLF018,WLF018,NARR-018-5-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-01-28,news
+NARR-018-5,WOLF018,WLF018,NARR-018-5-impairment,impairment,impairment,negative,75,80,2026-01-28,news
+NARR-018-5,WOLF018,WLF018,NARR-018-5-distress,distress,distress,negative,90,80,2026-01-28,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-resilient_demand,resilient demand,demand,positive,35,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-margin_expansion,margin expansion,margin,positive,35,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-guidance_raised,guidance raised,guidance,positive,40,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-share_buyback,share buyback,buyback,positive,35,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-major_contract_win,major contract win,order_book,positive,40,80,2026-04-17,news
+NARR-019-1,WOLF019,WLF019,NARR-019-1-pricing_power,pricing power,pricing_power,positive,35,80,2026-04-17,news
+NARR-019-2,WOLF019,WLF019,NARR-019-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-27,news
+NARR-019-2,WOLF019,WLF019,NARR-019-2-annual_report_released,annual report released,growth,neutral,20,80,2026-03-27,news
+NARR-019-2,WOLF019,WLF019,NARR-019-2-board_meeting_update,board meeting update,management,neutral,20,80,2026-03-27,news
+NARR-019-2,WOLF019,WLF019,NARR-019-2-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-03-27,news
+NARR-019-3,WOLF019,WLF019,NARR-019-3-weak_demand,weak demand,demand,negative,70,80,2026-03-06,analyst_commentary
+NARR-019-3,WOLF019,WLF019,NARR-019-3-margin_pressure,margin pressure,margin,negative,70,80,2026-03-06,analyst_commentary
+NARR-019-3,WOLF019,WLF019,NARR-019-3-guidance_cut,guidance cut,guidance,negative,75,80,2026-03-06,analyst_commentary
+NARR-019-3,WOLF019,WLF019,NARR-019-3-profit_warning,profit warning,profit_warning,negative,85,80,2026-03-06,analyst_commentary
+NARR-019-3,WOLF019,WLF019,NARR-019-3-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-03-06,analyst_commentary
+NARR-019-4,WOLF019,WLF019,NARR-019-4-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-02-13,news
+NARR-019-4,WOLF019,WLF019,NARR-019-4-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-02-13,news
+NARR-019-4,WOLF019,WLF019,NARR-019-4-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-02-13,news
+NARR-019-4,WOLF019,WLF019,NARR-019-4-impairment,impairment,impairment,negative,75,80,2026-02-13,news
+NARR-019-4,WOLF019,WLF019,NARR-019-4-distress,distress,distress,negative,90,80,2026-02-13,news
+NARR-019-5,WOLF019,WLF019,NARR-019-5-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-07-12,news
+NARR-019-5,WOLF019,WLF019,NARR-019-5-litigation_risk,litigation risk,litigation,negative,80,80,2026-07-12,news
+NARR-019-5,WOLF019,WLF019,NARR-019-5-governance_concern,governance concern,governance,negative,85,80,2026-07-12,news
+NARR-019-5,WOLF019,WLF019,NARR-019-5-management_resignation,management resignation,management,negative,75,80,2026-07-12,news
+NARR-020-1,WOLF020,WLF020,NARR-020-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-04-12,news
+NARR-020-1,WOLF020,WLF020,NARR-020-1-annual_report_released,annual report released,growth,neutral,20,80,2026-04-12,news
+NARR-020-1,WOLF020,WLF020,NARR-020-1-board_meeting_update,board meeting update,management,neutral,20,80,2026-04-12,news
+NARR-020-1,WOLF020,WLF020,NARR-020-1-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-04-12,news
+NARR-020-2,WOLF020,WLF020,NARR-020-2-weak_demand,weak demand,demand,negative,70,80,2026-03-22,analyst_commentary
+NARR-020-2,WOLF020,WLF020,NARR-020-2-margin_pressure,margin pressure,margin,negative,70,80,2026-03-22,analyst_commentary
+NARR-020-2,WOLF020,WLF020,NARR-020-2-guidance_cut,guidance cut,guidance,negative,75,80,2026-03-22,analyst_commentary
+NARR-020-2,WOLF020,WLF020,NARR-020-2-profit_warning,profit warning,profit_warning,negative,85,80,2026-03-22,analyst_commentary
+NARR-020-2,WOLF020,WLF020,NARR-020-2-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-03-22,analyst_commentary
+NARR-020-3,WOLF020,WLF020,NARR-020-3-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-03-01,news
+NARR-020-3,WOLF020,WLF020,NARR-020-3-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-03-01,news
+NARR-020-3,WOLF020,WLF020,NARR-020-3-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-03-01,news
+NARR-020-3,WOLF020,WLF020,NARR-020-3-impairment,impairment,impairment,negative,75,80,2026-03-01,news
+NARR-020-3,WOLF020,WLF020,NARR-020-3-distress,distress,distress,negative,90,80,2026-03-01,news
+NARR-020-4,WOLF020,WLF020,NARR-020-4-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-02-08,news
+NARR-020-4,WOLF020,WLF020,NARR-020-4-litigation_risk,litigation risk,litigation,negative,80,80,2026-02-08,news
+NARR-020-4,WOLF020,WLF020,NARR-020-4-governance_concern,governance concern,governance,negative,85,80,2026-02-08,news
+NARR-020-4,WOLF020,WLF020,NARR-020-4-management_resignation,management resignation,management,negative,75,80,2026-02-08,news
+NARR-020-5,WOLF020,WLF020,NARR-020-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-07-07,news
+NARR-020-5,WOLF020,WLF020,NARR-020-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-07-07,news
+NARR-020-5,WOLF020,WLF020,NARR-020-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-07-07,news
+NARR-020-5,WOLF020,WLF020,NARR-020-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-07-07,news
+NARR-020-5,WOLF020,WLF020,NARR-020-5-deleveraging,deleveraging,debt,positive,35,80,2026-07-07,news
+NARR-021-1,WOLF021,WLF021,NARR-021-1-weak_demand,weak demand,demand,negative,70,80,2026-04-07,analyst_commentary
+NARR-021-1,WOLF021,WLF021,NARR-021-1-margin_pressure,margin pressure,margin,negative,70,80,2026-04-07,analyst_commentary
+NARR-021-1,WOLF021,WLF021,NARR-021-1-guidance_cut,guidance cut,guidance,negative,75,80,2026-04-07,analyst_commentary
+NARR-021-1,WOLF021,WLF021,NARR-021-1-profit_warning,profit warning,profit_warning,negative,85,80,2026-04-07,analyst_commentary
+NARR-021-1,WOLF021,WLF021,NARR-021-1-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-04-07,analyst_commentary
+NARR-021-2,WOLF021,WLF021,NARR-021-2-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-03-17,news
+NARR-021-2,WOLF021,WLF021,NARR-021-2-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-03-17,news
+NARR-021-2,WOLF021,WLF021,NARR-021-2-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-03-17,news
+NARR-021-2,WOLF021,WLF021,NARR-021-2-impairment,impairment,impairment,negative,75,80,2026-03-17,news
+NARR-021-2,WOLF021,WLF021,NARR-021-2-distress,distress,distress,negative,90,80,2026-03-17,news
+NARR-021-3,WOLF021,WLF021,NARR-021-3-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-02-24,news
+NARR-021-3,WOLF021,WLF021,NARR-021-3-litigation_risk,litigation risk,litigation,negative,80,80,2026-02-24,news
+NARR-021-3,WOLF021,WLF021,NARR-021-3-governance_concern,governance concern,governance,negative,85,80,2026-02-24,news
+NARR-021-3,WOLF021,WLF021,NARR-021-3-management_resignation,management resignation,management,negative,75,80,2026-02-24,news
+NARR-021-4,WOLF021,WLF021,NARR-021-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-03,news
+NARR-021-4,WOLF021,WLF021,NARR-021-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-03,news
+NARR-021-4,WOLF021,WLF021,NARR-021-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-03,news
+NARR-021-4,WOLF021,WLF021,NARR-021-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-03,news
+NARR-021-4,WOLF021,WLF021,NARR-021-4-deleveraging,deleveraging,debt,positive,35,80,2026-02-03,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-dividend_increase,dividend increase,dividend,positive,45,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-cash_flow,cash flow,cash_flow,positive,35,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-resilient_demand,resilient demand,demand,positive,35,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-margin_expansion,margin expansion,margin,positive,35,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-guidance_raised,guidance raised,guidance,positive,40,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-share_buyback,share buyback,buyback,positive,35,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-major_contract_win,major contract win,order_book,positive,40,80,2026-07-02,news
+NARR-021-5,WOLF021,WLF021,NARR-021-5-pricing_power,pricing power,pricing_power,positive,35,80,2026-07-02,news
+NARR-022-1,WOLF022,WLF022,NARR-022-1-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-04-02,news
+NARR-022-1,WOLF022,WLF022,NARR-022-1-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-04-02,news
+NARR-022-1,WOLF022,WLF022,NARR-022-1-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-04-02,news
+NARR-022-1,WOLF022,WLF022,NARR-022-1-impairment,impairment,impairment,negative,75,80,2026-04-02,news
+NARR-022-1,WOLF022,WLF022,NARR-022-1-distress,distress,distress,negative,90,80,2026-04-02,news
+NARR-022-2,WOLF022,WLF022,NARR-022-2-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-03-12,news
+NARR-022-2,WOLF022,WLF022,NARR-022-2-litigation_risk,litigation risk,litigation,negative,80,80,2026-03-12,news
+NARR-022-2,WOLF022,WLF022,NARR-022-2-governance_concern,governance concern,governance,negative,85,80,2026-03-12,news
+NARR-022-2,WOLF022,WLF022,NARR-022-2-management_resignation,management resignation,management,negative,75,80,2026-03-12,news
+NARR-022-3,WOLF022,WLF022,NARR-022-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-19,news
+NARR-022-3,WOLF022,WLF022,NARR-022-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-19,news
+NARR-022-3,WOLF022,WLF022,NARR-022-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-19,news
+NARR-022-3,WOLF022,WLF022,NARR-022-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-19,news
+NARR-022-3,WOLF022,WLF022,NARR-022-3-deleveraging,deleveraging,debt,positive,35,80,2026-02-19,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-dividend_increase,dividend increase,dividend,positive,45,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-cash_flow,cash flow,cash_flow,positive,35,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-resilient_demand,resilient demand,demand,positive,35,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-margin_expansion,margin expansion,margin,positive,35,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-guidance_raised,guidance raised,guidance,positive,40,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-share_buyback,share buyback,buyback,positive,35,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-major_contract_win,major contract win,order_book,positive,40,80,2026-01-29,news
+NARR-022-4,WOLF022,WLF022,NARR-022-4-pricing_power,pricing power,pricing_power,positive,35,80,2026-01-29,news
+NARR-022-5,WOLF022,WLF022,NARR-022-5-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-06-27,news
+NARR-022-5,WOLF022,WLF022,NARR-022-5-annual_report_released,annual report released,growth,neutral,20,80,2026-06-27,news
+NARR-022-5,WOLF022,WLF022,NARR-022-5-board_meeting_update,board meeting update,management,neutral,20,80,2026-06-27,news
+NARR-022-5,WOLF022,WLF022,NARR-022-5-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-06-27,news
+NARR-023-1,WOLF023,WLF023,NARR-023-1-regulatory_probe,regulatory probe,regulation,negative,85,80,2026-03-28,news
+NARR-023-1,WOLF023,WLF023,NARR-023-1-litigation_risk,litigation risk,litigation,negative,80,80,2026-03-28,news
+NARR-023-1,WOLF023,WLF023,NARR-023-1-governance_concern,governance concern,governance,negative,85,80,2026-03-28,news
+NARR-023-1,WOLF023,WLF023,NARR-023-1-management_resignation,management resignation,management,negative,75,80,2026-03-28,news
+NARR-023-2,WOLF023,WLF023,NARR-023-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-07,news
+NARR-023-2,WOLF023,WLF023,NARR-023-2-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-07,news
+NARR-023-2,WOLF023,WLF023,NARR-023-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-07,news
+NARR-023-2,WOLF023,WLF023,NARR-023-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-07,news
+NARR-023-2,WOLF023,WLF023,NARR-023-2-deleveraging,deleveraging,debt,positive,35,80,2026-03-07,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-dividend_increase,dividend increase,dividend,positive,45,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-cash_flow,cash flow,cash_flow,positive,35,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-resilient_demand,resilient demand,demand,positive,35,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-margin_expansion,margin expansion,margin,positive,35,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-guidance_raised,guidance raised,guidance,positive,40,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-share_buyback,share buyback,buyback,positive,35,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-major_contract_win,major contract win,order_book,positive,40,80,2026-02-14,news
+NARR-023-3,WOLF023,WLF023,NARR-023-3-pricing_power,pricing power,pricing_power,positive,35,80,2026-02-14,news
+NARR-023-4,WOLF023,WLF023,NARR-023-4-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-07-13,news
+NARR-023-4,WOLF023,WLF023,NARR-023-4-annual_report_released,annual report released,growth,neutral,20,80,2026-07-13,news
+NARR-023-4,WOLF023,WLF023,NARR-023-4-board_meeting_update,board meeting update,management,neutral,20,80,2026-07-13,news
+NARR-023-4,WOLF023,WLF023,NARR-023-4-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-07-13,news
+NARR-023-5,WOLF023,WLF023,NARR-023-5-weak_demand,weak demand,demand,negative,70,80,2026-06-22,analyst_commentary
+NARR-023-5,WOLF023,WLF023,NARR-023-5-margin_pressure,margin pressure,margin,negative,70,80,2026-06-22,analyst_commentary
+NARR-023-5,WOLF023,WLF023,NARR-023-5-guidance_cut,guidance cut,guidance,negative,75,80,2026-06-22,analyst_commentary
+NARR-023-5,WOLF023,WLF023,NARR-023-5-profit_warning,profit warning,profit_warning,negative,85,80,2026-06-22,analyst_commentary
+NARR-023-5,WOLF023,WLF023,NARR-023-5-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-06-22,analyst_commentary
+NARR-024-1,WOLF024,WLF024,NARR-024-1-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-23,news
+NARR-024-1,WOLF024,WLF024,NARR-024-1-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-03-23,news
+NARR-024-1,WOLF024,WLF024,NARR-024-1-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-23,news
+NARR-024-1,WOLF024,WLF024,NARR-024-1-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-23,news
+NARR-024-1,WOLF024,WLF024,NARR-024-1-deleveraging,deleveraging,debt,positive,35,80,2026-03-23,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-dividend_increase,dividend increase,dividend,positive,45,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-strong_cash_flow,strong cash flow,cash_flow,positive,45,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-cash_flow,cash flow,cash_flow,positive,35,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-resilient_demand,resilient demand,demand,positive,35,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-margin_expansion,margin expansion,margin,positive,35,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-guidance_raised,guidance raised,guidance,positive,40,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-share_buyback,share buyback,buyback,positive,35,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-major_contract_win,major contract win,order_book,positive,40,80,2026-03-02,news
+NARR-024-2,WOLF024,WLF024,NARR-024-2-pricing_power,pricing power,pricing_power,positive,35,80,2026-03-02,news
+NARR-024-3,WOLF024,WLF024,NARR-024-3-ordinary_dividend_confirmed,ordinary dividend confirmed,dividend,positive,30,80,2026-02-09,news
+NARR-024-3,WOLF024,WLF024,NARR-024-3-annual_report_released,annual report released,growth,neutral,20,80,2026-02-09,news
+NARR-024-3,WOLF024,WLF024,NARR-024-3-board_meeting_update,board meeting update,management,neutral,20,80,2026-02-09,news
+NARR-024-3,WOLF024,WLF024,NARR-024-3-quarterly_trading_update,quarterly trading update,growth,neutral,20,80,2026-02-09,news
+NARR-024-4,WOLF024,WLF024,NARR-024-4-weak_demand,weak demand,demand,negative,70,80,2026-07-08,analyst_commentary
+NARR-024-4,WOLF024,WLF024,NARR-024-4-margin_pressure,margin pressure,margin,negative,70,80,2026-07-08,analyst_commentary
+NARR-024-4,WOLF024,WLF024,NARR-024-4-guidance_cut,guidance cut,guidance,negative,75,80,2026-07-08,analyst_commentary
+NARR-024-4,WOLF024,WLF024,NARR-024-4-profit_warning,profit warning,profit_warning,negative,85,80,2026-07-08,analyst_commentary
+NARR-024-4,WOLF024,WLF024,NARR-024-4-cost_pressure,cost pressure,cost_pressure,negative,65,80,2026-07-08,analyst_commentary
+NARR-024-5,WOLF024,WLF024,NARR-024-5-debt_refinancing_pressure,debt refinancing pressure,refinancing,negative,85,80,2026-06-17,news
+NARR-024-5,WOLF024,WLF024,NARR-024-5-credit_downgrade,credit downgrade,credit_stress,negative,85,80,2026-06-17,news
+NARR-024-5,WOLF024,WLF024,NARR-024-5-liquidity_pressure,liquidity pressure,liquidity,negative,85,80,2026-06-17,news
+NARR-024-5,WOLF024,WLF024,NARR-024-5-impairment,impairment,impairment,negative,75,80,2026-06-17,news
+NARR-024-5,WOLF024,WLF024,NARR-024-5-distress,distress,distress,negative,90,80,2026-06-17,news

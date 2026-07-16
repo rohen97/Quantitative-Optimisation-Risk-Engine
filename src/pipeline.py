@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.alternative_data.alt_features import build_alt_features
+from src.alternative_data.alt_features import run_alternative_data_pipeline
 from src.branches.branch_comparison import build_final_recommendations, compare_branches
 from src.branches.clean_sheet import run_clean_sheet_branch
 from src.branches.llm_benchmark import run_llm_benchmark_branch
@@ -17,20 +17,38 @@ from src.hedging.hedge_report import build_hedge_recommendations
 from src.models.forecasting import generate_mock_forecasts
 from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
+from src.narrative.pipeline import run_narrative_pipeline
 from src.optimisation.portfolio_builder import build_proposed_portfolio
 from src.portfolio.portfolio_diagnostics import build_concentration_summary, build_portfolio_diagnostics
 from src.portfolio.portfolio_loader import load_current_portfolio
 from src.regime.regime_classifier import build_regime_features
+from src.regime.pipeline import run_regime_pipeline
 from src.reporting.report_writer import write_csv, write_markdown
 from src.risk.risk_metrics import build_risk_report
 from src.risk.stress_testing import run_stress_tests
 from src.utils.config import ensure_output_dir, load_yaml
 
 
+REGIME_FEATURE_COLUMNS = [
+    "ticker",
+    "regime_suitability_score",
+    "regime_weight_adjustment",
+    "regime_review_required_flag",
+    "regime_exclusion_flag",
+    "dominant_regime",
+    "regime_risk_score",
+    "regime_deterioration_probability",
+]
+
+
 def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.DataFrame]:
     config = load_yaml("configs/base.yaml")
     branch_config = load_yaml("configs/branching.yaml")
     risk_limits = load_yaml("configs/risk_limits.yaml")
+    sentiment_config = load_yaml("configs/sentiment.yaml")
+    alternative_data_config = load_yaml("configs/alternative_data.yaml")
+    narrative_config = load_yaml("configs/narrative.yaml")
+    regime_config = load_yaml("configs/regime.yaml")
     out = Path(output_dir) if output_dir else ensure_output_dir(config)
 
     universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
@@ -39,8 +57,24 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     portfolio = load_current_portfolio(config.get("current_portfolio_path", "data/external/current_portfolio_template.csv"))
     diagnostics, exposures = build_portfolio_diagnostics(portfolio)
     concentration = build_concentration_summary(portfolio)
-    sentiment = build_alt_features(universe)
-    regime = build_regime_features(universe)
+    alt_outputs = run_alternative_data_pipeline(universe, sentiment_config, alternative_data_config)
+    narrative_outputs = run_narrative_pipeline(universe, narrative_config)
+    sentiment = alt_outputs["alt_features_monthly"].merge(
+        narrative_outputs["narrative_reframing_features"],
+        on=["security_id", "ticker"],
+        how="left",
+    )
+    preliminary_regime = build_regime_features(universe)
+    preliminary_features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, preliminary_regime)
+    regime_outputs = run_regime_pipeline(
+        universe,
+        prices,
+        preliminary_features,
+        alt_outputs["alt_features_monthly"],
+        narrative_outputs["narrative_reframing_features"],
+        regime_config,
+    )
+    regime = regime_outputs["regime_suitability_scores"][REGIME_FEATURE_COLUMNS]
     features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, regime)
     scorecard = build_scorecard(features, risk_limits)
     risk_report = build_risk_report(prices, portfolio)
@@ -52,14 +86,40 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     branch_comparison = compare_branches(portfolio_aware, clean_sheet, llm_benchmark)
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
     proposed = build_proposed_portfolio(portfolio, scorecard)
-    stress_report = run_stress_tests(portfolio)
-    hedge_report = build_hedge_recommendations(portfolio)
+    stress_report = run_stress_tests(portfolio, regime_outputs["regime_dashboard_summary"])
+    hedge_report = build_hedge_recommendations(portfolio, regime_outputs["regime_dashboard_summary"])
 
     write_csv(diagnostics, out, "current_portfolio_diagnostics.csv")
     write_csv(portfolio, out, "current_portfolio_enriched.csv")
     write_csv(concentration, out, "concentration_summary.csv")
     for name, frame in exposures.items():
         write_csv(frame, out, f"{name}_exposure.csv")
+    for filename, frame in {
+        "alt_text_documents.csv": alt_outputs["alt_text_documents"],
+        "alt_entity_mentions.csv": alt_outputs["alt_entity_mentions"],
+        "alt_sentiment_scores.csv": alt_outputs["alt_sentiment_scores"],
+        "alt_event_signals.csv": alt_outputs["alt_event_signals"],
+        "alt_features_monthly.csv": alt_outputs["alt_features_monthly"],
+    }.items():
+        write_csv(frame, out, filename)
+    for filename, frame in {
+        "narrative_concepts.csv": narrative_outputs["narrative_concepts"],
+        "narrative_frames.csv": narrative_outputs["narrative_frames"],
+        "narrative_semantic_distances.csv": narrative_outputs["narrative_semantic_distances"],
+        "narrative_markov_transitions.csv": narrative_outputs["narrative_markov_transitions"],
+        "narrative_reframing_features.csv": narrative_outputs["narrative_reframing_features"],
+    }.items():
+        write_csv(frame, out, filename)
+    for filename, frame in {
+        "regime_features.csv": regime_outputs["regime_features"],
+        "factor_regime_probabilities.csv": regime_outputs["factor_regime_probabilities"],
+        "chaos_regime_probabilities.csv": regime_outputs["chaos_regime_probabilities"],
+        "informational_driver_model.csv": regime_outputs["informational_driver_model"],
+        "regime_transition_matrix.csv": regime_outputs["regime_transition_matrix"],
+        "regime_suitability_scores.csv": regime_outputs["regime_suitability_scores"],
+        "regime_dashboard_summary.csv": regime_outputs["regime_dashboard_summary"],
+    }.items():
+        write_csv(frame, out, filename)
     write_csv(features, out, "features_monthly.csv")
     write_csv(scorecard, out, "stock_scorecard.csv")
     write_csv(portfolio_aware, out, "recommendations_portfolio_aware.csv")
@@ -87,6 +147,9 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "concentration": concentration,
         "exposures": pd.concat(exposures, names=["exposure_type"]),
         "features": features,
+        **alt_outputs,
+        **narrative_outputs,
+        **regime_outputs,
         "scorecard": scorecard,
         "recommendations_portfolio_aware": portfolio_aware,
         "recommendations_clean_sheet": clean_sheet,

@@ -24,6 +24,31 @@ Build the feature store and scorecard outputs:
 python scripts/build_features.py
 ```
 
+Run the mock sentiment and alternative-data engine:
+
+```bash
+python scripts/run_sentiment_engine.py
+```
+
+Run the mock financial narrative reframing engine:
+
+```bash
+python scripts/run_narrative_engine.py
+```
+
+Run the mock regime analysis and market-state engine:
+
+```bash
+python scripts/run_regime_engine.py
+```
+
+Validate Alpaca credentials or pull optional Alpaca daily bars:
+
+```bash
+python scripts/pull_alpaca_data.py --account
+python scripts/pull_alpaca_data.py --bars --symbols AAPL MSFT
+```
+
 Run tests:
 
 ```bash
@@ -35,6 +60,23 @@ Outputs are saved in `reports/outputs/`.
 Key Sprint 4 outputs:
 
 - `features_monthly.csv`
+- `alt_text_documents.csv`
+- `alt_entity_mentions.csv`
+- `alt_sentiment_scores.csv`
+- `alt_event_signals.csv`
+- `alt_features_monthly.csv`
+- `narrative_concepts.csv`
+- `narrative_frames.csv`
+- `narrative_semantic_distances.csv`
+- `narrative_markov_transitions.csv`
+- `narrative_reframing_features.csv`
+- `regime_features.csv`
+- `factor_regime_probabilities.csv`
+- `chaos_regime_probabilities.csv`
+- `informational_driver_model.csv`
+- `regime_transition_matrix.csv`
+- `regime_suitability_scores.csv`
+- `regime_dashboard_summary.csv`
 - `stock_scorecard.csv`
 - `recommendations_portfolio_aware.csv`
 - `recommendations_clean_sheet.csv`

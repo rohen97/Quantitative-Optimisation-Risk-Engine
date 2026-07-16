@@ -1,0 +1,44 @@
+regime:
+  enabled: true
+  mode: mock
+
+  factor_regime:
+    enabled: true
+    model: gmm
+    n_clusters: 4
+    fallback_mode: rule_based
+    labels:
+      - crisis
+      - steady_state
+      - inflation
+      - walking_on_ice
+
+  chaos_regime:
+    enabled: true
+    index_name: wolf_chaos_index
+    implementation: fcix_lite
+    labels:
+      - low_chaos
+      - intermediate_chaos
+      - high_chaos
+    thresholds:
+      low_chaos_max: 35
+      intermediate_chaos_max: 70
+      high_chaos_min: 70
+
+  informational_drivers:
+    enabled: true
+    model: elastic_net
+    fallback_mode: rule_based
+    deterioration_threshold: 70
+
+  fusion:
+    enabled: true
+    mixed_transition_confidence_threshold: 0.35
+    high_risk_threshold: 75
+
+  suitability:
+    enabled: true
+    neutral_score: 50
+    review_threshold: 35
+    exclusion_threshold: 20

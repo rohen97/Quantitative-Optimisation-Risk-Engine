@@ -1,0 +1,73 @@
+document_id,security_id,ticker,company_name_mentioned,mention_confidence,mention_count,primary_subject_flag
+DOC-001-1,WOLF001,WLF001,Wolf Germany Healthcare 1,1.0,3,True
+DOC-001-2,WOLF001,WLF001,Wolf Germany Healthcare 1,1.0,3,True
+DOC-001-3,WOLF001,WLF001,Wolf Germany Healthcare 1,1.0,3,True
+DOC-002-1,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,1.0,3,True
+DOC-002-2,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,1.0,3,True
+DOC-002-3,WOLF002,WLF002,Wolf Switzerland Consumer Staples 2,1.0,3,True
+DOC-003-1,WOLF003,WLF003,Wolf France Utilities 3,1.0,3,True
+DOC-003-2,WOLF003,WLF003,Wolf France Utilities 3,1.0,3,True
+DOC-003-3,WOLF003,WLF003,Wolf France Utilities 3,1.0,3,True
+DOC-004-1,WOLF004,WLF004,Wolf Netherlands Financials 4,1.0,3,True
+DOC-004-2,WOLF004,WLF004,Wolf Netherlands Financials 4,1.0,3,True
+DOC-004-3,WOLF004,WLF004,Wolf Netherlands Financials 4,1.0,3,True
+DOC-005-1,WOLF005,WLF005,Wolf United Kingdom Industrials 5,1.0,3,True
+DOC-005-2,WOLF005,WLF005,Wolf United Kingdom Industrials 5,1.0,3,True
+DOC-005-3,WOLF005,WLF005,Wolf United Kingdom Industrials 5,1.0,3,True
+DOC-006-1,WOLF006,WLF006,Wolf China Technology 6,1.0,3,True
+DOC-006-2,WOLF006,WLF006,Wolf China Technology 6,1.0,3,True
+DOC-006-3,WOLF006,WLF006,Wolf China Technology 6,1.0,3,True
+DOC-007-1,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,1.0,3,True
+DOC-007-2,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,1.0,3,True
+DOC-007-3,WOLF007,WLF007,Wolf Hong Kong Healthcare 7,1.0,3,True
+DOC-008-1,WOLF008,WLF008,Wolf Germany Consumer Staples 8,1.0,3,True
+DOC-008-2,WOLF008,WLF008,Wolf Germany Consumer Staples 8,1.0,3,True
+DOC-008-3,WOLF008,WLF008,Wolf Germany Consumer Staples 8,1.0,3,True
+DOC-009-1,WOLF009,WLF009,Wolf Switzerland Utilities 9,1.0,3,True
+DOC-009-2,WOLF009,WLF009,Wolf Switzerland Utilities 9,1.0,3,True
+DOC-009-3,WOLF009,WLF009,Wolf Switzerland Utilities 9,1.0,3,True
+DOC-010-1,WOLF010,WLF010,Wolf France Financials 10,1.0,3,True
+DOC-010-2,WOLF010,WLF010,Wolf France Financials 10,1.0,3,True
+DOC-010-3,WOLF010,WLF010,Wolf France Financials 10,1.0,3,True
+DOC-011-1,WOLF011,WLF011,Wolf Netherlands Industrials 11,1.0,3,True
+DOC-011-2,WOLF011,WLF011,Wolf Netherlands Industrials 11,1.0,3,True
+DOC-011-3,WOLF011,WLF011,Wolf Netherlands Industrials 11,1.0,3,True
+DOC-012-1,WOLF012,WLF012,Wolf United Kingdom Technology 12,1.0,3,True
+DOC-012-2,WOLF012,WLF012,Wolf United Kingdom Technology 12,1.0,3,True
+DOC-012-3,WOLF012,WLF012,Wolf United Kingdom Technology 12,1.0,3,True
+DOC-013-1,WOLF013,WLF013,Wolf China Healthcare 13,1.0,3,True
+DOC-013-2,WOLF013,WLF013,Wolf China Healthcare 13,1.0,3,True
+DOC-013-3,WOLF013,WLF013,Wolf China Healthcare 13,1.0,3,True
+DOC-014-1,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,1.0,3,True
+DOC-014-2,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,1.0,3,True
+DOC-014-3,WOLF014,WLF014,Wolf Hong Kong Consumer Staples 14,1.0,3,True
+DOC-015-1,WOLF015,WLF015,Wolf Germany Utilities 15,1.0,3,True
+DOC-015-2,WOLF015,WLF015,Wolf Germany Utilities 15,1.0,3,True
+DOC-015-3,WOLF015,WLF015,Wolf Germany Utilities 15,1.0,3,True
+DOC-016-1,WOLF016,WLF016,Wolf Switzerland Financials 16,1.0,3,True
+DOC-016-2,WOLF016,WLF016,Wolf Switzerland Financials 16,1.0,3,True
+DOC-016-3,WOLF016,WLF016,Wolf Switzerland Financials 16,1.0,3,True
+DOC-017-1,WOLF017,WLF017,Wolf France Industrials 17,1.0,3,True
+DOC-017-2,WOLF017,WLF017,Wolf France Industrials 17,1.0,3,True
+DOC-017-3,WOLF017,WLF017,Wolf France Industrials 17,1.0,3,True
+DOC-018-1,WOLF018,WLF018,Wolf Netherlands Technology 18,1.0,3,True
+DOC-018-2,WOLF018,WLF018,Wolf Netherlands Technology 18,1.0,3,True
+DOC-018-3,WOLF018,WLF018,Wolf Netherlands Technology 18,1.0,3,True
+DOC-019-1,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,1.0,3,True
+DOC-019-2,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,1.0,3,True
+DOC-019-3,WOLF019,WLF019,Wolf United Kingdom Healthcare 19,1.0,3,True
+DOC-020-1,WOLF020,WLF020,Wolf China Consumer Staples 20,1.0,3,True
+DOC-020-2,WOLF020,WLF020,Wolf China Consumer Staples 20,1.0,3,True
+DOC-020-3,WOLF020,WLF020,Wolf China Consumer Staples 20,1.0,3,True
+DOC-021-1,WOLF021,WLF021,Wolf Hong Kong Utilities 21,1.0,3,True
+DOC-021-2,WOLF021,WLF021,Wolf Hong Kong Utilities 21,1.0,3,True
+DOC-021-3,WOLF021,WLF021,Wolf Hong Kong Utilities 21,1.0,3,True
+DOC-022-1,WOLF022,WLF022,Wolf Germany Financials 22,1.0,3,True
+DOC-022-2,WOLF022,WLF022,Wolf Germany Financials 22,1.0,3,True
+DOC-022-3,WOLF022,WLF022,Wolf Germany Financials 22,1.0,3,True
+DOC-023-1,WOLF023,WLF023,Wolf Switzerland Industrials 23,1.0,3,True
+DOC-023-2,WOLF023,WLF023,Wolf Switzerland Industrials 23,1.0,3,True
+DOC-023-3,WOLF023,WLF023,Wolf Switzerland Industrials 23,1.0,3,True
+DOC-024-1,WOLF024,WLF024,Wolf France Technology 24,1.0,3,True
+DOC-024-2,WOLF024,WLF024,Wolf France Technology 24,1.0,3,True
+DOC-024-3,WOLF024,WLF024,Wolf France Technology 24,1.0,3,True

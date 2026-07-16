@@ -34,13 +34,17 @@ def build_feature_store(
         )
         data = data.drop(columns=["liquidity_stress_score_x", "liquidity_stress_score_y"], errors="ignore")
     data = data.merge(regime, on="ticker", how="left")
-    data["sentiment_alt_signal_score"] = (
+    data["news_sentiment_30d"] = data.get("news_sentiment_30d", pd.Series(0, index=data.index)).fillna(0)
+    data["negative_news_intensity"] = data.get("negative_news_intensity", pd.Series(0, index=data.index)).fillna(0)
+    data["controversy_score"] = data.get("controversy_score", pd.Series(0, index=data.index)).fillna(0)
+    fallback_sentiment_score = (
         50
         + 20 * data["news_sentiment_30d"].fillna(0)
         - 0.25 * data["negative_news_intensity"].fillna(0)
         - 0.15 * data["controversy_score"].fillna(0)
     ).clip(0, 100)
-    data["sentiment_alt_data_score"] = data["sentiment_alt_signal_score"]
+    data["sentiment_alt_data_score"] = data.get("sentiment_alt_data_score", fallback_sentiment_score).fillna(fallback_sentiment_score)
+    data["sentiment_alt_signal_score"] = data["sentiment_alt_data_score"]
     data["ml_expected_risk_adjusted_return_score"] = (55 + 25 * data["momentum_6m"] - 80 * data["volatility_1y"]).clip(0, 100)
     data["ml_expected_risk_adjusted_score"] = data["ml_expected_risk_adjusted_return_score"]
     data["regime_suitability_score"] = data["regime_suitability_score"].fillna(50)

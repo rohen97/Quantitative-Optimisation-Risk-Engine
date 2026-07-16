@@ -1,3 +1,4 @@
 risk_exposure,hedge_type,hedge_instrument_or_basket,target_weight,expected_hedge_effectiveness,trade_off_cost,residual_risk
 Equity drawdown,Equity-only,"Defensive dividend basket: Swiss healthcare, utilities, staples",0.05,Moderate,Lower upside in risk-on markets,Market beta remains
 Portfolio tail loss,Optional institutional,Index ETF/future overlay or protective put spread,0.0,High if implemented,"Premium, basis risk, operational complexity",Country and FX basis risk
+Fused market regime,Regime overlay,"Portfolio-level index, sector and FX overlay",0.0,Moderate,May reduce upside or add carry cost,Maintain baseline index and currency hedges.

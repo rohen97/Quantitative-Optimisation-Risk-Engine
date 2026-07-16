@@ -15,6 +15,9 @@ Feature groups:
 - Risk: daily return, annualised volatility, beta placeholders, max drawdown, downside volatility, VaR, CVaR, Sharpe proxy, Sortino proxy and risk score.
 - Liquidity: average daily value, average volume, turnover, days to liquidate 1% NAV, liquidity score and liquidity stress.
 - Portfolio fit: correlation fallback, incremental exposures, incremental dividend income, concentration impact, diversification benefit and portfolio fit score.
+- Sentiment and alternative data: rolling news sentiment, controversy, dividend risk, cash-flow deterioration, management confidence, regulatory risk, litigation risk, governance flags, credit stress, abnormal attention and event severity.
+- Narrative reframing: financial concept extraction, first occurrence/reoccurrence tracking, frame construction, semantic drift, risk-anchor similarity, temporal narrative states and Markov transition probabilities.
+- Regime analysis: factor-regime probabilities, Wolf Chaos Index, informational regime drivers, fused market-state dashboard, transition matrix and stock-level regime suitability.
 
 Output:
 
@@ -45,7 +48,60 @@ Weighted score:
 - 5% Liquidity
 - 7% Sentiment / Alternative Data Signal
 
-Production ML, regime and sentiment engines are not built yet. Missing signals use neutral placeholder scores so the interface remains stable.
+Production ML and real vendor ingestion are not built yet. Missing signals use neutral placeholder scores so the interface remains stable.
+
+## Sentiment + Alternative Data Methodology
+
+The sentiment engine is designed as an early-warning risk overlay. It currently runs in mock mode and supports the following source types by design: news, exchange announcements, annual/interim reports, earnings transcripts, analyst commentary, regulatory filings, social media, search trends, ownership/flow data and credit signals.
+
+The mock pipeline:
+
+1. Generates local text documents for active-universe companies.
+2. Maps documents to securities using ticker and company-name mentions.
+3. Scores text with rule-based financial sentiment dictionaries.
+4. Classifies events such as dividend cuts, profit warnings, buybacks, regulatory probes, credit stress and litigation.
+5. Aggregates rolling stock-level alternative-data features.
+6. Produces risk flags for scorecard and risk-engine consumption.
+
+Sentiment can reduce confidence, trigger review, cap target weights or exclude severe-risk names through hard risk overlays. It cannot override failed quant filters and cannot turn a weak quant name into a final buy by itself.
+
+## Financial Narrative Reframing Methodology
+
+The Financial Narrative Reframing Engine adapts protocol-framing ideas to financial text. It is more than sentiment analysis: it measures whether the company story is shifting from one frame to another over time.
+
+Current mock-mode process:
+
+1. Generate local financial documents for active-universe companies.
+2. Extract concepts such as dividend, cash flow, margin pressure, credit stress, regulation, governance and distress.
+3. Track first occurrence, reoccurrence, recurring risk concepts and concept acceleration.
+4. Construct narrative frames from co-occurring concepts.
+5. Generate deterministic mock embeddings for frame text.
+6. Measure cosine distance to company history and anchors such as positive quality, distress, dividend risk, credit stress, governance risk and regulatory risk.
+7. Classify temporal states such as positive stable, negative deteriorating, dividend risk, credit stress, regulatory overhang and distress.
+8. Estimate first-order and second-order Markov transition probabilities between narrative states.
+9. Aggregate final narrative reframing features for the scorecard and risk overlays.
+
+Narrative outputs can trigger review, cap weights or exclude severe-risk names. They cannot override hard quant filters or act as standalone buy signals.
+
+Future upgrades can add FinBERT, Sentence-BERT, OpenAI embeddings, Claude/OpenAI analyst benchmark integration and real vendor documents.
+
+Known-scenario fixtures in `tests/fixtures/` validate that a timeline can move from a positive quality frame into governance risk, distress and credit stress, with expected Markov transitions.
+
+## Regime Analysis Methodology
+
+The Regime Analysis and Market State Engine is a deterministic mock-mode overlay inspired by factor-regime modeling and chaos/systemic-risk indicators. It does not fetch real macro, market or paid data yet.
+
+Current process:
+
+1. Build a regional factor lens for Global, DACH, EU ex-DACH, UK, Mainland China and Hong Kong.
+2. Standardise factor returns and estimate crisis, steady-state, inflation and walking-on-ice probabilities with a GMM when available, falling back to rules.
+3. Calculate the Wolf Chaos Index from cross-sectional dispersion, pairwise correlation, correlation instability, largest eigenvalue, effective bets, breadth, volatility-of-volatility and drawdown breadth.
+4. Estimate informational regime deterioration using alternative-data and narrative proxies.
+5. Fuse factor, chaos and informational signals into a dominant regime such as steady-state low chaos, crisis high chaos, inflation pressure, Europe recession, China policy stress, UK rate pressure, credit stress or mixed transition.
+6. Build a transition matrix and stock-level regime suitability scores.
+7. Feed suitability, review/exclusion flags and target-weight adjustments into the scorecard, branches, stress tests and hedge recommendations.
+
+Regime output is a risk and sizing overlay. It can reduce exposure, add reviews or exclude severe mismatch names, but it cannot override hard filters.
 
 Output:
 

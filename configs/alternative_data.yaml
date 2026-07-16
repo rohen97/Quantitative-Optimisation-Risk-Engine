@@ -1,0 +1,8 @@
+alternative_data:
+  enabled: true
+  use_mock_alt_data: true
+  risk_overlay_enabled: true
+  dividend_risk_threshold: 80
+  regulatory_risk_threshold: 85
+  credit_stress_threshold: 85
+  negative_news_spike_zscore: 3.0
