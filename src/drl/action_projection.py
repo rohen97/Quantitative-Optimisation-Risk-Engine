@@ -258,7 +258,7 @@ def project_weights(
     n = len(meta)
     baseline = _as_array(baseline_weights, n, "baseline_weights")
     current = _as_array(current_weights, n, "current_weights")
-    mask = np.asarray(eligibility_mask, dtype=bool)
+    mask = np.asarray(eligibility_mask, dtype=bool).copy()
     if mask.shape[0] != n:
         raise ValueError(f"eligibility_mask length {mask.shape[0]} does not match asset count {n}.")
     cash_idx = _cash_index(meta)
