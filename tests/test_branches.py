@@ -5,10 +5,12 @@ from src.data_ingestion.universe import build_universe
 from src.pipeline import run_full_pipeline
 
 
-def test_active_universe_includes_eu_and_uk_but_not_india():
+def test_active_universe_includes_eu_uk_and_us_but_not_india():
     universe = build_universe()
     assert "EU ex-DACH" in set(universe["region"])
     assert "UK" in set(universe["region"])
+    assert "US" in set(universe["region"])
+    assert "United States" in set(universe["country"])
     assert "India" not in set(universe["region"])
     assert "India" not in set(universe["country"])
 

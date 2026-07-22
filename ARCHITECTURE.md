@@ -13,11 +13,12 @@ The repository is organised as a modular quant platform, with production logic i
 - `optimisation`: score-weighted, risk-parity, mean-variance, CVaR/ES, dividend-income and regime-aware portfolio construction, trade-list generation and constraint reporting.
 - `risk`: VaR, CVaR, Expected Shortfall, drawdown, risk contributions, scenario library, risk reports and stress tests.
 - `hedging`: equity-only hedges, optional institutional hedge placeholders and defensive substitution recommendations.
+- `drl`: constrained PPO-style allocation overlay, regime-gated specialist policies, projection to hard optimiser constraints, benchmark comparison and explanation reports.
 - `reporting`: CSV and Markdown output writers.
 
 ## Active Universe
 
-The active listed-equity universe covers DACH, EU ex-DACH, UK, Mainland China and Hong Kong. India is no longer part of the active stock-selection universe.
+The active listed-equity universe covers DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong. India is no longer part of the active stock-selection universe.
 
 ## Branching Pipeline
 
@@ -63,6 +64,22 @@ The stress engine applies deterministic mock scenarios including global risk-off
 
 The hedge engine separates equity-only recommendations from optional institutional hedges. It also suggests defensive substitutions for high-risk holdings. Optional institutional hedges are placeholders only and are not executable without mandate, pricing and market data.
 
+## DRL Allocation Overlay
+
+The DRL engine is a bounded challenger model layered on top of the selected classical optimiser. It follows the equation `w_drl = Projection_C(w_base + delta_w_agent)`: the PPO-style policy proposes small active-weight adjustments, regime-gated low-volatility and defensive specialists modify the action, then the final weights are projected through the existing hard exclusions, long-only rules and diversification caps.
+
+The engine is cash-inclusive, long-only and mock/local by default. It includes transaction-cost, slippage, liquidity, risk-aversion and drawdown reward components, chronological train/validation/test split metadata, multiple random seeds, benchmark comparison, ablations and explanation outputs. TCN/GAP/CAM interfaces are present for future deep policy and asset-time attribution work, but the MVP policy does not call live APIs or execute trades.
+
+The optimiser remains the primary allocator because it is deterministic and directly governed by explicit risk, concentration, liquidity and mandate constraints. DRL is a residual overlay: it receives point-in-time state features, emits bounded residual weight adjustments, passes through regime gating and the Wolf Chaos throttle, and is projected to the hard feasible set before any benchmark or trade-list output is written. If projection fails, risk limits breach, seed instability is excessive, confidence is too low or leakage is detected, the acceptance gate selects the baseline optimiser.
+
+The DRL state combines portfolio weights, cash, temporal returns, volatility, fundamentals, dividend quality, distributional forecasts, regime, sentiment, narrative, liquidity, risk contribution, stress tests and eligibility masks. The action design is monthly or quarterly residual weight deltas, with no leverage, no shorting and cash included. Transaction costs cover commissions, half-spread/slippage, nonlinear market impact, currency conversion placeholders and optional tax placeholders.
+
+Reward design uses Differential Sharpe plus net return, dividend income, regime suitability, diversification and quality components, then subtracts CVaR, Expected Shortfall, drawdown, transaction cost, turnover, dividend-risk, liquidity, narrative/credit and stress penalties. Specialist agents are blended probabilistically between stable low-chaos and crisis high-chaos policies, with inflation, regional-stress and credit-stress specialists left future-ready.
+
+PPO is the primary policy interface with deterministic evaluation and multi-seed validation. Stable-Baselines3 is optional; mock fallback keeps the pipeline runnable. SAC and TD3 are documented challengers. TCN/GAP and CAM/Grad-CAM paths are optional architecture hooks rather than hard dependencies. Benchmarking is explicitly labelled as fair information-set or full Wolf so richer DRL inputs are not compared unfairly against simpler optimisers.
+
+Acceptance outputs separate the baseline portfolio, DRL challenger portfolio, accepted/rejected/blended decision and final selected weights source. The DRL step does not silently overwrite the selected baseline optimiser portfolio.
+
 ## Sentiment And Alternative Data
 
 The sentiment and alternative-data engine is a risk overlay, not a standalone buy signal. In mock mode it generates active-universe text documents, maps them to securities, scores sentiment with rule-based financial keyword dictionaries, classifies events and aggregates rolling monthly features.
@@ -77,6 +94,6 @@ Narrative features feed the scorecard as risk overlays: high risk reframing, div
 
 ## Regime Analysis And Market State
 
-The regime engine is a market-state overlay that runs in deterministic mock mode. It builds a factor lens across Global, DACH, EU ex-DACH, UK, Mainland China and Hong Kong, estimates factor-regime probabilities, calculates a FCIX-lite Wolf Chaos Index, models informational deterioration drivers from alternative data and narrative features, fuses the signals into a dominant market regime and scores every stock for suitability under that regime.
+The regime engine is a market-state overlay that runs in deterministic mock mode. It builds a factor lens across Global, DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong, estimates factor-regime probabilities, calculates a FCIX-lite Wolf Chaos Index, models informational deterioration drivers from alternative data and narrative features, fuses the signals into a dominant market regime and scores every stock for suitability under that regime.
 
 Regime outputs feed the scorecard, portfolio-aware branch, clean-sheet branch, mock analyst benchmark, stress tests and hedge recommendations. The engine can reduce weights, trigger review/exclusion flags and add regime-conditioned stress/hedge overlays, but it cannot override hard quant controls.

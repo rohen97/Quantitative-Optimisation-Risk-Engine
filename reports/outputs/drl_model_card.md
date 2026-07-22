@@ -1,0 +1,89 @@
+# DRL Allocation Engine Model Card
+
+## Role
+
+The DRL engine is a residual overlay and challenger to the selected constrained optimiser. It proposes bounded active-weight changes relative to the baseline optimiser; it does not replace the optimiser by default and cannot bypass hard constraints.
+
+The baseline optimiser remains the primary portfolio because it is deterministic, auditable and directly tied to explicit risk, liquidity, concentration and mandate controls. DRL is allowed to contribute only through a capped blend unless the acceptance gate explicitly permits challenger status.
+
+## Runtime Mode
+
+- Mode: `mock`
+- Seeds: 11, 23, 37, 53, 71
+- Default deployment: maximum 25% DRL blend, baseline optimiser dominant.
+- Full DRL replacement: disabled unless explicitly configured and accepted.
+
+## State Design
+
+The point-in-time state contains deterministic feature ordering across portfolio state, temporal returns, volatility, fundamentals, dividend quality, distributional forecasts, regime, sentiment, narrative, liquidity, risk contribution, stress tests and hard eligibility masks. Cash is included as an explicit asset. Future target or realised-label columns are excluded.
+
+## Action Design
+
+The action is a residual weight adjustment. Monthly deltas are clipped to the configured maximum and applied to the baseline optimiser weights. The action space is long-only after projection, cash-inclusive, unlevered and does not permit shorting.
+
+## Constraint Projection
+
+Every proposed action is projected to the feasible set after masking excluded assets. The projection enforces non-negative weights, sum-to-one weights including cash, single-name caps, sector/country/region/currency caps, liquidity limits, turnover caps and cash floors. Infeasible projections fall back to the baseline optimiser.
+
+## Transaction-Cost Model
+
+Transaction costs include commission, half-spread/slippage, nonlinear market impact based on participation rate, currency conversion placeholders and optional transaction-tax placeholders. Costs are deducted from reward and included in benchmark net metrics.
+
+## Reward
+
+The reward is conservative and decomposed. Positive components include Differential Sharpe, net total return, dividend income, regime suitability improvement, diversification improvement and quality exposure. Negative components include CVaR, Expected Shortfall, drawdown, transaction costs, turnover, concentration, dividend-cut risk, liquidity risk, forecast uncertainty, narrative/credit stress and stress-scenario loss.
+
+Differential Sharpe is updated online from exponentially smoothed first and second moments, keeping the reward focused on risk-adjusted incremental performance rather than raw return alone.
+
+## Regime And Specialist Policies
+
+The Wolf Chaos risk throttle scales or blocks actions as chaos and crisis probabilities rise. Severe chaos can force baseline fallback. Specialist agents are blended probabilistically rather than hard switched: the stable low-chaos specialist emphasises return, dividends, quality and low turnover; the crisis high-chaos specialist emphasises CVaR, Expected Shortfall, drawdown control, liquidity, cash and dividend safety. Inflation, regional-stress and credit-stress specialists are future-ready placeholders.
+
+## Algorithms
+
+The primary policy interface is PPO with continuous residual actions, deterministic evaluation and multiple seeds. Stable-Baselines3 is optional. If unavailable or disabled, the pipeline uses a deterministic mock policy and labels outputs as mock. SAC and TD3 are documented as optional challengers but are not active production policies.
+
+The TCN/GAP encoder is optional and dependency-light. When PyTorch is available, it supports causal dilated convolutions, residual blocks, Global Average Pooling, cross-asset layers and a cash logit. It is not a hard dependency.
+
+## Explainability
+
+Outputs include constraint traces, feature-group attributions, asset-time attributions and human-readable explanations. CAM/Grad-CAM is future-ready for the TCN path. Explanations describe model attributions and avoid causal claims.
+
+## Validation And Benchmarks
+
+Validation uses chronological walk-forward splits, train-only scaling, an embargo between train/validation/test windows, multiple seeds and validation-only model selection. Benchmark comparisons are labelled as fair information-set comparisons or full Wolf comparisons so DRL is not credited for richer input data without disclosure.
+Benchmark success rate across windows: 100.00%
+
+Ablation tests compare regime/no-regime, distributional/no-distributional, sentiment/narrative variants, reward variants, transaction-cost assumptions, universal versus specialist policies, MLP versus optional TCN/GAP and no-throttle versus Wolf Chaos throttle.
+
+## Acceptance And Rejection
+
+The DRL allocation is rejected and replaced with the baseline optimiser for hard constraint violations, infeasible projection, missing eligibility masks, non-finite or negative weights, weight-sum errors, CVaR/Expected Shortfall/stress breaches, turnover or liquidity failures, severe throttle fallback, low confidence, excessive seed instability, validation underperformance or test leakage.
+
+## Current Limitations
+
+- MVP training uses deterministic local/mock policy mechanics.
+- Vendor point-in-time history is not yet connected.
+- PPO deep learning integration is optional and not required for pipeline success.
+- TCN/GAP and CAM paths are interfaces, not yet a fully validated production policy.
+- SAC, TD3, distributional RL and constrained policy optimisation are research extensions.
+- Outputs are research and decision-support artifacts, not trade execution instructions.
+
+## Future Research
+
+- full TCN + GAP PPO policy
+- robust CAM / Grad-CAM attribution
+- SAC and TD3 challengers
+- distributional reinforcement learning
+- constrained policy optimisation
+- Lagrangian risk constraints
+- offline reinforcement learning
+- uncertainty-aware policy ensembles
+- synthetic crisis generation
+- adversarial regime simulation
+- multi-agent allocation and hedging
+- meta-learning across regions
+- online fine-tuning with strict governance
+- causal validation of input features
+- DRL hedge sizing
+- hierarchical or graph-based cross-asset encoders

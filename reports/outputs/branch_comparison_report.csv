@@ -1,25 +1,25 @@
 ticker,company_name,portfolio_aware_recommendation,clean_sheet_recommendation,llm_recommendation,branch_classification,recommendation_agreement,score_dispersion,portfolio_aware_rank,clean_sheet_rank,llm_score,disagreement_flag,final_review_required,target_weight_portfolio_aware,clean_sheet_target_weight
-WLF004,Wolf Netherlands Financials 4,Hold,Avoid,Avoid,Reject,0.6666666666666666,24.57011034610307,19,22,42.23664701549365,True,True,0.0,0.0
-WLF010,Wolf France Financials 10,Hold,Avoid,Avoid,Reject,0.6666666666666666,25.853031627954817,23,23,37.83551053466999,True,True,0.0,0.0
-WLF016,Wolf Switzerland Financials 16,Hold,Avoid,Avoid,Reject,0.6666666666666666,24.19357673482313,24,24,33.011756688233916,True,True,0.0,0.0
-WLF006,Wolf China Technology 6,Avoid,Avoid,Avoid,Reject,1.0,11.136534879981134,2,10,64.07035475214597,False,False,0.0,0.0
-WLF024,Wolf France Technology 24,Avoid,Avoid,Avoid,Reject,1.0,0.8501387384781,10,4,61.77879505874803,False,False,0.0,0.0
-WLF018,Wolf Netherlands Technology 18,Avoid,Avoid,Avoid,Reject,1.0,6.7218431607332025,14,8,61.527497284933645,False,False,0.0,0.0
-WLF011,Wolf Netherlands Industrials 11,Avoid,Avoid,Avoid,Reject,1.0,4.404890669587891,15,6,59.78232545419682,False,False,0.0,0.0
-WLF005,Wolf United Kingdom Industrials 5,Avoid,Avoid,Avoid,Reject,1.0,16.341662306391697,7,15,59.252856383334276,False,False,0.0,0.0
-WLF019,Wolf United Kingdom Healthcare 19,Avoid,Avoid,Avoid,Reject,1.0,5.17553597651271,3,1,58.98878968150318,False,False,0.0,0.0
-WLF014,Wolf Hong Kong Consumer Staples 14,Avoid,Avoid,Avoid,Reject,1.0,25.290148439085332,16,19,58.42080694820781,False,False,0.0,0.0
-WLF017,Wolf France Industrials 17,Avoid,Avoid,Avoid,Reject,1.0,3.6877639821464,12,5,57.794350442369776,False,False,0.0,0.0
-WLF012,Wolf United Kingdom Technology 12,Avoid,Avoid,Avoid,Reject,1.0,14.172178984074554,5,14,57.5985230953993,False,False,0.0,0.0
-WLF022,Wolf Germany Financials 22,Avoid,Avoid,Avoid,Reject,1.0,12.127012939397904,8,12,57.597970751514865,False,False,0.0,0.0
-WLF021,Wolf Hong Kong Utilities 21,Avoid,Avoid,Avoid,Reject,1.0,8.339617270723286,1,2,56.32316788732573,False,False,0.0,0.0
-WLF013,Wolf China Healthcare 13,Avoid,Avoid,Avoid,Reject,1.0,7.09134094398337,9,9,55.73186327157406,False,False,0.0,0.0
-WLF009,Wolf Switzerland Utilities 9,Avoid,Avoid,Avoid,Reject,1.0,9.40291632091271,13,11,55.52020034050578,False,False,0.0,0.0
-WLF003,Wolf France Utilities 3,Avoid,Avoid,Avoid,Reject,1.0,6.355128094048489,4,3,55.45949653837942,False,False,0.0,0.0
-WLF015,Wolf Germany Utilities 15,Avoid,Avoid,Avoid,Reject,1.0,11.637451468947505,11,13,52.36043082223989,False,False,0.0,0.0
-WLF007,Wolf Hong Kong Healthcare 7,Avoid,Avoid,Avoid,Reject,1.0,7.302490784507612,6,7,51.56455321059933,False,False,0.0,0.0
-WLF002,Wolf Switzerland Consumer Staples 2,Avoid,Avoid,Avoid,Reject,1.0,19.43091796578337,17,18,50.60006752859453,False,False,0.0,0.0
-WLF008,Wolf Germany Consumer Staples 8,Avoid,Avoid,Avoid,Reject,1.0,9.865226879752182,22,16,47.948462021519475,False,False,0.0,0.0
-WLF023,Wolf Switzerland Industrials 23,Avoid,Avoid,Avoid,Reject,1.0,21.232015146074108,20,20,47.106616077397454,False,False,0.0,0.0
-WLF020,Wolf China Consumer Staples 20,Avoid,Avoid,Avoid,Reject,1.0,24.85050111890342,18,21,46.84945318225205,False,False,0.0,0.0
-WLF001,Wolf Germany Healthcare 1,Avoid,Avoid,Avoid,Reject,1.0,11.248602221689536,21,17,44.491963350898835,False,False,0.0,0.0
+WLF004,Wolf Netherlands Financials 4,Hold,Avoid,Avoid,Reject,0.6666666666666666,24.40174836484442,20,22,42.23664701549365,True,True,0.0,0.0
+WLF010,Wolf Switzerland Financials 10,Hold,Avoid,Avoid,Reject,0.6666666666666666,26.33219646186512,24,24,37.83551053466999,True,True,0.0,0.0
+WLF016,Wolf Hong Kong Financials 16,Hold,Avoid,Avoid,Reject,0.6666666666666666,25.861853387709886,23,23,33.011756688233916,True,True,0.0,0.0
+WLF006,Wolf United States Technology 6,Avoid,Avoid,Avoid,Reject,1.0,11.27111522938872,2,10,64.07035475214597,False,False,0.0,0.0
+WLF024,Wolf Hong Kong Technology 24,Avoid,Avoid,Avoid,Reject,1.0,3.435140298485015,5,4,61.77879505874803,False,False,0.0,0.0
+WLF018,Wolf Switzerland Technology 18,Avoid,Avoid,Avoid,Reject,1.0,6.892747590307805,11,8,61.527497284933645,False,False,0.0,0.0
+WLF011,Wolf France Industrials 11,Avoid,Avoid,Avoid,Reject,1.0,4.1809357631405675,14,6,59.78232545419682,False,False,0.0,0.0
+WLF005,Wolf United Kingdom Industrials 5,Avoid,Avoid,Avoid,Reject,1.0,16.181081271902542,8,15,59.252856383334276,False,False,0.0,0.0
+WLF019,Wolf France Healthcare 19,Avoid,Avoid,Avoid,Reject,1.0,4.332815648479631,7,1,58.98878968150318,False,False,0.0,0.0
+WLF014,Wolf United States Consumer Staples 14,Avoid,Avoid,Avoid,Reject,1.0,25.29583920142293,16,19,58.42080694820781,False,False,0.0,0.0
+WLF017,Wolf Germany Industrials 17,Avoid,Avoid,Avoid,Reject,1.0,3.8514629649637357,10,5,57.794350442369776,False,False,0.0,0.0
+WLF012,Wolf Netherlands Technology 12,Avoid,Avoid,Avoid,Reject,1.0,12.76955101342055,12,14,57.5985230953993,False,False,0.0,0.0
+WLF022,Wolf United States Financials 22,Avoid,Avoid,Avoid,Reject,1.0,14.023504496571606,3,12,57.597970751514865,False,False,0.0,0.0
+WLF021,Wolf United Kingdom Utilities 21,Avoid,Avoid,Avoid,Reject,1.0,7.543165914512382,1,2,56.32316788732573,False,False,0.0,0.0
+WLF013,Wolf United Kingdom Healthcare 13,Avoid,Avoid,Avoid,Reject,1.0,6.274131582975876,13,9,55.73186327157406,False,False,0.0,0.0
+WLF009,Wolf Germany Utilities 9,Avoid,Avoid,Avoid,Reject,1.0,8.919660142356662,15,11,55.52020034050578,False,False,0.0,0.0
+WLF003,Wolf France Utilities 3,Avoid,Avoid,Avoid,Reject,1.0,6.362762008141109,4,3,55.45949653837942,False,False,0.0,0.0
+WLF015,Wolf China Utilities 15,Avoid,Avoid,Avoid,Reject,1.0,13.657181674549724,6,13,52.36043082223989,False,False,0.0,0.0
+WLF007,Wolf China Healthcare 7,Avoid,Avoid,Avoid,Reject,1.0,7.078564844588182,9,7,51.56455321059933,False,False,0.0,0.0
+WLF002,Wolf Switzerland Consumer Staples 2,Avoid,Avoid,Avoid,Reject,1.0,19.25640313640132,17,18,50.60006752859453,False,False,0.0,0.0
+WLF008,Wolf Hong Kong Consumer Staples 8,Avoid,Avoid,Avoid,Reject,1.0,11.589663652951417,19,16,47.948462021519475,False,False,0.0,0.0
+WLF023,Wolf China Industrials 23,Avoid,Avoid,Avoid,Reject,1.0,22.367814452673823,18,20,47.106616077397454,False,False,0.0,0.0
+WLF020,Wolf Netherlands Consumer Staples 20,Avoid,Avoid,Avoid,Reject,1.0,23.018155428398902,21,21,46.84945318225205,False,False,0.0,0.0
+WLF001,Wolf Germany Healthcare 1,Avoid,Avoid,Avoid,Reject,1.0,11.112393748653247,22,17,44.491963350898835,False,False,0.0,0.0

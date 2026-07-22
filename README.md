@@ -1,6 +1,6 @@
 # The Wolf Quant Model
 
-Portfolio-aware, regime-aware and sentiment-aware conservative listed-equity selection MVP for DACH, EU ex-DACH, UK, Mainland China and Hong Kong.
+Portfolio-aware, regime-aware and sentiment-aware conservative listed-equity selection MVP for DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong.
 
 The active stock-selection universe is listed equities only. India has been removed from the active universe; options and ETFs are not included unless explicitly configured later.
 
@@ -62,6 +62,14 @@ python scripts/run_stress_tests.py
 python scripts/run_hedge_engine.py
 ```
 
+Run the constrained, regime-gated and explainable DRL allocation overlay:
+
+```bash
+python scripts/run_drl_pipeline.py
+```
+
+The DRL engine is a residual overlay, not a replacement for the selected optimiser. It proposes bounded active-weight deltas against the baseline optimiser, applies probabilistic regime gating and the Wolf Chaos risk throttle, then projects weights through hard constraints. The acceptance gate records whether the result is rejected, blended or accepted as a challenger, and final recommendations retain the baseline source separately from DRL challenger status.
+
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
 ```bash
@@ -118,6 +126,26 @@ Key Sprint 4 outputs:
 - `portfolio_constraint_report.csv`
 - `portfolio_optimisation_summary.csv`
 - `portfolio_risk_report.csv`
+- `drl_state_schema.csv`
+- `drl_training_summary.csv`
+- `drl_seed_results.csv`
+- `drl_backtest_results.csv`
+- `drl_benchmark_comparison.csv`
+- `drl_acceptance_decision.csv`
+- `drl_baseline_portfolio.csv`
+- `drl_challenger_portfolio.csv`
+- `drl_final_selected_weights_source.csv`
+- `drl_target_weights.csv`
+- `drl_trade_list.csv`
+- `drl_constraint_adjustments.csv`
+- `drl_reward_decomposition.csv`
+- `drl_regime_agent_weights.csv`
+- `drl_explanations.csv`
+- `drl_feature_attributions.csv`
+- `drl_asset_time_attributions.csv`
+- `drl_ablation_results.csv`
+- `drl_model_card.md`
+- `drl_validation_report.md`
 - `risk_contribution_report.csv`
 - `stress_test_report.csv`
 - `stress_test_contribution_report.csv`

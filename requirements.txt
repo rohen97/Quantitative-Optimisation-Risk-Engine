@@ -6,3 +6,5 @@ matplotlib
 pyyaml
 pytest
 streamlit
+gymnasium
+stable-baselines3

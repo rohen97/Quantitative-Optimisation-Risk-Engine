@@ -11,6 +11,7 @@ REGIONS = [
     ("EU ex-DACH", "France", "EUR"),
     ("EU ex-DACH", "Netherlands", "EUR"),
     ("UK", "United Kingdom", "GBP"),
+    ("US", "United States", "USD"),
     ("Mainland China", "China", "CNY"),
     ("Hong Kong", "Hong Kong", "HKD"),
 ]

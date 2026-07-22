@@ -12,6 +12,7 @@ from src.branches.portfolio_aware import run_portfolio_aware_branch
 from src.data_ingestion.fundamental_ingestion import load_fundamentals
 from src.data_ingestion.price_ingestion import load_prices
 from src.data_ingestion.universe import build_universe
+from src.drl.drl_pipeline import run_drl_pipeline
 from src.features.feature_store import build_feature_store
 from src.hedging.hedge_report import build_hedge_outputs
 from src.models.forecasting import generate_mock_forecasts
@@ -44,6 +45,51 @@ REGIME_FEATURE_COLUMNS = [
 ]
 
 
+def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_outputs: dict) -> pd.DataFrame:
+    """Add DRL challenger and accepted-source fields without replacing baseline recommendations."""
+    data = final_recommendations.copy()
+    overlay_columns = {
+        "baseline_weight",
+        "raw_drl_weight",
+        "projected_drl_weight",
+        "accepted_target_weight",
+        "acceptance_selected_weights_source",
+        "drl_challenger_status",
+        "final_selected_weights_source",
+        "drl_rejection_reasons",
+        "final_selected_weight",
+    }
+    data = data.drop(columns=[column for column in overlay_columns if column in data], errors="ignore")
+    challenger = drl_outputs.get("drl_challenger_portfolio", pd.DataFrame())
+    decision = drl_outputs.get("drl_acceptance_decision", pd.DataFrame())
+    source = "baseline_optimiser"
+    accepted = False
+    rejection_reasons = ""
+    if isinstance(decision, pd.DataFrame) and not decision.empty:
+        row = decision.iloc[0]
+        source = str(row.get("selected_weights_source", source))
+        accepted = bool(row.get("accepted", False))
+        rejection_reasons = str(row.get("rejection_reasons", ""))
+    if isinstance(challenger, pd.DataFrame) and not challenger.empty:
+        columns = [
+            "ticker",
+            "baseline_weight",
+            "raw_drl_weight",
+            "projected_drl_weight",
+            "accepted_target_weight",
+            "acceptance_selected_weights_source",
+        ]
+        available = [column for column in columns if column in challenger]
+        data = data.merge(challenger[available], on="ticker", how="left")
+    data["drl_challenger_status"] = "accepted_or_blended" if accepted else "rejected_baseline_fallback"
+    data["final_selected_weights_source"] = source
+    data["drl_rejection_reasons"] = rejection_reasons
+    data["final_selected_weight"] = data.get("accepted_target_weight", data.get("final_target_weight", 0.0)).fillna(
+        data.get("final_target_weight", 0.0)
+    )
+    return data
+
+
 def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.DataFrame]:
     config = load_yaml("configs/base.yaml")
     branch_config = load_yaml("configs/branching.yaml")
@@ -54,6 +100,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     regime_config = load_yaml("configs/regime.yaml")
     ml_config = load_yaml("configs/ml_forecasting.yaml")
     optimisation_config = load_yaml("configs/optimisation.yaml")
+    drl_config = load_yaml("configs/drl.yaml").get("drl", load_yaml("configs/drl.yaml"))
     out = Path(output_dir) if output_dir else ensure_output_dir(config)
 
     universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
@@ -171,6 +218,21 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         hedge_report,
         defensive_substitutions,
     )
+    drl_outputs = run_drl_pipeline(
+        out,
+        input_frames={
+            "portfolio_optimisation_summary": optimisation_outputs["portfolio_optimisation_summary"],
+            "recommended_optimised_portfolio": optimisation_outputs["recommended_optimised_portfolio"],
+            "optimised_portfolio_cvar_constrained": optimisation_outputs["optimised_portfolio_cvar_constrained"],
+            "optimised_portfolio_regime_aware": optimisation_outputs["optimised_portfolio_regime_aware"],
+            "stock_scorecard": scorecard,
+            "regime_dashboard_summary": regime_outputs["regime_dashboard_summary"],
+        },
+        drl_config=drl_config,
+        optimisation_config=optimisation_config,
+        write_outputs=False,
+    )
+    final_recommendations = attach_drl_challenger_status(final_recommendations, drl_outputs)
 
     write_csv(diagnostics, out, "current_portfolio_diagnostics.csv")
     write_csv(portfolio, out, "current_portfolio_enriched.csv")
@@ -253,6 +315,30 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     write_csv(defensive_substitutions, out, "defensive_substitution_recommendations.csv")
     write_markdown(risk_stress_hedge_summary, out, "risk_stress_hedge_summary.md")
     write_markdown(ml_outputs["model_validation_report"], out, "model_validation_report.md")
+    for filename, frame in {
+        "drl_state_schema.csv": drl_outputs["drl_state_schema"],
+        "drl_training_summary.csv": drl_outputs["drl_training_summary"],
+        "drl_seed_results.csv": drl_outputs["drl_seed_results"],
+        "drl_backtest_results.csv": drl_outputs["drl_backtest_results"],
+        "drl_benchmark_comparison.csv": drl_outputs["drl_benchmark_comparison"],
+        "drl_acceptance_decision.csv": drl_outputs["drl_acceptance_decision"],
+        "drl_baseline_portfolio.csv": drl_outputs["drl_baseline_portfolio"],
+        "drl_challenger_portfolio.csv": drl_outputs["drl_challenger_portfolio"],
+        "drl_final_selected_weights_source.csv": drl_outputs["drl_final_selected_weights_source"],
+        "drl_target_weights.csv": drl_outputs["drl_target_weights"],
+        "drl_trade_list.csv": drl_outputs["drl_trade_list"],
+        "drl_constraint_adjustments.csv": drl_outputs["drl_constraint_adjustments"],
+        "drl_reward_decomposition.csv": drl_outputs["drl_reward_decomposition"],
+        "drl_regime_agent_weights.csv": drl_outputs["drl_regime_agent_weights"],
+        "drl_risk_throttle.csv": drl_outputs["drl_risk_throttle"],
+        "drl_explanations.csv": drl_outputs["drl_explanations"],
+        "drl_feature_attributions.csv": drl_outputs["drl_feature_attributions"],
+        "drl_asset_time_attributions.csv": drl_outputs["drl_asset_time_attributions"],
+        "drl_ablation_results.csv": drl_outputs["drl_ablation_results"],
+    }.items():
+        write_csv(frame, out, filename)
+    write_markdown(str(drl_outputs["drl_model_card"]), out, "drl_model_card.md")
+    write_markdown(str(drl_outputs["drl_validation_report"]), out, "drl_validation_report.md")
     return {
         "portfolio": portfolio,
         "diagnostics": diagnostics,
@@ -278,5 +364,6 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "hedge_recommendations": hedge_report,
         "defensive_substitution_recommendations": defensive_substitutions,
         "risk_stress_hedge_summary": pd.DataFrame([{"markdown": risk_stress_hedge_summary}]),
+        **drl_outputs,
         **{f"recommendations_{h}m": frame for h, frame in recommendations.items()},
     }

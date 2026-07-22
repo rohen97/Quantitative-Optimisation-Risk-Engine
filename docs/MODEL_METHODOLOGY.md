@@ -94,7 +94,7 @@ The Regime Analysis and Market State Engine is a deterministic mock-mode overlay
 
 Current process:
 
-1. Build a regional factor lens for Global, DACH, EU ex-DACH, UK, Mainland China and Hong Kong.
+1. Build a regional factor lens for Global, DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong.
 2. Standardise factor returns and estimate crisis, steady-state, inflation and walking-on-ice probabilities with a GMM when available, falling back to rules.
 3. Calculate the Wolf Chaos Index from cross-sectional dispersion, pairwise correlation, correlation instability, largest eigenvalue, effective bets, breadth, volatility-of-volatility and drawdown breadth.
 4. Estimate informational regime deterioration using alternative-data and narrative proxies.
@@ -135,6 +135,61 @@ Implemented constructors:
 Hard constraints include long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints include dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration limits. The constraint report records breaches rather than hiding them.
 
 The trade list compares current and target weights and assigns Buy, Increase, Reduce, Sell, Hold or Avoid actions. Optimisation cannot override hard exclusions or use high expected return alone to justify high-risk names. Future upgrades can add Hierarchical Risk Parity, Black-Litterman, transaction-cost models, tax constraints, robust covariance estimation, robust optimisation and a DRL allocation overlay.
+
+## Constrained Regime-Gated DRL Methodology
+
+The DRL allocation engine is implemented as a bounded residual overlay and challenger to the selected classical optimiser. The central allocation equation is `raw_candidate_weights = baseline_optimiser_weights + bounded_drl_adjustments`, followed by projection to the feasible constraint set. DRL does not replace the optimiser by default because the optimiser is deterministic, auditable and directly controlled by explicit risk, concentration, liquidity and mandate constraints.
+
+State design is point-in-time and deterministic. The state includes current weights, baseline weights, cash, concentration, turnover budget, temporal return features, volatility, fundamentals, dividend quality, distributional forecasts, regime probabilities, Wolf Chaos Index, sentiment, narrative reframing, liquidity, risk contributions, stress losses and hard eligibility masks. Future target, realised-return or label columns are excluded from the observation.
+
+Action design is a residual weight adjustment. Monthly action deltas default to 1% per asset and quarterly deltas default to 2%. The action is not a direct target portfolio: it is clipped, added to the baseline, masked for eligibility and projected. The MVP is cash-inclusive, long-only, unlevered and does not permit shorting.
+
+Constraint projection is mandatory. Excluded stocks receive zero weight. The projection enforces non-negative weights, weights summing to one, single-name caps, sector/country/region/currency caps, liquidity limits, turnover caps and cash floors. If a projected action is infeasible, the engine falls back to the baseline optimiser.
+
+The transaction-cost model estimates commission, half-spread/slippage, nonlinear market impact using participation rate, currency conversion placeholders and optional country transaction-tax placeholders. Costs reduce reward and are included in net benchmark metrics.
+
+Reward design is conservative and decomposed. Positive components include Differential Sharpe, net total return, dividend income, regime suitability improvement, diversification improvement, cash-flow quality and dividend safety. Negative components include CVaR, Expected Shortfall, drawdown, transaction costs, turnover, concentration, dividend-cut risk, liquidity risk, forecast uncertainty, narrative/credit stress and stress-scenario loss. Differential Sharpe is updated online from exponentially smoothed first and second moments, so raw return alone is never the objective.
+
+The Wolf Chaos risk throttle scales actions during elevated chaos, blocks additions during high stress and can force a baseline fallback under severe chaos. Specialist agents are blended probabilistically rather than switched by a hard rule. The stable low-chaos specialist emphasises total return, dividend income, quality, cash flow, diversification and low turnover. The crisis high-chaos specialist emphasises CVaR, Expected Shortfall, drawdown control, liquidity, cash, defensive sectors, low leverage, dividend safety and reduced turnover. Inflation, regional-stress and credit-stress specialists are future-ready.
+
+PPO is the primary policy interface with continuous residual actions, deterministic evaluation and at least five seeds. Stable-Baselines3 is optional; deterministic mock fallback keeps the pipeline runnable and labels outputs as mock. SAC and TD3 are optional challengers documented in configuration but not active production policies.
+
+The optional TCN/GAP policy encoder is available only when PyTorch is present. It uses asset-independent temporal streams, shared parameters, causal dilated convolutions, residual blocks, Global Average Pooling, a cross-asset fully connected layer, cash logit and softmax portfolio weights. CAM/Grad-CAM explainability is future-ready for that path. Current explainability outputs include constraint traces, feature-group attribution, asset-time attribution and human-readable explanations that describe model attributions rather than causal relationships.
+
+Training uses chronological walk-forward validation only. The default layout is five years training, one year validation, one year testing, shifted forward one year, with limited-history fallback and a rebalance-period embargo. Scaling is fit on training data only. Model selection uses validation only; test data is held out and never used for model selection. Multi-seed evaluation reports every seed plus mean, median, standard deviation, best, worst and interquartile range.
+
+Benchmarking is labelled by information set. Fair comparisons give DRL and classical optimisers the same return, volatility, covariance, current-weight and cash inputs. Full Wolf comparisons allow richer scorecard, distributional, regime, sentiment, narrative, risk, stress and liquidity features. The model does not claim DRL beats MVO when DRL is using a richer state unless the comparison is clearly labelled.
+
+Ablation tests compare regime/no-regime, distributional/no-distributional, sentiment/narrative variants, Differential Sharpe only versus full conservative reward, no transaction costs versus realistic costs, universal agent versus regime-specialist blend, MLP versus optional TCN/GAP and no throttle versus Wolf Chaos throttle.
+
+The acceptance gate rejects DRL and selects the baseline optimiser when there is a hard constraint violation, infeasible projected action, missing eligibility mask, non-finite weight, negative weight, weight-sum error, CVaR breach, Expected Shortfall breach, severe stress breach, turnover breach, liquidity failure, throttle fallback, low confidence, excessive seed instability, validation underperformance or test leakage. In dry-run mode the DRL blend is capped at 25% and full replacement is disabled.
+
+Current limitations:
+
+- The MVP uses deterministic local/mock policies and mock/sample returns.
+- Point-in-time vendor history is not yet connected.
+- PPO integration is optional and dependency-gated.
+- TCN/GAP and CAM are research interfaces, not fully validated production policy explanations.
+- Outputs are decision-support artifacts and not execution instructions.
+
+Future research:
+
+- full TCN + GAP PPO policy
+- robust CAM / Grad-CAM attribution
+- SAC and TD3 challengers
+- distributional reinforcement learning
+- constrained policy optimisation
+- Lagrangian risk constraints
+- offline reinforcement learning
+- uncertainty-aware policy ensembles
+- synthetic crisis generation
+- adversarial regime simulation
+- multi-agent allocation and hedging
+- meta-learning across regions
+- online fine-tuning with strict governance
+- causal validation of input features
+- DRL hedge sizing
+- hierarchical or graph-based cross-asset encoders
 
 ## Risk, Stress Testing And Hedge Methodology
 

@@ -11,6 +11,10 @@ regions:
     countries: [United Kingdom]
     currencies: [GBP]
     exchanges: [London Stock Exchange]
+  US:
+    countries: [United States]
+    currencies: [USD]
+    exchanges: [NYSE, Nasdaq]
   Mainland China:
     countries: [China]
     currencies: [CNY]

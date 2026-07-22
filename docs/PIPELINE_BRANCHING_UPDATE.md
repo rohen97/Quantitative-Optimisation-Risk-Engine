@@ -2,7 +2,7 @@
 
 ## Update Summary
 
-The Wolf Quant Model equity universe is updated to remove India and add broader Europe and the United Kingdom.
+The Wolf Quant Model equity universe is updated to remove India and add broader Europe, the United Kingdom and the United States.
 
 ## Revised Equity Universe
 
@@ -11,6 +11,7 @@ The stock-selection universe is listed equities only and now covers:
 - DACH: Germany, Austria, Switzerland
 - EU ex-DACH: broader European Union listed equities outside DACH
 - UK: London-listed equities
+- US: United States listed equities
 - Mainland China / Shanghai listed equities
 - Hong Kong listed equities
 
@@ -23,7 +24,7 @@ The pipeline branches before final optimisation, risk, stress and hedge outputs 
 ```text
 Data Ingestion + Feature Store
         |
-Universe: DACH + EU ex-DACH + UK + Shanghai/China + Hong Kong
+Universe: DACH + EU ex-DACH + UK + US + Shanghai/China + Hong Kong
         |
 Branch 1: Portfolio-Aware Quant Model
         |

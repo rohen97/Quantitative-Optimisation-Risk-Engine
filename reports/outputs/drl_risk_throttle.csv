@@ -1,0 +1,2 @@
+action_scale,minimum_cash_weight,defensive_only,additions_blocked,fallback_to_baseline,reason
+0.5,0.05,False,False,False,elevated_uncertainty_scaled_actions

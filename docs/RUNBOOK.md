@@ -56,6 +56,18 @@ python scripts/run_stress_tests.py
 python scripts/run_hedge_engine.py
 ```
 
+Run DRL allocation overlay outputs:
+
+```bash
+python scripts/run_drl_environment_check.py
+python scripts/run_drl_training.py
+python scripts/run_drl_backtest.py
+python scripts/run_drl_explainability.py
+python scripts/run_drl_pipeline.py
+```
+
+The DRL scripts run in mock mode unless `configs/drl.yaml` is changed. They load the selected optimiser baseline, construct point-in-time states, validate state dimensions and eligibility masks, run the market environment smoke test, train PPO or deterministic mock fallback, run walk-forward and multi-seed backtests, apply regime gating and the Wolf Chaos throttle, project actions through hard constraints, compare benchmarks, run ablations, generate explanations, build the DRL trade list and save the acceptance decision.
+
 Validate Alpaca credentials:
 
 ```bash
@@ -84,7 +96,7 @@ Key branch outputs:
 - `branch_comparison_report.csv`
 - `final_recommendations.csv`
 
-The active universe is DACH, EU ex-DACH, UK, Mainland China and Hong Kong. The LLM analyst benchmark currently runs in mock mode and does not call OpenAI or Claude APIs.
+The active universe is DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong. The LLM analyst benchmark currently runs in mock mode and does not call OpenAI or Claude APIs.
 
 Feature store output:
 
@@ -148,6 +160,41 @@ ML distributional outputs:
 
 The ML layer is mock-first and forecasts distribution parameters, not just point returns. It derives VaR, CVaR, Expected Shortfall, tail risk, skewness risk and validation diagnostics. Transformer/xLSTM/CNN/LSTM ideas are present as disabled research placeholders; no deep-learning dependency or automated trading engine is active.
 
+DRL overlay outputs:
+
+- `drl_state_schema.csv`
+- `drl_training_summary.csv`
+- `drl_seed_results.csv`
+- `drl_backtest_results.csv`
+- `drl_benchmark_comparison.csv`
+- `drl_acceptance_decision.csv`
+- `drl_baseline_portfolio.csv`
+- `drl_challenger_portfolio.csv`
+- `drl_final_selected_weights_source.csv`
+- `drl_target_weights.csv`
+- `drl_trade_list.csv`
+- `drl_constraint_adjustments.csv`
+- `drl_reward_decomposition.csv`
+- `drl_regime_agent_weights.csv`
+- `drl_explanations.csv`
+- `drl_feature_attributions.csv`
+- `drl_asset_time_attributions.csv`
+- `drl_ablation_results.csv`
+- `drl_model_card.md`
+- `drl_validation_report.md`
+
+The DRL layer is a challenger overlay only. It cannot override hard exclusions, eligibility masks, liquidity restrictions, regime/narrative exclusions or stress-test rejection rules.
+
+Operational checks:
+
+- `drl_baseline_portfolio.csv` is the selected optimiser baseline.
+- `drl_challenger_portfolio.csv` is the projected DRL challenger.
+- `drl_acceptance_decision.csv` records rejected, blended or accepted status.
+- `drl_final_selected_weights_source.csv` records the final source and blend weights.
+- `final_recommendations.csv` keeps original recommendation fields and adds DRL challenger status. It does not silently replace optimiser weights.
+- `drl_model_card.md` documents role, state/action design, reward, PPO, specialists, explainability, limitations and future research.
+- `drl_validation_report.md` documents walk-forward validation, multiple seeds, benchmark fairness, ablations and acceptance/rejection controls.
+
 Portfolio optimisation outputs:
 
 - `optimiser_input_dataset.csv`
@@ -181,4 +228,4 @@ Alpaca integration:
 - Paper trading account checks use `https://paper-api.alpaca.markets`.
 - Market data bars use `https://data.alpaca.markets` and default to the `iex` feed.
 - A `403 Forbidden` from `/v2/account` usually means missing, invalid or mismatched Alpaca auth headers.
-- The full pipeline remains mock-first by default because the active universe includes non-US listings that Alpaca may not cover.
+- The full pipeline remains mock-first by default because the active universe includes both US and non-US listings; Alpaca may be useful for US names but does not cover the full universe.

@@ -1,0 +1,289 @@
+ticker,feature_group,attribution_score,rank,attribution_description
+WLF021,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF021.
+WLF021,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF021.
+WLF021,volatility,0.0,3,volatility had high attribution in the model allocation for WLF021.
+WLF021,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF021.
+WLF021,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF021.
+WLF021,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF021.
+WLF021,regime,0.0,7,regime had high attribution in the model allocation for WLF021.
+WLF021,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF021.
+WLF021,narrative,0.0,9,narrative had high attribution in the model allocation for WLF021.
+WLF021,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF021.
+WLF021,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF021.
+WLF021,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF021.
+WLF003,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF003.
+WLF003,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF003.
+WLF003,volatility,0.0,3,volatility had high attribution in the model allocation for WLF003.
+WLF003,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF003.
+WLF003,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF003.
+WLF003,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF003.
+WLF003,regime,0.0,7,regime had high attribution in the model allocation for WLF003.
+WLF003,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF003.
+WLF003,narrative,0.0,9,narrative had high attribution in the model allocation for WLF003.
+WLF003,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF003.
+WLF003,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF003.
+WLF003,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF003.
+WLF024,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF024.
+WLF024,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF024.
+WLF024,volatility,0.0,3,volatility had high attribution in the model allocation for WLF024.
+WLF024,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF024.
+WLF024,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF024.
+WLF024,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF024.
+WLF024,regime,0.0,7,regime had high attribution in the model allocation for WLF024.
+WLF024,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF024.
+WLF024,narrative,0.0,9,narrative had high attribution in the model allocation for WLF024.
+WLF024,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF024.
+WLF024,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF024.
+WLF024,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF024.
+WLF006,liquidity,6.360716351775744e-11,1,liquidity had high attribution in the model allocation for WLF006.
+WLF006,fundamentals,9.809465237479353e-16,2,fundamentals had high attribution in the model allocation for WLF006.
+WLF006,regime,5.912608157923442e-16,3,regime had high attribution in the model allocation for WLF006.
+WLF006,narrative,5.663216583831295e-16,4,narrative had high attribution in the model allocation for WLF006.
+WLF006,dividend quality,4.793992855123582e-16,5,dividend quality had high attribution in the model allocation for WLF006.
+WLF006,portfolio state,1.3981871216373064e-16,6,portfolio state had high attribution in the model allocation for WLF006.
+WLF006,distributional forecast,1.7266768456818218e-17,7,distributional forecast had high attribution in the model allocation for WLF006.
+WLF006,volatility,1.235098034484864e-17,8,volatility had high attribution in the model allocation for WLF006.
+WLF006,temporal returns,7.415253317074203e-18,9,temporal returns had high attribution in the model allocation for WLF006.
+WLF006,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF006.
+WLF006,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF006.
+WLF006,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF006.
+WLF022,liquidity,1332.9264636253588,1,liquidity had high attribution in the model allocation for WLF022.
+WLF022,fundamentals,0.06536874437848586,2,fundamentals had high attribution in the model allocation for WLF022.
+WLF022,narrative,0.03385637182364579,3,narrative had high attribution in the model allocation for WLF022.
+WLF022,dividend quality,0.026882226003181294,4,dividend quality had high attribution in the model allocation for WLF022.
+WLF022,regime,0.02472850262700165,5,regime had high attribution in the model allocation for WLF022.
+WLF022,portfolio state,0.009208525597732928,6,portfolio state had high attribution in the model allocation for WLF022.
+WLF022,distributional forecast,0.0010935579459536494,7,distributional forecast had high attribution in the model allocation for WLF022.
+WLF022,volatility,0.0007823305733849772,8,volatility had high attribution in the model allocation for WLF022.
+WLF022,temporal returns,0.0005330336099514159,9,temporal returns had high attribution in the model allocation for WLF022.
+WLF022,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF022.
+WLF022,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF022.
+WLF022,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF022.
+WLF019,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF019.
+WLF019,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF019.
+WLF019,volatility,0.0,3,volatility had high attribution in the model allocation for WLF019.
+WLF019,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF019.
+WLF019,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF019.
+WLF019,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF019.
+WLF019,regime,0.0,7,regime had high attribution in the model allocation for WLF019.
+WLF019,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF019.
+WLF019,narrative,0.0,9,narrative had high attribution in the model allocation for WLF019.
+WLF019,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF019.
+WLF019,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF019.
+WLF019,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF019.
+WLF018,liquidity,453.2879234728465,1,liquidity had high attribution in the model allocation for WLF018.
+WLF018,fundamentals,0.059036412917764444,2,fundamentals had high attribution in the model allocation for WLF018.
+WLF018,narrative,0.0325812051778881,3,narrative had high attribution in the model allocation for WLF018.
+WLF018,dividend quality,0.020854419724583923,4,dividend quality had high attribution in the model allocation for WLF018.
+WLF018,regime,0.01817487188156798,5,regime had high attribution in the model allocation for WLF018.
+WLF018,portfolio state,0.007306928257099715,6,portfolio state had high attribution in the model allocation for WLF018.
+WLF018,distributional forecast,0.0007149573149335712,7,distributional forecast had high attribution in the model allocation for WLF018.
+WLF018,volatility,0.0005427173172215639,8,volatility had high attribution in the model allocation for WLF018.
+WLF018,temporal returns,0.0005311207820231586,9,temporal returns had high attribution in the model allocation for WLF018.
+WLF018,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF018.
+WLF018,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF018.
+WLF018,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF018.
+WLF012,liquidity,6292.349211053587,1,liquidity had high attribution in the model allocation for WLF012.
+WLF012,fundamentals,0.10256426183497859,2,fundamentals had high attribution in the model allocation for WLF012.
+WLF012,narrative,0.06461119493498775,3,narrative had high attribution in the model allocation for WLF012.
+WLF012,regime,0.04587923674359228,4,regime had high attribution in the model allocation for WLF012.
+WLF012,dividend quality,0.04420539170354825,5,dividend quality had high attribution in the model allocation for WLF012.
+WLF012,portfolio state,0.014490236423662024,6,portfolio state had high attribution in the model allocation for WLF012.
+WLF012,distributional forecast,0.001702321953213453,7,distributional forecast had high attribution in the model allocation for WLF012.
+WLF012,volatility,0.0012534408412601544,8,volatility had high attribution in the model allocation for WLF012.
+WLF012,temporal returns,0.0006978219385213028,9,temporal returns had high attribution in the model allocation for WLF012.
+WLF012,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF012.
+WLF012,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF012.
+WLF012,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF012.
+WLF015,liquidity,1457.7012338794377,1,liquidity had high attribution in the model allocation for WLF015.
+WLF015,fundamentals,0.029643062718241846,2,fundamentals had high attribution in the model allocation for WLF015.
+WLF015,regime,0.014386149486206437,3,regime had high attribution in the model allocation for WLF015.
+WLF015,narrative,0.014160062652437503,4,narrative had high attribution in the model allocation for WLF015.
+WLF015,dividend quality,0.014036652861994596,5,dividend quality had high attribution in the model allocation for WLF015.
+WLF015,portfolio state,0.004699581782209484,6,portfolio state had high attribution in the model allocation for WLF015.
+WLF015,distributional forecast,0.0005593507425760407,7,distributional forecast had high attribution in the model allocation for WLF015.
+WLF015,volatility,0.0004008373713588514,8,volatility had high attribution in the model allocation for WLF015.
+WLF015,temporal returns,0.00026602262393217587,9,temporal returns had high attribution in the model allocation for WLF015.
+WLF015,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF015.
+WLF015,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF015.
+WLF015,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF015.
+WLF005,liquidity,14075.860529370275,1,liquidity had high attribution in the model allocation for WLF005.
+WLF005,fundamentals,0.35394959536116727,2,fundamentals had high attribution in the model allocation for WLF005.
+WLF005,dividend quality,0.23477931301061208,3,dividend quality had high attribution in the model allocation for WLF005.
+WLF005,narrative,0.21144347735585609,4,narrative had high attribution in the model allocation for WLF005.
+WLF005,regime,0.15569076834536405,5,regime had high attribution in the model allocation for WLF005.
+WLF005,portfolio state,0.06188198256202407,6,portfolio state had high attribution in the model allocation for WLF005.
+WLF005,volatility,0.004711116176964405,7,volatility had high attribution in the model allocation for WLF005.
+WLF005,distributional forecast,0.004700339217825249,8,distributional forecast had high attribution in the model allocation for WLF005.
+WLF005,temporal returns,0.0017397361296155288,9,temporal returns had high attribution in the model allocation for WLF005.
+WLF005,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF005.
+WLF005,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF005.
+WLF005,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF005.
+WLF013,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF013.
+WLF013,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF013.
+WLF013,volatility,0.0,3,volatility had high attribution in the model allocation for WLF013.
+WLF013,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF013.
+WLF013,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF013.
+WLF013,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF013.
+WLF013,regime,0.0,7,regime had high attribution in the model allocation for WLF013.
+WLF013,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF013.
+WLF013,narrative,0.0,9,narrative had high attribution in the model allocation for WLF013.
+WLF013,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF013.
+WLF013,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF013.
+WLF013,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF013.
+WLF007,liquidity,12828.868948723562,1,liquidity had high attribution in the model allocation for WLF007.
+WLF007,fundamentals,0.2141209739892529,2,fundamentals had high attribution in the model allocation for WLF007.
+WLF007,narrative,0.12834657413918246,3,narrative had high attribution in the model allocation for WLF007.
+WLF007,dividend quality,0.08886615697510178,4,dividend quality had high attribution in the model allocation for WLF007.
+WLF007,regime,0.08139018923091182,5,regime had high attribution in the model allocation for WLF007.
+WLF007,portfolio state,0.0326525209674362,6,portfolio state had high attribution in the model allocation for WLF007.
+WLF007,volatility,0.0019502262916016163,7,volatility had high attribution in the model allocation for WLF007.
+WLF007,temporal returns,0.0017695096163778314,8,temporal returns had high attribution in the model allocation for WLF007.
+WLF007,distributional forecast,0.001517599618268984,9,distributional forecast had high attribution in the model allocation for WLF007.
+WLF007,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF007.
+WLF007,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF007.
+WLF007,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF007.
+WLF014,liquidity,1745.143145312439,1,liquidity had high attribution in the model allocation for WLF014.
+WLF014,fundamentals,0.5932837731914832,2,fundamentals had high attribution in the model allocation for WLF014.
+WLF014,dividend quality,0.3023429818953622,3,dividend quality had high attribution in the model allocation for WLF014.
+WLF014,narrative,0.2772134623607694,4,narrative had high attribution in the model allocation for WLF014.
+WLF014,regime,0.19040978623997715,5,regime had high attribution in the model allocation for WLF014.
+WLF014,portfolio state,0.0843942785645239,6,portfolio state had high attribution in the model allocation for WLF014.
+WLF014,distributional forecast,0.00960513693644801,7,distributional forecast had high attribution in the model allocation for WLF014.
+WLF014,volatility,0.0076257813935537355,8,volatility had high attribution in the model allocation for WLF014.
+WLF014,temporal returns,0.001843437221113657,9,temporal returns had high attribution in the model allocation for WLF014.
+WLF014,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF014.
+WLF014,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF014.
+WLF014,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF014.
+WLF017,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF017.
+WLF017,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF017.
+WLF017,volatility,0.0,3,volatility had high attribution in the model allocation for WLF017.
+WLF017,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF017.
+WLF017,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF017.
+WLF017,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF017.
+WLF017,regime,0.0,7,regime had high attribution in the model allocation for WLF017.
+WLF017,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF017.
+WLF017,narrative,0.0,9,narrative had high attribution in the model allocation for WLF017.
+WLF017,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF017.
+WLF017,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF017.
+WLF017,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF017.
+WLF011,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF011.
+WLF011,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF011.
+WLF011,volatility,0.0,3,volatility had high attribution in the model allocation for WLF011.
+WLF011,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF011.
+WLF011,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF011.
+WLF011,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF011.
+WLF011,regime,0.0,7,regime had high attribution in the model allocation for WLF011.
+WLF011,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF011.
+WLF011,narrative,0.0,9,narrative had high attribution in the model allocation for WLF011.
+WLF011,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF011.
+WLF011,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF011.
+WLF011,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF011.
+WLF009,liquidity,1321.0907702392856,1,liquidity had high attribution in the model allocation for WLF009.
+WLF009,fundamentals,0.21145002760468656,2,fundamentals had high attribution in the model allocation for WLF009.
+WLF009,dividend quality,0.1132056260165031,3,dividend quality had high attribution in the model allocation for WLF009.
+WLF009,narrative,0.0962477476936079,4,narrative had high attribution in the model allocation for WLF009.
+WLF009,regime,0.07592332781199858,5,regime had high attribution in the model allocation for WLF009.
+WLF009,portfolio state,0.031943655387832046,6,portfolio state had high attribution in the model allocation for WLF009.
+WLF009,distributional forecast,0.0023151371260625537,7,distributional forecast had high attribution in the model allocation for WLF009.
+WLF009,volatility,0.0022095651257138505,8,volatility had high attribution in the model allocation for WLF009.
+WLF009,temporal returns,0.001490364605531926,9,temporal returns had high attribution in the model allocation for WLF009.
+WLF009,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF009.
+WLF009,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF009.
+WLF009,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF009.
+WLF002,liquidity,34848.65347371796,1,liquidity had high attribution in the model allocation for WLF002.
+WLF002,fundamentals,0.6336762943425984,2,fundamentals had high attribution in the model allocation for WLF002.
+WLF002,dividend quality,0.38685983331877055,3,dividend quality had high attribution in the model allocation for WLF002.
+WLF002,narrative,0.3459786348332207,4,narrative had high attribution in the model allocation for WLF002.
+WLF002,regime,0.2856164332763936,5,regime had high attribution in the model allocation for WLF002.
+WLF002,portfolio state,0.1053290018342942,6,portfolio state had high attribution in the model allocation for WLF002.
+WLF002,volatility,0.008669025346327157,7,volatility had high attribution in the model allocation for WLF002.
+WLF002,distributional forecast,0.008652264678248702,8,distributional forecast had high attribution in the model allocation for WLF002.
+WLF002,temporal returns,0.00030548205398931447,9,temporal returns had high attribution in the model allocation for WLF002.
+WLF002,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF002.
+WLF002,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF002.
+WLF002,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF002.
+WLF023,liquidity,52423.50818201191,1,liquidity had high attribution in the model allocation for WLF023.
+WLF023,fundamentals,0.7844329361715678,2,fundamentals had high attribution in the model allocation for WLF023.
+WLF023,narrative,0.4561862337919314,3,narrative had high attribution in the model allocation for WLF023.
+WLF023,dividend quality,0.31083679000412306,4,dividend quality had high attribution in the model allocation for WLF023.
+WLF023,regime,0.2965314252681783,5,regime had high attribution in the model allocation for WLF023.
+WLF023,portfolio state,0.14084308355150313,6,portfolio state had high attribution in the model allocation for WLF023.
+WLF023,volatility,0.010771701215503918,7,volatility had high attribution in the model allocation for WLF023.
+WLF023,distributional forecast,0.010312147010094821,8,distributional forecast had high attribution in the model allocation for WLF023.
+WLF023,temporal returns,0.0018236929389603934,9,temporal returns had high attribution in the model allocation for WLF023.
+WLF023,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF023.
+WLF023,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF023.
+WLF023,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF023.
+WLF004,liquidity,50969.948654598615,1,liquidity had high attribution in the model allocation for WLF004.
+WLF004,fundamentals,0.6228723983287962,2,fundamentals had high attribution in the model allocation for WLF004.
+WLF004,narrative,0.5012179391045382,3,narrative had high attribution in the model allocation for WLF004.
+WLF004,dividend quality,0.43326564323919925,4,dividend quality had high attribution in the model allocation for WLF004.
+WLF004,regime,0.3989504899595664,5,regime had high attribution in the model allocation for WLF004.
+WLF004,portfolio state,0.14499306283033575,6,portfolio state had high attribution in the model allocation for WLF004.
+WLF004,distributional forecast,0.01292919426466228,7,distributional forecast had high attribution in the model allocation for WLF004.
+WLF004,volatility,0.01224006531251988,8,volatility had high attribution in the model allocation for WLF004.
+WLF004,temporal returns,0.0016988027784755725,9,temporal returns had high attribution in the model allocation for WLF004.
+WLF004,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF004.
+WLF004,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF004.
+WLF004,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF004.
+WLF020,liquidity,36720.01539293369,1,liquidity had high attribution in the model allocation for WLF020.
+WLF020,fundamentals,0.6761730237857231,2,fundamentals had high attribution in the model allocation for WLF020.
+WLF020,narrative,0.5630971220727518,3,narrative had high attribution in the model allocation for WLF020.
+WLF020,dividend quality,0.3807203671293802,4,dividend quality had high attribution in the model allocation for WLF020.
+WLF020,regime,0.33514232885149026,5,regime had high attribution in the model allocation for WLF020.
+WLF020,portfolio state,0.12684015619860037,6,portfolio state had high attribution in the model allocation for WLF020.
+WLF020,distributional forecast,0.012313116999398997,7,distributional forecast had high attribution in the model allocation for WLF020.
+WLF020,volatility,0.011395069707231168,8,volatility had high attribution in the model allocation for WLF020.
+WLF020,temporal returns,0.0008154315403023844,9,temporal returns had high attribution in the model allocation for WLF020.
+WLF020,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF020.
+WLF020,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF020.
+WLF020,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF020.
+WLF008,portfolio state,0.0,1,portfolio state had high attribution in the model allocation for WLF008.
+WLF008,temporal returns,0.0,2,temporal returns had high attribution in the model allocation for WLF008.
+WLF008,volatility,0.0,3,volatility had high attribution in the model allocation for WLF008.
+WLF008,fundamentals,0.0,4,fundamentals had high attribution in the model allocation for WLF008.
+WLF008,dividend quality,0.0,5,dividend quality had high attribution in the model allocation for WLF008.
+WLF008,distributional forecast,0.0,6,distributional forecast had high attribution in the model allocation for WLF008.
+WLF008,regime,0.0,7,regime had high attribution in the model allocation for WLF008.
+WLF008,sentiment,0.0,8,sentiment had high attribution in the model allocation for WLF008.
+WLF008,narrative,0.0,9,narrative had high attribution in the model allocation for WLF008.
+WLF008,liquidity,0.0,10,liquidity had high attribution in the model allocation for WLF008.
+WLF008,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF008.
+WLF008,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF008.
+WLF001,liquidity,24643.496336019572,1,liquidity had high attribution in the model allocation for WLF001.
+WLF001,fundamentals,0.7759246831231749,2,fundamentals had high attribution in the model allocation for WLF001.
+WLF001,narrative,0.45147247204479934,3,narrative had high attribution in the model allocation for WLF001.
+WLF001,dividend quality,0.25669410840796786,4,dividend quality had high attribution in the model allocation for WLF001.
+WLF001,regime,0.1808893216370306,5,regime had high attribution in the model allocation for WLF001.
+WLF001,portfolio state,0.11917475653342531,6,portfolio state had high attribution in the model allocation for WLF001.
+WLF001,volatility,0.0072669898033423455,7,volatility had high attribution in the model allocation for WLF001.
+WLF001,distributional forecast,0.004547862348473584,8,distributional forecast had high attribution in the model allocation for WLF001.
+WLF001,temporal returns,0.0007868163200412172,9,temporal returns had high attribution in the model allocation for WLF001.
+WLF001,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF001.
+WLF001,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF001.
+WLF001,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF001.
+WLF016,liquidity,72256.3896256706,1,liquidity had high attribution in the model allocation for WLF016.
+WLF016,fundamentals,0.5438851556476181,2,fundamentals had high attribution in the model allocation for WLF016.
+WLF016,narrative,0.48088603866615165,3,narrative had high attribution in the model allocation for WLF016.
+WLF016,regime,0.3221279560970808,4,regime had high attribution in the model allocation for WLF016.
+WLF016,dividend quality,0.269731606990194,5,dividend quality had high attribution in the model allocation for WLF016.
+WLF016,portfolio state,0.15192539388942763,6,portfolio state had high attribution in the model allocation for WLF016.
+WLF016,distributional forecast,0.014253656441334014,7,distributional forecast had high attribution in the model allocation for WLF016.
+WLF016,volatility,0.011756156365832401,8,volatility had high attribution in the model allocation for WLF016.
+WLF016,temporal returns,0.007348062818714503,9,temporal returns had high attribution in the model allocation for WLF016.
+WLF016,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF016.
+WLF016,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF016.
+WLF016,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF016.
+WLF010,liquidity,40318.192624014075,1,liquidity had high attribution in the model allocation for WLF010.
+WLF010,fundamentals,0.5722315568586258,2,fundamentals had high attribution in the model allocation for WLF010.
+WLF010,narrative,0.5447020885765826,3,narrative had high attribution in the model allocation for WLF010.
+WLF010,dividend quality,0.4589161385407619,4,dividend quality had high attribution in the model allocation for WLF010.
+WLF010,regime,0.3248804377384918,5,regime had high attribution in the model allocation for WLF010.
+WLF010,portfolio state,0.14998217673956496,6,portfolio state had high attribution in the model allocation for WLF010.
+WLF010,distributional forecast,0.01480676557604181,7,distributional forecast had high attribution in the model allocation for WLF010.
+WLF010,volatility,0.012071102267581365,8,volatility had high attribution in the model allocation for WLF010.
+WLF010,temporal returns,0.006797473832729543,9,temporal returns had high attribution in the model allocation for WLF010.
+WLF010,sentiment,0.0,10,sentiment had high attribution in the model allocation for WLF010.
+WLF010,risk contribution,0.0,11,risk contribution had high attribution in the model allocation for WLF010.
+WLF010,stress tests,0.0,12,stress tests had high attribution in the model allocation for WLF010.

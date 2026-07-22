@@ -23,7 +23,7 @@ FACTOR_COLUMNS = [
     "uk_rate_pressure_proxy",
 ]
 
-REGIONS = ["Global", "DACH", "EU ex-DACH", "UK", "Mainland China", "Hong Kong"]
+REGIONS = ["Global", "DACH", "EU ex-DACH", "UK", "US", "Mainland China", "Hong Kong"]
 
 
 def build_mock_factor_lens(periods: int = 180, seed: int = 42) -> pd.DataFrame:
@@ -37,6 +37,7 @@ def build_mock_factor_lens(periods: int = 180, seed: int = 42) -> pd.DataFrame:
             "DACH": -0.0001,
             "EU ex-DACH": -0.00005,
             "UK": -0.00002,
+            "US": 0.00003,
             "Mainland China": -0.00015,
             "Hong Kong": -0.00012,
         }[region]
