@@ -12,6 +12,19 @@ Run the MVP pipeline:
 python scripts/run_full_pipeline.py
 ```
 
+Initialize and validate the DuckDB/Parquet data foundation:
+
+```bash
+python scripts/init_database.py
+python scripts/run_data_ingestion.py
+python scripts/build_point_in_time_snapshots.py
+python scripts/validate_data_layer.py
+python scripts/compare_legacy_vs_duckdb.py
+python scripts/export_duckdb_to_parquet.py
+```
+
+Default backend is `legacy_csv`. Change `configs/data.yaml` only after shadow comparisons pass. The configured DuckDB file is `data/database/wolf.duckdb`; large raw payloads are archived under `data/raw_archive/` with metadata registered separately. Local `.duckdb`, `.sqlite`, raw archive/cache and Parquet files are ignored and should not be committed.
+
 Build feature and scorecard outputs:
 
 ```bash
@@ -78,6 +91,57 @@ Pull Alpaca daily bars for selected symbols:
 
 ```bash
 python scripts/pull_alpaca_data.py --bars --symbols AAPL MSFT
+```
+
+Pull Yahoo Finance daily bars through yfinance:
+
+```bash
+python scripts/pull_yfinance_data.py --symbols AAPL MSFT SAP.DE VOD.L
+```
+
+Multi-source data configuration:
+
+```bash
+cp .env.example .env
+python scripts/pull_external_data.py --status-only
+```
+
+Populate any credentials you hold in the local `.env`:
+
+- `EODHD_API_TOKEN`
+- `FINNHUB_API_KEY`
+- `ALPHA_VANTAGE_API_KEY`
+- `FRED_API_KEY`
+- `ITICK_API_TOKEN`
+- existing Alpaca credentials
+
+No-key providers are Frankfurter, ECB, ONS, Bank of England, China Data and HKMA. Their concrete series/dataset selections live in `configs/data_sources.yaml`; ONS and HKMA use catalogue-specific endpoint paths supplied by the ingestion request.
+
+To pull configured macro and FX datasets:
+
+```bash
+python scripts/pull_external_data.py --start 2020-01-01
+```
+
+The command writes `data_source_status.csv`, `external_data_pull_status.csv`, `external_fx_rates.csv` and `external_macro_observations.csv` under `reports/outputs/`. A nonzero exit indicates at least one requested dataset failed; successful sources remain visible in the status output. Price ingestion uses all available configured providers when `USE_MOCK_DATA=false` and `USE_ALL_AVAILABLE_DATA_SOURCES=true`.
+
+Provider ticker formats differ. The universe may include `yfinance_ticker`, `alpaca_ticker`, `eodhd_ticker`, `finnhub_ticker`, `alpha_vantage_ticker` and `itick_code`; each adapter uses its provider-specific column and maps results back to the canonical `ticker`. When a provider column is absent, the canonical ticker is used as a fallback.
+
+Provider responsibilities:
+
+- DACH/EU: EODHD, Finnhub and yfinance for equities; ECB for official macro/rates; Frankfurter for FX.
+- UK: EODHD, Finnhub and yfinance for equities; ONS and Bank of England for official economic/rate data.
+- US: EODHD, Finnhub, yfinance and Alpaca for equities; FRED for macro, rates, credit and volatility.
+- Mainland China: EODHD, Finnhub, yfinance and iTick for equities; China Data and FRED for macro series.
+- Hong Kong: EODHD, Finnhub, yfinance and iTick for equities; HKMA and FRED for macro/financial-system series.
+
+The Medium examples informed the iTick response parser, retry/backoff policy, local persistence and cross-provider checks. They are not treated as authoritative data feeds or licensing documentation.
+
+To run model price ingestion with yfinance, set:
+
+```bash
+USE_MOCK_DATA=false
+DATA_PROVIDER=yfinance
 ```
 
 Run tests:
@@ -227,5 +291,44 @@ Alpaca integration:
 - Set `ENABLE_ALPACA=true`, `USE_MOCK_DATA=false`, `DATA_PROVIDER=alpaca`, `ALPACA_API_KEY_ID` and `ALPACA_API_SECRET_KEY` in `.env`.
 - Paper trading account checks use `https://paper-api.alpaca.markets`.
 - Market data bars use `https://data.alpaca.markets` and default to the `iex` feed.
+- Historical endpoints use the configurable `https://data.alpaca.markets/{version}` base, with `ALPACA_DATA_API_VERSION=v2`. Stock bars resolve to `/v2/stocks/bars` and follow `next_page_token` pagination up to the configured safety limit.
+- `alpaca-py` is the preferred historical-data client when `ALPACA_USE_SDK=true`. The REST adapter remains available for explicit endpoint and request-ID diagnostics. The SDK crypto historical client does not require API credentials.
+- Run `python scripts/pull_alpaca_data.py --crypto-bars --symbols BTC/USD --start 2022-09-01 --end 2022-09-07` for a no-key SDK smoke test. Add `--rest` to stock-bar commands when REST diagnostics are required.
 - A `403 Forbidden` from `/v2/account` usually means missing, invalid or mismatched Alpaca auth headers.
 - The full pipeline remains mock-first by default because the active universe includes both US and non-US listings; Alpaca may be useful for US names but does not cover the full universe.
+
+## Investment Committee Reporting
+
+Generate the Investment Committee report after the pipeline has produced outputs:
+
+```bash
+python scripts/run_ic_reporting.py
+python scripts/run_ic_reporting.py --skip-pdf
+python scripts/run_ic_reporting.py --as-of-date 2026-06-30 --model-run-id historical-2026-06
+python scripts/run_ic_reporting.py --backend legacy_csv --strict
+```
+
+Validate the bundle:
+
+```bash
+python scripts/validate_ic_report.py
+python scripts/run_ic_dashboard_check.py
+```
+
+Render a PDF when optional PDF dependencies are available:
+
+```bash
+python scripts/render_ic_pdf.py
+```
+
+Open the optional dashboard when Streamlit is installed:
+
+```bash
+streamlit run dashboards/ic_dashboard.py
+```
+
+Report bundles are written to `reports/outputs/ic/<model_run_id>/`. The `latest` folder is a copied snapshot for convenience, not a symlink. The reporting layer reads existing artifacts only and must not be used as a way to rerun models, recalculate risk metrics or change selected portfolio weights.
+
+The report includes executive summary, final weights and trades, current/target exposures, concentration, branch comparison, distinct forecast horizons, regime and Wolf Chaos context, authoritative risk metrics, stress scenarios, hedge concepts, defensive substitutions, DRL acceptance and constraint traces, deterministic narrative, charts, source hashes and data-quality status. `READY`, `READY_WITH_WARNINGS`, `REVIEW_REQUIRED` and `BLOCKED` are reporting-readiness labels, not investment approvals.
+
+Current limitations: report quality depends on upstream data quality; deterministic narrative does not replace analyst review; PDF rendering may be unavailable; hedge concepts require execution review; forecasts and stress losses are model estimates; attribution is not causality; and the dashboard never executes trades.

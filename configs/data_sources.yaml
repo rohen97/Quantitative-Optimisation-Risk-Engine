@@ -1,9 +1,167 @@
-market_data:
-  default_adapter: mock
-  supported_adapters: [csv, yahoo_style, alpha_vantage_style, institutional_placeholder, mock]
-fundamentals:
-  default_adapter: mock
-sentiment:
-  default_adapter: local_csv
-api_keys:
-  policy: never_commit_keys
+data_sources:
+  policy:
+    use_all_available: true
+    require_at_least_one_price_source: true
+    cross_validate_prices: true
+    maximum_close_difference_fraction: 0.02
+    request_timeout_seconds: 30
+    retry_attempts: 3
+    retry_backoff_seconds: 1.0
+    user_agent: wolf-quant-model/1.0
+    never_commit_keys: true
+
+  price_provider_order:
+    - eodhd
+    - finnhub
+    - alpha_vantage
+    - yfinance
+    - alpaca
+    - itick
+
+  providers:
+    yfinance:
+      enabled: true
+      symbol_column: yfinance_ticker
+      credential_env: null
+      asset_classes: [equities, indices, fx]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+      notes: Research-grade public web data; cross-validate material prices.
+
+    alpaca:
+      enabled: true
+      symbol_column: alpaca_ticker
+      historical_base_url: https://data.alpaca.markets/{version}
+      historical_api_version: v2
+      prefer_official_sdk: true
+      credential_env: ALPACA_API_KEY_ID
+      secret_env: ALPACA_API_SECRET_KEY
+      asset_classes: [equities]
+      regions: [US]
+
+    eodhd:
+      enabled: true
+      symbol_column: eodhd_ticker
+      base_url: https://eodhd.com/api
+      credential_env: EODHD_API_TOKEN
+      asset_classes: [equities, fundamentals, dividends, fx, indices, macro, news]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+
+    finnhub:
+      enabled: true
+      symbol_column: finnhub_ticker
+      base_url: https://finnhub.io/api/v1
+      credential_env: FINNHUB_API_KEY
+      asset_classes: [equities, fundamentals, dividends, fx, macro, news, sentiment]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+
+    alpha_vantage:
+      enabled: true
+      symbol_column: alpha_vantage_ticker
+      base_url: https://www.alphavantage.co
+      credential_env: ALPHA_VANTAGE_API_KEY
+      asset_classes: [equities, fundamentals, dividends, fx, macro, commodities, news, sentiment]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+      daily_function: TIME_SERIES_DAILY
+      output_size: compact
+      notes: Compact raw daily prices are free-compatible; adjusted/full history may require a premium plan.
+
+    itick:
+      enabled: true
+      symbol_column: itick_code
+      base_url: https://api.itick.org
+      credential_env: ITICK_API_TOKEN
+      asset_classes: [equities, fx]
+      regions: [US, Mainland China, Hong Kong]
+      region_codes:
+        US: US
+        Mainland China Shanghai: SH
+        Mainland China Shenzhen: SZ
+        Hong Kong: HK
+      notes: Added from the supplied research articles; validate licensing and plan limits.
+
+    frankfurter:
+      enabled: true
+      base_url: https://api.frankfurter.dev/v2
+      credential_env: null
+      asset_classes: [fx]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+      currencies: [EUR, CHF, SEK, DKK, GBP, USD, CNY, HKD]
+
+    fred:
+      enabled: true
+      base_url: https://api.stlouisfed.org/fred
+      credential_env: FRED_API_KEY
+      asset_classes: [macro, rates, credit, volatility]
+      regions: [US, DACH, EU ex-DACH, UK, Mainland China, Hong Kong]
+      preserve_vintages: true
+      series:
+        GDP: GDP
+        CPI: CPIAUCSL
+        unemployment: UNRATE
+        policy_rate: FEDFUNDS
+        treasury_10y: DGS10
+        credit_spread: BAMLH0A0HYM2
+        volatility: VIXCLS
+
+    ecb:
+      enabled: true
+      base_url: https://data-api.ecb.europa.eu/service
+      base_url_env: ECB_DATA_BASE_URL
+      credential_env: null
+      asset_classes: [macro, rates, fx, credit]
+      regions: [DACH, EU ex-DACH]
+      preserve_vintages: true
+      series:
+        eurusd_daily:
+          flow: EXR
+          key: D.USD.EUR.SP00.A
+        eurgbp_daily:
+          flow: EXR
+          key: D.GBP.EUR.SP00.A
+        eurchf_daily:
+          flow: EXR
+          key: D.CHF.EUR.SP00.A
+
+    ons:
+      enabled: true
+      base_url: https://api.beta.ons.gov.uk/v1
+      base_url_env: ONS_API_BASE_URL
+      credential_env: null
+      asset_classes: [macro, labour, inflation, demographics]
+      regions: [UK]
+      notes: Official beta API; dataset/version queries are configured per ingestion request.
+
+    bank_of_england:
+      enabled: true
+      base_url: https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp
+      base_url_env: BANK_OF_ENGLAND_BASE_URL
+      credential_env: null
+      asset_classes: [rates, fx, credit, money]
+      regions: [UK]
+
+    china_data:
+      enabled: true
+      base_url: https://chinadata.live/api/v2
+      credential_env: null
+      asset_classes: [macro, trade, inflation, demographics]
+      regions: [Mainland China]
+      datasets:
+        - china-gdp
+        - china-cpi
+
+    hkma:
+      enabled: true
+      base_url: https://api.hkma.gov.hk/public
+      base_url_env: HKMA_API_BASE_URL
+      credential_env: null
+      asset_classes: [macro, rates, fx, banking]
+      regions: [Hong Kong]
+      notes: Endpoint paths are supplied per ingestion request using the official HKMA Open API catalogue.
+
+  research_references:
+    - url: https://medium.com/@wutainfofu/2026-free-data-api-for-personal-quant-trading-selection-to-implementation-4c1636e1ff27
+      used_for: iTick integration, caching, retry and cross-validation guidance
+      authoritative: false
+    - url: https://medium.com/@wutainfofu/a-comprehensive-guide-to-e-financial-data-analysis-api-interfaces-f1a50fc99f28
+      used_for: cross-market provider review and China/Hong Kong source discovery
+      authoritative: false

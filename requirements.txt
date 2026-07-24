@@ -8,3 +8,8 @@ pytest
 streamlit
 gymnasium
 stable-baselines3
+yfinance
+alpaca-py
+duckdb
+pyarrow
+jinja2

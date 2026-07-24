@@ -8,9 +8,14 @@ mock_data:
   securities: 24
   price_days: 756
 data_provider:
-  name: mock
+  name: yfinance
   alpaca:
     enabled: false
     env: paper
     data_feed: iex
     lookback_days: 756
+  yfinance:
+    enabled: true
+    lookback_days: 756
+    interval: 1d
+    auto_adjust: true

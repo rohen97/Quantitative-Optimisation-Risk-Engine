@@ -1,0 +1,87 @@
+reporting:
+  enabled: true
+  output_root: reports/outputs
+  template: src/reporting/templates/investment_committee_report.html.j2
+  css: src/reporting/assets/ic_report.css
+  max_table_rows: 25
+
+  output:
+    root: reports/outputs/ic
+    latest_directory: reports/outputs/ic/latest
+    preserve_historical_runs: true
+    generate_html: true
+    generate_markdown: true
+    generate_pdf_when_available: true
+    generate_report_bundle: true
+    generate_static_charts: true
+
+  dashboard:
+    enabled: true
+    framework: streamlit
+    load_precomputed_bundle_only: true
+
+  critical_sources:
+    - current_portfolio
+    - final_portfolio
+    - final_recommendations
+    - portfolio_risk_report
+
+  freshness:
+    enabled: true
+    prices_max_age_days: 7
+    portfolio_max_age_days: 7
+    forecasts_max_age_days: 35
+    regime_max_age_days: 14
+    risk_report_max_age_days: 35
+
+  portfolio:
+    trade_weight_threshold: 0.0025
+    top_holdings_count: 15
+    concentration_warning_weight: 0.10
+    minimum_effective_holdings_warning: 10
+    base_currency: USD
+
+  forecasts:
+    horizons: [3M, 6M, 9M, 12M]
+    show_distribution_parameters: false
+    show_confidence: true
+
+  risk:
+    show_var_1: true
+    show_var_5: true
+    show_cvar: true
+    show_expected_shortfall: true
+    maximum_risk_contributors: 15
+
+  stress:
+    maximum_scenarios_displayed: 15
+    severe_loss_threshold: -0.20
+    warning_loss_threshold: -0.10
+
+  drl:
+    show_raw_proposal: true
+    show_constraint_trace: true
+    show_seed_results: true
+    show_reward_decomposition: true
+    show_attributions: true
+
+  narrative:
+    deterministic_only: true
+    maximum_executive_points: 8
+    maximum_trade_rationale_length: 300
+
+  charts:
+    dpi: 160
+    top_n: 15
+    image_format: png
+
+  number_format:
+    weight_decimals: 2
+    return_decimals: 2
+    currency_decimals: 0
+
+  validation:
+    fail_on_invalid_final_weights: true
+    fail_on_unresolved_hard_constraint: true
+    fail_on_point_in_time_failure: true
+    warn_on_missing_optional_sections: true

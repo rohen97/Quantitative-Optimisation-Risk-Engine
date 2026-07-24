@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Wolf Quant Investment Committee Report</title>
+  <link rel="stylesheet" href="ic_report.css">
+</head>
+<body>
+  <header class="cover">
+    <h1>Wolf Quant Investment Committee Report</h1>
+    <p>Model run: {{ model_run_id }}</p>
+    <p>As of: {{ as_of_date }}</p>
+    <p>Selected source: {{ selected_portfolio_source }}</p>
+  </header>
+
+  <section class="warning-panel">
+    <h2>Executive Summary</h2>
+    <p><strong>Readiness:</strong> {{ summary.decision_readiness_status }}</p>
+    <p>{{ narrative }}</p>
+    <ul>
+      {% for point in narrative_points %}
+      <li><strong>{{ point.title }}</strong> [{{ point.severity }}]: {{ point.text }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section>
+    <h2>Report Metadata And Lineage</h2>
+    <table>
+      <tbody>
+        <tr><th>Model Run ID</th><td>{{ model_run_id }}</td></tr>
+        <tr><th>As Of Date</th><td>{{ as_of_date }}</td></tr>
+        <tr><th>Selected Portfolio Source</th><td>{{ selected_portfolio_source }}</td></tr>
+        <tr><th>Fallback Used</th><td>{{ fallback_used }}</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Critical Warnings And Data Quality</h2>
+    {{ data_quality.to_html(index=False) | safe }}
+  </section>
+
+  <section>
+    <h2>Current Portfolio Diagnostics</h2>
+    {{ current_diagnostics.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.current_vs_target_top_holdings }}" alt="Current versus target top holdings">
+  </section>
+
+  <section>
+    <h2>Final Recommended Portfolio</h2>
+    {{ final_portfolio.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.portfolio_concentration }}" alt="Portfolio concentration">
+  </section>
+
+  <section>
+    <h2>Trade Recommendations</h2>
+    {{ final_trade_recommendations.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.trade_notional_by_action }}" alt="Trade notional by action">
+  </section>
+
+  <section>
+    <h2>Branch Comparison</h2>
+    {{ model_branch_comparison.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.branch_weight_comparison }}" alt="Branch weight comparison">
+    <img src="{{ chart_paths.recommendation_matrix }}" alt="Recommendation matrix">
+  </section>
+
+  <section>
+    <h2>Forecasts By Horizon</h2>
+    {{ forecast_horizon_summary.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.forecast_horizon_summary }}" alt="Forecast horizon summary">
+    <img src="{{ chart_paths.expected_return_vs_cvar }}" alt="Expected return versus CVaR">
+    <img src="{{ chart_paths.dividend_yield_vs_dividend_risk }}" alt="Dividend yield versus dividend risk">
+  </section>
+
+  <section>
+    <h2>Regime And Market-State Dashboard</h2>
+    {{ regime_summary_table.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.regime_probabilities }}" alt="Regime probabilities">
+    <img src="{{ chart_paths.wolf_chaos_history }}" alt="Wolf Chaos history">
+  </section>
+
+  <section>
+    <h2>Portfolio Risk</h2>
+    {{ portfolio_risk_summary.to_html(index=False) | safe }}
+    {{ top_risk_contributors_table.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.top_risk_contributors }}" alt="Top risk contributors">
+  </section>
+
+  <section>
+    <h2>Stress Testing</h2>
+    {{ stress_scenario_summary.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.stress_test_losses }}" alt="Stress test losses">
+  </section>
+
+  <section>
+    <h2>Hedge Recommendations</h2>
+    {{ hedge_concepts.to_html(index=False) | safe }}
+    <p>Optional institutional hedges are risk-management concepts requiring execution review.</p>
+  </section>
+
+  <section>
+    <h2>Defensive Substitutions</h2>
+    {{ defensive_substitution_summary.to_html(index=False) | safe }}
+  </section>
+
+  <section>
+    <h2>DRL Governance</h2>
+    {{ drl_governance_summary.to_html(index=False) | safe }}
+    {{ drl_constraint_trace.to_html(index=False) | safe }}
+    {{ drl_seed_summary.to_html(index=False) | safe }}
+    <img src="{{ chart_paths.drl_baseline_vs_projected }}" alt="DRL baseline versus projected">
+    <img src="{{ chart_paths.drl_reward_decomposition }}" alt="DRL reward decomposition">
+  </section>
+
+  <section>
+    <h2>Source And Methodology Notes</h2>
+    <p>All sections consume precomputed model outputs. HTML is the authoritative report output. PDF is optional.</p>
+    <p>Attributions are model attributions, not causal relationships. LLM benchmark outputs are non-authoritative when available.</p>
+  </section>
+
+  <section>
+    <h2>Limitations</h2>
+    <ul>
+      <li>Missing upstream sections are shown as unavailable and are not fabricated.</li>
+      <li>Expected return is separate from realised return.</li>
+      <li>Regime probabilities are estimates and not certainty.</li>
+      <li>No live execution instructions are created by this report.</li>
+    </ul>
+  </section>
+</body>
+</html>

@@ -14,6 +14,11 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "pyyaml",
+    "yfinance",
+    "alpaca-py",
+    "duckdb",
+    "pyarrow",
+    "jinja2",
 ]
 
 [tool.setuptools.packages.find]

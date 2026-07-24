@@ -2,6 +2,18 @@
 
 The MVP ranks listed equities with conservative hard filters, modular feature engineering, weighted quality scores, portfolio-fit features, branch comparison, risk checks, stress tests and hedge recommendations.
 
+## Data Foundation Methodology
+
+The DuckDB + Parquet data foundation is designed for persistence, reproducibility, point-in-time accuracy, lineage, duplicate handling, vintage tracking, API caching and model-run auditability. It is an additive backend beneath the existing Python model and does not alter scoring, optimisation, risk, DRL reward or recommendation logic.
+
+Backend modes are controlled by `configs/data.yaml`:
+
+- `legacy_csv`: existing CSV/mock reads remain active.
+- `shadow`: write/read DuckDB snapshots and compare them to legacy outputs while continuing to rely on legacy outputs if differences exceed tolerance.
+- `duckdb`: read from DuckDB point-in-time views after validation.
+
+Data is normalised in Python, persisted in DuckDB structured tables, optionally exported to Parquet and exposed through SQL views for point-in-time prices, fundamentals, macro vintages and FX rates. Model feature snapshots, model runs and model outputs are stored with run identifiers so outputs can be traced back to backend mode, code version, config hash and input snapshot.
+
 ## Feature Store
 
 The feature store creates stock-level monthly features from mock or future vendor inputs.
@@ -204,3 +216,23 @@ Hedge recommendations are split into equity-only actions and optional institutio
 Output:
 
 - `reports/outputs/stock_scorecard.csv`
+
+## Investment Committee Reporting Methodology
+
+The Investment Committee report is a presentation and governance layer. It consumes saved pipeline artifacts and keeps the model stack authoritative for calculations. Risk metrics, stress losses, optimiser weights, DRL acceptance decisions and final recommendations are displayed from their source outputs rather than recalculated inside the dashboard.
+
+The report bundle combines executive summary, portfolio exposures, forecast diagnostics, branch comparison, risk, stress testing, hedge recommendations, DRL governance, data quality and narrative commentary. Narrative text describes signals as model attributions or associations and avoids causal language.
+
+The immutable bundle layout supports auditability: each run is saved under `reports/outputs/ic/<model_run_id>/`, with manifest metadata, source file references, charts, HTML and optional PDF. The `latest` folder is a copied convenience view and does not replace the run-specific bundle.
+
+Current limitations:
+
+- The report quality depends on the completeness of upstream outputs.
+- PDF rendering is optional and dependency-gated.
+- The dashboard is optional and dependency-gated.
+- The report does not validate live trading readiness or vendor data entitlements.
+- Deterministic narrative is not a substitute for analyst review.
+- Optional hedge concepts require execution review.
+- Forecast and stress outputs remain model estimates.
+- Model attribution describes association, not causality.
+- The dashboard is read-only and does not execute trades.

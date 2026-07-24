@@ -2,7 +2,8 @@
 
 The repository is organised as a modular quant platform, with production logic in `src/` and scripts as thin entry points.
 
-- `data_ingestion`: universe, mock data and vendor adapter interfaces.
+- `data`: backend configuration, schemas, validators, normalisers, lineage, point-in-time views, snapshot building, CSV/DuckDB repositories, ingestion helpers and shadow comparison utilities.
+- `data_ingestion`: universe, mock data, yfinance price ingestion, Alpaca integration and vendor adapter interfaces.
 - `branches`: portfolio-aware quant, clean-sheet quant, mock LLM analyst benchmark and branch comparison engines.
 - `portfolio`: current holdings loading, exposure and concentration diagnostics.
 - `features`: financial, dividend, valuation, liquidity, risk and portfolio-fit features.
@@ -14,11 +15,21 @@ The repository is organised as a modular quant platform, with production logic i
 - `risk`: VaR, CVaR, Expected Shortfall, drawdown, risk contributions, scenario library, risk reports and stress tests.
 - `hedging`: equity-only hedges, optional institutional hedge placeholders and defensive substitution recommendations.
 - `drl`: constrained PPO-style allocation overlay, regime-gated specialist policies, projection to hard optimiser constraints, benchmark comparison and explanation reports.
-- `reporting`: CSV and Markdown output writers.
+- `reporting`: canonical IC data loading, final portfolio resolution, deterministic narratives, static charts, HTML/Markdown/PDF rendering, source lineage, governance bundles and dashboard inputs.
 
 ## Active Universe
 
 The active listed-equity universe covers DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong. India is no longer part of the active stock-selection universe.
+
+## Data Foundation
+
+The persistence layer is additive and does not change model math. API and Python-library data is normalised in Python, written to DuckDB structured tables and optionally archived to Parquet for large datasets. Point-in-time SQL views expose latest-available prices, fundamentals, macro vintages and FX rates. Model runs and outputs can be written back to DuckDB for auditability.
+
+Migration is configuration controlled through `configs/data.yaml`. `legacy_csv` remains the default. `shadow` mode supports dual-writing and comparing DuckDB snapshots against legacy CSV outputs before any production read switch. `duckdb` mode is reserved for validated point-in-time reads.
+
+The data foundation has three layers. The raw layer stores retrieval metadata in DuckDB and keeps large payloads under `data/raw_archive/`. The clean layer contains typed, deduplicated tables such as `securities`, `security_identifiers`, `prices_daily`, `fundamentals_reported`, `dividends`, `fx_rates`, `macro_observations`, `news_documents` and `news_security_map`. The model-ready layer contains point-in-time snapshots for features, regimes, forecasts, scorecards, portfolios, optimisation, risk, stress tests, hedges, DRL and final recommendations.
+
+The external-provider boundary is defined in `configs/data_sources.yaml` and implemented under `src/data_ingestion/`. Provider adapters normalise data before it reaches persistence or model code. The price router can query all credentialed sources, compare overlapping closes and select observations by explicit provider priority. Macro adapters retain source, retrieval time, availability date and vintage date so revisions are inserted as new point-in-time records. Current coverage combines yfinance, Alpaca, EODHD, Finnhub, iTick, Frankfurter, FRED, ECB, ONS, Bank of England, China Data and HKMA across every active region.
 
 ## Branching Pipeline
 
@@ -97,3 +108,21 @@ Narrative features feed the scorecard as risk overlays: high risk reframing, div
 The regime engine is a market-state overlay that runs in deterministic mock mode. It builds a factor lens across Global, DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong, estimates factor-regime probabilities, calculates a FCIX-lite Wolf Chaos Index, models informational deterioration drivers from alternative data and narrative features, fuses the signals into a dominant market regime and scores every stock for suitability under that regime.
 
 Regime outputs feed the scorecard, portfolio-aware branch, clean-sheet branch, mock analyst benchmark, stress tests and hedge recommendations. The engine can reduce weights, trigger review/exclusion flags and add regime-conditioned stress/hedge overlays, but it cannot override hard quant controls.
+
+## Investment Committee Reporting
+
+The Investment Committee reporting layer is a read-only consumer of precomputed model artifacts. It loads current portfolio, scorecard, branch comparison, final recommendation, optimiser, risk, stress, hedge, regime, DRL and data-quality outputs from the configured data backend, resolves changing column names through a reporting column resolver and renders a deterministic report bundle.
+
+The reporting pipeline is intentionally downstream of the model stack:
+
+1. load precomputed outputs
+2. validate availability and schema quality
+3. resolve selected baseline and DRL challenger portfolios
+4. summarise exposures, forecasts, branch agreement, risk, stress, hedges and DRL governance
+5. generate charts and non-causal narrative
+6. render HTML and optional PDF
+7. write an immutable bundle plus a copied `latest` view
+
+Opening the dashboard or rendering a report does not rerun forecasts, optimisation, risk, stress tests, DRL policies or external data ingestion. The report preserves the final selected weights source and keeps baseline optimiser, DRL challenger and accepted/rejected/blended status separate.
+
+Final portfolio resolution follows explicit final weights, accepted/blended DRL, selected constrained optimiser, CVaR-constrained, regime-aware, score-weighted and equal-weight fallback order. Invalid, negative or non-unit-sum weights are rejected. HTML and the JSON bundle are required pipeline artifacts; PDF and dashboard dependencies are optional.

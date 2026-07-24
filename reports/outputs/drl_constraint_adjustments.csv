@@ -1,5 +1,5 @@
 security_id,ticker,baseline_optimiser_weight,raw_drl_residual,raw_drl_weight,eligibility_mask_adjustment,single_name_cap_adjustment,sector_cap_adjustment,country_cap_adjustment,currency_cap_adjustment,liquidity_adjustment,turnover_adjustment,regime_throttle_adjustment,final_projected_weight,human_readable_explanation
-WOLF021,WLF021,0.05,0.004401658096436676,0.05141331990518013,0.017911481165031745,0.0014133199051801285,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF021.
+WOLF021,WLF021,0.049999999999999996,0.004401658096436676,0.051413319905180124,0.017911481165031745,0.0014133199051801215,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF021.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -16,7 +16,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF003,WLF003,0.05,0.004170011606004056,0.05118385295644806,0.017911481165031745,0.0011838529564480588,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF003.
+WOLF003,WLF003,0.049999999999999996,0.004170011606004056,0.051183852956448055,0.017911481165031745,0.0011838529564480518,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF003.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -34,7 +34,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF024,WLF024,0.05,0.004066065865319997,0.05108088523220618,0.017911481165031745,0.0010808852322061746,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF024.
+WOLF024,WLF024,0.049999999999999996,0.004066065865319995,0.05108088523220617,0.017911481165031745,0.0010808852322061677,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF024.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -67,7 +67,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF022,WLF022,0.049999999999999996,0.0021535294695806586,0.049186343725232666,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04954300121103062,"DRL proposed a 0.2 percentage-point increase in WLF022.
+WOLF022,WLF022,0.049999999999999996,0.0021535294695806586,0.049186343725232666,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04954300121103635,"DRL proposed a 0.2 percentage-point increase in WLF022.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -83,7 +83,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF019,WLF019,0.05,0.004497023174570801,0.05150778770158043,0.017911481165031745,0.0015077877015804292,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF019.
+WOLF019,WLF019,0.049999999999999996,0.004497023174570801,0.051507787701580425,0.017911481165031745,0.0015077877015804222,0.0,0.0,0.0,0.0,0.0,0.5,0.05,"DRL proposed a 0.4 percentage-point increase in WLF019.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -100,7 +100,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF018,WLF018,0.05,0.002248797918544208,0.04928071580163787,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04963737328748885,"DRL proposed a 0.2 percentage-point increase in WLF018.
+WOLF018,WLF018,0.049999999999999996,0.0022487979185442067,0.04928071580163786,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04963737328743766,"DRL proposed a 0.2 percentage-point increase in WLF018.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -116,7 +116,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF012,WLF012,0.049999999999999996,0.001888920139418553,0.04892422408126596,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.049280881567063915,"DRL proposed a 0.2 percentage-point increase in WLF012.
+WOLF012,WLF012,0.049999999999999996,0.0018889201394185515,0.048924224081265955,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04928088156706964,"DRL proposed a 0.2 percentage-point increase in WLF012.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -131,7 +131,7 @@ Constraint projection:
 - final executable weight: 4.9%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF015,WLF015,0.049999999999999996,0.0023794238136801414,0.04941011264907664,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04976677013487794,"DRL proposed a 0.2 percentage-point increase in WLF015.
+WOLF015,WLF015,0.049999999999999996,0.00237942381368014,0.04941011264907664,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.049766770134879464,"DRL proposed a 0.2 percentage-point increase in WLF015.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -147,7 +147,7 @@ Constraint projection:
 - final executable weight: 5.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF005,WLF005,0.049999999999999996,-0.00048536702134784895,0.04657227638209167,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04692893386788962,"DRL proposed a 0.0 percentage-point decrease in WLF005.
+WOLF005,WLF005,0.049999999999999996,-0.00048536702134784884,0.04657227638209167,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04692893386789535,"DRL proposed a 0.0 percentage-point decrease in WLF005.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -180,7 +180,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF007,WLF007,0.05,0.0009790047529592474,0.048022870009614645,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0483795274954126,"DRL proposed a 0.1 percentage-point increase in WLF007.
+WOLF007,WLF007,0.049999999999999996,0.0009790047529592472,0.04802287000961464,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04837952749541832,"DRL proposed a 0.1 percentage-point increase in WLF007.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -196,7 +196,7 @@ Constraint projection:
 - final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF014,WLF014,0.049999999999999996,-0.0016132143727000652,0.045455040848468846,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0458116983342668,"DRL proposed a 0.2 percentage-point decrease in WLF014.
+WOLF014,WLF014,0.049999999999999996,-0.0016132143727000663,0.045455040848468846,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04581169833427253,"DRL proposed a 0.2 percentage-point decrease in WLF014.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -230,7 +230,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF011,WLF011,0.0,0.002858020844632642,0.0028311299748410034,0.0028311299748410034,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.3 percentage-point increase in WLF011.
+WOLF011,WLF011,0.0,0.0028580208446326422,0.002831129974841004,0.002831129974841004,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.3 percentage-point increase in WLF011.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -246,7 +246,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF009,WLF009,0.049999999999999996,0.0010145183303541332,0.04805804944284561,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04841470692864357,"DRL proposed a 0.1 percentage-point increase in WLF009.
+WOLF009,WLF009,0.049999999999999996,0.0010145183303541315,0.04805804944284561,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0484147069286493,"DRL proposed a 0.1 percentage-point increase in WLF009.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -262,7 +262,7 @@ Constraint projection:
 - final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF002,WLF002,0.049999999999999996,-0.0026620266390490963,0.044416096765601834,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04477275425139979,"DRL proposed a 0.3 percentage-point decrease in WLF002.
+WOLF002,WLF002,0.049999999999999996,-0.0026620266390490967,0.044416096765601834,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04477275425140552,"DRL proposed a 0.3 percentage-point decrease in WLF002.
 
 Positive drivers:
 - high dividend safety had high attribution
@@ -278,7 +278,7 @@ Constraint projection:
 - final executable weight: 4.5%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF023,WLF023,0.049999999999999996,-0.004441252667172238,0.04265361132057906,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04301026880637701,"DRL proposed a 0.4 percentage-point decrease in WLF023.
+WOLF023,WLF023,0.049999999999999996,-0.004441252667172238,0.04265361132057906,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04301026880638274,"DRL proposed a 0.4 percentage-point decrease in WLF023.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -294,7 +294,7 @@ Constraint projection:
 - final executable weight: 4.3%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF004,WLF004,0.049999999999999996,-0.004649163185818504,0.04244765701393724,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.042804314499735194,"DRL proposed a 0.5 percentage-point decrease in WLF004.
+WOLF004,WLF004,0.049999999999999996,-0.004649163185818504,0.04244765701393724,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.042804314499740925,"DRL proposed a 0.5 percentage-point decrease in WLF004.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -310,7 +310,7 @@ Constraint projection:
 - final executable weight: 4.3%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF020,WLF020,0.049999999999999996,-0.003739717624971517,0.043348545680524604,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04370520316632256,"DRL proposed a 0.4 percentage-point decrease in WLF020.
+WOLF020,WLF020,0.049999999999999996,-0.0037397176249715177,0.043348545680524604,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04370520316632829,"DRL proposed a 0.4 percentage-point decrease in WLF020.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -326,7 +326,7 @@ Constraint projection:
 - final executable weight: 4.4%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF008,WLF008,0.0,-0.003308979558818761,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.3 percentage-point decrease in WLF008.
+WOLF008,WLF008,0.0,-0.00330897955881876,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.3 percentage-point decrease in WLF008.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -341,7 +341,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF001,WLF001,0.049999999999999996,-0.0033556874617014587,0.04372896253735711,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04408562002315507,"DRL proposed a 0.3 percentage-point decrease in WLF001.
+WOLF001,WLF001,0.049999999999999996,-0.003355687461701459,0.04372896253735711,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0440856200231608,"DRL proposed a 0.3 percentage-point decrease in WLF001.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -356,7 +356,7 @@ Constraint projection:
 - final executable weight: 4.4%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF016,WLF016,0.049999999999999996,-0.0049964672201482435,0.04210362073308901,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04246027821888696,"DRL proposed a 0.5 percentage-point decrease in WLF016.
+WOLF016,WLF016,0.049999999999999996,-0.0049964672201482435,0.04210362073308901,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04246027821889269,"DRL proposed a 0.5 percentage-point decrease in WLF016.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -372,7 +372,7 @@ Constraint projection:
 - final executable weight: 4.2%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-WOLF010,WLF010,0.049999999999999996,-0.004899113653220581,0.042200058308764575,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04255671579456253,"DRL proposed a 0.5 percentage-point decrease in WLF010.
+WOLF010,WLF010,0.049999999999999996,-0.004899113653220581,0.042200058308764575,0.017911481165031745,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04255671579456826,"DRL proposed a 0.5 percentage-point decrease in WLF010.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation

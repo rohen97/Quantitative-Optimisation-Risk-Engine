@@ -46,8 +46,26 @@ def test_alpaca_account_request_uses_auth_headers(monkeypatch):
     assert headers["apca-api-secret-key"] == "secret"
 
 
-def test_alpaca_daily_bars_normalize_to_price_schema(monkeypatch):
+def test_alpaca_versioned_paper_endpoint_does_not_duplicate_v2(monkeypatch):
+    captured = {}
+
     def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
+        return _Response({"id": "acct_123", "status": "ACTIVE"})
+
+    monkeypatch.setattr("src.data_ingestion.alpaca_adapter.urlopen", fake_urlopen)
+    monkeypatch.setenv("ALPACA_API_KEY_ID", "key")
+    monkeypatch.setenv("ALPACA_API_SECRET_KEY", "secret")
+    monkeypatch.setenv("ALPACA_PAPER_BASE_URL", "https://paper-api.alpaca.markets/v2")
+    AlpacaMarketDataAdapter().fetch_account()
+    assert captured["url"] == "https://paper-api.alpaca.markets/v2/account"
+
+
+def test_alpaca_daily_bars_normalize_to_price_schema(monkeypatch):
+    captured = {}
+
+    def fake_urlopen(request, timeout):
+        captured["url"] = request.full_url
         return _Response(
             {
                 "bars": {
@@ -66,6 +84,46 @@ def test_alpaca_daily_bars_normalize_to_price_schema(monkeypatch):
     assert list(bars.columns) == ["date", "ticker", "close", "return"]
     assert bars["return"].iloc[0] == 0
     assert round(float(bars["return"].iloc[1]), 4) == 0.1
+    assert captured["url"].startswith("https://data.alpaca.markets/v2/stocks/bars?")
+
+
+def test_alpaca_historical_bars_follow_page_tokens(monkeypatch):
+    calls = []
+
+    def fake_urlopen(request, timeout):
+        calls.append(request.full_url)
+        if "page_token=next-page" in request.full_url:
+            return _Response(
+                {
+                    "bars": {"AAPL": [{"t": "2026-01-03T05:00:00Z", "c": 101.0}]},
+                    "next_page_token": None,
+                }
+            )
+        return _Response(
+            {
+                "bars": {"AAPL": [{"t": "2026-01-02T05:00:00Z", "c": 100.0}]},
+                "next_page_token": "next-page",
+            }
+        )
+
+    monkeypatch.setattr("src.data_ingestion.alpaca_adapter.urlopen", fake_urlopen)
+    monkeypatch.setenv("ALPACA_API_KEY_ID", "key")
+    monkeypatch.setenv("ALPACA_API_SECRET_KEY", "secret")
+    monkeypatch.setenv("ALPACA_DATA_BASE_URL", "https://data.alpaca.markets/{version}")
+    monkeypatch.setenv("ALPACA_DATA_API_VERSION", "v2")
+    bars = AlpacaMarketDataAdapter().load_daily_bars(["AAPL"])
+    assert len(calls) == 2
+    assert len(bars) == 2
+    assert bars["close"].tolist() == [100.0, 101.0]
+
+
+def test_alpaca_historical_base_accepts_explicit_version_in_url(monkeypatch):
+    monkeypatch.setenv("ALPACA_API_KEY_ID", "key")
+    monkeypatch.setenv("ALPACA_API_SECRET_KEY", "secret")
+    monkeypatch.setenv("ALPACA_DATA_BASE_URL", "https://data.alpaca.markets/v2")
+    monkeypatch.setenv("ALPACA_DATA_API_VERSION", "v2")
+    adapter = AlpacaMarketDataAdapter()
+    assert adapter.historical_url("stocks/bars") == "https://data.alpaca.markets/v2/stocks/bars"
 
 
 def test_price_loader_defaults_to_mock():

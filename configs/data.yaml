@@ -1,0 +1,55 @@
+data:
+  backend: legacy_csv
+
+  duckdb:
+    enabled: true
+    database_path: data/database/wolf.duckdb
+    read_only_for_models: true
+    threads: 4
+    memory_limit: 4GB
+
+  parquet:
+    root_path: data/parquet
+    compression: zstd
+    partition_prices_by:
+      - trade_year
+    partition_news_by:
+      - published_year
+      - published_month
+
+  migration:
+    dual_write_enabled: false
+    shadow_compare_enabled: false
+    fail_on_shadow_difference: false
+    fallback_to_legacy_csv: true
+
+  point_in_time:
+    enabled: true
+    strict_availability_dates: true
+    allow_missing_available_from: false
+    use_latest_vintage_only_for_live_runs: true
+    preserve_all_vintages: true
+
+  validation:
+    fail_on_duplicate_primary_keys: true
+    fail_on_future_available_from: true
+    fail_on_invalid_currency: true
+    fail_on_negative_prices: true
+    maximum_missing_price_fraction: 0.05
+
+  comparison:
+    absolute_tolerance: 1.0e-8
+    relative_tolerance: 1.0e-6
+    weight_absolute_tolerance: 1.0e-6
+    compare_column_order: false
+
+  retention:
+    preserve_raw_payload_metadata: true
+    store_raw_payload_in_database: false
+    raw_archive_path: data/raw_archive
+
+  audit:
+    register_ingestion_runs: true
+    register_model_runs: true
+    calculate_config_hash: true
+    calculate_input_snapshot_hash: true

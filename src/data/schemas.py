@@ -1,0 +1,430 @@
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class ColumnSchema:
+    name: str
+    dtype: str
+    nullable: bool = True
+
+
+@dataclass(frozen=True)
+class TableSchema:
+    name: str
+    columns: tuple[ColumnSchema, ...]
+    primary_key: tuple[str, ...]
+
+    @property
+    def column_names(self) -> tuple[str, ...]:
+        return tuple(column.name for column in self.columns)
+
+
+SCHEMAS: dict[str, TableSchema] = {
+    "data_ingestion_runs": TableSchema(
+        "data_ingestion_runs",
+        (
+            ColumnSchema("ingestion_run_id", "VARCHAR", False),
+            ColumnSchema("source_name", "VARCHAR", False),
+            ColumnSchema("dataset_name", "VARCHAR", False),
+            ColumnSchema("started_at", "TIMESTAMP", False),
+            ColumnSchema("completed_at", "TIMESTAMP"),
+            ColumnSchema("status", "VARCHAR", False),
+            ColumnSchema("requested_start_date", "DATE"),
+            ColumnSchema("requested_end_date", "DATE"),
+            ColumnSchema("request_parameters_json", "JSON"),
+            ColumnSchema("row_count", "BIGINT"),
+            ColumnSchema("inserted_count", "BIGINT"),
+            ColumnSchema("updated_count", "BIGINT"),
+            ColumnSchema("rejected_count", "BIGINT"),
+            ColumnSchema("payload_hash", "VARCHAR"),
+            ColumnSchema("config_hash", "VARCHAR"),
+            ColumnSchema("error_message", "VARCHAR"),
+        ),
+        ("ingestion_run_id",),
+    ),
+    "raw_payload_metadata": TableSchema(
+        "raw_payload_metadata",
+        (
+            ColumnSchema("payload_id", "VARCHAR", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR", False),
+            ColumnSchema("source_name", "VARCHAR", False),
+            ColumnSchema("dataset_name", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("request_parameters_json", "JSON"),
+            ColumnSchema("response_status", "INTEGER"),
+            ColumnSchema("payload_hash", "VARCHAR", False),
+            ColumnSchema("archive_path", "VARCHAR"),
+            ColumnSchema("row_count", "BIGINT"),
+        ),
+        ("payload_id",),
+    ),
+    "securities": TableSchema(
+        "securities",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("company_name", "VARCHAR", False),
+            ColumnSchema("instrument_type", "VARCHAR", False),
+            ColumnSchema("listing_status", "VARCHAR", False),
+            ColumnSchema("exchange_code", "VARCHAR"),
+            ColumnSchema("country", "VARCHAR"),
+            ColumnSchema("region", "VARCHAR"),
+            ColumnSchema("sector", "VARCHAR"),
+            ColumnSchema("industry", "VARCHAR"),
+            ColumnSchema("trading_currency", "VARCHAR"),
+            ColumnSchema("domicile_currency", "VARCHAR"),
+            ColumnSchema("first_seen_at", "TIMESTAMP", False),
+            ColumnSchema("last_seen_at", "TIMESTAMP", False),
+            ColumnSchema("source", "VARCHAR", False),
+        ),
+        ("security_id",),
+    ),
+    "security_identifiers": TableSchema(
+        "security_identifiers",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("identifier_type", "VARCHAR", False),
+            ColumnSchema("identifier_value", "VARCHAR", False),
+            ColumnSchema("valid_from", "DATE", False),
+            ColumnSchema("valid_to", "DATE"),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+        ),
+        ("security_id", "identifier_type", "identifier_value", "valid_from"),
+    ),
+    "prices_daily": TableSchema(
+        "prices_daily",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("trade_date", "DATE", False),
+            ColumnSchema("open_price", "DOUBLE"),
+            ColumnSchema("high_price", "DOUBLE"),
+            ColumnSchema("low_price", "DOUBLE"),
+            ColumnSchema("close_price", "DOUBLE"),
+            ColumnSchema("adjusted_close", "DOUBLE"),
+            ColumnSchema("volume", "DOUBLE"),
+            ColumnSchema("trading_currency", "VARCHAR"),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+            ColumnSchema("row_hash", "VARCHAR", False),
+        ),
+        ("security_id", "trade_date", "source"),
+    ),
+    "corporate_actions": TableSchema(
+        "corporate_actions",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("action_type", "VARCHAR", False),
+            ColumnSchema("ex_date", "DATE", False),
+            ColumnSchema("effective_date", "DATE"),
+            ColumnSchema("split_ratio", "DOUBLE"),
+            ColumnSchema("cash_amount", "DOUBLE"),
+            ColumnSchema("currency", "VARCHAR"),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+        ),
+        ("security_id", "action_type", "ex_date", "source"),
+    ),
+    "fundamentals_reported": TableSchema(
+        "fundamentals_reported",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("fiscal_period_end", "DATE", False),
+            ColumnSchema("fiscal_period_type", "VARCHAR", False),
+            ColumnSchema("filing_date", "DATE"),
+            ColumnSchema("available_from", "TIMESTAMP", False),
+            ColumnSchema("currency", "VARCHAR"),
+            ColumnSchema("revenue", "DOUBLE"),
+            ColumnSchema("operating_income", "DOUBLE"),
+            ColumnSchema("net_income", "DOUBLE"),
+            ColumnSchema("operating_cash_flow", "DOUBLE"),
+            ColumnSchema("capital_expenditure", "DOUBLE"),
+            ColumnSchema("free_cash_flow", "DOUBLE"),
+            ColumnSchema("total_assets", "DOUBLE"),
+            ColumnSchema("total_liabilities", "DOUBLE"),
+            ColumnSchema("total_debt", "DOUBLE"),
+            ColumnSchema("cash_and_equivalents", "DOUBLE"),
+            ColumnSchema("shareholders_equity", "DOUBLE"),
+            ColumnSchema("dividends_paid", "DOUBLE"),
+            ColumnSchema("diluted_shares", "DOUBLE"),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+            ColumnSchema("vintage_id", "VARCHAR", False),
+            ColumnSchema("row_hash", "VARCHAR", False),
+        ),
+        ("security_id", "fiscal_period_end", "fiscal_period_type", "source", "vintage_id"),
+    ),
+    "dividends": TableSchema(
+        "dividends",
+        (
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("declaration_date", "DATE"),
+            ColumnSchema("ex_dividend_date", "DATE", False),
+            ColumnSchema("record_date", "DATE"),
+            ColumnSchema("payment_date", "DATE"),
+            ColumnSchema("dividend_amount", "DOUBLE", False),
+            ColumnSchema("currency", "VARCHAR"),
+            ColumnSchema("dividend_type", "VARCHAR", False),
+            ColumnSchema("available_from", "TIMESTAMP", False),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+        ),
+        ("security_id", "ex_dividend_date", "dividend_type", "source"),
+    ),
+    "fx_rates": TableSchema(
+        "fx_rates",
+        (
+            ColumnSchema("base_currency", "VARCHAR", False),
+            ColumnSchema("quote_currency", "VARCHAR", False),
+            ColumnSchema("rate_date", "DATE", False),
+            ColumnSchema("rate", "DOUBLE", False),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+        ),
+        ("base_currency", "quote_currency", "rate_date", "source"),
+    ),
+    "macro_observations": TableSchema(
+        "macro_observations",
+        (
+            ColumnSchema("series_id", "VARCHAR", False),
+            ColumnSchema("observation_date", "DATE", False),
+            ColumnSchema("vintage_date", "DATE", False),
+            ColumnSchema("available_from", "TIMESTAMP", False),
+            ColumnSchema("value", "DOUBLE"),
+            ColumnSchema("unit", "VARCHAR"),
+            ColumnSchema("frequency", "VARCHAR"),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("ingestion_run_id", "VARCHAR"),
+        ),
+        ("series_id", "observation_date", "vintage_date", "source"),
+    ),
+    "news_documents": TableSchema(
+        "news_documents",
+        (
+            ColumnSchema("document_id", "VARCHAR", False),
+            ColumnSchema("published_at", "TIMESTAMP"),
+            ColumnSchema("available_from", "TIMESTAMP", False),
+            ColumnSchema("retrieved_at", "TIMESTAMP", False),
+            ColumnSchema("source", "VARCHAR", False),
+            ColumnSchema("headline", "VARCHAR"),
+            ColumnSchema("body_text", "VARCHAR"),
+            ColumnSchema("language", "VARCHAR"),
+            ColumnSchema("url_hash", "VARCHAR"),
+            ColumnSchema("payload_hash", "VARCHAR"),
+            ColumnSchema("raw_archive_path", "VARCHAR"),
+        ),
+        ("document_id",),
+    ),
+    "news_security_map": TableSchema(
+        "news_security_map",
+        (
+            ColumnSchema("document_id", "VARCHAR", False),
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("relevance_score", "DOUBLE"),
+            ColumnSchema("mapping_method", "VARCHAR"),
+            ColumnSchema("model_version", "VARCHAR", False),
+            ColumnSchema("calculated_at", "TIMESTAMP", False),
+        ),
+        ("document_id", "security_id", "model_version"),
+    ),
+    "feature_snapshots_monthly": TableSchema(
+        "feature_snapshots_monthly",
+        (
+            ColumnSchema("model_run_id", "VARCHAR", False),
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("as_of_date", "DATE", False),
+            ColumnSchema("feature_name", "VARCHAR", False),
+            ColumnSchema("feature_value", "DOUBLE"),
+            ColumnSchema("feature_text_value", "VARCHAR"),
+            ColumnSchema("feature_version", "VARCHAR", False),
+            ColumnSchema("calculated_at", "TIMESTAMP", False),
+        ),
+        ("model_run_id", "security_id", "as_of_date", "feature_name"),
+    ),
+    "portfolio_weight_snapshots": TableSchema(
+        "portfolio_weight_snapshots",
+        (
+            ColumnSchema("model_run_id", "VARCHAR", False),
+            ColumnSchema("portfolio_name", "VARCHAR", False),
+            ColumnSchema("as_of_date", "DATE", False),
+            ColumnSchema("security_id", "VARCHAR", False),
+            ColumnSchema("weight", "DOUBLE", False),
+            ColumnSchema("market_value_usd", "DOUBLE"),
+            ColumnSchema("recommendation", "VARCHAR"),
+        ),
+        ("model_run_id", "portfolio_name", "as_of_date", "security_id"),
+    ),
+    "model_metric_snapshots": TableSchema(
+        "model_metric_snapshots",
+        (
+            ColumnSchema("model_run_id", "VARCHAR", False),
+            ColumnSchema("model_component", "VARCHAR", False),
+            ColumnSchema("as_of_date", "DATE", False),
+            ColumnSchema("metric_name", "VARCHAR", False),
+            ColumnSchema("metric_value", "DOUBLE"),
+            ColumnSchema("metric_text_value", "VARCHAR"),
+        ),
+        ("model_run_id", "model_component", "as_of_date", "metric_name"),
+    ),
+    "model_runs": TableSchema(
+        "model_runs",
+        (
+            ColumnSchema("model_run_id", "VARCHAR", False),
+            ColumnSchema("model_name", "VARCHAR", False),
+            ColumnSchema("model_version", "VARCHAR", False),
+            ColumnSchema("git_commit_hash", "VARCHAR"),
+            ColumnSchema("git_is_dirty", "BOOLEAN"),
+            ColumnSchema("backend", "VARCHAR", False),
+            ColumnSchema("mode", "VARCHAR", False),
+            ColumnSchema("as_of_date", "TIMESTAMP", False),
+            ColumnSchema("started_at", "TIMESTAMP", False),
+            ColumnSchema("completed_at", "TIMESTAMP"),
+            ColumnSchema("status", "VARCHAR", False),
+            ColumnSchema("config_hash", "VARCHAR", False),
+            ColumnSchema("input_snapshot_hash", "VARCHAR"),
+            ColumnSchema("random_seed", "INTEGER"),
+            ColumnSchema("train_start", "DATE"),
+            ColumnSchema("train_end", "DATE"),
+            ColumnSchema("validation_start", "DATE"),
+            ColumnSchema("validation_end", "DATE"),
+            ColumnSchema("test_start", "DATE"),
+            ColumnSchema("test_end", "DATE"),
+            ColumnSchema("output_path", "VARCHAR"),
+            ColumnSchema("error_message", "VARCHAR"),
+            ColumnSchema("runtime_seconds", "DOUBLE"),
+        ),
+        ("model_run_id",),
+    ),
+    "model_outputs": TableSchema(
+        "model_outputs",
+        (
+            ColumnSchema("model_run_id", "VARCHAR", False),
+            ColumnSchema("output_name", "VARCHAR", False),
+            ColumnSchema("ticker", "VARCHAR"),
+            ColumnSchema("metric", "VARCHAR"),
+            ColumnSchema("value", "DOUBLE"),
+            ColumnSchema("payload_json", "VARCHAR"),
+        ),
+        ("model_run_id", "output_name", "ticker", "metric"),
+    ),
+}
+
+
+SCHEMAS.update(
+    {
+        "regime_snapshots": TableSchema(
+            "regime_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("regime_name", "VARCHAR", False),
+                ColumnSchema("probability", "DOUBLE"),
+                ColumnSchema("source_backend", "VARCHAR"),
+            ),
+            ("model_run_id", "as_of_date", "regime_name"),
+        ),
+        "distributional_forecast_snapshots": TableSchema(
+            "distributional_forecast_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR", False),
+                ColumnSchema("horizon", "VARCHAR", False),
+                ColumnSchema("metric_name", "VARCHAR", False),
+                ColumnSchema("metric_value", "DOUBLE"),
+            ),
+            ("model_run_id", "as_of_date", "security_id", "horizon", "metric_name"),
+        ),
+        "scorecard_snapshots": TableSchema(
+            "scorecard_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR", False),
+                ColumnSchema("score_name", "VARCHAR", False),
+                ColumnSchema("score_value", "DOUBLE"),
+            ),
+            ("model_run_id", "as_of_date", "security_id", "score_name"),
+        ),
+        "optimisation_snapshots": TableSchema(
+            "optimisation_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR", False),
+                ColumnSchema("weight", "DOUBLE"),
+                ColumnSchema("objective", "VARCHAR"),
+            ),
+            ("model_run_id", "as_of_date", "security_id"),
+        ),
+        "risk_snapshots": TableSchema(
+            "risk_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR"),
+                ColumnSchema("risk_metric", "VARCHAR", False),
+                ColumnSchema("value", "DOUBLE"),
+            ),
+            ("model_run_id", "as_of_date", "security_id", "risk_metric"),
+        ),
+        "stress_test_snapshots": TableSchema(
+            "stress_test_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("scenario_name", "VARCHAR", False),
+                ColumnSchema("security_id", "VARCHAR"),
+                ColumnSchema("loss_estimate", "DOUBLE"),
+            ),
+            ("model_run_id", "as_of_date", "scenario_name", "security_id"),
+        ),
+        "hedge_recommendation_snapshots": TableSchema(
+            "hedge_recommendation_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("hedge_instrument", "VARCHAR", False),
+                ColumnSchema("recommended_weight", "DOUBLE"),
+                ColumnSchema("reason", "VARCHAR"),
+            ),
+            ("model_run_id", "as_of_date", "hedge_instrument"),
+        ),
+        "drl_snapshots": TableSchema(
+            "drl_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR", False),
+                ColumnSchema("raw_weight", "DOUBLE"),
+                ColumnSchema("projected_weight", "DOUBLE"),
+                ColumnSchema("accepted_weight", "DOUBLE"),
+                ColumnSchema("acceptance_status", "VARCHAR"),
+            ),
+            ("model_run_id", "as_of_date", "security_id"),
+        ),
+        "final_recommendation_snapshots": TableSchema(
+            "final_recommendation_snapshots",
+            (
+                ColumnSchema("model_run_id", "VARCHAR", False),
+                ColumnSchema("as_of_date", "DATE", False),
+                ColumnSchema("security_id", "VARCHAR", False),
+                ColumnSchema("final_weight", "DOUBLE"),
+                ColumnSchema("selected_source", "VARCHAR"),
+                ColumnSchema("recommendation", "VARCHAR"),
+            ),
+            ("model_run_id", "as_of_date", "security_id"),
+        ),
+    }
+)
+
+
+def schema_names() -> tuple[str, ...]:
+    return tuple(SCHEMAS)

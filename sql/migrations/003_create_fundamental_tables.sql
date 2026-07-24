@@ -1,0 +1,33 @@
+CREATE TABLE IF NOT EXISTS fundamentals_reported (
+    security_id VARCHAR NOT NULL,
+    fiscal_period_end DATE NOT NULL,
+    fiscal_period_type VARCHAR NOT NULL,
+    filing_date DATE,
+    available_from TIMESTAMP NOT NULL,
+    currency VARCHAR,
+    revenue DOUBLE,
+    operating_income DOUBLE,
+    net_income DOUBLE,
+    operating_cash_flow DOUBLE,
+    capital_expenditure DOUBLE,
+    free_cash_flow DOUBLE,
+    total_assets DOUBLE,
+    total_liabilities DOUBLE,
+    total_debt DOUBLE,
+    cash_and_equivalents DOUBLE,
+    shareholders_equity DOUBLE,
+    dividends_paid DOUBLE,
+    diluted_shares DOUBLE,
+    source VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    ingestion_run_id VARCHAR,
+    vintage_id VARCHAR NOT NULL,
+    row_hash VARCHAR NOT NULL,
+    PRIMARY KEY (
+        security_id,
+        fiscal_period_end,
+        fiscal_period_type,
+        source,
+        vintage_id
+    )
+);

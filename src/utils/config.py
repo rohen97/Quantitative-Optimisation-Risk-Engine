@@ -22,3 +22,11 @@ def ensure_output_dir(config: dict[str, Any] | None = None) -> Path:
     path = ROOT / output_dir
     path.mkdir(parents=True, exist_ok=True)
     return path
+
+
+def load_settings() -> dict[str, Any]:
+    """Load central project settings, including the data backend layer."""
+    settings = load_yaml("configs/base.yaml")
+    settings["data"] = load_yaml("configs/data.yaml").get("data", {})
+    settings["data_sources"] = load_yaml("configs/data_sources.yaml").get("data_sources", {})
+    return settings

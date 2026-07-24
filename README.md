@@ -75,7 +75,27 @@ Validate Alpaca credentials or pull optional Alpaca daily bars:
 ```bash
 python scripts/pull_alpaca_data.py --account
 python scripts/pull_alpaca_data.py --bars --symbols AAPL MSFT
+python scripts/pull_alpaca_data.py --crypto-bars --symbols BTC/USD --start 2022-09-01 --end 2022-09-07
 ```
+
+Pull Yahoo Finance daily bars through yfinance:
+
+```bash
+python scripts/pull_yfinance_data.py --symbols AAPL MSFT SAP.DE VOD.L
+```
+
+Configure and inspect the multi-source data layer:
+
+```bash
+python scripts/pull_external_data.py --status-only
+python scripts/pull_external_data.py --start 2020-01-01
+```
+
+`configs/data_sources.yaml` maps providers to the full DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong universe. Add private credentials to `.env` using the placeholders in `.env.example`. With `USE_MOCK_DATA=false`, the price loader queries every enabled provider for which credentials are available, cross-validates overlapping closes and retains the configured highest-priority observation. It does not silently treat a failed provider as valid data.
+
+Configured sources include yfinance, Alpaca, EODHD, Finnhub, Alpha Vantage and iTick for market data; Frankfurter for FX; FRED, ECB, ONS, Bank of England, China Data and HKMA for economic and financial-system data. Alpha Vantage also exposes configured fundamental, FX, macro, commodity, news and sentiment capabilities. FRED and ECB requests preserve revision/vintage information where exposed. The supplied Medium articles are retained as non-authoritative engineering references; primary provider documentation controls endpoint and licensing decisions.
+
+Mock mode remains the safe default. To use yfinance data in the model, set `USE_MOCK_DATA=false` and `DATA_PROVIDER=yfinance` in `.env`.
 
 Run tests:
 
@@ -84,6 +104,29 @@ pytest
 ```
 
 Outputs are saved in `reports/outputs/`.
+
+## Data Backend Foundation
+
+The model now has a DuckDB + Parquet data foundation underneath the existing CSV/mock pipeline. The default backend is still `legacy_csv`, so existing behaviour is preserved. Configure backend migration in `configs/data.yaml`:
+
+- `legacy_csv`: current CSV/mock behaviour.
+- `shadow`: compare legacy CSV outputs with DuckDB-backed snapshots while continuing to use legacy outputs.
+- `duckdb`: read from DuckDB point-in-time views after validation.
+
+The local DuckDB database path is `data/database/wolf.duckdb`. Large raw payloads stay outside the database under `data/raw_archive/`; DuckDB stores source, request hash, retrieval timestamp, status, row count, archive path and payload hash metadata.
+
+Initialize and validate the data layer:
+
+```bash
+python scripts/init_database.py
+python scripts/run_data_ingestion.py
+python scripts/build_point_in_time_snapshots.py
+python scripts/validate_data_layer.py
+python scripts/compare_legacy_vs_duckdb.py
+python scripts/export_duckdb_to_parquet.py
+```
+
+DuckDB files, SQLite files, raw API cache files and Parquet datasets are ignored by git. Do not commit raw vendor/API data or local database files.
 
 Key Sprint 4 outputs:
 
@@ -158,3 +201,26 @@ Key Sprint 4 outputs:
 - `recommendations_llm_benchmark.csv`
 - `branch_comparison_report.csv`
 - `final_recommendations.csv`
+
+## Investment Committee Reporting
+
+The Investment Committee reporting layer consumes the pipeline outputs already saved in `reports/outputs/`. It does not rerun the model, alter optimiser selections, recalculate authoritative risk metrics or open any live execution path.
+
+Run the report bundle:
+
+```bash
+python scripts/run_ic_reporting.py
+python scripts/run_ic_reporting.py --skip-pdf
+python scripts/run_ic_reporting.py --as-of-date 2026-06-30 --model-run-id ic-2026-06
+python scripts/run_ic_reporting.py --backend legacy_csv --strict
+```
+
+Useful checks:
+
+```bash
+python scripts/run_ic_dashboard_check.py
+python scripts/validate_ic_report.py
+python scripts/render_ic_pdf.py
+```
+
+The immutable bundle is written to `reports/outputs/ic/<model_run_id>/`, and a copied latest view is written to `reports/outputs/ic/latest/`. HTML, Markdown and `report_bundle.json` are required. PDF and Streamlit dashboard support are optional; missing optional packages create warnings without breaking the core report. Critical portfolio inputs or HTML/bundle failures stop the full pipeline.
