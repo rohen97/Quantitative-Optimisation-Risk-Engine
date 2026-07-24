@@ -15,6 +15,7 @@ from src.data.lineage import new_model_run_metadata
 from src.data.repository.duckdb_repository import DUCKDB_AVAILABLE, DuckDBRepository
 from src.reporting.ic_pipeline import run_ic_reporting
 from src.utils.config import ensure_output_dir, load_yaml
+from src.validation.validation_pipeline import run_validation_pipeline
 
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -40,6 +41,7 @@ FULL_PIPELINE_STAGES = [
     "DRL Overlay",
     "Final Portfolio Resolution",
     "Investment Committee Dashboard and Reporting Engine",
+    "Validation and Governance",
 ]
 
 
@@ -81,4 +83,11 @@ if __name__ == "__main__":
     )
     for warning in ic_bundle.warnings:
         logging.warning("IC reporting warning: %s", warning)
+    validation_result = run_validation_pipeline(execution_mode="smoke", run_sensitivity=False, run_ablation=False)
+    logging.info(
+        "Validation completed at %s with approval=%s score=%.1f",
+        validation_result.output_directory,
+        validation_result.approval_status,
+        validation_result.overall_score,
+    )
     logging.info("Wolf Quant MVP pipeline completed with %s output frames.", len(outputs))

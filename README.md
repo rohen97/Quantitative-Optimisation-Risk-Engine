@@ -224,3 +224,15 @@ python scripts/render_ic_pdf.py
 ```
 
 The immutable bundle is written to `reports/outputs/ic/<model_run_id>/`, and a copied latest view is written to `reports/outputs/ic/latest/`. HTML, Markdown and `report_bundle.json` are required. PDF and Streamlit dashboard support are optional; missing optional packages create warnings without breaking the core report. Critical portfolio inputs or HTML/bundle failures stop the full pipeline.
+
+## Model Validation And Governance
+
+The validation engine is a read-only downstream control layer. It validates point-in-time availability, leakage, forecast calibration, positive-loss VaR/Expected Shortfall, realised portfolio performance, transaction costs, benchmarks, regimes, constraints, DRL stability, sensitivity, ablations and governance. It does not tune or change the investment model.
+
+```bash
+python scripts/run_validation_smoke_test.py
+python scripts/run_model_validation.py --mode full
+python scripts/run_model_validation.py --mode release_candidate --strict
+```
+
+Every run is preserved under `reports/outputs/validation/<validation_run_id>/`; `reports/outputs/validation/latest/` is a copied view. Missing realised history is reported as `INSUFFICIENT_DATA`, never as a pass. Critical leakage, point-in-time, lineage, reproducibility or hard-constraint failures force `REJECTED`.

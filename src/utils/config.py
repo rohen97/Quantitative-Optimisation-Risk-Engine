@@ -29,4 +29,5 @@ def load_settings() -> dict[str, Any]:
     settings = load_yaml("configs/base.yaml")
     settings["data"] = load_yaml("configs/data.yaml").get("data", {})
     settings["data_sources"] = load_yaml("configs/data_sources.yaml").get("data_sources", {})
+    settings["validation"] = load_yaml("configs/validation.yaml").get("validation", {})
     return settings

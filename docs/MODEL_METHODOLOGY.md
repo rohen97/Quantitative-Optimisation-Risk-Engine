@@ -236,3 +236,15 @@ Current limitations:
 - Forecast and stress outputs remain model estimates.
 - Model attribution describes association, not causality.
 - The dashboard is read-only and does not execute trades.
+
+## Validation Methodology
+
+Validation is chronological: training precedes calibration/validation, which precedes an untouched test period, followed by rolling walk-forward evaluation. Purge and embargo gaps reduce label overlap. Scaling, imputation and covariance estimation must use prior training data only.
+
+Point forecasts use MAE, RMSE, normalised RMSE, bias, directional accuracy and rank IC by horizon and segment. Distribution validation measures P5/P50/P95 coverage, pinball loss, interval coverage and quantile crossing. Binary risks use Brier score and calibration error. Small samples remain explicitly insufficient.
+
+Risk backtesting converts return-side negative VaR values to positive losses before Kupiec and Christoffersen tests. Expected Shortfall is the average positive loss beyond VaR. CVaR and Expected Shortfall at the same confidence level are reported without being double-counted in governance.
+
+Portfolio validation applies weights after decision timestamps, drifts pre-trade weights, calculates half-turnover and deducts commissions, spread, slippage and square-root market impact. Missing returns are never silently replaced with zero. Benchmark comparisons use aligned periods and moving-block bootstrap confidence intervals.
+
+DRL remains a challenger. It requires at least five stable seeds, compliant projected weights, net-of-cost classical outperformance, and no deterioration in drawdown or Expected Shortfall. Any accepted blend remains capped at 25%. Attribution is not causality.

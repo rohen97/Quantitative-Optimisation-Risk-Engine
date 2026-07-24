@@ -1,0 +1,87 @@
+# Wolf Quant Model Validation Report
+
+## 1. Validation Overview
+
+- Validation run: `{{ validation_run_id }}`
+- As-of date: `{{ as_of_date }}`
+- Execution mode: `{{ execution_mode }}`
+- Overall score: **{{ "%.1f"|format(overall_score) }} / 100**
+
+## 2. Overall Approval Decision
+
+**{{ approval_status }}**
+
+## 3. Critical Failures
+
+{% if critical_failures %}{% for item in critical_failures %}- {{ item }}
+{% endfor %}{% else %}- None.
+{% endif %}
+
+## 4. Model Component Approval Table
+
+{{ component_table }}
+
+## 5. Data Integrity
+{{ sections.data_integrity }}
+
+## 6. Point-in-Time and Leakage Validation
+{{ sections.leakage }}
+
+## 7. Forecast Accuracy
+{{ sections.forecast }}
+
+## 8. Distribution Calibration
+{{ sections.distribution }}
+
+## 9. Binary-Event Calibration
+{{ sections.binary }}
+
+## 10. Risk Backtesting
+{{ sections.risk }}
+
+## 11. Portfolio Performance
+{{ sections.portfolio }}
+
+## 12. Transaction-Cost Robustness
+{{ sections.costs }}
+
+## 13. Benchmark Comparison
+{{ sections.benchmarks }}
+
+## 14. Regime Performance
+{{ sections.regime }}
+
+## 15. Regional Performance
+{{ sections.regional }}
+
+## 16. Constraint Compliance
+{{ sections.constraints }}
+
+## 17. DRL Governance
+{{ sections.drl }}
+
+## 18. Sensitivity Analysis
+{{ sections.sensitivity }}
+
+## 19. Ablation Analysis
+{{ sections.ablation }}
+
+## 20. Stability and Concentration Tests
+{{ sections.stability }}
+
+## 21. Statistical Confidence
+{{ sections.statistics }}
+
+## 22. Known Limitations
+{% for item in limitations %}- {{ item }}
+{% endfor %}
+
+## 23. Required Remediation
+{% for item in remediation %}- {{ item }}
+{% endfor %}
+
+## 24. Final Production Recommendation
+
+{{ production_recommendation }}
+
+Attributions, where reported, are model attributions and are not causal claims.

@@ -1,0 +1,116 @@
+validation:
+  enabled: true
+  execution_mode: smoke
+
+  output:
+    root: reports/outputs/validation
+    latest_directory: reports/outputs/validation/latest
+    generate_markdown: true
+    generate_html: true
+    preserve_historical_runs: true
+
+  chronology:
+    require_walk_forward: true
+    minimum_training_years: 3
+    minimum_validation_months: 12
+    minimum_test_months: 12
+    purge_days: 5
+    embargo_days: 5
+
+  horizons: [3M, 6M, 9M, 12M]
+
+  forecast:
+    minimum_observations: 30
+    directional_accuracy_threshold: 0.52
+    minimum_rank_ic: 0.02
+    maximum_normalised_rmse: 1.25
+    calibration_bins: 10
+
+  distributions:
+    p5_target_coverage: 0.05
+    p50_target_coverage: 0.50
+    p95_target_coverage: 0.95
+    coverage_absolute_tolerance: 0.05
+    minimum_pit_observations: 50
+
+  binary_probabilities:
+    calibration_bins: 10
+    maximum_brier_score: 0.25
+    maximum_expected_calibration_error: 0.10
+
+  risk:
+    var_confidence_levels: [0.95, 0.99]
+    violation_rate_tolerance: 0.02
+    kupiec_pvalue_threshold: 0.05
+    christoffersen_pvalue_threshold: 0.05
+    expected_shortfall_bootstrap_samples: 1000
+
+  portfolio:
+    rebalance_frequency: monthly
+    base_currency: USD
+    cash_rate_column: cash_return
+    minimum_backtest_months: 24
+    maximum_turnover_annualised: 4.0
+    minimum_net_sharpe: 0.25
+    maximum_drawdown_limit: -0.35
+    maximum_single_period_loss: -0.20
+
+  costs:
+    base_commission_bps: 5.0
+    half_spread_bps: 7.5
+    slippage_bps: 5.0
+    market_impact_enabled: true
+    impact_coefficient: 0.10
+    stress_multiplier: [1.0, 1.5, 2.0]
+
+  benchmarks:
+    - current_portfolio
+    - equal_weight
+    - cap_weight
+    - score_weighted
+    - risk_parity
+    - cvar_constrained
+    - regime_aware
+    - selected_classical
+    - drl
+    - final_portfolio
+
+  regime:
+    minimum_observations_per_regime: 20
+    probability_sum_tolerance: 0.001
+
+  drl:
+    minimum_seeds: 5
+    maximum_seed_sharpe_std: 0.35
+    maximum_seed_return_std: 0.10
+    maximum_drl_blend: 0.25
+    require_classical_outperformance_net_of_costs: true
+    require_constraint_compliance: true
+    require_tail_risk_non_deterioration: true
+    require_drawdown_non_deterioration: true
+
+  constraints:
+    weight_sum_tolerance: 1.0e-6
+    negative_weight_tolerance: 1.0e-10
+    cap_tolerance: 1.0e-6
+    fail_on_hard_breach: true
+
+  sensitivity:
+    enabled: true
+    relative_parameter_changes: [-0.20, -0.10, 0.10, 0.20]
+
+  bootstrap:
+    enabled: true
+    samples: 1000
+    confidence_level: 0.95
+    block_size: 20
+    random_seed: 42
+
+  governance:
+    critical_failures_block_approval: true
+    minimum_overall_score: 70
+    conditional_approval_score: 60
+    require_point_in_time_pass: true
+    require_constraint_pass: true
+    require_risk_backtest_pass: true
+    require_net_of_costs_results: true

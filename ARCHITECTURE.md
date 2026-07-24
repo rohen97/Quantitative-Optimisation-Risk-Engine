@@ -126,3 +126,17 @@ The reporting pipeline is intentionally downstream of the model stack:
 Opening the dashboard or rendering a report does not rerun forecasts, optimisation, risk, stress tests, DRL policies or external data ingestion. The report preserves the final selected weights source and keeps baseline optimiser, DRL challenger and accepted/rejected/blended status separate.
 
 Final portfolio resolution follows explicit final weights, accepted/blended DRL, selected constrained optimiser, CVaR-constrained, regime-aware, score-weighted and equal-weight fallback order. Invalid, negative or non-unit-sum weights are rejected. HTML and the JSON bundle are required pipeline artifacts; PDF and dashboard dependencies are optional.
+
+## Validation And Governance
+
+`src/validation/` consumes immutable model artifacts after IC reporting. Its layers are:
+
+1. evidence loading and forecast/outcome alignment by security, origin, horizon and realisation date
+2. point-in-time, chronology, purge/embargo and leakage controls
+3. point, distribution, binary-event and tail-risk calibration
+4. realised portfolio, cost, benchmark, regime and regional validation
+5. hard-constraint, DRL, sensitivity, ablation and concentration controls
+6. statistical confidence, component scoring and production governance
+7. immutable Markdown/HTML report bundles plus DuckDB lineage registration
+
+Daily pipeline runs use smoke mode. Full and release-candidate modes are explicit because historical bootstrap, sensitivity and ablation work can be expensive. Validation never promotes DRL when the constrained classical baseline fails governance.

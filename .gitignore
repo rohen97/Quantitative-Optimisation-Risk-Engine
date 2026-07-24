@@ -29,3 +29,5 @@ reports/outputs/yfinance_prices_daily.csv
 reports/outputs/alpaca_prices_daily.csv
 reports/outputs/ic/*
 !reports/outputs/ic/.gitkeep
+reports/outputs/validation/*
+!reports/outputs/validation/.gitkeep

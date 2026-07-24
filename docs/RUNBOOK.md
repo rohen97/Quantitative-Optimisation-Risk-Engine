@@ -332,3 +332,32 @@ Report bundles are written to `reports/outputs/ic/<model_run_id>/`. The `latest`
 The report includes executive summary, final weights and trades, current/target exposures, concentration, branch comparison, distinct forecast horizons, regime and Wolf Chaos context, authoritative risk metrics, stress scenarios, hedge concepts, defensive substitutions, DRL acceptance and constraint traces, deterministic narrative, charts, source hashes and data-quality status. `READY`, `READY_WITH_WARNINGS`, `REVIEW_REQUIRED` and `BLOCKED` are reporting-readiness labels, not investment approvals.
 
 Current limitations: report quality depends on upstream data quality; deterministic narrative does not replace analyst review; PDF rendering may be unavailable; hedge concepts require execution review; forecasts and stress losses are model estimates; attribution is not causality; and the dashboard never executes trades.
+
+## Validation Operations
+
+Daily smoke controls:
+
+```bash
+python scripts/run_validation_smoke_test.py
+python scripts/run_leakage_checks.py
+```
+
+Component checks:
+
+```bash
+python scripts/run_forecast_calibration.py
+python scripts/run_risk_backtesting.py
+python scripts/run_strategy_backtest.py
+python scripts/run_drl_validation.py
+```
+
+Full monthly or release-candidate validation:
+
+```bash
+python scripts/run_model_validation.py --mode full
+python scripts/run_model_validation.py --mode release_candidate --strict
+```
+
+Do not delete historical folders under `reports/outputs/validation/`. Review `validation_manifest.json`, `model_validation_scorecard.csv`, `model_component_approval.csv` and `model_approval_report.html`. `REJECTED` and `INSUFFICIENT_DATA` are valid engine outcomes; they block production but do not mean the validation process crashed.
+
+Release order: complete upstream pipeline, freeze the input snapshot, run release-candidate validation, remediate critical failures, rerun under a new validation run ID, obtain governance approval, then tag the model release.

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Wolf Quant Model Validation Report</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #17202a; max-width: 1100px; margin: 32px auto; line-height: 1.45; }
+    h1, h2 { color: #123b57; }
+    table { border-collapse: collapse; width: 100%; margin: 12px 0 24px; }
+    th, td { border: 1px solid #ccd4d9; padding: 7px; text-align: left; }
+    th { background: #edf3f6; }
+    .decision { font-size: 1.3rem; font-weight: 700; padding: 12px; border-left: 5px solid #a33; background: #f7eeee; }
+    pre { white-space: pre-wrap; font-family: inherit; }
+  </style>
+</head>
+<body>
+  <h1>Wolf Quant Model Validation Report</h1>
+  <p>Validation run: <code>{{ validation_run_id }}</code><br>As-of date: {{ as_of_date }}<br>Execution mode: {{ execution_mode }}</p>
+  <div class="decision">{{ approval_status }} | Score {{ "%.1f"|format(overall_score) }} / 100</div>
+  <h2>Critical Failures</h2>
+  <ul>{% for item in critical_failures %}<li>{{ item }}</li>{% else %}<li>None.</li>{% endfor %}</ul>
+  <h2>Component Approvals</h2>
+  {{ component_table_html | safe }}
+  {% for title, content in html_sections.items() %}<h2>{{ title }}</h2><pre>{{ content }}</pre>{% endfor %}
+  <h2>Known Limitations</h2><ul>{% for item in limitations %}<li>{{ item }}</li>{% endfor %}</ul>
+  <h2>Required Remediation</h2><ul>{% for item in remediation %}<li>{{ item }}</li>{% endfor %}</ul>
+  <h2>Final Production Recommendation</h2><p>{{ production_recommendation }}</p>
+  <p><small>Attributions, where reported, are model attributions and are not causal claims.</small></p>
+</body>
+</html>
