@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
+def _category_labels(values: pd.Series) -> list[str]:
+    return ["Unknown" if pd.isna(value) else str(value) for value in values.tolist()]
+
+
 def _unavailable(output_path: Path, title: str) -> Path:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure, axis = plt.subplots(figsize=(8, 4))
@@ -33,7 +37,7 @@ def save_current_vs_target_chart(data: pd.DataFrame, output_path: Path, top_n: i
     axis.barh(positions, plot_data["current_weight"], height=0.35, label="Current")
     axis.barh([position + 0.35 for position in positions], plot_data["target_weight"], height=0.35, label="Target")
     axis.set_yticks([position + 0.175 for position in positions])
-    axis.set_yticklabels(plot_data["ticker"].astype(str), fontsize=8)
+    axis.set_yticklabels(_category_labels(plot_data["ticker"]), fontsize=8)
     axis.set_xlabel("Portfolio weight")
     axis.set_title("Current versus target portfolio weights")
     axis.legend()
@@ -51,12 +55,13 @@ def _bar(data: pd.DataFrame, output_path: Path, x: str, y: str, title: str, ylab
     plot_data = data.copy()
     plot_data[y] = pd.to_numeric(plot_data[y], errors="coerce").fillna(0.0)
     plot_data = plot_data.sort_values(y).tail(15)
+    labels = _category_labels(plot_data[x])
     figure, axis = plt.subplots(figsize=(10, 5))
     if horizontal:
-        axis.barh(plot_data[x].astype(str), plot_data[y])
+        axis.barh(labels, plot_data[y].to_numpy(dtype=float))
         axis.set_xlabel(ylabel)
     else:
-        axis.bar(plot_data[x].astype(str), plot_data[y])
+        axis.bar(labels, plot_data[y].to_numpy(dtype=float))
         axis.set_ylabel(ylabel)
         axis.tick_params(axis="x", rotation=35, labelsize=8)
     axis.set_title(title)

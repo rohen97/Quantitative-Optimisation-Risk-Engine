@@ -1,6 +1,6 @@
 import pandas as pd
 
-from src.data.normalisers import normalise_fundamentals, normalise_macro_vintages, normalise_prices
+from src.data.normalisers import normalise_fundamentals, normalise_macro_vintages, normalise_prices, record_hash
 
 
 def test_normalisers_add_lineage_and_vintage_columns():
@@ -20,3 +20,19 @@ def test_normalisers_add_lineage_and_vintage_columns():
     )
     assert macro.loc[0, "vintage_date"] == pd.Timestamp("2026-04-30")
     assert macro.loc[0, "available_from"] == pd.Timestamp("2026-04-30")
+
+
+def test_record_hash_handles_mixed_missing_values_deterministically():
+    frame = pd.DataFrame(
+        {
+            "security_id": ["AAA", "BBB"],
+            "value": [1.5, float("nan")],
+            "optional": [pd.NA, "reported"],
+        }
+    )
+
+    first = record_hash(frame, ["security_id", "value", "optional"])
+    second = record_hash(frame, ["security_id", "value", "optional"])
+
+    assert first.equals(second)
+    assert first.str.fullmatch(r"[0-9a-f]{64}").all()

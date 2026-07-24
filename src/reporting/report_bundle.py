@@ -25,7 +25,7 @@ def _handle_remove_error(function, path: str, _exc_info) -> None:
 
 def _remove_tree(path: Path) -> None:
     if path.exists():
-        shutil.rmtree(path, onexc=_handle_remove_error)
+        shutil.rmtree(path, onerror=_handle_remove_error)
 
 
 def prepare_report_directory(archive_root: Path, latest_dir: Path, model_run_id: str) -> Path:

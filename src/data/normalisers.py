@@ -13,7 +13,14 @@ def _now() -> pd.Timestamp:
 
 
 def record_hash(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
-    values = frame[columns].astype(str).agg("|".join, axis=1)
+    def serialise(value: object) -> str:
+        if pd.isna(value):
+            return ""
+        if isinstance(value, pd.Timestamp):
+            return value.isoformat()
+        return str(value)
+
+    values = frame.loc[:, columns].apply(lambda column: column.map(serialise)).agg("|".join, axis=1)
     return values.map(lambda value: hashlib.sha256(value.encode("utf-8")).hexdigest())
 
 
