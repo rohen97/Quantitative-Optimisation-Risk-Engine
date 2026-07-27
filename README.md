@@ -105,6 +105,8 @@ pytest
 
 Outputs are saved in `reports/outputs/`.
 
+Architecture diagrams and stage-by-stage diagnostic checks are documented in `docs/ARCHITECTURE_DIAGRAMS.md`.
+
 ## Data Backend Foundation
 
 The model now has a DuckDB + Parquet data foundation underneath the existing CSV/mock pipeline. The default backend is still `legacy_csv`, so existing behaviour is preserved. Configure backend migration in `configs/data.yaml`:

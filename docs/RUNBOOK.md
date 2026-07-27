@@ -12,6 +12,12 @@ Run the MVP pipeline:
 python scripts/run_full_pipeline.py
 ```
 
+Review the visual model flow and diagnostics map:
+
+```text
+docs/ARCHITECTURE_DIAGRAMS.md
+```
+
 Initialize and validate the DuckDB/Parquet data foundation:
 
 ```bash

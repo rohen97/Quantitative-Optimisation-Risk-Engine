@@ -2,6 +2,8 @@
 
 The repository is organised as a modular quant platform, with production logic in `src/` and scripts as thin entry points.
 
+For visual pipeline diagrams, data-flow graphs and stage-by-stage diagnostic checks, see `docs/ARCHITECTURE_DIAGRAMS.md`.
+
 - `data`: backend configuration, schemas, validators, normalisers, lineage, point-in-time views, snapshot building, CSV/DuckDB repositories, ingestion helpers and shadow comparison utilities.
 - `data_ingestion`: universe, mock data, yfinance price ingestion, Alpaca integration and vendor adapter interfaces.
 - `branches`: portfolio-aware quant, clean-sheet quant, mock LLM analyst benchmark and branch comparison engines.
