@@ -31,3 +31,9 @@ reports/outputs/ic/*
 !reports/outputs/ic/.gitkeep
 reports/outputs/validation/*
 !reports/outputs/validation/.gitkeep
+reports/outputs/production/*
+!reports/outputs/production/.gitkeep
+logs/production/*
+!logs/production/.gitkeep
+data/locks/*
+!data/locks/.gitkeep

@@ -1,0 +1,156 @@
+production:
+  enabled: true
+  timezone: Asia/Singapore
+
+  execution:
+    default_mode: daily
+    prevent_concurrent_runs: true
+    stale_lock_minutes: 360
+    stop_on_required_step_failure: true
+    preserve_failed_run_outputs: true
+    update_latest_successful: true
+    update_latest_approved_only_on_pass: true
+
+  paths:
+    output_root: reports/outputs/production
+    latest_successful: reports/outputs/production/latest_successful
+    latest_approved: reports/outputs/production/latest_approved
+    lock_directory: data/locks
+    log_directory: logs/production
+    database_path: data/database/wolf.duckdb
+
+  schedules:
+    daily:
+      enabled: true
+      local_time: "07:00"
+      validation_mode: smoke
+    weekly:
+      enabled: true
+      day_of_week: SAT
+      local_time: "09:00"
+      validation_mode: standard
+    monthly:
+      enabled: true
+      week_of_month: FIRST
+      day_of_week: SUN
+      local_time: "10:00"
+      validation_mode: full
+    release_candidate:
+      enabled: true
+      validation_mode: release_candidate
+
+  pipeline:
+    full_pipeline_script: scripts/run_full_pipeline.py
+    timeout_minutes:
+      daily: 180
+      weekly: 300
+      monthly: 720
+      release_candidate: 900
+    model_backend: duckdb
+    allow_shadow_mode: true
+
+  retries:
+    enabled: true
+    maximum_attempts: 3
+    initial_delay_seconds: 10
+    maximum_delay_seconds: 120
+    backoff_multiplier: 2.0
+    jitter_seconds: 3
+    retryable_exit_codes:
+      - 75
+      - 111
+    non_retryable_steps:
+      - point_in_time_validation
+      - constraint_validation
+      - governance_approval
+
+  health:
+    minimum_free_disk_gb: 10
+    database_connection_required: true
+    repository_write_required: true
+    git_required: false
+    fail_on_dirty_git_for_release_candidate: true
+    maximum_database_size_gb: 50
+
+  freshness:
+    prices_max_age_hours: 36
+    fx_max_age_hours: 36
+    macro_max_age_days: 35
+    fundamentals_max_age_days: 120
+    news_max_age_hours: 48
+    current_portfolio_max_age_hours: 36
+    regime_output_max_age_hours: 72
+    forecast_output_max_age_days: 35
+    risk_output_max_age_days: 35
+    ic_report_max_age_hours: 36
+
+  drift:
+    enabled: true
+    baseline_directory: reports/outputs/production/baselines
+    minimum_observations: 30
+    psi_warning_threshold: 0.10
+    psi_critical_threshold: 0.25
+    maximum_weight_l1_change_warning: 0.20
+    maximum_weight_l1_change_critical: 0.40
+    maximum_recommendation_churn_warning: 0.25
+    maximum_recommendation_churn_critical: 0.50
+    maximum_universe_churn_warning: 0.10
+    maximum_missingness_change_warning: 0.05
+    maximum_regime_probability_change_warning: 0.30
+    baseline_refresh_requires_approval: true
+
+  approval:
+    daily_requires_smoke_validation_pass: true
+    weekly_requires_standard_validation_pass: true
+    monthly_requires_full_validation_pass: true
+    release_candidate_requires_approved_status: true
+    block_on_critical_health_failure: true
+    block_on_point_in_time_failure: true
+    block_on_hard_constraint_failure: true
+    block_on_invalid_weights: true
+    block_on_drl_governance_mismatch: true
+    block_on_missing_ic_report: true
+    allow_warning_status: true
+
+  alerts:
+    enabled: true
+    deduplication_window_minutes: 120
+    send_recovery_alerts: true
+    minimum_console_severity: INFO
+    minimum_email_severity: CRITICAL
+    minimum_slack_severity: WARNING
+    console:
+      enabled: true
+    file:
+      enabled: true
+      path: reports/outputs/production/alerts.jsonl
+    email:
+      enabled: false
+      smtp_host_env: WOLF_SMTP_HOST
+      smtp_port_env: WOLF_SMTP_PORT
+      smtp_username_env: WOLF_SMTP_USERNAME
+      smtp_password_env: WOLF_SMTP_PASSWORD
+      from_address_env: WOLF_ALERT_FROM
+      to_addresses_env: WOLF_ALERT_TO
+      use_tls: true
+    slack:
+      enabled: false
+      webhook_url_env: WOLF_SLACK_WEBHOOK_URL
+
+  incidents:
+    enabled: true
+    auto_open_on_critical_alert: true
+    auto_resolve_on_recovery: true
+    deduplicate_by_fingerprint: true
+
+  logging:
+    level: INFO
+    json_logs: false
+    retain_days: 90
+    redact_secrets: true
+
+  status_report:
+    enabled: true
+    generate_json: true
+    generate_markdown: true
+    generate_html: true

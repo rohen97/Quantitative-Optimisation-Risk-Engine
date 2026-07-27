@@ -38,3 +38,8 @@ The final test period cannot be used for hyperparameter selection. Failed period
 ## Current Governance Position
 
 The present repository has current cross-sectional forecasts and proxy backtests but insufficient aligned realised outcomes for full 3M, 6M, 9M and 12M calibration. Production approval therefore requires accumulated point-in-time forecast vintages, at least 24 months of realised net strategy returns, completed risk backtests and remediation of all hard constraints. DRL cannot be promoted before the selected classical optimiser passes these controls.
+## Production Operations Governance
+
+The production operations layer is a downstream control plane. It can block approval, preserve evidence and alert operators, but it must not change investment signals, optimiser objectives, risk limits, stress assumptions, hedge rules or DRL acceptance logic.
+
+Latest successful and latest approved production pointers are copied directories, not symlinks. Failed and blocked runs remain immutable under `reports/outputs/production/<production_run_id>/` and must not update `latest_approved`.

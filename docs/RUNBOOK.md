@@ -156,6 +156,25 @@ Run tests:
 pytest
 ```
 
+Run production operations:
+
+```bash
+python scripts/run_production_pipeline.py --mode daily
+python scripts/check_production_health.py
+python scripts/check_data_freshness.py
+python scripts/check_model_drift.py
+python scripts/show_production_status.py
+```
+
+Install or remove Windows scheduled tasks:
+
+```powershell
+scripts/windows/install_production_tasks.ps1
+scripts/windows/uninstall_production_tasks.ps1
+```
+
+Production operations are documented in `docs/PRODUCTION_OPERATIONS.md`.
+
 Outputs are written to `reports/outputs/`.
 
 Key branch outputs:

@@ -1,0 +1,5 @@
+# Example only. Windows Task Scheduler is the primary local scheduler.
+# Times are local to the machine running cron. Store model timestamps in UTC.
+0 7 * * 1-5 cd "/path/to/the-wolf-quant-model" && python scripts/run_production_pipeline.py --mode daily
+0 9 * * 6 cd "/path/to/the-wolf-quant-model" && python scripts/run_production_pipeline.py --mode weekly
+0 10 1 * * cd "/path/to/the-wolf-quant-model" && python scripts/run_production_pipeline.py --mode monthly

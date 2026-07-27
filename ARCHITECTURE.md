@@ -142,3 +142,9 @@ Final portfolio resolution follows explicit final weights, accepted/blended DRL,
 7. immutable Markdown/HTML report bundles plus DuckDB lineage registration
 
 Daily pipeline runs use smoke mode. Full and release-candidate modes are explicit because historical bootstrap, sensitivity and ablation work can be expensive. Validation never promotes DRL when the constrained classical baseline fails governance.
+
+## Production Monitoring And Operations
+
+`src/production/` operationalises the existing stack without changing model math. It adds operating modes, production run locks, preflight and post-run health checks, freshness checks, lightweight drift monitoring, approval gates, alert routing, incident tracking, immutable production manifests and copied latest-successful/latest-approved pointers.
+
+The scheduler boundary is outside Python. Windows Task Scheduler scripts live under `scripts/windows/`, and Linux cron examples live under `scripts/linux/`. All persisted timestamps are UTC; human-facing schedules are configured for Asia/Singapore.

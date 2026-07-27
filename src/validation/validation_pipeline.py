@@ -7,6 +7,7 @@ import json
 import logging
 from pathlib import Path
 import shutil
+import time
 from typing import Any
 from uuid import uuid4
 
@@ -46,9 +47,30 @@ def _status_frame(component: str, status: str, commentary: str, observations: in
 
 
 def _copy_latest(run_directory: Path, latest_directory: Path) -> None:
-    if latest_directory.exists():
-        shutil.rmtree(latest_directory, onerror=lambda function, path, _: function(path))
-    shutil.copytree(run_directory, latest_directory)
+    unique_suffix = uuid4().hex[:8]
+    tmp_directory = latest_directory.with_name(f"{latest_directory.name}.tmp-{unique_suffix}")
+    old_directory = latest_directory.with_name(f"{latest_directory.name}.old-{unique_suffix}")
+    shutil.copytree(run_directory, tmp_directory)
+    for attempt in range(3):
+        try:
+            if latest_directory.exists():
+                latest_directory.rename(old_directory)
+            tmp_directory.rename(latest_directory)
+            if old_directory.exists():
+                shutil.rmtree(old_directory, ignore_errors=True)
+            return
+        except PermissionError as error:
+            LOGGER.warning(
+                "Could not atomically replace validation latest directory on attempt %s: %s",
+                attempt + 1,
+                error,
+            )
+            time.sleep(0.5 * (attempt + 1))
+    LOGGER.warning(
+        "Validation latest pointer was not updated because Windows denied directory replacement. Immutable run remains at %s.",
+        run_directory,
+    )
+    shutil.rmtree(tmp_directory, ignore_errors=True)
 
 
 def _input_hash(paths: list[Path]) -> str:

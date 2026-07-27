@@ -30,4 +30,6 @@ def load_settings() -> dict[str, Any]:
     settings["data"] = load_yaml("configs/data.yaml").get("data", {})
     settings["data_sources"] = load_yaml("configs/data_sources.yaml").get("data_sources", {})
     settings["validation"] = load_yaml("configs/validation.yaml").get("validation", {})
+    settings["production"] = load_yaml("configs/production.yaml").get("production", {})
+    settings["repository_root"] = str(ROOT)
     return settings

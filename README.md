@@ -238,3 +238,16 @@ python scripts/run_model_validation.py --mode release_candidate --strict
 ```
 
 Every run is preserved under `reports/outputs/validation/<validation_run_id>/`; `reports/outputs/validation/latest/` is a copied view. Missing realised history is reported as `INSUFFICIENT_DATA`, never as a pass. Critical leakage, point-in-time, lineage, reproducibility or hard-constraint failures force `REJECTED`.
+
+## Production Operations
+
+The production operations layer wraps the existing model with scheduling, run locks, health checks, freshness checks, drift checks, alerting, incidents, manifests and latest-run pointers. It does not alter investment logic.
+
+```bash
+python scripts/run_production_pipeline.py --mode daily
+python scripts/run_production_pipeline.py --mode weekly
+python scripts/run_production_pipeline.py --mode monthly
+python scripts/run_production_pipeline.py --mode release_candidate
+```
+
+See `docs/PRODUCTION_OPERATIONS.md` for Windows Task Scheduler setup, cron examples, alert routing and operator diagnostics.
