@@ -15,7 +15,17 @@ def test_yfinance_daily_bars_normalize_single_symbol(monkeypatch):
 
     monkeypatch.setattr("src.data_ingestion.yfinance_adapter.yf.download", fake_download)
     bars = YFinanceMarketDataAdapter(YFinanceConfig()).load_daily_bars(["AAPL"], start="2026-01-01", end="2026-01-04")
-    assert list(bars.columns) == ["date", "ticker", "close", "return"]
+    assert list(bars.columns) == [
+        "date",
+        "ticker",
+        "open",
+        "high",
+        "low",
+        "close",
+        "adjusted_close",
+        "volume",
+        "return",
+    ]
     assert bars["ticker"].tolist() == ["AAPL", "AAPL"]
     assert bars["return"].iloc[0] == 0
     assert round(float(bars["return"].iloc[1]), 4) == 0.1

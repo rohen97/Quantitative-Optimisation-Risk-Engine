@@ -40,9 +40,11 @@ class YFinanceMarketDataAdapter:
     @staticmethod
     def _normalise_download(raw: pd.DataFrame, symbols: list[str]) -> pd.DataFrame:
         if raw is None or raw.empty:
-            return pd.DataFrame(columns=["date", "ticker", "close", "return"])
+            return pd.DataFrame(
+                columns=["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+            )
         data = raw.copy()
-        close_frames = []
+        frames = []
         if isinstance(data.columns, pd.MultiIndex):
             if "Close" in data.columns.get_level_values(0):
                 close = data["Close"]
@@ -52,19 +54,55 @@ class YFinanceMarketDataAdapter:
                 raise YFinanceRequestError("yfinance response did not contain Close or Adj Close columns.")
             close = close if isinstance(close, pd.DataFrame) else close.to_frame(name=symbols[0])
             for ticker in close.columns:
-                close_frames.append(pd.DataFrame({"date": close.index, "ticker": str(ticker), "close": close[ticker].to_numpy(dtype=float)}))
+                values = {
+                    "date": close.index,
+                    "ticker": str(ticker),
+                    "close": close[ticker].to_numpy(dtype=float),
+                }
+                for source_name, target_name in (
+                    ("Open", "open"),
+                    ("High", "high"),
+                    ("Low", "low"),
+                    ("Adj Close", "adjusted_close"),
+                    ("Volume", "volume"),
+                ):
+                    if source_name in data.columns.get_level_values(0):
+                        source = data[source_name]
+                        source = source if isinstance(source, pd.DataFrame) else source.to_frame(name=symbols[0])
+                        if ticker in source:
+                            values[target_name] = source[ticker].to_numpy()
+                frames.append(pd.DataFrame(values))
         else:
             close_column = "Close" if "Close" in data.columns else "Adj Close" if "Adj Close" in data.columns else None
             if close_column is None:
                 raise YFinanceRequestError("yfinance response did not contain Close or Adj Close columns.")
             ticker = symbols[0] if symbols else "UNKNOWN"
-            close_frames.append(pd.DataFrame({"date": data.index, "ticker": ticker, "close": data[close_column].to_numpy(dtype=float)}))
-        output = pd.concat(close_frames, ignore_index=True) if close_frames else pd.DataFrame(columns=["date", "ticker", "close"])
+            values = {
+                "date": data.index,
+                "ticker": ticker,
+                "close": data[close_column].to_numpy(dtype=float),
+            }
+            for source_name, target_name in (
+                ("Open", "open"),
+                ("High", "high"),
+                ("Low", "low"),
+                ("Adj Close", "adjusted_close"),
+                ("Volume", "volume"),
+            ):
+                if source_name in data:
+                    values[target_name] = data[source_name].to_numpy()
+            frames.append(pd.DataFrame(values))
+        output = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=["date", "ticker", "close"])
         output["date"] = pd.to_datetime(output["date"]).dt.normalize()
         output["close"] = pd.to_numeric(output["close"], errors="coerce")
+        for column in ("open", "high", "low", "adjusted_close", "volume"):
+            fallback = output["close"] if column != "volume" else pd.NA
+            output[column] = pd.to_numeric(output.get(column, fallback), errors="coerce")
         output = output.dropna(subset=["date", "ticker", "close"]).sort_values(["ticker", "date"]).reset_index(drop=True)
         output["return"] = output.groupby("ticker")["close"].pct_change().fillna(0.0)
-        return output[["date", "ticker", "close", "return"]]
+        return output[
+            ["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+        ]
 
     def load_daily_bars(
         self,
@@ -75,7 +113,9 @@ class YFinanceMarketDataAdapter:
         """Fetch yfinance daily bars and normalize them to the model price schema."""
         clean_symbols = sorted({str(symbol).strip() for symbol in symbols if str(symbol).strip()})
         if not clean_symbols:
-            return pd.DataFrame(columns=["date", "ticker", "close", "return"])
+            return pd.DataFrame(
+                columns=["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+            )
         end_dt = datetime.now(UTC).date() if end is None else pd.Timestamp(end).date()
         start_dt = end_dt - timedelta(days=self.config.lookback_days) if start is None else pd.Timestamp(start).date()
         raw = yf.download(

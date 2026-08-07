@@ -34,7 +34,13 @@ def _first_numeric(frame: pd.DataFrame, candidates: tuple[str, ...]) -> float | 
     return None
 
 
-def _readiness(bundle: ICDataBundle, resolved: ResolvedPortfolio | None, hard_breaches: int, pdf_available: bool = True) -> str:
+def _readiness(
+    bundle: ICDataBundle,
+    resolved: ResolvedPortfolio | None,
+    hard_breaches: int,
+    pdf_available: bool = True,
+    report_quality: pd.DataFrame | None = None,
+) -> str:
     if resolved is None or resolved.portfolio.empty:
         return "BLOCKED"
     weights = pd.to_numeric(resolved.portfolio.get("target_weight", resolved.portfolio.get("final_weight", pd.Series(dtype=float))), errors="coerce")
@@ -42,6 +48,10 @@ def _readiness(bundle: ICDataBundle, resolved: ResolvedPortfolio | None, hard_br
         return "BLOCKED"
     if hard_breaches > 0:
         return "BLOCKED"
+    if report_quality is not None and not report_quality.empty:
+        statuses = report_quality.get("status", pd.Series(dtype=str)).astype(str).str.lower()
+        if statuses.eq("fail").any():
+            return "BLOCKED"
     data_validation = bundle.frames.get("data_validation_report", pd.DataFrame())
     if not data_validation.empty and data_validation.astype(str).apply(lambda col: col.str.contains("fail|error", case=False, na=False)).any().any():
         return "BLOCKED"
@@ -72,6 +82,7 @@ def build_executive_summary(
     bundle: ICDataBundle,
     resolved: ResolvedPortfolio | None = None,
     pdf_available: bool = True,
+    report_quality: pd.DataFrame | None = None,
 ) -> dict[str, object]:
     try:
         resolved = resolved or resolve_final_portfolio_from_bundle(bundle)
@@ -113,7 +124,13 @@ def build_executive_summary(
     summary: dict[str, object] = {
         "model_run_id": bundle.model_run_id,
         "as_of_date": str(bundle.as_of_date.date()) if hasattr(bundle.as_of_date, "date") else str(bundle.as_of_date),
-        "decision_readiness_status": _readiness(bundle, resolved, hard_breaches, pdf_available),
+        "decision_readiness_status": _readiness(
+            bundle,
+            resolved,
+            hard_breaches,
+            pdf_available,
+            report_quality,
+        ),
         "current_nav_usd": float(pd.to_numeric(current.get("market_value_usd", pd.Series(dtype=float)), errors="coerce").sum()) if not current.empty else None,
         "selected_portfolio_source": resolved.source_name if resolved is not None else "unavailable",
         "recommended_positions": int((weights > 0).sum()) if not weights.empty else 0,

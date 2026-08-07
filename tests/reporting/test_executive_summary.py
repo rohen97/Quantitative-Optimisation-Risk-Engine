@@ -33,3 +33,24 @@ def test_executive_summary_counts_only_true_hard_breaches():
     )
     summary = build_executive_summary(bundle)
     assert summary["number_of_hard_constraint_breaches"] == 1
+
+
+def test_executive_summary_blocks_failed_report_quality():
+    bundle = ICDataBundle(
+        {
+            "final_recommendations": pd.DataFrame(
+                {"security_id": ["sec-1"], "ticker": ["AAA"], "final_selected_weight": [1.0]}
+            ),
+        }
+    )
+    report_quality = pd.DataFrame(
+        {
+            "section": ["data_provenance"],
+            "rule": ["observed_investment_inputs"],
+            "status": ["fail"],
+        }
+    )
+
+    summary = build_executive_summary(bundle, report_quality=report_quality)
+
+    assert summary["decision_readiness_status"] == "BLOCKED"

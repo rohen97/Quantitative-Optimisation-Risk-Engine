@@ -8,13 +8,9 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from src.data_ingestion.fundamental_ingestion import load_fundamentals
-from src.data_ingestion.price_ingestion import load_prices
-from src.data_ingestion.universe import build_universe
 from src.drl.baseline_policy import choose_baseline_portfolio
 from src.drl.drl_pipeline import run_drl_pipeline
 from src.pipeline import attach_drl_challenger_status
-from src.portfolio.portfolio_loader import load_current_portfolio
 from src.reporting.report_writer import write_csv
 from src.utils.config import ensure_output_dir, load_yaml
 
@@ -43,8 +39,6 @@ DRL_INPUT_FILES = {
 PIPELINE_STAGES = [
     "load settings",
     "load optimiser baseline portfolio",
-    "load current portfolio",
-    "load price history",
     "load scorecard",
     "load distributional forecasts",
     "load regime outputs",
@@ -125,15 +119,6 @@ def main() -> dict[str, pd.DataFrame | str]:
         raise ValueError("DRL pipeline requires an optimiser baseline portfolio before training or backtesting.")
     frames["recommended_optimised_portfolio"] = baseline
     logging.info("Loaded optimiser baseline portfolio with %s rows.", len(baseline))
-
-    current_path = base_config.get("current_portfolio_path", "data/external/current_portfolio_template.csv")
-    current_portfolio = load_current_portfolio(current_path)
-    logging.info("Loaded current portfolio with %s rows.", len(current_portfolio))
-
-    universe = build_universe(n=int(base_config.get("mock_data", {}).get("securities", 24)))
-    price_history = load_prices(universe)
-    fundamentals = load_fundamentals(universe)
-    logging.info("Loaded price history with %s rows and fundamentals with %s rows.", len(price_history), len(fundamentals))
 
     outputs = run_drl_pipeline(
         output_dir,

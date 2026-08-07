@@ -88,14 +88,16 @@ def build_final_recommendations(branch_comparison: pd.DataFrame, scorecard: pd.D
         how="left",
     )
     quant_buy = data["portfolio_aware_recommendation"].eq("Buy")
+    quant_hold = data["portfolio_aware_recommendation"].eq("Hold") | data["clean_sheet_recommendation"].eq("Hold")
     llm_support = data["llm_recommendation"].eq("Buy") & ~data["final_review_required"]
     data["final_recommendation"] = np.select(
         [
             ~data["passes_hard_filters"].fillna(False),
             quant_buy & llm_support,
             quant_buy,
+            quant_hold,
         ],
-        ["Avoid", "Buy", "Hold"],
+        ["Avoid", "Buy", "Hold", "Watchlist"],
         default="Avoid",
     )
     data["final_target_weight"] = np.where(data["final_recommendation"].eq("Buy"), data["target_weight_portfolio_aware"], 0.0)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
@@ -18,8 +19,13 @@ def load_yaml(path: str | Path) -> dict[str, Any]:
 
 
 def ensure_output_dir(config: dict[str, Any] | None = None) -> Path:
-    output_dir = (config or {}).get("output_dir", "reports/outputs")
-    path = ROOT / output_dir
+    output_dir = os.environ.get("PIPELINE_OUTPUT_DIR") or (config or {}).get(
+        "output_dir",
+        "reports/outputs",
+    )
+    path = Path(output_dir)
+    if not path.is_absolute():
+        path = ROOT / path
     path.mkdir(parents=True, exist_ok=True)
     return path
 

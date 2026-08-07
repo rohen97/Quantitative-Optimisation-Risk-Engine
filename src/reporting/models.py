@@ -95,7 +95,7 @@ class ICDataBundle(ICDataPackage):
     ) -> None:
         super().__init__(
             model_run_id=model_run_id,
-            as_of_date=as_of_date or pd.Timestamp.utcnow(),
+            as_of_date=as_of_date or pd.Timestamp.now('UTC'),
             current_portfolio=frames.get("current_portfolio", pd.DataFrame()),
             final_portfolio=frames.get("final_recommendations", frames.get("final_portfolio_weights", pd.DataFrame())),
             final_trades=frames.get("portfolio_trade_list", pd.DataFrame()),

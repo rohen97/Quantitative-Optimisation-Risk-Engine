@@ -35,5 +35,12 @@ reports/outputs/production/*
 !reports/outputs/production/.gitkeep
 logs/production/*
 !logs/production/.gitkeep
+logs/*.log
+reports/logs/
+reports/two_phase_smoke/
+reports/outputs/equity_universe.csv
+reports/outputs/*_smoke.pdf
+reports/outputs/gtk_pango_check.pdf
+reports/outputs/walk_forward/
 data/locks/*
 !data/locks/.gitkeep

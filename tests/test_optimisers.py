@@ -67,3 +67,12 @@ def test_cvar_and_dividend_optimisers_penalise_risky_names():
     income = dividend_income_portfolio(data, {"max_single_name_weight": 0.10})
     assert cvar.loc[cvar["ticker"].eq("T00"), "target_weight"].iloc[0] > cvar.loc[cvar["ticker"].eq("T19"), "target_weight"].iloc[0]
     assert income.loc[income["ticker"].eq("T00"), "target_weight"].iloc[0] > income.loc[income["ticker"].eq("T19"), "target_weight"].iloc[0]
+
+
+def test_cross_listed_issuer_is_allocated_once():
+    data = _data()
+    data["issuer_id"] = [f"ISSUER-{i}" for i in range(len(data))]
+    data.loc[[0, 1], "issuer_id"] = "DUPLICATE-ISSUER"
+    portfolio = score_weighted_portfolio(data, {"max_single_name_weight": 0.10})
+    invested = portfolio.loc[portfolio["target_weight"].gt(0)]
+    assert invested["issuer_id"].is_unique

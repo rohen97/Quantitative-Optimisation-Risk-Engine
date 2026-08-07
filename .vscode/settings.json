@@ -1,4 +1,7 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:conda",
-    "python-envs.defaultPackageManager": "ms-python.python:conda"
+    "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+    "python-envs.defaultPackageManager": "ms-python.python:pip",
+    "terminal.integrated.env.windows": {
+        "CUDA_VISIBLE_DEVICES": "-1"
+    }
 }

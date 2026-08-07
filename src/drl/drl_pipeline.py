@@ -73,6 +73,34 @@ def _load_inputs(output_dir: Path, input_frames: dict[str, pd.DataFrame] | None)
     return frames
 
 
+def _limit_drl_universe(baseline: pd.DataFrame, maximum_assets: int) -> pd.DataFrame:
+    """Keep held names plus a small ranked opportunity set for bounded DRL state size."""
+    if maximum_assets <= 0 or len(baseline) <= maximum_assets:
+        return baseline
+    target = pd.to_numeric(
+        baseline.get("target_weight", pd.Series(0.0, index=baseline.index)),
+        errors="coerce",
+    ).fillna(0.0)
+    current = pd.to_numeric(
+        baseline.get("current_weight", pd.Series(0.0, index=baseline.index)),
+        errors="coerce",
+    ).fillna(0.0)
+    mandatory = target.gt(1e-12) | current.gt(1e-12)
+    eligible = baseline.get(
+        "eligible_for_optimisation",
+        pd.Series(True, index=baseline.index),
+    ).fillna(False).astype(bool)
+    slots = max(maximum_assets - int(mandatory.sum()), 0)
+    score = pd.to_numeric(
+        baseline.get("final_recommendation_score", pd.Series(0.0, index=baseline.index)),
+        errors="coerce",
+    ).fillna(0.0)
+    extras = score.where(eligible & ~mandatory, -np.inf).nlargest(slots).index
+    active = mandatory.copy()
+    active.loc[extras] = True
+    return baseline.loc[active].copy()
+
+
 def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
     """Create a DRL model card covering role, design, controls and limits."""
     success_rate = float(benchmark["drl_success_flag"].mean()) if not benchmark.empty else 0.0
@@ -288,6 +316,10 @@ def run_drl_pipeline(
     baseline = choose_baseline_portfolio(frames, out)
     if baseline.empty:
         raise ValueError("DRL pipeline requires optimiser outputs or a stock_scorecard fallback.")
+    baseline = _limit_drl_universe(
+        baseline,
+        int(config.get("maximum_assets", 100)),
+    )
     baseline = baseline.reset_index(drop=True)
     constraints = _constraints(config, optimisation_config)
     eligibility = baseline.get("eligible_for_optimisation")

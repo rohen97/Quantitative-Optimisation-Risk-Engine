@@ -63,6 +63,8 @@ def apply_hard_filters(features: pd.DataFrame, risk_limits: dict | None = None) 
     data["sentiment_alt_data_score"] = _series(data, "sentiment_alt_data_score", data["sentiment_alt_signal_score"]).fillna(neutral)
     data["sentiment_alt_signal_score"] = data["sentiment_alt_data_score"]
     data["average_daily_value_usd"] = _series(data, "average_daily_value_usd", 0).fillna(_series(data, "avg_daily_traded_value_usd", 0))
+    data["price_data_quality_score"] = _series(data, "price_data_quality_score", neutral).fillna(neutral)
+    data["price_data_exclusion_flag"] = _series(data, "price_data_exclusion_flag", False).fillna(False)
     data["regulatory_risk_score"] = _series(data, "regulatory_risk_score", 0).fillna(0)
     data["credit_stress_score"] = _series(data, "credit_stress_score", 0).fillna(0)
     data["liquidity_stress_score"] = _series(data, "liquidity_stress_score", 0).fillna(0)
@@ -97,6 +99,7 @@ def apply_hard_filters(features: pd.DataFrame, risk_limits: dict | None = None) 
         & (~data["alt_data_exclusion_flag"].astype(bool))
         & (~data["reframing_exclusion_flag"].astype(bool))
         & (~data["regime_exclusion_flag"].astype(bool))
+        & (~data["price_data_exclusion_flag"].astype(bool))
         & (data["incremental_portfolio_cvar"] <= limits.get("max_portfolio_cvar_5", 0.12))
     )
     return data
@@ -169,6 +172,7 @@ def build_scorecard(features: pd.DataFrame, risk_limits: dict | None = None) -> 
     data.loc[data["reframing_exclusion_flag"].astype(bool), "risk_management_flags"] += "narrative_exclusion;"
     data.loc[data["regime_review_required_flag"].astype(bool), "risk_management_flags"] += "regime_review;"
     data.loc[data["regime_exclusion_flag"].astype(bool), "risk_management_flags"] += "regime_exclusion;"
+    data.loc[data["price_data_exclusion_flag"].astype(bool), "risk_management_flags"] += "price_data_exclusion;"
     data.loc[data["regime_deterioration_probability"] > 0.70, "risk_management_flags"] += "regime_deterioration;"
     data.loc[data["dividend_cut_probability"] > 0.35, "risk_management_flags"] += "ml_dividend_cut_risk;"
     data.loc[data["large_drawdown_probability_12m"] > 0.30, "risk_management_flags"] += "ml_drawdown_risk;"

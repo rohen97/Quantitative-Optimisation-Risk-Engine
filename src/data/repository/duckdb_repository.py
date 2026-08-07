@@ -125,8 +125,8 @@ class DuckDBRepository:
         clean = data.copy()
         clean["document_id"] = clean.get("document_id", [str(uuid4()) for _ in range(len(clean))])
         clean["published_at"] = pd.to_datetime(clean.get("published_at", clean.get("published_date", pd.NaT)))
-        clean["available_from"] = pd.to_datetime(clean.get("available_from", clean["published_at"])).fillna(pd.Timestamp.utcnow().tz_localize(None))
-        clean["retrieved_at"] = pd.to_datetime(clean.get("retrieved_at", pd.Timestamp.utcnow().tz_localize(None)))
+        clean["available_from"] = pd.to_datetime(clean.get("available_from", clean["published_at"])).fillna(pd.Timestamp.now('UTC').tz_localize(None))
+        clean["retrieved_at"] = pd.to_datetime(clean.get("retrieved_at", pd.Timestamp.now('UTC').tz_localize(None)))
         clean["source"] = clean.get("source", "mock")
         clean["headline"] = clean.get("headline", clean.get("title", ""))
         clean["body_text"] = clean.get("body_text", clean.get("body", ""))
@@ -200,7 +200,7 @@ class DuckDBRepository:
         )
 
     def register_model_run(self, metadata: dict[str, object]) -> str:
-        now = pd.Timestamp.utcnow().tz_localize(None)
+        now = pd.Timestamp.now('UTC').tz_localize(None)
         model_run_id = str(metadata.get("model_run_id") or uuid4())
         row = {
             "model_run_id": model_run_id,
@@ -244,5 +244,5 @@ class DuckDBRepository:
                 SET completed_at = ?, status = ?, output_path = ?, error_message = ?
                 WHERE model_run_id = ?
                 """,
-                [pd.Timestamp.utcnow().tz_localize(None), status, output_path, error_message, model_run_id],
+                [pd.Timestamp.now('UTC').tz_localize(None), status, output_path, error_message, model_run_id],
             )

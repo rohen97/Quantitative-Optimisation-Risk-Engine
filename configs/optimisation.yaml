@@ -5,6 +5,7 @@ optimisation:
   base_currency: USD
   long_only: true
   fully_invested: true
+  maximum_candidates: 2000
 
   methods:
     equal_weight:
@@ -32,6 +33,7 @@ optimisation:
     max_currency_weight: 0.40
     minimum_liquidity_score: 40
     minimum_average_daily_value_usd: 5000000
+    minimum_liquidity_observations: 20
     minimum_portfolio_dividend_yield: 0.03
     maximum_portfolio_volatility: 0.20
     maximum_portfolio_var_5: -0.15

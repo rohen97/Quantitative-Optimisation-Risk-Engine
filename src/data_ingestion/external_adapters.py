@@ -14,7 +14,18 @@ from src.data_ingestion.provider_registry import ProviderDefinition
 from src.utils.env import get_env
 
 
-PRICE_COLUMNS = ["date", "ticker", "close", "return", "source"]
+PRICE_COLUMNS = [
+    "date",
+    "ticker",
+    "open",
+    "high",
+    "low",
+    "close",
+    "adjusted_close",
+    "volume",
+    "return",
+    "source",
+]
 
 
 def _price_frame(rows: list[dict[str, object]], source: str) -> pd.DataFrame:
@@ -24,6 +35,9 @@ def _price_frame(rows: list[dict[str, object]], source: str) -> pd.DataFrame:
     data["date"] = pd.to_datetime(data["date"], errors="coerce", utc=True).dt.tz_localize(None).dt.normalize()
     data["ticker"] = data["ticker"].astype(str)
     data["close"] = pd.to_numeric(data["close"], errors="coerce")
+    for column in ("open", "high", "low", "adjusted_close", "volume"):
+        fallback = data["close"] if column != "volume" else np.nan
+        data[column] = pd.to_numeric(data.get(column, fallback), errors="coerce")
     data = data.dropna(subset=["date", "ticker", "close"])
     data = data[data["close"] > 0].sort_values(["ticker", "date"]).drop_duplicates(["ticker", "date"], keep="last")
     data["return"] = data.groupby("ticker")["close"].pct_change().fillna(0.0)
@@ -72,6 +86,11 @@ class EodhdAdapter:
                     "date": item.get("date"),
                     "ticker": symbol,
                     "close": item.get("adjusted_close", item.get("close")),
+                    "open": item.get("open"),
+                    "high": item.get("high"),
+                    "low": item.get("low"),
+                    "adjusted_close": item.get("adjusted_close"),
+                    "volume": item.get("volume"),
                 }
                 for item in payload
                 if isinstance(item, dict)
@@ -101,9 +120,21 @@ class FinnhubAdapter:
             closes = payload.get("c", [])
             if not isinstance(timestamps, list) or not isinstance(closes, list):
                 raise DataSourceRequestError(f"Finnhub returned an invalid candle payload for {symbol}.")
+            opens = payload.get("o", [])
+            highs = payload.get("h", [])
+            lows = payload.get("l", [])
+            volumes = payload.get("v", [])
             rows.extend(
-                {"date": pd.to_datetime(timestamp, unit="s", utc=True), "ticker": symbol, "close": close}
-                for timestamp, close in zip(timestamps, closes, strict=False)
+                {
+                    "date": pd.to_datetime(timestamp, unit="s", utc=True),
+                    "ticker": symbol,
+                    "open": opens[index] if index < len(opens) else None,
+                    "high": highs[index] if index < len(highs) else None,
+                    "low": lows[index] if index < len(lows) else None,
+                    "close": close,
+                    "volume": volumes[index] if index < len(volumes) else None,
+                }
+                for index, (timestamp, close) in enumerate(zip(timestamps, closes, strict=False))
             )
         return _price_frame(rows, "finnhub")
 
@@ -156,7 +187,18 @@ class AlphaVantageAdapter:
                 if not isinstance(values, dict):
                     continue
                 close = values.get("5. adjusted close", values.get("4. close"))
-                rows.append({"date": date, "ticker": symbol, "close": close})
+                rows.append(
+                    {
+                        "date": date,
+                        "ticker": symbol,
+                        "open": values.get("1. open"),
+                        "high": values.get("2. high"),
+                        "low": values.get("3. low"),
+                        "close": close,
+                        "adjusted_close": values.get("5. adjusted close"),
+                        "volume": values.get("6. volume", values.get("5. volume")),
+                    }
+                )
         frame = _price_frame(rows, "alpha_vantage")
         if start is not None and not frame.empty:
             frame = frame[frame["date"] >= pd.Timestamp(start)].reset_index(drop=True)
@@ -165,6 +207,70 @@ class AlphaVantageAdapter:
         if not frame.empty:
             frame["return"] = frame.groupby("ticker")["close"].pct_change().fillna(0.0)
         return frame
+
+
+@dataclass
+class TickDbAdapter:
+    provider: ProviderDefinition
+    client: HttpClient
+
+    def load_daily_bars(self, symbols: list[str], start: str | None = None, end: str | None = None) -> pd.DataFrame:
+        token = get_env(self.provider.credential_env or "", "")
+        if not token:
+            raise DataSourceRequestError("TICKDB_API_KEY is required.")
+        interval = str(self.provider.settings.get("interval", "1d"))
+        limit = int(self.provider.settings.get("limit", 1000))
+        use_time_range = (get_env("TICKDB_USE_TIME_RANGE", str(self.provider.settings.get("use_time_range", False))) or "false").lower() in {"1", "true", "yes", "y", "on"}
+        range_params = {}
+        if use_time_range:
+            start_date, end_date = _date_range(start, end)
+            range_params = {
+                "start_time": int(pd.Timestamp(start_date, tz="UTC").timestamp() * 1000),
+                "end_time": int(pd.Timestamp(end_date, tz="UTC").timestamp() * 1000),
+            }
+        rows: list[dict[str, object]] = []
+        for symbol in sorted(set(symbols)):
+            try:
+                payload = self.client.get(
+                    f"{self.provider.base_url}/v1/market/kline",
+                    params={
+                        "symbol": symbol,
+                        "interval": interval,
+                        "limit": min(max(limit, 1), 1000),
+                        **range_params,
+                    },
+                    headers={"X-API-Key": token, "X-TickDB-Key": token},
+                ).json()
+            except DataSourceRequestError as exc:
+                message = str(exc).lower()
+                if "http 404" in message or "symbol not found" in message or "http error 500" in message or "internal server error" in message:
+                    continue
+                raise
+            if not isinstance(payload, dict):
+                raise DataSourceRequestError(f"TickDB returned an invalid payload for {symbol}.")
+            if payload.get("code", 0) not in {0, "0", None}:
+                raise DataSourceRequestError(f"TickDB rejected {symbol}: {payload.get('message', payload)}")
+            data = payload.get("data", {})
+            records = data.get("klines", []) if isinstance(data, dict) else []
+            for record in records if isinstance(records, list) else []:
+                if not isinstance(record, dict):
+                    continue
+                timestamp = record.get("time", record.get("timestamp", record.get("date")))
+                if isinstance(timestamp, (int, float, np.integer, np.floating)):
+                    timestamp = pd.to_datetime(timestamp, unit="ms", utc=True)
+                rows.append(
+                    {
+                        "date": timestamp,
+                        "ticker": symbol,
+                        "open": record.get("open"),
+                        "high": record.get("high"),
+                        "low": record.get("low"),
+                        "close": record.get("close"),
+                        "adjusted_close": record.get("adjusted_close"),
+                        "volume": record.get("volume", record.get("vol")),
+                    }
+                )
+        return _price_frame(rows, "tickdb")
 
 
 @dataclass
@@ -195,14 +301,32 @@ class ITickAdapter:
                 if isinstance(record, dict):
                     timestamp = record.get("t", record.get("timestamp", record.get("date")))
                     close = record.get("c", record.get("close"))
+                    open_price = record.get("o", record.get("open"))
+                    high = record.get("h", record.get("high"))
+                    low = record.get("l", record.get("low"))
+                    volume = record.get("v", record.get("volume"))
                 elif isinstance(record, list) and len(record) >= 5:
                     timestamp, close = record[0], record[4]
+                    open_price = record[1] if len(record) > 1 else None
+                    high = record[2] if len(record) > 2 else None
+                    low = record[3] if len(record) > 3 else None
+                    volume = record[5] if len(record) > 5 else None
                 else:
                     continue
                 if isinstance(timestamp, (int, float, np.integer, np.floating)):
                     unit = "ms" if float(timestamp) > 10_000_000_000 else "s"
                     timestamp = pd.to_datetime(timestamp, unit=unit, utc=True)
-                rows.append({"date": timestamp, "ticker": symbol, "close": close})
+                rows.append(
+                    {
+                        "date": timestamp,
+                        "ticker": symbol,
+                        "open": open_price,
+                        "high": high,
+                        "low": low,
+                        "close": close,
+                        "volume": volume,
+                    }
+                )
         return _price_frame(rows, "itick")
 
 
@@ -219,33 +343,38 @@ class FrankfurterAdapter:
         end: str | None = None,
     ) -> pd.DataFrame:
         start_date, end_date = _date_range(start, end)
-        payload = self.client.get(
-            f"{self.provider.base_url}/rates",
-            params={
-                "base": base_currency.upper(),
-                "quotes": ",".join(currency.upper() for currency in quote_currencies),
-                "from": start_date,
-                "to": end_date,
-                "expand": "providers",
-            },
-        ).json()
-        records = payload if isinstance(payload, list) else payload.get("rates", []) if isinstance(payload, dict) else []
         rows: list[dict[str, object]] = []
-        if isinstance(records, dict):
-            for date, rates in records.items():
-                for quote, rate in rates.items():
-                    rows.append({"base_currency": base_currency, "quote_currency": quote, "rate_date": date, "rate": rate})
-        else:
-            for item in records:
-                if isinstance(item, dict):
-                    rows.append(
-                        {
-                            "base_currency": item.get("base", base_currency),
-                            "quote_currency": item.get("quote"),
-                            "rate_date": item.get("date"),
-                            "rate": item.get("rate"),
-                        }
-                    )
+        window_start = pd.Timestamp(start_date).date()
+        final_end = pd.Timestamp(end_date).date()
+        while window_start <= final_end:
+            window_end = min(window_start + timedelta(days=365 * 4 + 300), final_end)
+            payload = self.client.get(
+                f"{self.provider.base_url}/rates",
+                params={
+                    "base": base_currency.upper(),
+                    "quotes": ",".join(currency.upper() for currency in quote_currencies),
+                    "from": window_start.isoformat(),
+                    "to": window_end.isoformat(),
+                    "expand": "providers",
+                },
+            ).json()
+            records = payload if isinstance(payload, list) else payload.get("rates", []) if isinstance(payload, dict) else []
+            if isinstance(records, dict):
+                for date, rates in records.items():
+                    for quote, rate in rates.items():
+                        rows.append({"base_currency": base_currency, "quote_currency": quote, "rate_date": date, "rate": rate})
+            else:
+                for item in records:
+                    if isinstance(item, dict):
+                        rows.append(
+                            {
+                                "base_currency": item.get("base", base_currency),
+                                "quote_currency": item.get("quote"),
+                                "rate_date": item.get("date"),
+                                "rate": item.get("rate"),
+                            }
+                        )
+            window_start = window_end + timedelta(days=1)
         data = pd.DataFrame(rows)
         if data.empty:
             return pd.DataFrame(
@@ -254,7 +383,6 @@ class FrankfurterAdapter:
         from src.data.ingestion.fx import ingest_fx
 
         return ingest_fx(data, source="frankfurter")
-
 
 @dataclass
 class FredAdapter:

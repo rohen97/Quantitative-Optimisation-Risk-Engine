@@ -25,10 +25,14 @@ def load_env_file(path: str | Path = ".env") -> dict[str, str]:
 
 
 def get_env(name: str, default: str | None = None) -> str | None:
-    """Read an environment variable, falling back to the local .env file."""
+    """Read an environment variable, falling back to local env files."""
     if name in os.environ:
         return os.environ[name]
-    return load_env_file().get(name, default)
+    values = load_env_file()
+    if name in values:
+        return values[name]
+    example_values = load_env_file(".env.example")
+    return example_values.get(name, default)
 
 
 def env_flag(name: str, default: bool = False) -> bool:

@@ -20,6 +20,7 @@ def make_governance_decision(
     approval_threshold: float = 70.0,
     conditional_threshold: float = 60.0,
     insufficient_components: list[str] | None = None,
+    maximum_status: str | None = None,
 ) -> GovernanceDecision:
     score = float(sum(value for value in component_scores.values() if pd.notna(value)))
     if critical_failures:
@@ -32,6 +33,8 @@ def make_governance_decision(
         status = "CONDITIONALLY_APPROVED"
     else:
         status = "REJECTED"
+    if maximum_status == 'CONDITIONALLY_APPROVED' and status == 'APPROVED':
+        status = 'CONDITIONALLY_APPROVED'
     return GovernanceDecision(score, status, tuple(critical_failures), tuple(warnings))
 
 

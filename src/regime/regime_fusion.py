@@ -16,6 +16,8 @@ def fuse_regime_signals(
     dominant = "steady_state_low_chaos"
     if factor["crisis_probability"] > 0.35 and chaos["high_chaos_probability"] > 0.35:
         dominant = "crisis_high_chaos"
+    elif chaos["high_chaos_probability"] > 0.50:
+        dominant = "risk_on_fragile"
     elif drivers.get("credit_stress_news", 0) > 75:
         dominant = "credit_stress"
     elif drivers.get("europe_recession_uncertainty", 0) > 60:
@@ -37,7 +39,8 @@ def fuse_regime_signals(
     confidence = max(probabilities + [chaos["low_chaos_probability"], chaos["intermediate_chaos_probability"], chaos["high_chaos_probability"]])
     if confidence < 0.35:
         dominant = "mixed_transition"
-    risk_score = min(100, 35 * factor["crisis_probability"] + 35 * chaos["high_chaos_probability"] + 30 * deterioration)
+    weighted_risk = 35 * factor["crisis_probability"] + 35 * chaos["high_chaos_probability"] + 30 * deterioration
+    risk_score = min(100, max(weighted_risk, 100 * chaos["high_chaos_probability"]))
     as_of_date = factor.get("as_of_date", chaos.get("as_of_date", drivers.get("as_of_date", pd.Timestamp.today().normalize())))
     return pd.DataFrame(
         [

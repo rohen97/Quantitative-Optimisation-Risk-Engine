@@ -69,18 +69,29 @@ def _consensus(row: pd.Series) -> str:
 
 
 def build_model_branch_comparison(bundle: ICDataBundle, resolved: ResolvedPortfolio) -> pd.DataFrame:
+    selected_ids = set(resolved.portfolio.get("security_id", pd.Series(dtype=str)).dropna().astype(str))
+    selected_tickers = set(resolved.portfolio.get("ticker", pd.Series(dtype=str)).dropna().astype(str))
+
+    def selected(frame: pd.DataFrame) -> pd.DataFrame:
+        if frame.empty or not (selected_ids or selected_tickers):
+            return frame
+        keep = frame["security_id"].astype(str).isin(selected_ids)
+        if "ticker" in frame:
+            keep |= frame["ticker"].astype(str).isin(selected_tickers)
+        return frame.loc[keep].copy()
+
     base = _as_security_frame(bundle.frames.get("final_recommendations", pd.DataFrame()), "final", "final_selected_weight")
     frames = [
-        base,
-        _as_security_frame(bundle.frames.get("recommendations_portfolio_aware", pd.DataFrame()), "portfolio_aware", rec_col="final_recommendation"),
-        _as_security_frame(bundle.frames.get("recommendations_clean_sheet", pd.DataFrame()), "clean_sheet", rec_col="final_recommendation"),
-        _as_security_frame(bundle.frames.get("drl_target_weights", pd.DataFrame()), "drl", "target_weight"),
-        _as_security_frame(resolved.portfolio, "final", "target_weight"),
-        _as_security_frame(bundle.frames.get("llm_benchmark_results", pd.DataFrame()), "llm", rec_col="recommendation"),
+        selected(base),
+        selected(_as_security_frame(bundle.frames.get("recommendations_portfolio_aware", pd.DataFrame()), "portfolio_aware", rec_col="final_recommendation")),
+        selected(_as_security_frame(bundle.frames.get("recommendations_clean_sheet", pd.DataFrame()), "clean_sheet", rec_col="final_recommendation")),
+        selected(_as_security_frame(bundle.frames.get("drl_target_weights", pd.DataFrame()), "drl", "target_weight")),
+        selected(_as_security_frame(resolved.portfolio, "final", "target_weight")),
+        selected(_as_security_frame(bundle.frames.get("llm_benchmark_results", pd.DataFrame()), "llm", rec_col="recommendation")),
     ]
     optimiser = resolved.portfolio.copy()
     optimiser["optimiser_weight"] = pd.to_numeric(optimiser.get("target_weight", optimiser.get("final_weight", 0.0)), errors="coerce").fillna(0.0)
-    frames.append(_as_security_frame(optimiser, "optimiser", "optimiser_weight"))
+    frames.append(selected(_as_security_frame(optimiser, "optimiser", "optimiser_weight")))
     merged = pd.DataFrame({"security_id": pd.concat([f["security_id"] for f in frames if "security_id" in f], ignore_index=True).dropna().astype(str).unique()})
     for frame in frames:
         merged = merged.merge(frame, on="security_id", how="left", suffixes=("", "_dup"))

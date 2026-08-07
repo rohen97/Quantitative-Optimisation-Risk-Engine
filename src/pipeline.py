@@ -20,9 +20,14 @@ from src.models.ml_pipeline import run_ml_forecasting_engine
 from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.narrative.pipeline import run_narrative_pipeline
-from src.optimisation.portfolio_builder import build_proposed_portfolio, run_portfolio_optimisation
+from src.optimisation.portfolio_builder import (
+    build_final_portfolio_weights,
+    build_proposed_portfolio,
+    run_portfolio_optimisation,
+)
 from src.portfolio.portfolio_diagnostics import build_concentration_summary, build_portfolio_diagnostics
 from src.portfolio.portfolio_loader import load_current_portfolio
+from src.pipeline_inputs import load_duckdb_universe, load_recent_duckdb_prices
 from src.regime.regime_classifier import build_regime_features
 from src.regime.pipeline import run_regime_pipeline
 from src.reporting.report_writer import write_csv, write_markdown
@@ -31,6 +36,7 @@ from src.risk.risk_contributions import build_risk_contribution_report
 from src.risk.risk_report import build_risk_stress_hedge_summary
 from src.risk.stress_testing import run_stress_tests
 from src.utils.config import ensure_output_dir, load_yaml
+from src.utils.env import env_flag, get_env
 
 
 REGIME_FEATURE_COLUMNS = [
@@ -44,6 +50,31 @@ REGIME_FEATURE_COLUMNS = [
     "regime_deterioration_probability",
 ]
 
+
+def _csv_env(name: str) -> list[str]:
+    value = get_env(name, "")
+    if not value:
+        return []
+    return [item.strip() for item in value.split(",") if item.strip()]
+
+
+def load_duckdb_model_inputs() -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Load ingested DuckDB securities and prices in the shape expected by the research pipeline."""
+    max_securities = int(get_env("PIPELINE_MAX_SECURITIES", "1000") or "1000")
+    min_price_rows = int(get_env("PIPELINE_MIN_PRICE_ROWS", "120") or "120")
+    regions = _csv_env("PIPELINE_REGIONS")
+    universe = load_duckdb_universe(
+        max_securities=max_securities,
+        min_price_rows=min_price_rows,
+        regions=regions,
+    )
+    tickers = universe["ticker"].astype(str).tolist()
+    lookback_rows = int(get_env("PIPELINE_PRICE_LOOKBACK_ROWS", "756") or "756")
+    prices = load_recent_duckdb_prices(
+        tickers,
+        lookback_rows=lookback_rows,
+    )
+    return universe.drop(columns=["_pipeline_index"], errors="ignore"), prices
 
 def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_outputs: dict) -> pd.DataFrame:
     """Add DRL challenger and accepted-source fields without replacing baseline recommendations."""
@@ -70,6 +101,7 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
         source = str(row.get("selected_weights_source", source))
         accepted = bool(row.get("accepted", False))
         rejection_reasons = str(row.get("rejection_reasons", ""))
+    challenger_supplies_weights = isinstance(challenger, pd.DataFrame) and not challenger.empty and "accepted_target_weight" in challenger
     if isinstance(challenger, pd.DataFrame) and not challenger.empty:
         columns = [
             "ticker",
@@ -84,13 +116,26 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
     data["drl_challenger_status"] = "accepted_or_blended" if accepted else "rejected_baseline_fallback"
     data["final_selected_weights_source"] = source
     data["drl_rejection_reasons"] = rejection_reasons
-    data["final_selected_weight"] = data.get("accepted_target_weight", data.get("final_target_weight", 0.0)).fillna(
-        data.get("final_target_weight", 0.0)
-    )
+    if challenger_supplies_weights:
+        data["final_selected_weight"] = pd.to_numeric(data["accepted_target_weight"], errors="coerce").fillna(0.0)
+    else:
+        data["final_selected_weight"] = pd.to_numeric(data.get("final_target_weight", 0.0), errors="coerce").fillna(0.0)
     return data
 
 
-def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.DataFrame]:
+def run_pipeline_from_inputs(
+    output_dir: str | Path | None = None,
+    *,
+    universe: pd.DataFrame | None = None,
+    prices: pd.DataFrame | None = None,
+    fundamentals: pd.DataFrame | None = None,
+    alt_outputs: dict[str, pd.DataFrame] | None = None,
+    narrative_outputs: dict[str, pd.DataFrame] | None = None,
+    price_risk_features: pd.DataFrame | None = None,
+    chaos_index: pd.DataFrame | None = None,
+    ml_targets: pd.DataFrame | None = None,
+) -> dict[str, pd.DataFrame]:
+    """Run global research, allocation, risk and reporting from supplied or configured inputs."""
     config = load_yaml("configs/base.yaml")
     branch_config = load_yaml("configs/branching.yaml")
     risk_limits = load_yaml("configs/risk_limits.yaml")
@@ -103,21 +148,38 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     drl_config = load_yaml("configs/drl.yaml").get("drl", load_yaml("configs/drl.yaml"))
     out = Path(output_dir) if output_dir else ensure_output_dir(config)
 
-    universe = build_universe(n=int(config.get("mock_data", {}).get("securities", 24)))
-    prices = load_prices(universe)
-    fundamentals = load_fundamentals(universe)
+    if universe is None or prices is None:
+        input_source = (get_env("PIPELINE_INPUT_SOURCE", "") or "").strip().lower()
+        use_mock = env_flag("USE_MOCK_DATA", bool(config.get("mock_data", {}).get("enabled", True)))
+        if input_source == "duckdb":
+            universe, prices = load_duckdb_model_inputs()
+        else:
+            universe = build_universe(use_mock=use_mock, n=int(config.get("mock_data", {}).get("securities", 24)))
+            prices = load_prices(universe, use_mock=use_mock)
+    else:
+        universe = universe.copy()
+        prices = prices.copy()
+    fundamentals = fundamentals.copy() if fundamentals is not None else load_fundamentals(universe, use_mock=True)
     portfolio = load_current_portfolio(config.get("current_portfolio_path", "data/external/current_portfolio_template.csv"))
     diagnostics, exposures = build_portfolio_diagnostics(portfolio)
     concentration = build_concentration_summary(portfolio)
-    alt_outputs = run_alternative_data_pipeline(universe, sentiment_config, alternative_data_config)
-    narrative_outputs = run_narrative_pipeline(universe, narrative_config)
+    alt_outputs = alt_outputs or run_alternative_data_pipeline(universe, sentiment_config, alternative_data_config)
+    narrative_outputs = narrative_outputs or run_narrative_pipeline(universe, narrative_config)
     sentiment = alt_outputs["alt_features_monthly"].merge(
         narrative_outputs["narrative_reframing_features"],
         on=["security_id", "ticker"],
         how="left",
     )
     preliminary_regime = build_regime_features(universe)
-    preliminary_features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, preliminary_regime)
+    preliminary_features = build_feature_store(
+        universe,
+        prices,
+        fundamentals,
+        sentiment,
+        portfolio,
+        preliminary_regime,
+        price_risk_features=price_risk_features,
+    )
     regime_outputs = run_regime_pipeline(
         universe,
         prices,
@@ -125,10 +187,25 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         alt_outputs["alt_features_monthly"],
         narrative_outputs["narrative_reframing_features"],
         regime_config,
+        chaos_index=chaos_index,
     )
     regime = regime_outputs["regime_suitability_scores"][REGIME_FEATURE_COLUMNS]
-    features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, regime)
-    ml_outputs = run_ml_forecasting_engine(features, prices, regime_outputs["regime_dashboard_summary"], ml_config)
+    features = build_feature_store(
+        universe,
+        prices,
+        fundamentals,
+        sentiment,
+        portfolio,
+        regime,
+        price_risk_features=price_risk_features,
+    )
+    ml_outputs = run_ml_forecasting_engine(
+        features,
+        prices,
+        regime_outputs["regime_dashboard_summary"],
+        ml_config,
+        targets=ml_targets,
+    )
     ml_merge_columns = [
         "ticker",
         "expected_total_return_3m",
@@ -194,8 +271,14 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     llm_mode = branches.get("llm_analyst_benchmark", {}).get("mode", "mock")
     llm_benchmark = run_llm_benchmark_branch(scorecard, mode=llm_mode)
     branch_comparison = compare_branches(portfolio_aware, clean_sheet, llm_benchmark)
-    optimisation_outputs = run_portfolio_optimisation(scorecard, portfolio, optimisation_config, branch_comparison, regime_outputs["regime_dashboard_summary"])
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
+    optimisation_outputs = run_portfolio_optimisation(
+        scorecard,
+        portfolio,
+        optimisation_config,
+        final_recommendations,
+        regime_outputs["regime_dashboard_summary"],
+    )
     proposed = build_proposed_portfolio(portfolio, scorecard)
     risk_portfolio = optimisation_outputs["recommended_optimised_portfolio"]
     risk_report = build_risk_report(prices, risk_portfolio)
@@ -233,6 +316,10 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         write_outputs=False,
     )
     final_recommendations = attach_drl_challenger_status(final_recommendations, drl_outputs)
+    final_portfolio = build_final_portfolio_weights(
+        final_recommendations,
+        optimisation_outputs["recommended_optimised_portfolio"],
+    )
 
     write_csv(diagnostics, out, "current_portfolio_diagnostics.csv")
     write_csv(portfolio, out, "current_portfolio_enriched.csv")
@@ -301,6 +388,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
     }.items():
         write_csv(frame, out, filename)
     write_csv(final_recommendations, out, "final_recommendations.csv")
+    write_csv(final_portfolio, out, "final_portfolio_weights.csv")
     recommendations = {}
     for horizon in HORIZONS_MONTHS:
         forecast = generate_mock_forecasts(scorecard, horizon)
@@ -356,6 +444,7 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         "branch_comparison_report": branch_comparison,
         **optimisation_outputs,
         "final_recommendations": final_recommendations,
+        "final_portfolio_weights": final_portfolio,
         "proposed_portfolio": proposed,
         "risk_report": risk_report,
         "risk_contribution_report": risk_contribution_report,
@@ -367,3 +456,8 @@ def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.Data
         **drl_outputs,
         **{f"recommendations_{h}m": frame for h, frame in recommendations.items()},
     }
+
+
+def run_full_pipeline(output_dir: str | Path | None = None) -> dict[str, pd.DataFrame]:
+    """Run the pipeline using its configured mock, CSV or DuckDB input source."""
+    return run_pipeline_from_inputs(output_dir)

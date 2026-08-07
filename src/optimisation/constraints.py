@@ -1,49 +1,86 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
+from scipy.optimize import linprog
+from scipy.sparse import csr_matrix
+
+
+UNKNOWN_LABELS = {"", "unknown", "nan", "none", "n/a", "<na>"}
+GROUP_CAPS = (
+    ("sector", "max_sector_weight"),
+    ("country", "max_country_weight"),
+    ("region", "max_region_weight"),
+    ("currency", "max_currency_weight"),
+)
+
+
+def _series(data: pd.DataFrame, column: str, default) -> pd.Series:
+    if column in data:
+        return data[column]
+    return pd.Series(default, index=data.index)
+
+
+def _known(values: pd.Series) -> pd.Series:
+    return ~values.fillna("Unknown").astype(str).str.strip().str.lower().isin(UNKNOWN_LABELS)
 
 
 def build_eligibility_mask(data: pd.DataFrame, constraints: dict | None = None) -> pd.Series:
     """Apply hard optimiser exclusions. Hard constraints must not be bypassed."""
     limits = constraints or {}
-    recommendation = data["final_recommendation"].astype(str).str.lower()
+    recommendation = _series(data, "final_recommendation", "Avoid").astype(str).str.lower()
     mask = (
-        data["instrument_type"].fillna("Equity").eq("Equity")
-        & data["listing_status"].fillna("Active").eq("Active")
+        _series(data, "instrument_type", "Equity").fillna("Equity").eq("Equity")
+        & _series(data, "listing_status", "Active").fillna("Active").eq("Active")
         & ~recommendation.str.contains("exclude|avoid", na=False)
-        & (data["liquidity_score"].fillna(50) >= limits.get("minimum_liquidity_score", 40))
-        & (data["average_daily_value_usd"].fillna(5_000_000) >= limits.get("minimum_average_daily_value_usd", 5_000_000))
-        & (data["dividend_cut_probability"].fillna(0.10) <= limits.get("maximum_dividend_cut_probability", 0.35))
-        & (data["large_drawdown_probability_12m"].fillna(0.20) <= limits.get("maximum_large_drawdown_probability", 0.35))
-        & (data["forecast_uncertainty_score"].fillna(50) <= limits.get("maximum_forecast_uncertainty_score", 80))
-        & (data["tail_risk_score"].fillna(50) <= limits.get("maximum_tail_risk_score", 80))
-        & ~data["regime_exclusion_flag"].fillna(False).astype(bool)
-        & ~data["reframing_exclusion_flag"].fillna(False).astype(bool)
-        & ~data["alt_data_exclusion_flag"].fillna(False).astype(bool)
+        & recommendation.str.contains("buy|hold|watchlist|accumulate|core income", na=False)
+        & (pd.to_numeric(_series(data, "liquidity_score", np.nan), errors="coerce") >= limits.get("minimum_liquidity_score", 40))
+        & (
+            pd.to_numeric(_series(data, "average_daily_value_usd", np.nan), errors="coerce")
+            >= limits.get("minimum_average_daily_value_usd", 5_000_000)
+        )
+        & (pd.to_numeric(_series(data, "dividend_cut_probability", np.nan), errors="coerce") <= limits.get("maximum_dividend_cut_probability", 0.35))
+        & (
+            pd.to_numeric(_series(data, "large_drawdown_probability_12m", np.nan), errors="coerce")
+            <= limits.get("maximum_large_drawdown_probability", 0.35)
+        )
+        & (
+            pd.to_numeric(_series(data, "forecast_uncertainty_score", np.nan), errors="coerce")
+            <= limits.get("maximum_forecast_uncertainty_score", 80)
+        )
+        & (pd.to_numeric(_series(data, "tail_risk_score", np.nan), errors="coerce") <= limits.get("maximum_tail_risk_score", 80))
+        & ~_series(data, "regime_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "reframing_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "alt_data_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "price_data_exclusion_flag", False).fillna(False).astype(bool)
     )
+    for column, key in GROUP_CAPS:
+        if float(limits.get(key, 1.0)) < 1.0 and column in data:
+            mask &= _known(data[column])
+    if not bool(limits.get("allow_synthetic_data", False)):
+        mask &= ~_series(data, "is_synthetic_data", False).fillna(False).astype(bool)
+        mask &= ~_series(data, "is_synthetic_fundamentals", False).fillna(False).astype(bool)
+    if "liquidity_observation_count" in data:
+        observations = pd.to_numeric(data["liquidity_observation_count"], errors="coerce").fillna(0)
+        observation_ok = observations.ge(int(limits.get("minimum_liquidity_observations", 20)))
+        if bool(limits.get("allow_synthetic_data", False)):
+            observation_ok |= _series(data, "is_synthetic_data", False).fillna(False).astype(bool)
+        mask &= observation_ok
     return mask
 
 
 def build_fallback_eligibility_mask(data: pd.DataFrame, constraints: dict | None = None, min_names: int = 20) -> pd.Series:
-    """Dry-run fallback when every name is excluded by mock upstream flags."""
-    limits = constraints or {}
-    base = (
-        data["instrument_type"].fillna("Equity").eq("Equity")
-        & data["listing_status"].fillna("Active").eq("Active")
-        & (data["liquidity_score"].fillna(50) >= limits.get("minimum_liquidity_score", 40))
-        & (data["average_daily_value_usd"].fillna(5_000_000) >= limits.get("minimum_average_daily_value_usd", 5_000_000))
-        & ~data["regime_exclusion_flag"].fillna(False).astype(bool)
-        & ~data["alt_data_exclusion_flag"].fillna(False).astype(bool)
-    )
-    if base.sum() == 0:
-        base = data["instrument_type"].fillna("Equity").eq("Equity") & data["listing_status"].fillna("Active").eq("Active")
+    """Select a ranked subset without relaxing any hard eligibility rule."""
+    base = build_eligibility_mask(data, constraints)
+    if not bool(base.any()):
+        return base
     ranking = (
-        data["final_recommendation_score"].fillna(50)
-        + data["liquidity_score"].fillna(50)
-        + data["regime_suitability_score"].fillna(50)
-        - 100 * data["dividend_cut_probability"].fillna(0.10)
-        - 80 * data["large_drawdown_probability_12m"].fillna(0.20)
-        - data["tail_risk_score"].fillna(50)
+        pd.to_numeric(_series(data, "final_recommendation_score", 50), errors="coerce").fillna(50)
+        + pd.to_numeric(_series(data, "liquidity_score", 50), errors="coerce").fillna(50)
+        + pd.to_numeric(_series(data, "regime_suitability_score", 50), errors="coerce").fillna(50)
+        - 100 * pd.to_numeric(_series(data, "dividend_cut_probability", 0.10), errors="coerce").fillna(0.10)
+        - 80 * pd.to_numeric(_series(data, "large_drawdown_probability_12m", 0.20), errors="coerce").fillna(0.20)
+        - pd.to_numeric(_series(data, "tail_risk_score", 50), errors="coerce").fillna(50)
     )
     selected = ranking.where(base, -1e9).sort_values(ascending=False).head(min_names).index
     mask = pd.Series(False, index=data.index)
@@ -93,17 +130,64 @@ def apply_group_cap(weights: pd.Series, data: pd.DataFrame, group_col: str, max_
 
 
 def apply_diversification_caps(weights: pd.Series, data: pd.DataFrame, constraints: dict | None = None) -> pd.Series:
+    """Solve the long-only cap system exactly with a sparse linear programme."""
     limits = constraints or {}
-    adjusted = cap_and_renormalise_weights(weights, data, limits)
-    for column, key in [
-        ("sector", "max_sector_weight"),
-        ("country", "max_country_weight"),
-        ("region", "max_region_weight"),
-        ("currency", "max_currency_weight"),
-    ]:
-        adjusted = apply_group_cap(adjusted, data, column, float(limits.get(key, 1.0)))
-        adjusted = cap_and_renormalise_weights(adjusted, data, limits)
-    return adjusted
+    raw = pd.Series(weights, index=data.index, dtype=float).replace([np.inf, -np.inf], np.nan).fillna(0.0).clip(lower=0.0)
+    active_positions = np.flatnonzero(raw.to_numpy() > 0)
+    output = pd.Series(0.0, index=data.index)
+    if len(active_positions) == 0:
+        output.attrs.update(feasible=False, status="no_positive_candidate_weights")
+        return output
+
+    active = data.iloc[active_positions].reset_index(drop=True)
+    preference = raw.iloc[active_positions].to_numpy(dtype=float, copy=True)
+    preference /= max(float(preference.max()), 1.0)
+    preference += np.linspace(1e-12, 0.0, len(preference), endpoint=False)
+    max_weight = float(limits.get("max_single_name_weight", 0.05))
+    if len(active) * max_weight < 1.0 - 1e-10:
+        partial = np.minimum(raw.iloc[active_positions].to_numpy(dtype=float), max_weight)
+        output.iloc[active_positions] = partial
+        output.attrs.update(feasible=False, status="insufficient_single_name_capacity")
+        return output
+
+    row_indices: list[int] = []
+    column_indices: list[int] = []
+    values: list[float] = []
+    upper_bounds: list[float] = []
+    constraint_row = 0
+    for column, key in GROUP_CAPS:
+        cap = float(limits.get(key, 1.0))
+        if cap >= 1.0 or column not in active:
+            continue
+        for _, positions in active.groupby(column, sort=False).indices.items():
+            local_positions = np.asarray(positions, dtype=int)
+            row_indices.extend([constraint_row] * len(local_positions))
+            column_indices.extend(local_positions.tolist())
+            values.extend([1.0] * len(local_positions))
+            upper_bounds.append(cap)
+            constraint_row += 1
+    a_ub = (
+        csr_matrix((values, (row_indices, column_indices)), shape=(constraint_row, len(active)))
+        if constraint_row
+        else None
+    )
+    result = linprog(
+        c=-preference,
+        A_ub=a_ub,
+        b_ub=np.asarray(upper_bounds, dtype=float) if upper_bounds else None,
+        A_eq=np.ones((1, len(active)), dtype=float),
+        b_eq=np.array([1.0]),
+        bounds=[(0.0, max_weight)] * len(active),
+        method="highs",
+    )
+    if not result.success:
+        output.attrs.update(feasible=False, status=f"infeasible:{result.message}")
+        return output
+    solved = np.where(np.asarray(result.x) > 1e-10, np.asarray(result.x), 0.0)
+    solved /= solved.sum()
+    output.iloc[active_positions] = solved
+    output.attrs.update(feasible=True, status="optimal")
+    return output
 
 
 def check_weight_caps(portfolio: pd.DataFrame, max_weight: float = 0.05) -> bool:

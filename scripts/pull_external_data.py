@@ -7,6 +7,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from src.data.config import load_data_config
+from src.data.repository.duckdb_repository import DUCKDB_AVAILABLE, DuckDBRepository
+from src.data.schemas import SCHEMAS
 from src.data_ingestion.multi_source import build_source_status, pull_configured_macro_and_fx
 from src.utils.config import ensure_output_dir
 
@@ -35,6 +38,16 @@ def main() -> int:
     result.source_status.to_csv(output_dir / "external_data_pull_status.csv", index=False)
     result.fx_rates.to_csv(output_dir / "external_fx_rates.csv", index=False)
     result.macro_observations.to_csv(output_dir / "external_macro_observations.csv", index=False)
+    data_config = load_data_config()
+    if DUCKDB_AVAILABLE and (data_config.mode in {"duckdb", "shadow"} or data_config.dual_write_duckdb):
+        repo = DuckDBRepository(data_config.duckdb_path)
+        repo.execute_migrations(data_config.migrations_path)
+        if not result.fx_rates.empty:
+            repo.write_table("fx_rates", result.fx_rates, SCHEMAS["fx_rates"].primary_key)
+        if not result.macro_observations.empty:
+            repo.write_table("macro_observations", result.macro_observations, SCHEMAS["macro_observations"].primary_key)
+        repo.close()
+        LOGGER.info("Wrote external FX and macro frames to DuckDB at %s.", data_config.duckdb_path)
     failed = int((result.source_status["status"] == "failed").sum()) if not result.source_status.empty else 0
     LOGGER.info(
         "Pulled %s FX rows and %s macro rows; %s datasets failed.",

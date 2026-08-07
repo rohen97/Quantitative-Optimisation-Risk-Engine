@@ -16,6 +16,83 @@ from src.reporting.models import ICDataBundle, ReportSource
 
 LOGGER = logging.getLogger(__name__)
 
+_LARGE_SOURCE_BYTES = 8 * 1024 * 1024
+_IDENTIFIER_COLUMNS = (
+    "security_id",
+    "ticker",
+    "issuer_id",
+    "company_name",
+    "country",
+    "region",
+    "sector",
+    "currency",
+)
+_FORECAST_COLUMNS = (
+    "horizon",
+    "horizon_months",
+    "expected_total_return",
+    "expected_price_return",
+    "expected_dividend_return",
+    "expected_volatility",
+    "expected_max_drawdown",
+    "p5_return",
+    "p50_return",
+    "p95_return",
+    "var_5",
+    "var_1",
+    "cvar_5",
+    "cvar_1",
+    "expected_shortfall_5",
+    "expected_shortfall_1",
+    "dividend_cut_probability",
+    "large_drawdown_probability",
+    "forecast_uncertainty_score",
+    "regime_suitability_score",
+    "distribution_name",
+    "distribution_model_confidence",
+    "distribution_family",
+    "model_version",
+)
+_PORTFOLIO_COLUMNS = (
+    *_IDENTIFIER_COLUMNS,
+    "target_weight",
+    "current_weight",
+    "current_market_value_usd",
+    "market_value_usd",
+    "final_weight",
+    "final_selected_weight",
+    "final_recommendation",
+    "recommendation",
+    "final_recommendation_score",
+    "portfolio_method",
+    "eligible_for_optimisation",
+    "fallback_eligibility_used",
+    "expected_total_return_12m",
+    "expected_dividend_return_12m",
+    "expected_volatility_12m",
+    "dividend_yield",
+    "p5_return_12m",
+    "p50_return_12m",
+    "p95_return_12m",
+    "var_5_12m",
+    "cvar_5_12m",
+    "expected_shortfall_5_12m",
+    "dividend_cut_probability",
+    "large_drawdown_probability_12m",
+    "regime_suitability_score",
+    "risk_management_flags",
+    "sector_data_source",
+    "liquidity_data_source",
+    "market_cap_data_source",
+    "fundamentals_data_source",
+    "is_synthetic_data",
+    "is_synthetic_fundamentals",
+    "price_data_quality_score",
+    "price_data_exclusion_flag",
+    "optimisation_feasible",
+    "optimisation_status",
+)
+
 CSV_OUTPUTS = {
     "current_portfolio": "current_portfolio_enriched.csv",
     "current_diagnostics": "current_portfolio_diagnostics.csv",
@@ -29,7 +106,7 @@ CSV_OUTPUTS = {
     "currency_exposure": "currency_exposure.csv",
     "final_recommendations": "final_recommendations.csv",
     "branch_comparison": "branch_comparison_report.csv",
-    "llm_benchmark_results": "llm_benchmark_results.csv",
+    "llm_benchmark_results": "recommendations_llm_benchmark.csv",
     "portfolio_trade_list": "portfolio_trade_list.csv",
     "recommendations_portfolio_aware": "recommendations_portfolio_aware.csv",
     "recommendations_clean_sheet": "recommendations_clean_sheet.csv",
@@ -47,7 +124,7 @@ CSV_OUTPUTS = {
     "drawdown_probability": "drawdown_probability.csv",
     "regime_suitability": "regime_suitability_scores.csv",
     "regime_transition_matrix": "regime_transition_matrix.csv",
-    "regime_informational_drivers": "regime_informational_drivers.csv",
+    "regime_informational_drivers": "informational_driver_model.csv",
     "drl_trade_list": "drl_trade_list.csv",
     "drl_acceptance": "drl_acceptance_decision.csv",
     "drl_target_weights": "drl_target_weights.csv",
@@ -98,6 +175,82 @@ def calculate_file_hash(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _projected_columns(source_name: str, available: list[str]) -> list[str] | None:
+    if source_name == "features":
+        desired = _IDENTIFIER_COLUMNS
+    elif source_name == "scorecard":
+        desired = (
+            *_IDENTIFIER_COLUMNS,
+            "passes_hard_filters",
+            "final_recommendation_score",
+            "recommendation",
+            "target_weight",
+            "risk_management_flags",
+            "expected_total_return_12m",
+            "p5_return_12m",
+            "p50_return_12m",
+            "p95_return_12m",
+            "dividend_cut_probability",
+            "large_drawdown_probability_12m",
+        )
+    elif source_name in {"recommendations_portfolio_aware", "recommendations_clean_sheet"}:
+        desired = (
+            *_IDENTIFIER_COLUMNS,
+            "final_recommendation",
+            "recommendation",
+            "target_weight",
+            "final_recommendation_score",
+        )
+    elif source_name == "branch_comparison":
+        desired = (
+            "security_id",
+            "ticker",
+            "company_name",
+            "portfolio_aware_recommendation",
+            "clean_sheet_recommendation",
+            "llm_recommendation",
+            "branch_classification",
+            "recommendation_agreement",
+            "disagreement_flag",
+        )
+    elif source_name.startswith("optimised_portfolio_"):
+        desired = _PORTFOLIO_COLUMNS
+    elif source_name.startswith("ml_forecasts_") or source_name == "distribution_forecasts":
+        desired = (*_IDENTIFIER_COLUMNS, *_FORECAST_COLUMNS)
+    elif source_name.startswith("recommendations_"):
+        desired = (*_IDENTIFIER_COLUMNS, *_FORECAST_COLUMNS)
+    else:
+        return None
+    projected = [column for column in available if column in set(desired)]
+    return projected or None
+
+
+def _read_large_reporting_csv(path: Path, source_name: str) -> tuple[pd.DataFrame, int]:
+    available = list(pd.read_csv(path, nrows=0).columns)
+    if source_name == "stress_contribution":
+        row_count = sum(len(chunk) for chunk in pd.read_csv(path, usecols=[available[0]], chunksize=50_000))
+        return pd.DataFrame(columns=available), row_count
+    usecols = _projected_columns(source_name, available)
+    if usecols is None:
+        data = pd.read_csv(path)
+        return data, len(data)
+    if not source_name.startswith("optimised_portfolio_"):
+        data = pd.read_csv(path, usecols=usecols)
+        return data, len(data)
+
+    retained: list[pd.DataFrame] = []
+    row_count = 0
+    for chunk in pd.read_csv(path, usecols=usecols, chunksize=10_000):
+        row_count += len(chunk)
+        target = pd.to_numeric(chunk.get("target_weight", pd.Series(0.0, index=chunk.index)), errors="coerce").fillna(0.0)
+        current = pd.to_numeric(chunk.get("current_weight", pd.Series(0.0, index=chunk.index)), errors="coerce").fillna(0.0)
+        active = target.abs().gt(1e-12) | current.abs().gt(1e-12)
+        if active.any():
+            retained.append(chunk.loc[active].copy())
+    data = pd.concat(retained, ignore_index=True) if retained else pd.DataFrame(columns=usecols)
+    return data, row_count
+
+
 def safe_read_csv(path: Path, source_name: str) -> tuple[pd.DataFrame, ReportSource]:
     if not path.exists():
         return (
@@ -105,11 +258,15 @@ def safe_read_csv(path: Path, source_name: str) -> tuple[pd.DataFrame, ReportSou
             ReportSource(source_name, path, False, 0, None, None, "Source file is unavailable."),
         )
     try:
-        data = pd.read_csv(path)
+        if path.stat().st_size > _LARGE_SOURCE_BYTES:
+            data, source_row_count = _read_large_reporting_csv(path, source_name)
+        else:
+            data = pd.read_csv(path)
+            source_row_count = len(data)
         modified_at = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
         return (
             canonicalise_dataframe(data),
-            ReportSource(source_name, path, True, len(data), modified_at, calculate_file_hash(path)),
+            ReportSource(source_name, path, True, source_row_count, modified_at, calculate_file_hash(path)),
         )
     except Exception as error:
         LOGGER.exception("Failed to load reporting source %s", path)
@@ -127,13 +284,13 @@ def _model_run_id(frames: dict[str, pd.DataFrame]) -> str:
     lineage = frames.get("model_run_lineage", pd.DataFrame())
     if not lineage.empty and "model_run_id" in lineage:
         return str(lineage.iloc[-1]["model_run_id"])
-    return pd.Timestamp.utcnow().strftime("ic-%Y%m%d%H%M%S")
+    return pd.Timestamp.now('UTC').strftime("ic-%Y%m%d%H%M%S")
 
 
 def _as_of_date(sources: list[ReportSource]) -> pd.Timestamp:
     available_dates = [source.modified_at for source in sources if source.modified_at is not None]
     if not available_dates:
-        return pd.Timestamp.utcnow()
+        return pd.Timestamp.now('UTC')
     return pd.Timestamp(max(available_dates))
 
 

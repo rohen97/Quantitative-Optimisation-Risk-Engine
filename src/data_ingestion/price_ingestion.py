@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 
 from src.data_ingestion.alpaca_adapter import ALPACA_PY_AVAILABLE, AlpacaMarketDataAdapter, AlpacaSdkMarketDataAdapter
-from src.data_ingestion.external_adapters import AlphaVantageAdapter, EodhdAdapter, FinnhubAdapter, ITickAdapter
+from src.data_ingestion.external_adapters import AlphaVantageAdapter, EodhdAdapter, FinnhubAdapter, ITickAdapter, TickDbAdapter
 from src.data_ingestion.http_client import DataSourceRequestError, HttpClient, HttpClientConfig
 from src.data_ingestion.mock_data import generate_mock_prices
 from src.data_ingestion.provider_registry import load_data_source_registry
@@ -27,7 +27,13 @@ def _client_from_policy(policy: dict) -> HttpClient:
     )
 
 
-def _load_provider(provider_name: str, symbols: list[str], client: HttpClient, registry) -> pd.DataFrame:
+def _load_provider(
+    provider_name: str,
+    symbols: list[str],
+    client: HttpClient,
+    registry,
+    universe: pd.DataFrame | None = None,
+) -> pd.DataFrame:
     provider = registry.providers.get(provider_name)
     if provider_name == "yfinance":
         data = YFinanceMarketDataAdapter().load_daily_bars(symbols)
@@ -47,9 +53,26 @@ def _load_provider(provider_name: str, symbols: list[str], client: HttpClient, r
         return FinnhubAdapter(provider, client).load_daily_bars(symbols)
     if provider_name == "alpha_vantage":
         return AlphaVantageAdapter(provider, client).load_daily_bars(symbols)
+    if provider_name == "tickdb":
+        return TickDbAdapter(provider, client).load_daily_bars(symbols)
     if provider_name == "itick":
-        region = get_env("ITICK_DEFAULT_REGION", "US") or "US"
-        return ITickAdapter(provider, client).load_daily_bars(symbols, region=region)
+        adapter = ITickAdapter(provider, client)
+        if universe is None or "itick_region" not in universe.columns:
+            region = get_env("ITICK_DEFAULT_REGION", "US") or "US"
+            return adapter.load_daily_bars(symbols, region=region)
+        symbol_column = str(provider.settings.get("symbol_column", "itick_code"))
+        grouped = (
+            universe[["ticker", symbol_column, "itick_region"]]
+            .dropna(subset=[symbol_column, "itick_region"])
+            .astype(str)
+            .drop_duplicates()
+        )
+        frames: list[pd.DataFrame] = []
+        for region, region_rows in grouped.groupby("itick_region"):
+            region_symbols = sorted(region_rows[symbol_column].str.strip().loc[lambda values: values.ne("")].unique())
+            if region_symbols:
+                frames.append(adapter.load_daily_bars(region_symbols, region=region))
+        return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
     raise NotImplementedError(f"Unsupported price data provider: {provider_name}")
 
 
@@ -87,10 +110,14 @@ def _combine_provider_prices(frames: list[pd.DataFrame], provider_order: list[st
             len(discrepancies),
             tolerance * 100.0,
         )
+    combined["_missing_volume"] = pd.to_numeric(
+        combined.get("volume", pd.Series(float("nan"), index=combined.index)),
+        errors="coerce",
+    ).fillna(0.0).le(0.0)
     selected = (
-        combined.sort_values(["ticker", "date", "provider_rank"])
+        combined.sort_values(["ticker", "date", "_missing_volume", "provider_rank"])
         .drop_duplicates(["ticker", "date"], keep="first")
-        .drop(columns="provider_rank")
+        .drop(columns=["provider_rank", "_missing_volume"])
         .sort_values(["ticker", "date"])
         .reset_index(drop=True)
     )
@@ -124,7 +151,7 @@ def load_prices(universe: pd.DataFrame, use_mock: bool | None = None) -> pd.Data
             continue
         try:
             symbols, reverse_map = _provider_symbols(universe, provider_name, registry)
-            frame = _load_provider(provider_name, symbols, client, registry)
+            frame = _load_provider(provider_name, symbols, client, registry, universe)
             if not frame.empty:
                 frame["ticker"] = frame["ticker"].map(reverse_map).fillna(frame["ticker"])
             if not frame.empty:

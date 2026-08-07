@@ -1,6 +1,22 @@
 import pandas as pd
 
-from src.drl.drl_pipeline import run_drl_pipeline
+from src.drl.drl_pipeline import _limit_drl_universe, run_drl_pipeline
+
+
+def test_drl_universe_is_bounded_but_retains_existing_allocations():
+    baseline = pd.DataFrame(
+        {
+            "ticker": [f"T{i:03d}" for i in range(200)],
+            "target_weight": [0.05] * 20 + [0.0] * 180,
+            "current_weight": [0.0] * 199 + [0.01],
+            "eligible_for_optimisation": [True] * 200,
+            "final_recommendation_score": list(range(200)),
+        }
+    )
+    limited = _limit_drl_universe(baseline, 100)
+    assert len(limited) == 100
+    assert set(baseline.loc[baseline["target_weight"].gt(0), "ticker"]).issubset(limited["ticker"])
+    assert "T199" in set(limited["ticker"])
 
 
 def test_drl_pipeline_generates_required_outputs(tmp_path):

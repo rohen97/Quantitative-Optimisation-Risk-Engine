@@ -34,7 +34,7 @@ def _model_run_id(frames: dict[str, pd.DataFrame]) -> str:
     lineage = frames.get("model_run_lineage", pd.DataFrame())
     if not lineage.empty and "model_run_id" in lineage:
         return str(lineage.iloc[-1]["model_run_id"])
-    return pd.Timestamp.utcnow().strftime("ic-%Y%m%d%H%M%S")
+    return pd.Timestamp.now('UTC').strftime("ic-%Y%m%d%H%M%S")
 
 
 def run_ic_reporting(
@@ -82,7 +82,7 @@ def run_ic_reporting(
     analysis_outputs = {
         "model_branch_comparison": build_model_branch_comparison(bundle, resolved_portfolio),
         "forecast_horizon_summary": build_forecast_horizon_summary(bundle, resolved_portfolio),
-        "security_forecast_summary": build_security_forecast_summary(bundle),
+        "security_forecast_summary": build_security_forecast_summary(bundle, resolved_portfolio),
         "regime_summary": build_ic_regime_summary(bundle, resolved_portfolio),
         "portfolio_risk_summary": build_portfolio_risk_summary(bundle, resolved_portfolio),
         "top_risk_contributors": build_top_risk_contributors(bundle),
@@ -90,7 +90,11 @@ def run_ic_reporting(
     }
     analysis_outputs.update(build_hedge_and_substitution_outputs(bundle))
     analysis_outputs.update(build_drl_governance_outputs(bundle))
-    summary = build_executive_summary(bundle, resolved_portfolio)
+    summary = build_executive_summary(
+        bundle,
+        resolved_portfolio,
+        report_quality=report_quality,
+    )
     nav = summary.get("current_nav_usd")
     trade_recommendations = build_final_trade_recommendations(bundle, resolved_portfolio, nav_usd=nav if isinstance(nav, (int, float)) else None)
     context = {

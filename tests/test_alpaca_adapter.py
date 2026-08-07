@@ -81,7 +81,17 @@ def test_alpaca_daily_bars_normalize_to_price_schema(monkeypatch):
     monkeypatch.setenv("ALPACA_API_KEY_ID", "key")
     monkeypatch.setenv("ALPACA_API_SECRET_KEY", "secret")
     bars = AlpacaMarketDataAdapter().load_daily_bars(["AAPL"])
-    assert list(bars.columns) == ["date", "ticker", "close", "return"]
+    assert list(bars.columns) == [
+        "date",
+        "ticker",
+        "open",
+        "high",
+        "low",
+        "close",
+        "adjusted_close",
+        "volume",
+        "return",
+    ]
     assert bars["return"].iloc[0] == 0
     assert round(float(bars["return"].iloc[1]), 4) == 0.1
     assert captured["url"].startswith("https://data.alpaca.markets/v2/stocks/bars?")

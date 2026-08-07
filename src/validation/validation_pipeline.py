@@ -22,6 +22,10 @@ from src.validation.data_loader import load_validation_data
 from src.validation.distribution_calibration import quantile_crossing_count
 from src.validation.drl_validation import validate_seed_stability
 from src.validation.governance import component_approval_table, make_governance_decision
+from src.validation.historical_evaluation import (
+    HistoricalEvaluation,
+    evaluate_historical_evidence,
+)
 from src.validation.leakage import leakage_report, validate_point_in_time
 from src.validation.models import ValidationPipelineResult
 from src.validation.regime_validation import validate_regime_probabilities
@@ -33,6 +37,7 @@ LOGGER = logging.getLogger(__name__)
 
 OUTPUT_FILES = (
     "model_validation_scorecard.csv", "data_leakage_report.csv", "point_in_time_validation.csv",
+    "data_provenance_validation.csv",
     "forecast_accuracy_report.csv", "forecast_calibration_report.csv", "distribution_coverage_report.csv",
     "binary_probability_calibration.csv", "risk_backtesting_report.csv", "portfolio_strategy_comparison.csv",
     "portfolio_performance_by_period.csv", "regime_performance_report.csv", "regional_performance_report.csv",
@@ -83,7 +88,14 @@ def _input_hash(paths: list[Path]) -> str:
 
 
 def _weight_column(frame: pd.DataFrame) -> str | None:
-    for candidate in ("final_selected_weight", "final_weight", "target_weight", "projected_drl_weight", "weight"):
+    for candidate in (
+        "final_selected_weight",
+        "final_weight",
+        "accepted_target_weight",
+        "target_weight",
+        "projected_drl_weight",
+        "weight",
+    ):
         if candidate in frame:
             return candidate
     return None
@@ -155,10 +167,33 @@ def run_validation_pipeline(
         raise FileExistsError(f"Validation run already exists: {run_directory}")
     run_directory.mkdir(parents=True)
     package = load_validation_data(validation_run_id, timestamp)
+    historical_evaluation: HistoricalEvaluation | None = None
+    if package.evidence_manifest and package.evidence_mode != 'current_snapshot':
+        historical_evaluation = evaluate_historical_evidence(package, config.raw)
 
     features = pd.read_csv(ROOT / "reports" / "outputs" / "features_monthly.csv")
     leakage = leakage_report(features)
     point_in_time = validate_point_in_time(features)
+    if historical_evaluation is not None:
+        chronology_rows = []
+        for check_name, failure_count in package.evidence_manifest.get(
+            'chronology_checks',
+            {},
+        ).items():
+            failures = int(failure_count)
+            chronology_rows.append(
+                {
+                    'check_name': f'walk_forward_{check_name}',
+                    'status': 'PASS' if failures == 0 else 'FAIL',
+                    'failures': failures,
+                    'commentary': 'Reconstructed walk-forward chronology invariant.',
+                }
+            )
+        point_in_time = pd.concat(
+            [point_in_time, pd.DataFrame(chronology_rows)],
+            ignore_index=True,
+            sort=False,
+        )
     india_rows = int(features.get("country", pd.Series(dtype=str)).astype(str).str.contains("India", case=False, na=False).sum())
     leakage = pd.concat([leakage, pd.DataFrame([{"check_name": "india_excluded_from_active_universe", "status": "PASS" if india_rows == 0 else "FAIL", "failure_count": india_rows, "details": "", "critical": True}])], ignore_index=True)
 
@@ -188,6 +223,20 @@ def run_validation_pipeline(
     factor_columns = [column for column in ("crisis_probability", "steady_state_probability", "inflation_probability", "walking_on_ice_probability") if column in package.regime_history]
     regime = validate_regime_probabilities(package.regime_history, factor_columns, config.section("regime").get("probability_sum_tolerance", 0.001)) if factor_columns else _status_frame("regime", "NOT_EVALUATED", "Regime probability history unavailable.")
 
+    if historical_evaluation is not None:
+        aligned_observations = historical_evaluation.aligned_observations
+        forecast_accuracy = historical_evaluation.forecast_accuracy
+        forecast_calibration = historical_evaluation.forecast_calibration
+        distribution = historical_evaluation.distribution_coverage
+        binary = historical_evaluation.binary_calibration
+        risk = historical_evaluation.risk_backtesting
+        benchmark = historical_evaluation.benchmark_comparison
+        period_performance = historical_evaluation.period_performance
+        regional = historical_evaluation.regional_performance
+        transaction = historical_evaluation.transaction_costs
+        if not historical_evaluation.regime_performance.empty:
+            regime = historical_evaluation.regime_performance
+
     constraint_rows = []
     hard_breaches = 0
     for name, report in package.constraint_reports.items():
@@ -204,7 +253,8 @@ def run_validation_pipeline(
             maximum = 1.0 if name == "current_portfolio" else 0.05
             checks = validate_portfolio_frame(portfolio, weight_column, maximum)
             checks["portfolio"] = name
-            hard_breaches += int(checks["status"].eq("FAIL").sum())
+            if name in {"selected_classical", "final_portfolio"}:
+                hard_breaches += int(checks["status"].eq("FAIL").sum())
             constraint_rows.append(checks)
     constraints = pd.concat(constraint_rows, ignore_index=True, sort=False) if constraint_rows else _status_frame("constraints", "FAIL", "No reproducible portfolio constraint evidence.")
 
@@ -222,7 +272,17 @@ def run_validation_pipeline(
     stability = _status_frame("stability", "NOT_EVALUATED", "Leave-one-period and leave-one-region tests require realised history.")
     significance = _status_frame("benchmark_significance", "NOT_EVALUATED", "Block-bootstrap significance requires aligned realised strategy returns.")
 
-    data_integrity_status = "PASS" if not package.lineage.empty and india_rows == 0 else "FAIL"
+    integrity_errors = [issue for issue in package.issues if issue.severity.lower() == "error"]
+    if historical_evaluation is not None:
+        sensitivity = historical_evaluation.sensitivity
+        stability = historical_evaluation.stability
+        significance = historical_evaluation.significance
+
+    data_integrity_status = (
+        "PASS"
+        if not package.lineage.empty and india_rows == 0 and not integrity_errors
+        else "FAIL"
+    )
     pit_status = "FAIL" if leakage["status"].eq("FAIL").any() or point_in_time["status"].eq("FAIL").any() else "WARNING"
     statuses = {
         "data_integrity": data_integrity_status,
@@ -234,10 +294,13 @@ def run_validation_pipeline(
         "constraint_compliance": "FAIL" if hard_breaches else "PASS",
         "stability_sensitivity": "NOT_EVALUATED",
     }
+    if historical_evaluation is not None:
+        statuses.update(historical_evaluation.statuses)
     scorecard = build_validation_scorecard(statuses)
     critical_failures = []
     if package.lineage.empty:
         critical_failures.append("Missing model-run lineage.")
+    critical_failures.extend(issue.message for issue in integrity_errors)
     if leakage["status"].eq("FAIL").any():
         critical_failures.append("Look-ahead or target leakage check failed.")
     if point_in_time["status"].eq("FAIL").any():
@@ -248,6 +311,11 @@ def run_validation_pipeline(
     warnings.extend(["Historical forecast calibration, risk backtesting, and net-of-cost strategy validation are not evaluable from the current stored outcomes."])
     insufficient = scorecard.loc[scorecard["status"].eq("NOT_EVALUATED"), "component"].tolist()
     governance = config.section("governance")
+    if historical_evaluation is not None:
+        warnings = [issue.message for issue in package.issues]
+        warnings.append(
+            'Validation uses reconstructed point-in-time evidence and remains capped at conditional approval.'
+        )
     decision = make_governance_decision(
         dict(zip(scorecard["component"], scorecard["score"])),
         critical_failures,
@@ -255,11 +323,25 @@ def run_validation_pipeline(
         governance.get("minimum_overall_score", 70),
         governance.get("conditional_approval_score", 60),
         insufficient,
+        maximum_status=package.evidence_manifest.get('release_approval_cap'),
     )
     approvals = component_approval_table(scorecard)
 
     outputs = {
         "model_validation_scorecard.csv": scorecard,
+        "data_provenance_validation.csv": pd.DataFrame(
+            [
+                {
+                    "component": issue.component,
+                    "severity": issue.severity,
+                    "rule": issue.rule,
+                    "message": issue.message,
+                    "affected_observations": issue.affected_observations,
+                }
+                for issue in package.issues
+                if issue.component == "data_integrity"
+            ]
+        ),
         "data_leakage_report.csv": leakage,
         "point_in_time_validation.csv": point_in_time,
         "forecast_accuracy_report.csv": forecast_accuracy,
@@ -295,8 +377,24 @@ def run_validation_pipeline(
         "Run walk-forward risk and strategy validation on at least 24 months of realised net returns.",
         "Re-evaluate DRL only after the selected classical optimiser passes governance.",
     ]
+    if historical_evaluation is not None:
+        limitations = [
+            str(value)
+            for value in package.evidence_manifest.get('limitations', [])
+        ]
+        remediation = [
+            'Replace reconstructed filing lags with exchange or regulator filing timestamps.',
+            'Add delisted constituents and historical security metadata to remove survivorship bias.',
+            'Repair and repopulate historical volume, then remove the static ADV proxy.',
+            'Archive immutable sentiment, narrative, and regime vintages for future walk-forward runs.',
+            'Continue storing live forecast vintages until native out-of-sample evidence supersedes this proxy.',
+        ]
     section_frames = {
-        "data_integrity": _status_frame("data_integrity", data_integrity_status, "Lineage and active-universe checks."),
+        "data_integrity": _status_frame(
+            "data_integrity",
+            data_integrity_status,
+            "Lineage, active-universe, metadata provenance, and final-selection checks.",
+        ),
         "leakage": leakage,
         "forecast": forecast_accuracy,
         "distribution": distribution,
@@ -319,6 +417,14 @@ def run_validation_pipeline(
         decision.critical_failures, approvals, section_frames, limitations, remediation,
     )
     source_paths = [ROOT / "configs" / "validation.yaml", ROOT / "reports" / "outputs" / "model_run_lineage.csv"]
+    if historical_evaluation is not None:
+        source_paths.append(
+            ROOT
+            / 'reports'
+            / 'outputs'
+            / 'walk_forward'
+            / 'walk_forward_manifest.json'
+        )
     manifest = {
         "validation_run_id": validation_run_id,
         "source_model_run_id": model_run_id,
@@ -338,6 +444,22 @@ def run_validation_pipeline(
     }
     manifest_path = run_directory / "validation_manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, default=str), encoding="utf-8")
+    if historical_evaluation is not None:
+        manifest.update(
+            {
+                'evidence_mode': package.evidence_mode,
+                'evidence_approval_cap': package.evidence_manifest.get(
+                    'release_approval_cap'
+                ),
+                'walk_forward_artifact_version': package.evidence_manifest.get(
+                    'artifact_version'
+                ),
+            }
+        )
+        manifest_path.write_text(
+            json.dumps(manifest, indent=2, default=str),
+            encoding='utf-8',
+        )
     if output_root is None:
         _register_validation_run(
             validation_run_id,

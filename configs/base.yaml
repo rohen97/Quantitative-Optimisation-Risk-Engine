@@ -5,7 +5,7 @@ output_dir: reports/outputs
 current_portfolio_path: data/external/current_portfolio_template.csv
 mock_data:
   enabled: true
-  securities: 24
+  securities: 128
   price_days: 756
 data_provider:
   name: yfinance

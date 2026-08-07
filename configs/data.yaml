@@ -1,5 +1,5 @@
 data:
-  backend: legacy_csv
+  backend: duckdb
 
   duckdb:
     enabled: true
@@ -18,7 +18,7 @@ data:
       - published_month
 
   migration:
-    dual_write_enabled: false
+    dual_write_enabled: true
     shadow_compare_enabled: false
     fail_on_shadow_difference: false
     fallback_to_legacy_csv: true

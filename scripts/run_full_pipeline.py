@@ -15,6 +15,7 @@ from src.data.lineage import new_model_run_metadata
 from src.data.repository.duckdb_repository import DUCKDB_AVAILABLE, DuckDBRepository
 from src.reporting.ic_pipeline import run_ic_reporting
 from src.utils.config import ensure_output_dir, load_yaml
+from src.utils.env import env_flag
 from src.validation.validation_pipeline import run_validation_pipeline
 
 
@@ -47,6 +48,7 @@ FULL_PIPELINE_STAGES = [
 
 if __name__ == "__main__":
     started = time.perf_counter()
+    output_dir = ensure_output_dir()
     data_config = load_data_config()
     logging.info(
         "Data backend mode: %s. CSV/mock fallback remains active unless mode is changed in configs/data.yaml.",
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     )
     for index, stage in enumerate(FULL_PIPELINE_STAGES, start=1):
         logging.info("Full pipeline stage %02d: %s", index, stage)
-    outputs = run_full_pipeline()
+    outputs = run_full_pipeline(output_dir)
     runtime_seconds = time.perf_counter() - started
     metadata = new_model_run_metadata(
         model_name="wolf_quant_full_pipeline",
@@ -65,29 +67,38 @@ if __name__ == "__main__":
         input_snapshot_hash=None,
         repository_root=Path(__file__).resolve().parents[1],
     )
-    metadata_row = {**metadata.to_dict(), "status": "completed", "runtime_seconds": runtime_seconds, "output_path": str(ensure_output_dir())}
-    pd.DataFrame([metadata_row]).to_csv(ensure_output_dir() / "model_run_lineage.csv", index=False)
-    if DUCKDB_AVAILABLE:
+    metadata_row = {**metadata.to_dict(), "status": "completed", "runtime_seconds": runtime_seconds, "output_path": str(output_dir)}
+    pd.DataFrame([metadata_row]).to_csv(output_dir / "model_run_lineage.csv", index=False)
+    if DUCKDB_AVAILABLE and env_flag("PIPELINE_REGISTER_MODEL_RUN", True):
         try:
             repo = DuckDBRepository(data_config.duckdb_path, read_only=False)
             repo.execute_migrations(data_config.migrations_path)
             repo.register_model_run(metadata_row)
-            repo.complete_model_run(metadata.model_run_id, "completed", output_path=str(ensure_output_dir()))
+            repo.complete_model_run(metadata.model_run_id, "completed", output_path=str(output_dir))
         except Exception as exc:  # pragma: no cover - lineage must not alter calculations
             logging.warning("Could not register full-pipeline model run in DuckDB: %s", exc)
-    ic_bundle = run_ic_reporting()
+    logging.info("Full pipeline stage 20 start: Validation and Governance - IC reporting begins")
+    ic_bundle = run_ic_reporting(output_root=output_dir)
     logging.info(
         "Investment Committee report generated at %s with readiness=%s",
         ic_bundle.html_path,
         ic_bundle.readiness_status,
     )
+    logging.info("Full pipeline stage 20 progress: IC reporting completed")
     for warning in ic_bundle.warnings:
         logging.warning("IC reporting warning: %s", warning)
-    validation_result = run_validation_pipeline(execution_mode="smoke", run_sensitivity=False, run_ablation=False)
+    logging.info("Full pipeline stage 20 progress: Validation pipeline begins")
+    validation_result = run_validation_pipeline(
+        execution_mode="smoke",
+        run_sensitivity=False,
+        run_ablation=False,
+        output_root=output_dir / "validation",
+    )
     logging.info(
         "Validation completed at %s with approval=%s score=%.1f",
         validation_result.output_directory,
         validation_result.approval_status,
         validation_result.overall_score,
     )
+    logging.info("Full pipeline stage 20 completed: Validation and Governance finished")
     logging.info("Wolf Quant MVP pipeline completed with %s output frames.", len(outputs))
