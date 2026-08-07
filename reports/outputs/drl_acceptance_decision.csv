@@ -1,2 +1,2 @@
 accepted,selected_weights_source,rejection_reasons,blend_weight_drl,blend_weight_baseline
-False,baseline_optimiser,"('portfolio_cvar_exceeds_configured_limit', 'expected_shortfall_exceeds_configured_limit', 'turnover_exceeds_hard_limit')",0.0,1.0
+False,baseline_optimiser,"('turnover_exceeds_hard_limit',)",0.0,1.0

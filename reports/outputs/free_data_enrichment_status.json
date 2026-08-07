@@ -1,0 +1,13 @@
+{
+  "candidate_count": 1402,
+  "completed_at": "2026-08-07 07:51:08.239150",
+  "failure_count": 0,
+  "failure_sample": [],
+  "fundamental_rows_written": 574,
+  "job_count": 142,
+  "profile_rows_written": 142,
+  "run_id": "325dbf77-fd17-4fb0-9fb6-021bcc2bc4fe",
+  "skipped_count": 1260,
+  "stage": "fundamentals",
+  "status": "completed"
+}

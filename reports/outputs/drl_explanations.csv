@@ -1,25 +1,101 @@
 ticker,baseline_weight,drl_target_weight,weight_change,material_change_flag,explanation
-WLF021,0.049999999999999996,0.05,6.938893903907228e-18,False,No material DRL overlay change after projection.
-WLF003,0.049999999999999996,0.05,6.938893903907228e-18,False,No material DRL overlay change after projection.
-WLF024,0.049999999999999996,0.05,6.938893903907228e-18,False,No material DRL overlay change after projection.
-WLF006,0.049999999999999996,0.05,6.938893903907228e-18,False,No material DRL overlay change after projection.
-WLF022,0.049999999999999996,0.04954300121103635,-0.00045699878896364454,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF019,0.049999999999999996,0.05,6.938893903907228e-18,False,No material DRL overlay change after projection.
-WLF018,0.049999999999999996,0.04963737328743766,-0.00036262671256233336,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF012,0.049999999999999996,0.04928088156706964,-0.000719118432930356,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF015,0.049999999999999996,0.049766770134879464,-0.00023322986512053223,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF005,0.049999999999999996,0.04692893386789535,-0.003071066132104644,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF013,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-WLF007,0.049999999999999996,0.04837952749541832,-0.0016204725045816729,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF014,0.049999999999999996,0.04581169833427253,-0.004188301665727465,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF017,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-WLF011,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-WLF009,0.049999999999999996,0.0484147069286493,-0.0015852930713506977,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF002,0.049999999999999996,0.04477275425140552,-0.0052272457485944765,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF023,0.049999999999999996,0.04301026880638274,-0.006989731193617253,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF004,0.049999999999999996,0.042804314499740925,-0.0071956855002590706,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF020,0.049999999999999996,0.04370520316632829,-0.006294796833671706,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF008,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-WLF001,0.049999999999999996,0.0440856200231608,-0.005914379976839197,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF016,0.049999999999999996,0.04246027821889269,-0.007539721781107303,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-WLF010,0.049999999999999996,0.04255671579456826,-0.0074432842054317355,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+000333.SHE,0.05000000000000002,0.04614965421286592,-0.003850345787134099,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+ALV.XETRA,0.05000000000000002,0.04533088247196275,-0.004669117528037267,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601398.SHG,0.0,0.0022558568848005797,0.0022558568848005797,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601816.SHG,0.05000000000000002,0.045741769746746715,-0.004258230253253302,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+600036.SHG,0.05000000000000002,0.04621582163138123,-0.0037841783686187874,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+NOVN.SW,0.05000000000000002,0.04536425944202179,-0.004635740557978225,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+AD.AS,0.05000000000000002,0.04615398077820722,-0.0038460192217927985,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+0939.HK,0.0,0.0018851900816405785,0.0018851900816405785,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+PG.US,0.05000000000000002,0.04513203514613873,-0.00486796485386129,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+600919.SHG,0.0,0.0019997620916969248,0.0019997620916969248,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601728.SHG,0.0,0.00023955107670430646,0.00023955107670430646,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+PRU.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+1113.HK,0.0,0.00023955107722284507,0.00023955107722284507,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+2318.HK,0.0,6.829023478763002e-05,6.829023478763002e-05,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+2328.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+1919.HK,0.0,0.00023955107722284594,0.00023955107722284594,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+1288.HK,0.0,0.000578961957131735,0.000578961957131735,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+HNR1.XETRA,0.0,0.0009139468926236636,0.0009139468926236636,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+AIG.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ALL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+BMY.US,0.0,0.0022736535808210545,0.0022736535808210545,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+ADP.US,0.0,0.00023955107722284835,0.00023955107722284835,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+SHEL.LSE,0.0,0.0024496705085410623,0.0024496705085410623,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+MET.US,0.0,6.211228455961392e-19,6.211228455961392e-19,False,No material DRL overlay change after projection.
+NVS.US,0.0,0.0005499943199887569,0.0005499943199887569,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+PGR.US,0.0,0.0016546874560042528,0.0016546874560042528,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+SHEL.US,0.05000000000000002,0.04637358964043115,-0.0036264103595688643,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+T.US,0.0,0.002784625011877251,0.002784625011877251,True,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+LOW.US,0.0,0.00023955107722284345,0.00023955107722284345,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+EOG.US,0.0,0.00023955107722284754,0.00023955107722284754,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+3968.HK,0.0,0.0013201917562395702,0.0013201917562395702,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+2020.HK,0.0,0.0004646782622044739,0.0004646782622044739,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+3988.HK,0.05000000000000002,0.04576410294814645,-0.0042358970518535655,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601288.SHG,0.0,0.0013770061547210685,0.0013770061547210685,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601169.SHG,0.0,0.0023751268746163325,0.0023751268746163325,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+600690.SHG,0.0,0.0021114952508998574,0.0021114952508998574,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+600019.SHG,0.0,0.0002395510772228468,0.0002395510772228468,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+600050.SHG,0.0,0.001573185163169085,0.001573185163169085,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+600406.SHG,0.0,0.00023955107722284686,0.00023955107722284686,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601766.SHG,0.0,0.0020546651934375774,0.0020546651934375774,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+603195.SHG,0.0,0.0002395510782115287,0.0002395510782115287,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+2057.HK,0.0,0.00023955107821152546,0.00023955107821152546,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+EN.PA,0.0,0.00023955107670430622,0.00023955107670430622,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+ORA.PA,0.049999999999999725,0.04429492001681856,-0.005705079983181163,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601988.SHG,0.0,0.0016740310861561285,0.0016740310861561285,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+002415.SHE,0.0,0.00023955107722284616,0.00023955107722284616,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+002352.SHE,0.0,0.0002395510772228466,0.0002395510772228466,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+0293.HK,0.0,0.001682553013940828,0.001682553013940828,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+MCD.US,0.05000000000000002,0.045075085829610936,-0.00492491417038908,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+FGR.PA,0.0,0.0004945397354774191,0.0004945397354774191,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+000538.SHE,0.05000000000000002,0.04482997779792562,-0.005170022202074395,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+TMUS.US,0.0,0.00023955107670430812,0.00023955107670430812,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+TTE.PA,0.0,0.0002395510772228454,0.0002395510772228454,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601658.SHG,0.0,0.0014237609243850666,0.0014237609243850666,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+PSON.LSE,0.0,0.00023955107722284564,0.00023955107722284564,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+JNJ.US,0.0,0.00023955107722284524,0.00023955107722284524,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+FDX.US,0.0,0.0002395510782115282,0.0002395510782115282,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601838.SHG,0.0,0.0013724810332294939,0.0013724810332294939,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+BUD.US,0.0,0.00023955107821152632,0.00023955107821152632,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+GILD.US,0.0,0.001024750775494402,0.001024750775494402,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+BNZL.LSE,0.0,0.0006308802319931112,0.0006308802319931112,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+STT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+601009.SHG,0.0,0.000186335329987539,0.000186335329987539,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+COP.US,0.0,0.00023955107722284692,0.00023955107722284692,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601166.SHG,0.0,0.002033186101605134,0.002033186101605134,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+DCC.LSE,0.0,0.00023955107821152784,0.00023955107821152784,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+ABI.BR,0.0,0.0014599820392022756,0.0014599820392022756,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+SCHP.SW,0.0,0.00023955107821152773,0.00023955107821152773,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+DHL.XETRA,0.0,0.00023955107722284513,0.00023955107722284513,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+RHHBY.US,0.0,0.00023955107722284654,0.00023955107722284654,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+TFC.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+GSK.US,0.0,0.0002395510772228455,0.0002395510772228455,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601939.SHG,0.0,0.0011487617352892614,0.0011487617352892614,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+SBRY.LSE,0.05000000000000002,0.044054284033714836,-0.005945715966285181,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+PRU.LSE,0.0,1.3553843156296286e-18,1.3553843156296286e-18,False,No material DRL overlay change after projection.
+601211.SHG,0.0,1.438043761476865e-18,1.438043761476865e-18,False,No material DRL overlay change after projection.
+0823.HK,0.05000000000000002,0.04534420000105097,-0.004655799998949044,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+MDT.US,0.0,0.00023955107722284472,0.00023955107722284472,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+LMT.US,0.0,0.00023955107722284627,0.00023955107722284627,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+HEN3.XETRA,0.05000000000000002,0.043750367856881446,-0.006249632143118571,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+AENA.MC,0.0,0.000239551078211527,0.000239551078211527,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+601818.SHG,0.05000000000000002,0.045405092764208184,-0.004594907235791833,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+AFL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+GD.US,0.0,0.00023955107821152703,0.00023955107821152703,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+USB.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ROP.SW,0.0,0.00023955107722284543,0.00023955107722284543,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+CS.PA,0.05000000000000002,0.044986896923504,-0.005013103076496016,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+MTB.US,0.0,4.930196901370828e-19,4.930196901370828e-19,False,No material DRL overlay change after projection.
+5.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+SREN.SW,0.0,7.929014990935698e-19,7.929014990935698e-19,False,No material DRL overlay change after projection.
+BBVA.MC,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+601998.SHG,0.0,2.9626665882470756e-05,2.9626665882470756e-05,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+LI.PA,0.05000000000000002,0.04571714833051368,-0.004282851669486339,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+HSY.US,0.0,0.00023955107722284242,0.00023955107722284242,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+TSCO.LSE,0.0,0.00023955107722284358,0.00023955107722284358,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+OR.PA,0.0,0.00023955107722284337,0.00023955107722284337,False,"Positive overlay: score, dividend return, liquidity or regime suitability outweighed risk penalties."
+ESSITY-B.ST,0.05000000000000002,0.04317972062490259,-0.006820279375097424,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+600018.SHG,0.05000000000000002,0.041136209802967234,-0.008863790197032782,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+0002.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+NESN.SW,0.0,0.0,0.0,False,No material DRL overlay change after projection.

@@ -1,0 +1,59 @@
+{
+  "artifact_profile": {
+    "aligned_outcome_fraction": 0.9938523475327784,
+    "anchors": 25,
+    "constraint_rows": 150,
+    "forecast_rows": 73524,
+    "outcome_rows": 73072,
+    "portfolio_months": 25,
+    "portfolio_weight_rows": 18622,
+    "risk_observations": 494
+  },
+  "artifact_version": 1,
+  "chronology_checks": {
+    "future_fundamental_rows": 0,
+    "future_price_feature_rows": 0,
+    "hard_constraint_breaches": 0,
+    "outcomes_before_target_rows": 0
+  },
+  "configuration": {
+    "approval_cap": "CONDITIONALLY_APPROVED",
+    "evidence_mode": "reconstructed_pit_proxy",
+    "filing_lag_days": 120,
+    "forecast_end_date": "2025-07-31 00:00:00",
+    "minimum_annual_periods": 2,
+    "minimum_training_price_rows": 756,
+    "outcome_date_tolerance_days": 7,
+    "output_directory": ".\\reports\\outputs\\walk_forward",
+    "portfolio_nav_usd": 100000000.0,
+    "price_lookback_rows": 756,
+    "primary_strategy": "wolf_cvar",
+    "risk_ewma_decay": 0.94,
+    "risk_lookback_rows": 252,
+    "start_date": "2024-06-30 00:00:00",
+    "strategy_end_date": "2026-06-30 00:00:00"
+  },
+  "evidence_mode": "reconstructed_pit_proxy",
+  "generated_at": "2026-08-07T09:23:25.841084+00:00",
+  "limitations": [
+    "Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.",
+    "The current active universe and current sector metadata introduce survivorship and reference-data bias.",
+    "Historical sentiment, narrative, and regime vintages are unavailable and are held neutral in this reconstruction.",
+    "Stored candidate price bars have zero volume, so observed current 3-month ADV is used as a static liquidity proxy.",
+    "Adjusted-close outcomes may include provider-side retrospective corporate-action adjustments.",
+    "This evidence can support conditional model use but cannot support full production approval."
+  ],
+  "primary_strategy": "wolf_cvar",
+  "release_approval_cap": "CONDITIONALLY_APPROVED",
+  "source_database": ".\\data\\database\\wolf.duckdb",
+  "source_profile": {
+    "fundamental_max_period": "2026-06-30 00:00:00",
+    "fundamental_min_period": "2021-08-31 00:00:00",
+    "price_max_date": "2026-07-31 00:00:00",
+    "price_min_date": "2016-07-28 00:00:00",
+    "price_rows": 3307843,
+    "security_count": 1408,
+    "statement_rows": 5823
+  },
+  "source_universe_hash": "7a0cefa7d602da5b5e19914361f7220f08d3ec4c65fb1244ea0ed4008566aed5"
+}

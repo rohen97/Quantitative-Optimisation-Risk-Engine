@@ -1,6 +1,6 @@
 provider,enabled,credential_required,credential_available,available,asset_classes,regions,base_url
 alpaca,True,True,True,True,equities,US,
-alpha_vantage,True,True,False,False,"equities,fundamentals,dividends,fx,macro,commodities,news,sentiment","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",https://www.alphavantage.co
+alpha_vantage,True,True,True,True,"equities,fundamentals,dividends,fx,macro,commodities,news,sentiment","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",https://www.alphavantage.co
 bank_of_england,True,False,True,True,"rates,fx,credit,money",UK,https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp
 china_data,True,False,True,True,"macro,trade,inflation,demographics",Mainland China,https://chinadata.live/api/v2
 ecb,True,False,True,True,"macro,rates,fx,credit","DACH,EU ex-DACH",https://data-api.ecb.europa.eu/service

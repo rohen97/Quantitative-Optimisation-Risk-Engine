@@ -1,0 +1,3 @@
+check_name,status,failure_count,details,critical
+future_target_columns_absent,PASS,0,,True
+india_excluded_from_active_universe,PASS,0,,True
