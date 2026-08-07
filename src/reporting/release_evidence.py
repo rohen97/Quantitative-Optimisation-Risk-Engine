@@ -312,6 +312,16 @@ def _normalise_json_paths(directory: Path) -> None:
         )
 
 
+def _normalise_text_whitespace(directory: Path) -> None:
+    text_suffixes = {'.csv', '.css', '.html', '.json', '.md', '.txt'}
+    for path in sorted(directory.rglob('*')):
+        if not path.is_file() or path.suffix.lower() not in text_suffixes:
+            continue
+        text = path.read_text(encoding='utf-8')
+        normalised = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
+        path.write_text(normalised, encoding='utf-8')
+
+
 def _validate_plots(paths: Iterable[Path]) -> None:
     for path in paths:
         pixels = plt.imread(path)
@@ -470,6 +480,7 @@ def build_release_evidence(
         scorecard,
         strategies,
     )
+    _normalise_text_whitespace(output)
     _normalise_json_paths(output)
 
     files = sorted(path for path in output.rglob('*') if path.is_file() and path.name != 'manifest.json')

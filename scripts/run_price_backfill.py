@@ -70,7 +70,7 @@ def load_universe(
     minimum_volume_rows: int = 20,
 ) -> pd.DataFrame:
     query = f"""
-        SELECT s.*, 
+        SELECT s.*,
                max(CASE WHEN i.identifier_type = 'eodhd_ticker' THEN i.identifier_value END) AS eodhd_ticker,
                max(CASE WHEN i.identifier_type = 'yfinance_ticker' THEN i.identifier_value END) AS yfinance_ticker,
                max(CASE WHEN i.identifier_type = 'finnhub_ticker' THEN i.identifier_value END) AS finnhub_ticker,
