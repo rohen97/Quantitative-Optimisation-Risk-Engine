@@ -2,20 +2,34 @@
 
 ## Current MVP Status
 
-The repository now contains a runnable mock-data MVP scaffold. It includes modular source packages, configs, scripts, pytest coverage, generated sample outputs, and a basic dashboard skeleton.
+The repository now contains the integrated observed-data research pipeline across
+all six configured regions. It includes resumable ingestion, DuckDB point-in-time
+storage, feature and forecast pipelines, constrained optimisation, risk and stress
+engines, a gated DRL overlay, investment-committee reporting, production controls,
+and reconstructed walk-forward governance evidence.
 
 Validated commands:
 
 ```bash
-python scripts/run_full_pipeline.py
-pytest
+python scripts/run_two_phase_pipeline.py all --with-governance
+python scripts/run_walk_forward_validation.py
+python scripts/build_release_evidence.py --release-id 2026-08-07-full-universe
+USE_MOCK_DATA=true python -m pytest -q
 ```
 
-The next engineering issue should replace mock data with point-in-time CSV/vendor fixtures and validation tests.
+As of 2026-08-07, 288 automated tests pass and governance is
+`CONDITIONALLY_APPROVED` at 87.5/100 with no critical failures or hard-constraint
+breaches. Full production approval still requires observed filing timestamps,
+historical delisted-universe membership, historical volume, and archived
+sentiment, narrative, and regime vintages.
 
 ## Project Objective
 
-Build a portfolio-aware quant equity selection engine for listed equities in DACH, Shanghai/China, Hong Kong and India. The model will recommend conservative dividend and cash-flow equities after accounting for the current portfolio, regime analysis, sentiment/alternative data, ML forecasts, DRL portfolio optimisation, VaR/CVaR, stress tests and hedge requirements.
+Build a portfolio-aware quant equity selection engine for listed equities in DACH,
+EU ex-DACH, UK, US, Mainland China and Hong Kong. The model recommends
+conservative dividend and cash-flow equities after accounting for the current
+portfolio, regime analysis, sentiment/alternative data, ML forecasts, constrained
+optimisation, a gated DRL overlay, VaR/CVaR, stress tests and hedge requirements.
 
 ## Operating Model
 
@@ -93,14 +107,14 @@ Then open a pull request into `main` or `develop`, depending on whether a `devel
 
 ## Timeline Summary
 
-| Month | Focus | Output |
-|---|---|---|
-| Month 1 | Foundation, database and current portfolio engine | Repo structure, current portfolio ingestion, diagnostics, database schema v0 |
-| Month 2 | Feature store and conservative scorecard | Universe engine, price/fundamental/dividend ingestion, stock scorecard v0 |
-| Month 3 | Sentiment, alternative data and regime engine | Sentiment analyser, alt-data event detection, regime engine, scorecard v1 |
-| Month 4 | ML forecasting, portfolio optimisation and DRL prototype | Return/risk forecasts, quantile outputs, HRP/MVO/CVaR optimiser, DRL prototype |
-| Month 5 | Finalisation, integration and debugging I | Full pipeline, validation checks, risk engine, stress tests, hedge recommender |
-| Month 6 | Final debugging, deployment and IC pack | Dashboard, documentation, final validation, investment committee report, v1.0 release |
+| Month | Focus | Output | Status |
+|---|---|---|---|
+| Month 1 | Foundation, database and current portfolio engine | Repo structure, current portfolio ingestion, diagnostics, database schema v0 | Complete |
+| Month 2 | Feature store and conservative scorecard | Universe engine, price/fundamental/dividend ingestion, stock scorecard v0 | Complete |
+| Month 3 | Sentiment, alternative data and regime engine | Sentiment analyser, alt-data event detection, regime engine, scorecard v1 | Complete |
+| Month 4 | ML forecasting, portfolio optimisation and DRL prototype | Return/risk forecasts, quantile outputs, HRP/MVO/CVaR optimiser, DRL prototype | Complete |
+| Month 5 | Finalisation, integration and debugging I | Full pipeline, validation checks, risk engine, stress tests, hedge recommender | Complete |
+| Month 6 | Final debugging, deployment and IC pack | Dashboard, documentation, validation, investment committee report | Conditional release candidate |
 
 ## Sprint Plan
 
@@ -149,7 +163,7 @@ Build the core conservative equity selection layer using dividends, cash flow, b
 
 ### Deliverables
 
-- Equity universe engine for DACH, Shanghai/China, Hong Kong and India.
+- Equity universe engine for DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong.
 - Security master.
 - Price ingestion.
 - Fundamental ingestion.
@@ -280,7 +294,8 @@ Model-related issues also need:
 
 | Risk | Probability | Impact | Mitigation |
 |---|---:|---:|---|
-| Data coverage is weak for China/HK/India | High | High | Use vendor adapters and fallback sources |
+| Data coverage is weak for China/HK | High | High | Use TickDB, regulator sources and provider fallbacks |
+| Historical source vintages are incomplete | High | Very High | Archive immutable filings, volumes, universe membership and alternative-data snapshots |
 | Fundamentals introduce look-ahead bias | Medium | Very High | Use filing dates and point-in-time checks |
 | Sentiment data is noisy | Medium | Medium | Use as a risk overlay, not sole buy signal |
 | DRL overfits | High | High | Compare against HRP/MVO/CVaR and restrict with hard risk limits |

@@ -50,14 +50,17 @@ def generate_mock_text_documents(universe: pd.DataFrame, as_of_date: pd.Timestam
     as_of = (as_of_date or pd.Timestamp.today()).normalize()
     rows = []
     for idx, row in universe.reset_index(drop=True).iterrows():
+        position = int(row.get("_pipeline_index", idx))
         for story_idx, (document_type, title_suffix, body) in enumerate(MOCK_STORIES[:3]):
-            story = MOCK_STORIES[(idx + story_idx) % len(MOCK_STORIES)]
+            story = MOCK_STORIES[(position + story_idx) % len(MOCK_STORIES)]
             document_type, title_suffix, body = story
-            publication = as_of - pd.Timedelta(days=int((idx * 3 + story_idx * 11) % 95))
+            publication = as_of - pd.Timedelta(days=int((position * 3 + story_idx * 11) % 95))
             rows.append(
                 {
-                    "document_id": f"DOC-{idx + 1:03d}-{story_idx + 1}",
-                    "source_type": SOURCE_TYPES[(idx + story_idx) % len(SOURCE_TYPES)],
+                    "document_id": f"DOC-{position + 1:03d}-{story_idx + 1}",
+                    "security_id": row["security_id"],
+                    "ticker": row["ticker"],
+                    "source_type": SOURCE_TYPES[(position + story_idx) % len(SOURCE_TYPES)],
                     "source_name": "Mock Financial Newswire",
                     "publication_timestamp": publication,
                     "ingestion_timestamp": as_of,

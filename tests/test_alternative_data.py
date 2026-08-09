@@ -1,4 +1,4 @@
-from pathlib import Path
+import os
 import subprocess
 import sys
 
@@ -53,7 +53,16 @@ def test_risk_flags_trigger_on_thresholds():
     assert flags.loc[0, "alt_data_review_required_flag"]
 
 
-def test_run_sentiment_engine_script_creates_outputs():
-    result = subprocess.run([sys.executable, "scripts/run_sentiment_engine.py"], check=True, capture_output=True, text=True)
+def test_run_sentiment_engine_script_creates_outputs(tmp_path):
+    output_dir = tmp_path / "outputs"
+    environment = os.environ.copy()
+    environment["PIPELINE_OUTPUT_DIR"] = str(output_dir)
+    result = subprocess.run(
+        [sys.executable, "scripts/run_sentiment_engine.py"],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
     assert result.returncode == 0
-    assert Path("reports/outputs/alt_features_monthly.csv").exists()
+    assert (output_dir / "alt_features_monthly.csv").exists()

@@ -23,7 +23,7 @@ def ingest_dividends(raw_dividends: pd.DataFrame, source: str = "mock") -> pd.Da
     data["dividend_type"] = data.get("dividend_type", "cash")
     data["available_from"] = pd.to_datetime(data.get("available_from", data["ex_dividend_date"])).dt.normalize()
     data["source"] = source
-    data["retrieved_at"] = pd.Timestamp.utcnow().tz_localize(None)
+    data["retrieved_at"] = pd.Timestamp.now('UTC').tz_localize(None)
     data["ingestion_run_id"] = data.get("ingestion_run_id", None)
     return data[
         [

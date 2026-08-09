@@ -1,0 +1,455 @@
+{
+  "approval_status": "CONDITIONALLY_APPROVED",
+  "evidence_mode": "reconstructed_pit_proxy",
+  "files": [
+    {
+      "path": "final_portfolio_weights.csv",
+      "sha256": "cedd1afe735f2608cb0c5db2965f49fc2150df4c80c07e6a1df893f67db1c5a9",
+      "size_bytes": 21877
+    },
+    {
+      "path": "free_data_enrichment_status.json",
+      "sha256": "2a4b295f1e7d13618d34900d6963ce102c6f06b968c8881e61455b98d1745b22",
+      "size_bytes": 352
+    },
+    {
+      "path": "investment_committee/charts/branch_weight_comparison.png",
+      "sha256": "2620b509cc6cf869aabbb48a071640585714c1a6cf86f6ba220f77183708420d",
+      "size_bytes": 45154
+    },
+    {
+      "path": "investment_committee/charts/country_exposure_current_vs_target.png",
+      "sha256": "ee30926b333a8a043eba2c2f53650e8e628fa90d19a8c4725ebd5fab06aa88e0",
+      "size_bytes": 43423
+    },
+    {
+      "path": "investment_committee/charts/currency_exposure_current_vs_target.png",
+      "sha256": "32062f4a3001c4ca10105751b264cdc6db8846616d081fa89a38009d9a95e53f",
+      "size_bytes": 32152
+    },
+    {
+      "path": "investment_committee/charts/current_vs_target_top_holdings.png",
+      "sha256": "d6401a16a8825aadd53476367fa85269a6c33556e2cb51f3ce02a206d0b167f2",
+      "size_bytes": 58961
+    },
+    {
+      "path": "investment_committee/charts/dividend_yield_vs_dividend_risk.png",
+      "sha256": "db429a9f25a5933c367a09d7ec5abd539f17ddd3ba955ede64a07f3990cbb28c",
+      "size_bytes": 45995
+    },
+    {
+      "path": "investment_committee/charts/drl_baseline_vs_projected.png",
+      "sha256": "b4874c798862ce56303733876a2e447e8f40dce934466e41750541329a4fb71a",
+      "size_bytes": 44877
+    },
+    {
+      "path": "investment_committee/charts/drl_reward_decomposition.png",
+      "sha256": "c3fcef090c19ffaead8bce60620384ece309e91d92def467fd15e7be273b883e",
+      "size_bytes": 12944
+    },
+    {
+      "path": "investment_committee/charts/expected_return_vs_cvar.png",
+      "sha256": "bfde64bc45db34e03c50ec319cdc63bd7138fddf402c827bdae20e70536e1868",
+      "size_bytes": 61885
+    },
+    {
+      "path": "investment_committee/charts/forecast_horizon_summary.png",
+      "sha256": "51baf9e684e2424c55652cba9def210d9a2aaadc7bdc943ddd356a7f2b8e07c4",
+      "size_bytes": 26764
+    },
+    {
+      "path": "investment_committee/charts/portfolio_concentration.png",
+      "sha256": "0d5d7bfaf2bad14c0d1021414a005812f9f8157662de7b4c1a5cd70ea91211da",
+      "size_bytes": 18215
+    },
+    {
+      "path": "investment_committee/charts/recommendation_matrix.png",
+      "sha256": "fe552ced149c1d43c44bee9bc74426ad4de761b530a08d1a6e09762f2dbfd5b6",
+      "size_bytes": 41499
+    },
+    {
+      "path": "investment_committee/charts/regime_probabilities.png",
+      "sha256": "08cfd2f2cfc42faf7c3e433d95316e9c44671327b5dd0c7b0d8878f701afa8d2",
+      "size_bytes": 51314
+    },
+    {
+      "path": "investment_committee/charts/region_exposure_current_vs_target.png",
+      "sha256": "a449424fc2c0538b3b48df14c329371ee9d2d30fb2dbc6c6b0a5002cb8e6c3e7",
+      "size_bytes": 37724
+    },
+    {
+      "path": "investment_committee/charts/sector_exposure_current_vs_target.png",
+      "sha256": "82be0b8b3377d4da2cd7c7a0accc7f99ab2c8d9c72aaf196c2b2e323c344fbf3",
+      "size_bytes": 47527
+    },
+    {
+      "path": "investment_committee/charts/stress_test_losses.png",
+      "sha256": "af2da289b595ffa7cb1b2ad0001792db2b6cbae9ed1857ef8e4850c56fa3855e",
+      "size_bytes": 51944
+    },
+    {
+      "path": "investment_committee/charts/top_risk_contributors.png",
+      "sha256": "d25085d8b49996a2f3e6c2943dff43cb40d2981b0aa1dc13c406365681b8330a",
+      "size_bytes": 37841
+    },
+    {
+      "path": "investment_committee/charts/trade_notional_by_action.png",
+      "sha256": "54a52f3535551d0bfcf8de5ecd9bc7b2bc45787f695101ff991d91c1776fc276",
+      "size_bytes": 25053
+    },
+    {
+      "path": "investment_committee/charts/wolf_chaos_history.png",
+      "sha256": "65e2213446df43c57bcb43afff3a234ea9dda64398180f991a4f48a82c0905f0",
+      "size_bytes": 24279
+    },
+    {
+      "path": "investment_committee/concentration_summary.csv",
+      "sha256": "91858261fcf5e3d4f681aa8e27b8da6b3003b414b7ee5c8bd99bebcdddbbfbc8",
+      "size_bytes": 196
+    },
+    {
+      "path": "investment_committee/country_exposures.csv",
+      "sha256": "c107f540db019cdc5c6a1fed6d246bdfe9d636862000741dde255f23bdf7f91c",
+      "size_bytes": 436
+    },
+    {
+      "path": "investment_committee/currency_exposures.csv",
+      "sha256": "41057c6cfdaf306791fcd610ceb0dda1d862e9a4de8a60786981d7384b9a0004",
+      "size_bytes": 346
+    },
+    {
+      "path": "investment_committee/current_vs_target_holdings.csv",
+      "sha256": "f2fc3405cf94128df3864812fb6baf090a80fb25cd75f46276f1fc6c65144315",
+      "size_bytes": 3486
+    },
+    {
+      "path": "investment_committee/data_quality_report.csv",
+      "sha256": "065e2fe79c4f311d2bf2df9a8cc06985400981a621a5c59b6b6c7b504b1febc2",
+      "size_bytes": 837
+    },
+    {
+      "path": "investment_committee/defensive_substitution_summary.csv",
+      "sha256": "348fcc326004ee6879d2736a4b89dcdbb08ac5c4f0f9cfb7671a2ed0c13b60cc",
+      "size_bytes": 279
+    },
+    {
+      "path": "investment_committee/dividend_yield_bucket_exposures.csv",
+      "sha256": "c30e69bd6aac4cfc8fb5abebffd1561bd4fdebcd8a2761fee39c9ef63e6c9635",
+      "size_bytes": 222
+    },
+    {
+      "path": "investment_committee/drl_constraint_trace.csv",
+      "sha256": "8c655ab19c97e48611b891a368d7a4da81e28d87c3b43f8e2de1ff4ac4e8f32b",
+      "size_bytes": 76007
+    },
+    {
+      "path": "investment_committee/drl_governance_summary.csv",
+      "sha256": "2e5e149ccd55074e72919e56938acb88dc9e248f81ffcc3d4e7d46fe577ce4e9",
+      "size_bytes": 464
+    },
+    {
+      "path": "investment_committee/drl_seed_summary.csv",
+      "sha256": "6e3f6bc49afb15ab2f01d5d9ea0b285dd2a472924fab650086db0c6e5f2d2bcf",
+      "size_bytes": 1101
+    },
+    {
+      "path": "investment_committee/executive_summary.csv",
+      "sha256": "fd974dc2425f6268097ce6a467ddb32ae450389c13f76db0ea3142a37b9809bb",
+      "size_bytes": 960
+    },
+    {
+      "path": "investment_committee/final_portfolio_weights.csv",
+      "sha256": "04c63628c1c445ef441064db2db01bf0a3f31def27b423323947639355e70eea",
+      "size_bytes": 20619
+    },
+    {
+      "path": "investment_committee/final_trade_recommendations.csv",
+      "sha256": "5692f5bf68a63582a15ed06e96ebc41d8a9bf6a85a1519c8a1c91347ba3f2874",
+      "size_bytes": 6572
+    },
+    {
+      "path": "investment_committee/forecast_horizon_summary.csv",
+      "sha256": "649485b120de024f8ebcb938207d65b42f7f3c218d3ee1e9c9c94c9c599edbf6",
+      "size_bytes": 1422
+    },
+    {
+      "path": "investment_committee/hedge_concepts.csv",
+      "sha256": "3eecefc9fce2ac0cad0a16ecf890d3ff79dab7d206a167bb55c61065939f2e97",
+      "size_bytes": 3410
+    },
+    {
+      "path": "investment_committee/hedge_summary.csv",
+      "sha256": "3eecefc9fce2ac0cad0a16ecf890d3ff79dab7d206a167bb55c61065939f2e97",
+      "size_bytes": 3410
+    },
+    {
+      "path": "investment_committee/ic_report.css",
+      "sha256": "30de66f5921c9384bb99357e5c64d15ad84463640022587e21bd9ade4f0023a0",
+      "size_bytes": 967
+    },
+    {
+      "path": "investment_committee/investment_committee_report.html",
+      "sha256": "24d6cd9a530f1d36d7decd58a359894f798e3c8ea726065098482cc43ab5e98a",
+      "size_bytes": 214588
+    },
+    {
+      "path": "investment_committee/investment_committee_report.md",
+      "sha256": "d61f324ea57047151becb9049648760a5bd74a062d7f5e10df786fe87dfd8c6b",
+      "size_bytes": 20751
+    },
+    {
+      "path": "investment_committee/investment_committee_report.pdf",
+      "sha256": "44161e814e0f2d0e299f759ff452e828a73924f407a7aee5942920aec91f4686",
+      "size_bytes": 894553
+    },
+    {
+      "path": "investment_committee/investment_committee_summary.md",
+      "sha256": "d61f324ea57047151becb9049648760a5bd74a062d7f5e10df786fe87dfd8c6b",
+      "size_bytes": 20751
+    },
+    {
+      "path": "investment_committee/model_branch_comparison.csv",
+      "sha256": "de05d9a20a15c547564f636355f07c68bc54bc815e2b88cfbec99d86eba50f02",
+      "size_bytes": 2197
+    },
+    {
+      "path": "investment_committee/portfolio_risk_summary.csv",
+      "sha256": "299111d9a4dfbcaf99873d8724bd53efd7b45b1cb15e5e31cc0746834b6b1334",
+      "size_bytes": 1409
+    },
+    {
+      "path": "investment_committee/recommendation_exposures.csv",
+      "sha256": "360e173dd324fb3fb6df278d9d31c4b17c9c42e5d8ac9e22783d77c368baeac1",
+      "size_bytes": 219
+    },
+    {
+      "path": "investment_committee/regime_summary.csv",
+      "sha256": "aa647664c48954d166cce54edba06d048c6519f02d87ecf884580e6e4c621efa",
+      "size_bytes": 1888
+    },
+    {
+      "path": "investment_committee/region_exposures.csv",
+      "sha256": "44eb96c895de9580384fb56a3a5df61f1ed640df3e11b13177a1e301fba14eb1",
+      "size_bytes": 363
+    },
+    {
+      "path": "investment_committee/report_bundle.json",
+      "sha256": "b7587201ee4315662e9cf6e2145e64f7afa4e4de7192af0cda8d8a4c4cb9cdfc",
+      "size_bytes": 404498
+    },
+    {
+      "path": "investment_committee/report_data_quality.csv",
+      "sha256": "4ebe951bdcf3358166df95405fc13d78160740a75ae44bf319e6c8774005e537",
+      "size_bytes": 2507
+    },
+    {
+      "path": "investment_committee/report_manifest.json",
+      "sha256": "42d54042ec0014f4ac01d538c5d25fd24dca209ea916738b0cb29b568e1b8f1a",
+      "size_bytes": 10087
+    },
+    {
+      "path": "investment_committee/risk_bucket_exposures.csv",
+      "sha256": "2735139533fe8ab0c4b3893d6fb920a188d408b02a0f7b986ad2bf8153f1c708",
+      "size_bytes": 108
+    },
+    {
+      "path": "investment_committee/sector_exposures.csv",
+      "sha256": "8780167fbe6e1c165eb633014b3797e7e4b52b65997db35baeb493c09c8f1a19",
+      "size_bytes": 382
+    },
+    {
+      "path": "investment_committee/security_forecast_summary.csv",
+      "sha256": "1e8ec8a8319d576f89d6751d00f312b3151e609f8d3d01c8ce7be1841430fd98",
+      "size_bytes": 22755
+    },
+    {
+      "path": "investment_committee/stress_scenario_summary.csv",
+      "sha256": "f88ada14a9af4f198b3cd8a3f9b7e101c1e425fd11097a545ae109ea35eb3957",
+      "size_bytes": 1808
+    },
+    {
+      "path": "investment_committee/top_risk_contributors.csv",
+      "sha256": "22e652eac55f978e7dc49dcb0d45cc3d5a1e4e1a23f6e3523187df9f312e5a16",
+      "size_bytes": 4417
+    },
+    {
+      "path": "plots/cumulative_returns.png",
+      "sha256": "c1630be99d16627c242dfa034583765235817f6d16be151a7cab7acdf02487e4",
+      "size_bytes": 134826
+    },
+    {
+      "path": "plots/distribution_coverage.png",
+      "sha256": "edd2afc8daf62b79dc41fdf3f067e5688938346b75d4aa6a5184779294288887",
+      "size_bytes": 45900
+    },
+    {
+      "path": "plots/final_portfolio_exposures.png",
+      "sha256": "eeda1ad0d909c19709ce1c788f26443b113dc7ca8a402b7049fa3606437971f8",
+      "size_bytes": 73205
+    },
+    {
+      "path": "plots/forecast_quality.png",
+      "sha256": "e65d7e28efb64a758ea82e9b9aff06cea3082f061ba4a32872e716bf4f29af1a",
+      "size_bytes": 64296
+    },
+    {
+      "path": "plots/portfolio_comparison.png",
+      "sha256": "1b31b40a25e6e49d0d4da251d74d41da812b0d86a68c26414d2cfa8b9d9bdcfc",
+      "size_bytes": 68772
+    },
+    {
+      "path": "plots/regional_rank_ic.png",
+      "sha256": "801fcdf0ab7801d324d1d0be6feb3f40c8e70d2c36a534ccee44c3def1d0cad7",
+      "size_bytes": 70374
+    },
+    {
+      "path": "plots/risk_backtest.png",
+      "sha256": "7c2f8a67d2cb14650c2ea1edd2c6fcc1ccf06a3543a417126e63f4b227b87993",
+      "size_bytes": 49672
+    },
+    {
+      "path": "plots/validation_scorecard.png",
+      "sha256": "be893a497dbccf9ecbb5e8fdab01e49ad3d3d80dd9615fd9c0149874c6e3b4b3",
+      "size_bytes": 61689
+    },
+    {
+      "path": "README.md",
+      "sha256": "cf8a1463205bc65fe5d64f2f972e5964eac4c1c4fc0812c2fe75708c6f9c2e31",
+      "size_bytes": 2601
+    },
+    {
+      "path": "universe_summary.csv",
+      "sha256": "f9aaee70848d2e844228eec365c5a4dc4d7a23d025a21ad5298d4bb65aff9840",
+      "size_bytes": 348
+    },
+    {
+      "path": "validation/ablation_analysis.csv",
+      "sha256": "c864112c2e0e8d68a493e841e8e3082bc968e702677fe092a1d49b284d280354",
+      "size_bytes": 2315
+    },
+    {
+      "path": "validation/benchmark_significance_report.csv",
+      "sha256": "f6a12cc14dec55e1a671476e2d257bf4acc047ea39f1271f1e68d70901d5ce93",
+      "size_bytes": 265
+    },
+    {
+      "path": "validation/binary_probability_calibration.csv",
+      "sha256": "7faf672efc3e476ebad157220b968dbda2b240c7ee88fd128a0013d8d772d008",
+      "size_bytes": 189
+    },
+    {
+      "path": "validation/constraint_compliance_report.csv",
+      "sha256": "35d6c743e9553048eca87f9861a6e4ab652d27654ab8c8725d1b4ebff4baf74d",
+      "size_bytes": 17724
+    },
+    {
+      "path": "validation/data_leakage_report.csv",
+      "sha256": "4ed82f45e79c733f4e3a1fd8db558af40572c668766d276e2bd1aa8475ea18de",
+      "size_bytes": 143
+    },
+    {
+      "path": "validation/data_provenance_validation.csv",
+      "sha256": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6",
+      "size_bytes": 2
+    },
+    {
+      "path": "validation/distribution_coverage_report.csv",
+      "sha256": "b689c454cb6060ec564ada243e3f66880685c8fe7b54333e7a93136e9940a6cc",
+      "size_bytes": 738
+    },
+    {
+      "path": "validation/drl_governance_validation.csv",
+      "sha256": "3df028a4a66ba58fb4382b8a7c8125ac5b9fc811bdd861723ba94f3733bf62be",
+      "size_bytes": 162
+    },
+    {
+      "path": "validation/drl_seed_stability.csv",
+      "sha256": "4f5f6f2b8418733006ccf75c224ed49dc5d76524a41a0b54ff631e4bb784ae85",
+      "size_bytes": 89
+    },
+    {
+      "path": "validation/forecast_accuracy_report.csv",
+      "sha256": "41c302a54c4f5815f4c507c55892941643ae4680d17dd1f7d7b88c7a14d7f629",
+      "size_bytes": 744
+    },
+    {
+      "path": "validation/forecast_calibration_report.csv",
+      "sha256": "d78d01c62ec319f0be3af568ecc7bb3823af4902b81bc86afd85bac1569b6dab",
+      "size_bytes": 590
+    },
+    {
+      "path": "validation/model_approval_report.html",
+      "sha256": "792c19f1f9668445454ba586617b65992d98678a647fcff68cbfd57d46dddd94",
+      "size_bytes": 53278
+    },
+    {
+      "path": "validation/model_approval_report.md",
+      "sha256": "68e083443a3a8516309f06b3feba1adf4dd99d2d9a806acef673517ef8867861",
+      "size_bytes": 51125
+    },
+    {
+      "path": "validation/model_component_approval.csv",
+      "sha256": "e9fe4be0b19358b21cef5cba8583c0c1625aa8b4e0a8526c2c2225a63ab237bb",
+      "size_bytes": 511
+    },
+    {
+      "path": "validation/model_validation_scorecard.csv",
+      "sha256": "48c6eaf96284edca3f6f1abffcd3740d2a604246470aa50f1ca4a4454d0481fb",
+      "size_bytes": 327
+    },
+    {
+      "path": "validation/point_in_time_validation.csv",
+      "sha256": "8b14e614053e92686123b8484c3ae46e85d17dfb0797e5143aedeb53316f4a1d",
+      "size_bytes": 455
+    },
+    {
+      "path": "validation/portfolio_performance_by_period.csv",
+      "sha256": "40b4d2fd3f5f2c2b39cb5e9b846c010d57a03bd4fa83c6693249cfa3c4532f2a",
+      "size_bytes": 4268
+    },
+    {
+      "path": "validation/portfolio_strategy_comparison.csv",
+      "sha256": "a9cfa983c4e479980d3282fb5c4676f395bd2c50070383d3f2514c0dbbca3d06",
+      "size_bytes": 1319
+    },
+    {
+      "path": "validation/regime_performance_report.csv",
+      "sha256": "8dec4c40e165c28ee1a5060dca8f515bb065b0c2b47fbd4eccb92928ac36ba8d",
+      "size_bytes": 414
+    },
+    {
+      "path": "validation/regional_performance_report.csv",
+      "sha256": "17c2d22778acc12e1a43a9f074ce7c96fd98ace187b56da328bfab4b25ab7502",
+      "size_bytes": 3102
+    },
+    {
+      "path": "validation/risk_backtesting_report.csv",
+      "sha256": "8b9e7c95fcde8d801959b740ef358ee6cb77cb76df1902428820bd6e2b34ce0a",
+      "size_bytes": 680
+    },
+    {
+      "path": "validation/sensitivity_analysis.csv",
+      "sha256": "81f21f0b76d764567c0f644fd8717b7742fc4d2c79597e4f43b5b980de8ead32",
+      "size_bytes": 900
+    },
+    {
+      "path": "validation/transaction_cost_validation.csv",
+      "sha256": "2d3d29f6300e6bb79936b6c16599a51f412fe149555230ebb0ecb5ad0a2558fe",
+      "size_bytes": 1284
+    },
+    {
+      "path": "validation/validation_manifest.json",
+      "sha256": "b89cf2593123f4b9cb1ac6eaa8d144726ab44dd5ac83a810c4a2be3a127cd7e0",
+      "size_bytes": 2492
+    },
+    {
+      "path": "walk_forward_manifest.json",
+      "sha256": "55959b6dbf5a24ea24ed4eb6911d78adbae1bd23db7f0dc69f25a82a134a445c",
+      "size_bytes": 2534
+    }
+  ],
+  "generated_at": "2026-08-07T09:23:27.509723+00:00",
+  "overall_score": 87.5,
+  "release_id": "2026-08-07-full-universe",
+  "source_validation_run_id": "validation-20260807T092326-e5e0e476"
+}

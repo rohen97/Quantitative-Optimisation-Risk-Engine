@@ -86,6 +86,7 @@ def build_ml_forecast_features(features: pd.DataFrame, regime_dashboard: pd.Data
     distribution = build_return_distribution_forecasts(wide)
     distribution_update = distribution.drop(columns=[col for col in ["security_id", "company_name"] if col in distribution], errors="ignore")
     wide = wide.drop(columns=[col for col in distribution_update.columns if col in wide.columns and col != "ticker"], errors="ignore").merge(distribution_update, on="ticker", how="left")
+    wide = wide.copy()
     raw_score = (
         50
         + 150 * wide["expected_total_return_12m"]

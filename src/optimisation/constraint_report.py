@@ -38,6 +38,55 @@ def build_constraint_report(portfolio: pd.DataFrame, constraints: dict | None = 
     limits = constraints or {}
     weights = portfolio["target_weight"].fillna(0)
     rows = []
+    invested = portfolio.loc[weights.gt(1e-12)].copy()
+    total_weight = float(weights.sum())
+    rows.append(
+        _row(
+            "fully_invested",
+            "hard",
+            1.0,
+            total_weight,
+            not abs(total_weight - 1.0) <= 1e-8,
+        )
+    )
+    recommendation = invested.get("final_recommendation", pd.Series("", index=invested.index)).fillna("").astype(str)
+    prohibited = recommendation.str.contains("avoid|exclude", case=False, regex=True)
+    rows.append(
+        _row(
+            "recommendation_eligibility",
+            "hard",
+            "no Avoid or Exclude",
+            int(prohibited.sum()),
+            bool(prohibited.any()),
+            ", ".join(invested.loc[prohibited, "ticker"].astype(str)),
+        )
+    )
+    if "issuer_id" in invested:
+        duplicated_issuer = invested["issuer_id"].fillna("").astype(str).duplicated(keep=False)
+        rows.append(
+            _row(
+                "unique_issuer",
+                "hard",
+                "one listing per issuer",
+                int(duplicated_issuer.sum()),
+                bool(duplicated_issuer.any()),
+                ", ".join(invested.loc[duplicated_issuer, "ticker"].astype(str)),
+            )
+        )
+    price_excluded = invested.get(
+        "price_data_exclusion_flag",
+        pd.Series(False, index=invested.index),
+    ).fillna(False).astype(bool)
+    rows.append(
+        _row(
+            "price_data_quality",
+            "hard",
+            "no quarantined price histories",
+            int(price_excluded.sum()),
+            bool(price_excluded.any()),
+            ", ".join(invested.loc[price_excluded, "ticker"].astype(str)),
+        )
+    )
     max_weight = float(limits.get("max_single_name_weight", 0.05))
     rows.append(_row("single_name_concentration", "hard", max_weight, float(weights.max()), weights.max() > max_weight + 1e-9))
     for name, exposure_fn, key in [

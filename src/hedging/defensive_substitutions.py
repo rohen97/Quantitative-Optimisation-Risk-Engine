@@ -3,6 +3,24 @@ from __future__ import annotations
 import pandas as pd
 
 
+SUBSTITUTION_COLUMNS = [
+    "risky_security_id",
+    "risky_ticker",
+    "risky_company_name",
+    "risk_reason",
+    "suggested_security_id",
+    "suggested_ticker",
+    "suggested_company_name",
+    "substitution_type",
+    "expected_risk_reduction",
+    "dividend_yield_change",
+    "expected_return_change",
+    "regime_suitability_change",
+    "liquidity_change",
+    "substitution_commentary",
+]
+
+
 def build_defensive_substitution_recommendations(portfolio: pd.DataFrame, candidates: pd.DataFrame | None = None) -> pd.DataFrame:
     """Suggest safer equity replacements for high-risk holdings."""
     data = portfolio.copy()
@@ -70,4 +88,4 @@ def build_defensive_substitution_recommendations(portfolio: pd.DataFrame, candid
                 "substitution_commentary": "Suggested replacement has better downside, dividend or regime characteristics.",
             }
         )
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows, columns=SUBSTITUTION_COLUMNS)

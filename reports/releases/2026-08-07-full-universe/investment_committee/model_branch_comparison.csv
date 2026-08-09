@@ -1,0 +1,21 @@
+security_id,ticker,portfolio_aware_recommendation,clean_sheet_recommendation,optimiser_weight,drl_weight,final_weight,llm_recommendation,consensus_category,disagreement_flag,disagreement_commentary
+000333.SHE,000333.SHE,Buy,,0.05,0.0461496542128659,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+ALV.XETRA,ALV.XETRA,Buy,,0.05,0.0453308824719627,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+601816.SHG,601816.SHG,Buy,,0.05,0.0457417697467467,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+600036.SHG,600036.SHG,Buy,,0.05,0.0462158216313812,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+NOVN.SW,NOVN.SW,Buy,,0.05,0.0453642594420217,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+AD.AS,AD.AS,Buy,,0.05,0.0461539807782072,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+PG.US,PG.US,Buy,,0.05,0.0451320351461387,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+ORA.PA,ORA.PA,Buy,,0.0499999999999997,0.0442949200168185,0.0499999999999997,,Portfolio-Aware Only,True,Portfolio-Aware Only
+SHEL.US,SHEL.US,Buy,,0.05,0.0463735896404311,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+3988.HK,3988.HK,Buy,,0.05,0.0457641029481464,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+MCD.US,MCD.US,Buy,,0.05,0.0450750858296109,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+000538.SHE,000538.SHE,Buy,,0.05,0.0448299777979256,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+SBRY.LSE,SBRY.LSE,Buy,,0.05,0.0440542840337148,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+0823.HK,0823.HK,Buy,,0.05,0.0453442000010509,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+HEN3.XETRA,HEN3.XETRA,Hold,,0.05,0.0437503678568814,0.05,,No Consensus,True,No Consensus
+601818.SHG,601818.SHG,Buy,,0.05,0.0454050927642081,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+CS.PA,CS.PA,Buy,,0.05,0.044986896923504,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+LI.PA,LI.PA,Buy,,0.05,0.0457171483305136,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+ESSITY-B.ST,ESSITY-B.ST,Hold,,0.05,0.0431797206249025,0.05,,No Consensus,True,No Consensus
+600018.SHG,600018.SHG,Hold,,0.05,0.0411362098029672,0.05,,No Consensus,True,No Consensus

@@ -28,18 +28,66 @@ def _fallback_correlation(row_i: pd.Series, row_j: pd.Series) -> float:
     return 0.25
 
 
+def _group_pair_product_sum(groups: pd.DataFrame, columns: list[str], exposure: pd.Series) -> float:
+    """Return sum(x_i * x_j) for unordered pairs sharing every group column."""
+    frame = groups[columns].copy()
+    frame["_exposure"] = exposure.to_numpy(dtype=float)
+    frame["_exposure_squared"] = np.square(frame["_exposure"])
+    frame = frame.dropna(subset=columns)
+    if len(frame) < 2:
+        return 0.0
+    totals = frame.groupby(columns, sort=False, observed=True)[["_exposure", "_exposure_squared"]].sum()
+    return float(0.5 * (np.square(totals["_exposure"]) - totals["_exposure_squared"]).sum())
+
+
 def calculate_portfolio_volatility(portfolio: pd.DataFrame, weight_col: str = "target_weight") -> float:
     weights = _weights(portfolio, weight_col).to_numpy()
     vols = portfolio["expected_volatility_12m"].fillna(0.20).to_numpy()
     if len(weights) == 0:
         return 0.0
-    corr = np.eye(len(weights))
-    rows = portfolio.reset_index(drop=True)
-    for i in range(len(rows)):
-        for j in range(i + 1, len(rows)):
-            corr[i, j] = corr[j, i] = _fallback_correlation(rows.iloc[i], rows.iloc[j])
-    covariance = np.outer(vols, vols) * corr
-    return float(np.sqrt(max(weights @ covariance @ weights, 0)))
+    exposure_values = weights * vols
+    active = exposure_values != 0
+    if not active.any():
+        return 0.0
+
+    rows = portfolio.loc[active].reset_index(drop=True)
+    exposure = pd.Series(exposure_values[active], index=rows.index)
+    groups = pd.DataFrame(index=rows.index)
+    for column in ["sector", "country", "region", "currency"]:
+        groups[column] = rows[column].to_numpy() if column in rows else f"__missing_{column}__"
+
+    diagonal = float(np.square(exposure).sum())
+    all_pairs = float(0.5 * (float(exposure.sum()) ** 2 - diagonal))
+
+    same_sector = _group_pair_product_sum(groups, ["sector"], exposure)
+    same_country_only = _group_pair_product_sum(groups, ["country"], exposure) - _group_pair_product_sum(
+        groups, ["country", "sector"], exposure
+    )
+    same_region_only = (
+        _group_pair_product_sum(groups, ["region"], exposure)
+        - _group_pair_product_sum(groups, ["region", "country"], exposure)
+        - _group_pair_product_sum(groups, ["region", "sector"], exposure)
+        + _group_pair_product_sum(groups, ["region", "country", "sector"], exposure)
+    )
+    same_currency_only = (
+        _group_pair_product_sum(groups, ["currency"], exposure)
+        - _group_pair_product_sum(groups, ["currency", "region"], exposure)
+        - _group_pair_product_sum(groups, ["currency", "country"], exposure)
+        - _group_pair_product_sum(groups, ["currency", "sector"], exposure)
+        + _group_pair_product_sum(groups, ["currency", "region", "country"], exposure)
+        + _group_pair_product_sum(groups, ["currency", "region", "sector"], exposure)
+        + _group_pair_product_sum(groups, ["currency", "country", "sector"], exposure)
+        - _group_pair_product_sum(groups, ["currency", "region", "country", "sector"], exposure)
+    )
+
+    pair_variance = (
+        0.25 * all_pairs
+        + 0.35 * same_sector
+        + 0.25 * same_country_only
+        + 0.15 * same_region_only
+        + 0.10 * same_currency_only
+    )
+    return float(np.sqrt(max(diagonal + 2 * pair_variance, 0.0)))
 
 
 def calculate_portfolio_var_proxy(portfolio: pd.DataFrame, weight_col: str = "target_weight") -> float:

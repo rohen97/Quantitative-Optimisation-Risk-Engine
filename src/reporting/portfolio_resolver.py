@@ -102,6 +102,13 @@ def _selected_optimiser(bundle: ICDataBundle) -> pd.DataFrame:
     summary = bundle.frames.get("portfolio_optimisation_summary", pd.DataFrame())
     if summary.empty:
         return pd.DataFrame()
+    if {"selected_recommended_portfolio", "portfolio_method"}.issubset(summary.columns):
+        selected = summary[
+            summary["selected_recommended_portfolio"].astype(str).str.strip().str.lower().isin({"true", "1", "yes"})
+        ]
+        if not selected.empty:
+            key = str(selected.iloc[-1]["portfolio_method"]).lower().replace("-", "_").replace(" ", "_")
+            return bundle.frames.get(f"optimised_portfolio_{key}", pd.DataFrame())
     for column in ("selected_portfolio", "selected_strategy", "portfolio_name", "recommended_portfolio"):
         if column in summary:
             key = str(summary.iloc[-1][column]).lower().replace("-", "_").replace(" ", "_")

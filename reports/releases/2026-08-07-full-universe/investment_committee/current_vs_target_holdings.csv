@@ -1,0 +1,28 @@
+security_id,ticker,company_name,sector,country,region,currency,recommendation,current_weight,target_weight,weight_change,current_rank,target_rank,concentration_contribution,dividend_yield_bucket,risk_bucket
+000333.SHE,000333.SHE,Midea Group Co Ltd,Consumer Discretionary,China,Mainland China,CNY,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+000538.SHE,000538.SHE,Yunnan Baiyao Group Co Ltd,Healthcare,China,Mainland China,CNY,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+0823.HK,0823.HK,Link Real Estate Investment Trust,Real Estate,Hong Kong,Hong Kong,HKD,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,6%+,low
+601818.SHG,601818.SHG,China Everbright Bank Co Ltd,Financials,China,Mainland China,CNY,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+3988.HK,3988.HK,Bank of China Ltd H,Financials,Hong Kong,Hong Kong,HKD,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+600018.SHG,600018.SHG,Shanghai International Port Group Co Ltd,Industrials,China,Mainland China,CNY,Watchlist,0.0,0.05,0.05,9,1,0.0025000000000000005,6%+,low
+600036.SHG,600036.SHG,China Merchants Bank Co Ltd,Financials,China,Mainland China,CNY,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+AD.AS,AD.AS,Koninklijke Ahold Delhaize NV,Consumer Staples,Netherlands,EU ex-DACH,EUR,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+601816.SHG,601816.SHG,Beijing-Shanghai High Speed Railway Co Ltd,Industrials,China,Mainland China,CNY,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+CS.PA,CS.PA,AXA SA,Financials,France,EU ex-DACH,EUR,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+ALV.XETRA,ALV.XETRA,Allianz SE VNA O.N.,Financials,Germany,DACH,EUR,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+SHEL.US,SHEL.US,Shell PLC ADR,Energy,United States,US,USD,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+SBRY.LSE,SBRY.LSE,J Sainsbury PLC,Consumer Staples,United Kingdom,UK,GBX,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+ESSITY-B.ST,ESSITY-B.ST,Essity AB (publ),Consumer Staples,Sweden,EU ex-DACH,SEK,Watchlist,0.0,0.05,0.05,9,1,0.0025000000000000005,4-6%,low
+HEN3.XETRA,HEN3.XETRA,Henkel AG & Co. KGaA vz. (Pref Shares),Consumer Staples,Germany,DACH,EUR,Watchlist,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+MCD.US,MCD.US,McDonald’s Corporation,Consumer Discretionary,United States,US,USD,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+LI.PA,LI.PA,Klepierre SA,Real Estate,France,EU ex-DACH,EUR,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+PG.US,PG.US,Procter & Gamble Company,Consumer Staples,United States,US,USD,Hold,0.0,0.05,0.05,9,1,0.0025000000000000005,2-4%,low
+NOVN.SW,NOVN.SW,Novartis AG,Healthcare,Switzerland,DACH,CHF,Hold,0.10951080208592004,0.05,-0.059510802085920037,6,1,0.0025000000000000005,2-4%,low
+ORA.PA,ORA.PA,Orange S.A.,Communication Services,France,EU ex-DACH,EUR,Hold,0.0,0.0499999999999997,0.0499999999999997,9,20,0.0024999999999999697,4-6%,low
+0002.HK,,,,,,,,0.03973181028060591,0.0,-0.03973181028060591,8,21,0.0,0%,low
+000651.SZ,,,,,,,,0.05761112490687857,0.0,-0.05761112490687857,7,21,0.0,0%,low
+ASML.AS,,,,,,,,0.17432331760615843,0.0,-0.17432331760615843,2,21,0.0,0%,low
+NESN.SW,,,,,,,,0.13037000248323813,0.0,-0.13037000248323813,5,21,0.0,0%,low
+OR.PA,,,,,,,,0.20859200397318103,0.0,-0.20859200397318103,1,21,0.0,0%,low
+SIE.DE,,,,,,,,0.13781971691085176,0.0,-0.13781971691085176,4,21,0.0,0%,low
+ULVR.L,,,,,,,,0.14204122175316614,0.0,-0.14204122175316614,3,21,0.0,0%,low

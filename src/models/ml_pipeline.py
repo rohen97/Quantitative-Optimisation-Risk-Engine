@@ -22,11 +22,12 @@ def run_ml_forecasting_engine(
     prices: pd.DataFrame,
     regime_dashboard: pd.DataFrame | None = None,
     ml_config: dict | None = None,
+    targets: pd.DataFrame | None = None,
 ) -> dict[str, pd.DataFrame | str]:
     """Run mock ML forecasting, distribution, risk, validation and registry outputs."""
     config = (ml_config or {}).get("ml_forecasting", ml_config or {})
     horizons = config.get("horizons_months", HORIZONS_MONTHS)
-    targets = build_forward_return_targets(prices, features)
+    targets = targets.copy() if targets is not None else build_forward_return_targets(prices, features)
     outputs = build_ml_forecast_features(features, regime_dashboard)
     _, _, feature_groups = build_forecast_feature_matrix(features)
     metrics_by_horizon: dict[int, dict[str, float]] = {}

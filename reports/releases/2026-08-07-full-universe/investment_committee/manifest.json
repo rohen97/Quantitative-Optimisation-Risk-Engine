@@ -1,0 +1,623 @@
+{
+  "as_of_date": "2026-08-07 07:57:07.705950+00:00",
+  "backend": "duckdb",
+  "charts": {
+    "branch_weight_comparison": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\branch_weight_comparison.png",
+    "country_exposure_current_vs_target": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\country_exposure_current_vs_target.png",
+    "currency_exposure_current_vs_target": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\currency_exposure_current_vs_target.png",
+    "current_vs_target_top_holdings": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\current_vs_target_top_holdings.png",
+    "dividend_yield_vs_dividend_risk": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\dividend_yield_vs_dividend_risk.png",
+    "drl_baseline_vs_projected": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\drl_baseline_vs_projected.png",
+    "drl_reward_decomposition": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\drl_reward_decomposition.png",
+    "expected_return_vs_cvar": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\expected_return_vs_cvar.png",
+    "final_weights": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\current_vs_target_top_holdings.png",
+    "forecast_horizon_summary": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\forecast_horizon_summary.png",
+    "portfolio_concentration": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\portfolio_concentration.png",
+    "recommendation_matrix": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\recommendation_matrix.png",
+    "regime_probabilities": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\regime_probabilities.png",
+    "region_exposure_current_vs_target": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\region_exposure_current_vs_target.png",
+    "sector_exposure_current_vs_target": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\sector_exposure_current_vs_target.png",
+    "stress_losses": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\stress_test_losses.png",
+    "stress_test_losses": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\stress_test_losses.png",
+    "top_risk_contributors": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\top_risk_contributors.png",
+    "trade_notional_by_action": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\trade_notional_by_action.png",
+    "wolf_chaos_history": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\charts\\wolf_chaos_history.png"
+  },
+  "fallback_used": false,
+  "html": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\investment_committee_report.html",
+  "ic_outputs": [
+    "concentration_summary.csv",
+    "country_exposures.csv",
+    "currency_exposures.csv",
+    "current_vs_target_holdings.csv",
+    "defensive_substitution_summary.csv",
+    "dividend_yield_bucket_exposures.csv",
+    "drl_constraint_trace.csv",
+    "drl_governance_summary.csv",
+    "drl_seed_summary.csv",
+    "executive_summary.csv",
+    "final_portfolio_weights.csv",
+    "final_trade_recommendations.csv",
+    "forecast_horizon_summary.csv",
+    "hedge_concepts.csv",
+    "hedge_summary.csv",
+    "model_branch_comparison.csv",
+    "portfolio_risk_summary.csv",
+    "recommendation_exposures.csv",
+    "regime_summary.csv",
+    "region_exposures.csv",
+    "risk_bucket_exposures.csv",
+    "sector_exposures.csv",
+    "security_forecast_summary.csv",
+    "stress_scenario_summary.csv",
+    "top_risk_contributors.csv"
+  ],
+  "markdown": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\investment_committee_report.md",
+  "model_run_id": "33d94fa4-0abb-4658-b94a-bc911b16a2a2",
+  "pdf": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\investment_committee_report.pdf",
+  "portfolio_resolution_warnings": [
+    "Raw DRL weights ignored because DRL was not accepted or blended."
+  ],
+  "report_bundle": ".\\reports\\outputs\\ic\\33d94fa4-0abb-4658-b94a-bc911b16a2a2\\report_bundle.json",
+  "selected_portfolio_source": "explicit_final_portfolio",
+  "sources": [
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.340194+00:00",
+      "name": "current_portfolio",
+      "path": ".\\reports\\outputs\\current_portfolio_enriched.csv",
+      "row_count": 8,
+      "source_hash": "f26fbcb870ccc8b76eea80313ff2685ff75695dd6a5abdb93f56ad52017de917",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.339193+00:00",
+      "name": "current_diagnostics",
+      "path": ".\\reports\\outputs\\current_portfolio_diagnostics.csv",
+      "row_count": 1,
+      "source_hash": "4ea637df1b142daff4166d0eb6f01d090cf88b843836bda8406e4c7b3abe0868",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.602693+00:00",
+      "name": "final_portfolio_weights",
+      "path": ".\\reports\\outputs\\final_portfolio_weights.csv",
+      "row_count": 20,
+      "source_hash": "cedd1afe735f2608cb0c5db2965f49fc2150df4c80c07e6a1df893f67db1c5a9",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.602693+00:00",
+      "name": "final_portfolio",
+      "path": ".\\reports\\outputs\\final_portfolio_weights.csv",
+      "row_count": 20,
+      "source_hash": "cedd1afe735f2608cb0c5db2965f49fc2150df4c80c07e6a1df893f67db1c5a9",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.570664+00:00",
+      "name": "portfolio_optimisation_summary",
+      "path": ".\\reports\\outputs\\portfolio_optimisation_summary.csv",
+      "row_count": 7,
+      "source_hash": "e1c0f3a436b8c8846b610573a3923287ba40d7852ac792bf35f0d26ea2275c9f",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.569662+00:00",
+      "name": "portfolio_constraint_report",
+      "path": ".\\reports\\outputs\\portfolio_constraint_report.csv",
+      "row_count": 23,
+      "source_hash": "64db2a8f3104ca97b053f33ca45d973914bf80c4cfb8ba721a70e11578a76b98",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.341194+00:00",
+      "name": "sector_exposure",
+      "path": ".\\reports\\outputs\\sector_exposure.csv",
+      "row_count": 6,
+      "source_hash": "f2a46a7efde6e5f9b76ed3ba5a2776e519eaae57f2747e67771ad23f57daf22d",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.342196+00:00",
+      "name": "country_exposure",
+      "path": ".\\reports\\outputs\\country_exposure.csv",
+      "row_count": 7,
+      "source_hash": "f2ac1cf46cd4117fcec151bc073993ce2c44aefda9ab77db28979d165fe7959a",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.343196+00:00",
+      "name": "region_exposure",
+      "path": ".\\reports\\outputs\\region_exposure.csv",
+      "row_count": 5,
+      "source_hash": "4ae05194249e990a58261e6fc20d3241276874eef3a8112c6943a814b3c99e2a",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.344197+00:00",
+      "name": "currency_exposure",
+      "path": ".\\reports\\outputs\\currency_exposure.csv",
+      "row_count": 5,
+      "source_hash": "e151d71a0a190cddc446ffc2b9ce726471b06008c3402f27c0189436fc854feb",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.598689+00:00",
+      "name": "final_recommendations",
+      "path": ".\\reports\\outputs\\final_recommendations.csv",
+      "row_count": 1402,
+      "source_hash": "40c5bb2f28a38adfd577afc4fcfa40c7959176ea4a53a4a6d5a6ff5e946fe552",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.458562+00:00",
+      "name": "branch_comparison",
+      "path": ".\\reports\\outputs\\branch_comparison_report.csv",
+      "row_count": 1402,
+      "source_hash": "a380150ef43fc0b2b4e187a2f56e4e418a2fd83b0585a752bb382e171a3f3896",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.448553+00:00",
+      "name": "llm_benchmark_results",
+      "path": ".\\reports\\outputs\\recommendations_llm_benchmark.csv",
+      "row_count": 1402,
+      "source_hash": "4badfad28a594750eb3a60c68eb4fbb8228842c5e5cda862b65f5ec7bcbd09a1",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.568662+00:00",
+      "name": "portfolio_trade_list",
+      "path": ".\\reports\\outputs\\portfolio_trade_list.csv",
+      "row_count": 142,
+      "source_hash": "4b2088f0e1408732c9de3439e3254ccc74d8bf5ce57d462429932ca10f7361bb",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.403512+00:00",
+      "name": "recommendations_portfolio_aware",
+      "path": ".\\reports\\outputs\\recommendations_portfolio_aware.csv",
+      "row_count": 1402,
+      "source_hash": "59e3d844284c03d8c2ae4edc498275d76df33c2c488cb64181cdbdbcc37b5d08",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.425532+00:00",
+      "name": "recommendations_clean_sheet",
+      "path": ".\\reports\\outputs\\recommendations_clean_sheet.csv",
+      "row_count": 1402,
+      "source_hash": "3f0c68c6f9156226407068a2d92d5e4565fdb516e3ce1ca54e17d076377d3f88",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.526623+00:00",
+      "name": "optimised_portfolio_score_weighted",
+      "path": ".\\reports\\outputs\\optimised_portfolio_score_weighted.csv",
+      "row_count": 142,
+      "source_hash": "c0636221ef7b211d788f29bcb890016b43eda34bf6ea5fd2afe5c2248d821bba",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.534632+00:00",
+      "name": "optimised_portfolio_risk_parity",
+      "path": ".\\reports\\outputs\\optimised_portfolio_risk_parity.csv",
+      "row_count": 142,
+      "source_hash": "575ff3e19fae2c377127235a1143eda993fb7e98ef7638111890488cc2c12e89",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.541637+00:00",
+      "name": "optimised_portfolio_mean_variance",
+      "path": ".\\reports\\outputs\\optimised_portfolio_mean_variance.csv",
+      "row_count": 142,
+      "source_hash": "a2ae740e058c42608cbb2c5c00487635e2b55ad4a2e0c2e031b2870579c4737f",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.549644+00:00",
+      "name": "optimised_portfolio_cvar_constrained",
+      "path": ".\\reports\\outputs\\optimised_portfolio_cvar_constrained.csv",
+      "row_count": 142,
+      "source_hash": "1c2f2f3318347e65a4111ead5165417d36773129c332d8f3228190e07c154064",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.556651+00:00",
+      "name": "optimised_portfolio_dividend_income",
+      "path": ".\\reports\\outputs\\optimised_portfolio_dividend_income.csv",
+      "row_count": 142,
+      "source_hash": "f57a99eb26c2fd4f482b8da6b5f86c125f331db423a171b215e6bb22aa464bee",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.564658+00:00",
+      "name": "optimised_portfolio_regime_aware",
+      "path": ".\\reports\\outputs\\optimised_portfolio_regime_aware.csv",
+      "row_count": 142,
+      "source_hash": "5925d579773cb0e1d151ad24f14101e8b5ad777a0d4ae6b2e9b8ec4b87820e15",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.487679+00:00",
+      "name": "ml_forecasts_3m",
+      "path": ".\\reports\\outputs\\ml_forecasts_3m.csv",
+      "row_count": 1402,
+      "source_hash": "5918654de178ae099d6664340ba6b29b526229c98d03f9024a629692e125eb5b",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.539726+00:00",
+      "name": "ml_forecasts_6m",
+      "path": ".\\reports\\outputs\\ml_forecasts_6m.csv",
+      "row_count": 1402,
+      "source_hash": "11663757d350f6e873bbb5a74b17ae8892758f8b472a2ca7b260b1a6c70f1946",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.591774+00:00",
+      "name": "ml_forecasts_9m",
+      "path": ".\\reports\\outputs\\ml_forecasts_9m.csv",
+      "row_count": 1402,
+      "source_hash": "aaec62759b655b44b7ebf8ba896b535be1b997280ce209097173787d59ee156e",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.642820+00:00",
+      "name": "ml_forecasts_12m",
+      "path": ".\\reports\\outputs\\ml_forecasts_12m.csv",
+      "row_count": 1402,
+      "source_hash": "bd2e8f96d469717435d10d32c1a977df8c718ec57e3df0ad501c28b4daac4f23",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.679854+00:00",
+      "name": "dividend_cut_probability",
+      "path": ".\\reports\\outputs\\dividend_cut_probability.csv",
+      "row_count": 1402,
+      "source_hash": "4e0ff27ee5b1cb791989f33823a755f3d070148bcd0ad862195411af1e2659dd",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.696869+00:00",
+      "name": "drawdown_probability",
+      "path": ".\\reports\\outputs\\drawdown_probability.csv",
+      "row_count": 1402,
+      "source_hash": "4f41f7e76bc1e2eb1570a47695f6d6caff10098ffc9e92bc836e7a462414120b",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.435632+00:00",
+      "name": "regime_suitability",
+      "path": ".\\reports\\outputs\\regime_suitability_scores.csv",
+      "row_count": 1402,
+      "source_hash": "1c2c70fbf8ce463c05352136a7b48bb75bafdae2fbd79ac218219c40ad1a2f1a",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.411259+00:00",
+      "name": "regime_transition_matrix",
+      "path": ".\\reports\\outputs\\regime_transition_matrix.csv",
+      "row_count": 12,
+      "source_hash": "a4a99ec5f644c686cea18aacab9e9f673eee4ea021168b76be1c8da8e4cf7e3f",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.410257+00:00",
+      "name": "regime_informational_drivers",
+      "path": ".\\reports\\outputs\\informational_driver_model.csv",
+      "row_count": 1,
+      "source_hash": "51a56ca91849c81a047b9561074d6816f8093ce0d11aef30bf4c50c023f5ee13",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.938911+00:00",
+      "name": "drl_trade_list",
+      "path": ".\\reports\\outputs\\drl_trade_list.csv",
+      "row_count": 100,
+      "source_hash": "cbaee0a991b5bfa5fe3f5a5d20d0564b0db7acd24337e42f80cc869d552ba41c",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.916892+00:00",
+      "name": "drl_acceptance",
+      "path": ".\\reports\\outputs\\drl_acceptance_decision.csv",
+      "row_count": 1,
+      "source_hash": "5c7b250d6becbd2b8babc4f60c77041ab78d068c4fe54fa48c60d018cf07f0a7",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.935909+00:00",
+      "name": "drl_target_weights",
+      "path": ".\\reports\\outputs\\drl_target_weights.csv",
+      "row_count": 100,
+      "source_hash": "e1f18b8d8745a9588dadd6f28e4a138d13eb701775fc7717eac6cfb09ba2ef35",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.942915+00:00",
+      "name": "drl_constraints",
+      "path": ".\\reports\\outputs\\drl_constraint_adjustments.csv",
+      "row_count": 100,
+      "source_hash": "e33f742f656524f02cd5dbf896d41c64b494df83248004aeb120f656a8e9823f",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.943916+00:00",
+      "name": "drl_reward_decomposition",
+      "path": ".\\reports\\outputs\\drl_reward_decomposition.csv",
+      "row_count": 6,
+      "source_hash": "0e0430057143052370ae1ad1265e73b72cbcf9f89128a40c91eda0896d867d24",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.944917+00:00",
+      "name": "drl_regime_agent_weights",
+      "path": ".\\reports\\outputs\\drl_regime_agent_weights.csv",
+      "row_count": 5,
+      "source_hash": "48d8a5192ba3bfc62d3602d57b94e7f46a86f9b99733eb008cb82d3daefae0bd",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.947920+00:00",
+      "name": "drl_explanations",
+      "path": ".\\reports\\outputs\\drl_explanations.csv",
+      "row_count": 100,
+      "source_hash": "939264d2f03c58ed05b361c7c61740cef25becd593e300789a7ef315be6a886a",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.951924+00:00",
+      "name": "drl_feature_attributions",
+      "path": ".\\reports\\outputs\\drl_feature_attributions.csv",
+      "row_count": 1200,
+      "source_hash": "8c9ed9132d62cbe1fbdc15d1d988a489b65f8f9b4c709354492358c8fca1e7c2",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:07.397669+00:00",
+      "name": "drl_asset_time_attributions",
+      "path": ".\\reports\\outputs\\drl_asset_time_attributions.csv",
+      "row_count": 126000,
+      "source_hash": "bc59fe60a2a981d2aad652f712a2b726d4fcde1c8145adfbd4438e57db0b0abc",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.915890+00:00",
+      "name": "drl_benchmark_comparison",
+      "path": ".\\reports\\outputs\\drl_benchmark_comparison.csv",
+      "row_count": 24,
+      "source_hash": "605c13be0b7701b2e03976d2b47aea4a2b5ab6193cdc060a25d9cbaa2081fcb2",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.912888+00:00",
+      "name": "drl_seed_results",
+      "path": ".\\reports\\outputs\\drl_seed_results.csv",
+      "row_count": 11,
+      "source_hash": "684cb36c1851a6d258513c7795cec0b2692cc597a4be57655db579d8df33ff38",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:07.398671+00:00",
+      "name": "drl_ablation_results",
+      "path": ".\\reports\\outputs\\drl_ablation_results.csv",
+      "row_count": 16,
+      "source_hash": "7a2582aba415396b06c02b675e68db4e26b03651801497c78e7044b75d468724",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.889868+00:00",
+      "name": "risk_report",
+      "path": ".\\reports\\outputs\\portfolio_risk_report.csv",
+      "row_count": 1,
+      "source_hash": "211208bcb6c75f627f62233e768e9e2de616dfa3a9e0650e1799de9ab7e63cd2",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.892870+00:00",
+      "name": "risk_contribution",
+      "path": ".\\reports\\outputs\\risk_contribution_report.csv",
+      "row_count": 142,
+      "source_hash": "d03fbe8ff71f3d8500901dd3ad5443e694df024f549ad7ff9f08f7056b5897ce",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.894872+00:00",
+      "name": "stress_report",
+      "path": ".\\reports\\outputs\\stress_test_report.csv",
+      "row_count": 12,
+      "source_hash": "9d1707b9c1e4223275a0759675d85a79e92536edf6ab54f92a1a216e25ea5201",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.905881+00:00",
+      "name": "stress_contribution",
+      "path": ".\\reports\\outputs\\stress_test_contribution_report.csv",
+      "row_count": 1704,
+      "source_hash": "e211bdc00075063f4d56d6eafc6a05a4101115c9726ca7e756bf75a2dbeb327b",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.436634+00:00",
+      "name": "regime_summary",
+      "path": ".\\reports\\outputs\\regime_dashboard_summary.csv",
+      "row_count": 1,
+      "source_hash": "85353369b76623bc594280d23215b9527b1fe38af1e96bb253da436382111516",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.408256+00:00",
+      "name": "factor_regime_probabilities",
+      "path": ".\\reports\\outputs\\factor_regime_probabilities.csv",
+      "row_count": 1,
+      "source_hash": "cfe77b6e05b93c51b1d29d49dcb66b038833aa6c32d139fc11579c989b2c0b89",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.409256+00:00",
+      "name": "chaos_regime_probabilities",
+      "path": ".\\reports\\outputs\\chaos_regime_probabilities.csv",
+      "row_count": 1,
+      "source_hash": "156ce9329f634fcd3b3e7b35c359e0ef81d9b10358e9a12648702505584ed439",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.907884+00:00",
+      "name": "hedges",
+      "path": ".\\reports\\outputs\\hedge_recommendations.csv",
+      "row_count": 8,
+      "source_hash": "1af563c5f3f787a34af4520d578a67992a91a80bb1ee88ca258c430c3f0d5b2e",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.907884+00:00",
+      "name": "defensive_substitutions",
+      "path": ".\\reports\\outputs\\defensive_substitution_recommendations.csv",
+      "row_count": 0,
+      "source_hash": "348fcc326004ee6879d2736a4b89dcdbb08ac5c4f0f9cfb7671a2ed0c13b60cc",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.079217+00:00",
+      "name": "features",
+      "path": ".\\reports\\outputs\\features_monthly.csv",
+      "row_count": 1402,
+      "source_hash": "11d79f4b79cfa7e6d929ce40b754baae826977d55ca0ffe68cac716f02c0cca6",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.383494+00:00",
+      "name": "scorecard",
+      "path": ".\\reports\\outputs\\stock_scorecard.csv",
+      "row_count": 1402,
+      "source_hash": "efc51c26006dc23ea6c0a4501132025077449e7326400471fc9c047be77803b2",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:05.925991+00:00",
+      "name": "recommendations_3m",
+      "path": ".\\reports\\outputs\\recommendations_3m.csv",
+      "row_count": 1402,
+      "source_hash": "beb9fd5a9382f8818601221bb01593c83b191b8eb0d12a062c2ece4dd3323b86",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.245281+00:00",
+      "name": "recommendations_6m",
+      "path": ".\\reports\\outputs\\recommendations_6m.csv",
+      "row_count": 1402,
+      "source_hash": "602662aeb7c59430bbdf27a6708d64e84493c6adf7ccb6b66d38a899f75ca66d",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.562570+00:00",
+      "name": "recommendations_9m",
+      "path": ".\\reports\\outputs\\recommendations_9m.csv",
+      "row_count": 1402,
+      "source_hash": "acb5602c587897d98a79a795605be6ba831279bb2753440ea766f243c93c9ef0",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:06.887865+00:00",
+      "name": "recommendations_12m",
+      "path": ".\\reports\\outputs\\recommendations_12m.csv",
+      "row_count": 1402,
+      "source_hash": "e25b74ff92227f2b53ab3ee9b87dfed4feddf4cfe27602e401854900996dc545",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:04.671848+00:00",
+      "name": "distribution_forecasts",
+      "path": ".\\reports\\outputs\\return_distribution_forecasts.csv",
+      "row_count": 1402,
+      "source_hash": "a466a5186d39f3357283621b1e002be292654f4da4f39d688035a923dfd552c2",
+      "warning": null
+    },
+    {
+      "available": true,
+      "modified_at": "2026-07-29 02:44:57.629352+00:00",
+      "name": "data_backend_comparison",
+      "path": ".\\reports\\outputs\\data_backend_comparison.csv",
+      "row_count": 10,
+      "source_hash": "d806a07c7b19d5ac55a4b591304e55ddfdb1d0c363dac2e5ebf91b799d0b1a08",
+      "warning": null
+    },
+    {
+      "available": false,
+      "modified_at": null,
+      "name": "data_validation_report",
+      "path": ".\\reports\\outputs\\data_validation_report.csv",
+      "row_count": 0,
+      "source_hash": null,
+      "warning": "Source file is unavailable."
+    },
+    {
+      "available": true,
+      "modified_at": "2026-08-07 07:57:07.705950+00:00",
+      "name": "model_run_lineage",
+      "path": ".\\reports\\outputs\\model_run_lineage.csv",
+      "row_count": 1,
+      "source_hash": "24553b35ce35e825ddeea8fd3ca0d604d288899c99bed6222d0ef8bdfa0478a2",
+      "warning": null
+    }
+  ]
+}

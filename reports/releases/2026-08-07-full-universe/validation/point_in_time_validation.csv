@@ -1,0 +1,6 @@
+check_name,status,failures,commentary
+decision_date_parseable,PASS,0,
+walk_forward_future_fundamental_rows,PASS,0,Reconstructed walk-forward chronology invariant.
+walk_forward_future_price_feature_rows,PASS,0,Reconstructed walk-forward chronology invariant.
+walk_forward_hard_constraint_breaches,PASS,0,Reconstructed walk-forward chronology invariant.
+walk_forward_outcomes_before_target_rows,PASS,0,Reconstructed walk-forward chronology invariant.

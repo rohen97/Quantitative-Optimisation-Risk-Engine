@@ -45,7 +45,12 @@ FORECAST_COLUMNS = {
 }
 
 
-def _forecast_frame(bundle: ICDataBundle, horizon: int) -> pd.DataFrame:
+def _forecast_frame(
+    bundle: ICDataBundle,
+    horizon: int,
+    security_ids: set[str] | None = None,
+    tickers: set[str] | None = None,
+) -> pd.DataFrame:
     frame = bundle.frames.get(f"ml_forecasts_{horizon}m", pd.DataFrame())
     if frame.empty:
         frame = bundle.frames.get(f"recommendations_{horizon}m", pd.DataFrame())
@@ -54,6 +59,11 @@ def _forecast_frame(bundle: ICDataBundle, horizon: int) -> pd.DataFrame:
         return data
     if "security_id" not in data:
         data["security_id"] = data.get("ticker", pd.Series(range(len(data)), index=data.index)).astype(str)
+    if security_ids or tickers:
+        selected = data["security_id"].astype(str).isin(security_ids or set())
+        if "ticker" in data:
+            selected |= data["ticker"].astype(str).isin(tickers or set())
+        data = data.loc[selected].copy()
     output = pd.DataFrame(
         {
             "horizon": f"{horizon}M",
@@ -69,8 +79,16 @@ def _forecast_frame(bundle: ICDataBundle, horizon: int) -> pd.DataFrame:
     return output
 
 
-def build_security_forecast_summary(bundle: ICDataBundle) -> pd.DataFrame:
-    frames = [_forecast_frame(bundle, horizon) for horizon in (3, 6, 9, 12)]
+def build_security_forecast_summary(
+    bundle: ICDataBundle,
+    resolved: ResolvedPortfolio | None = None,
+) -> pd.DataFrame:
+    security_ids: set[str] | None = None
+    tickers: set[str] | None = None
+    if resolved is not None and not resolved.portfolio.empty:
+        security_ids = set(resolved.portfolio.get("security_id", pd.Series(dtype=str)).dropna().astype(str))
+        tickers = set(resolved.portfolio.get("ticker", pd.Series(dtype=str)).dropna().astype(str))
+    frames = [_forecast_frame(bundle, horizon, security_ids, tickers) for horizon in (3, 6, 9, 12)]
     frames = [frame for frame in frames if not frame.empty]
     if not frames:
         return pd.DataFrame()
@@ -78,7 +96,7 @@ def build_security_forecast_summary(bundle: ICDataBundle) -> pd.DataFrame:
 
 
 def build_forecast_horizon_summary(bundle: ICDataBundle, resolved: ResolvedPortfolio) -> pd.DataFrame:
-    security = build_security_forecast_summary(bundle)
+    security = build_security_forecast_summary(bundle, resolved)
     if security.empty:
         return security
     weights = resolved.portfolio.copy()

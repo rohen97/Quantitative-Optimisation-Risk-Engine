@@ -15,6 +15,7 @@ data_sources:
     - finnhub
     - alpha_vantage
     - yfinance
+    - tickdb
     - alpaca
     - itick
 
@@ -64,6 +65,19 @@ data_sources:
       daily_function: TIME_SERIES_DAILY
       output_size: compact
       notes: Compact raw daily prices are free-compatible; adjusted/full history may require a premium plan.
+
+
+    tickdb:
+      enabled: true
+      symbol_column: tickdb_ticker
+      base_url: https://api.tickdb.ai
+      credential_env: TICKDB_API_KEY
+      asset_classes: [equities, indices, fx, crypto]
+      regions: [US, Mainland China, Hong Kong]
+      interval: 1d
+      limit: 250
+      use_time_range: false
+      notes: Unified REST market data API; use for HK stocks and A-shares when yfinance/iTick coverage is thin.
 
     itick:
       enabled: true

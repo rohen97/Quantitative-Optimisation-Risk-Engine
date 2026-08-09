@@ -12,6 +12,6 @@ def ingest_news(raw_news: pd.DataFrame, source: str = "mock") -> pd.DataFrame:
         data["document_id"] = text.map(lambda value: hashlib.sha256(value.encode("utf-8")).hexdigest())
     data["published_at"] = pd.to_datetime(data["published_at"])
     data["source"] = source
-    data["ingested_at"] = pd.Timestamp.utcnow().tz_localize(None)
+    data["ingested_at"] = pd.Timestamp.now('UTC').tz_localize(None)
     data["record_hash"] = data["document_id"]
     return data

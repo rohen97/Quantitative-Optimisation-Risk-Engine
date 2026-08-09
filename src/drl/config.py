@@ -101,6 +101,7 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             "max_delta_weight": float(_coalesce(raw.get("max_delta_weight"), raw.get("max_adjustment"), default=selected_delta)),
             "use_softmax": bool(_coalesce(action.get("use_softmax"), default=False)),
             "use_constraint_projection": bool(_coalesce(action.get("use_constraint_projection"), default=True)),
+            "maximum_assets": int(_coalesce(action.get("maximum_assets"), raw.get("maximum_assets"), default=100)),
             "turnover_limit": float(_coalesce(constraints.get("maximum_turnover_monthly"), raw.get("turnover_limit"), default=0.10)),
             "maximum_turnover": float(_coalesce(constraints.get("maximum_turnover_monthly"), raw.get("maximum_turnover"), default=0.10)),
             "annual_turnover_limit": float(_coalesce(constraints.get("maximum_turnover_annual"), default=0.35)),

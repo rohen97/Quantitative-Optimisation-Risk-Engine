@@ -12,11 +12,85 @@ The pipeline now compares three recommendation branches:
 
 The LLM benchmark is an explanation and comparison layer only. It cannot bypass hard quant risk controls.
 
+## Current Validated Run
+
+The latest full-universe evidence package is dated 2026-08-07.
+
+| Measure | Result |
+|---|---:|
+| Security master | 112,570 active and delisted listings |
+| Active universe | 55,504 equities |
+| Walk-forward eligible securities | 1,408 |
+| Historical forecasts | 73,524 |
+| Aligned realised outcomes | 73,072 |
+| Portfolio decisions | 25 monthly anchors |
+| Governance score | 87.5 / 100 |
+| Approval | `CONDITIONALLY_APPROVED` |
+| Hard constraint breaches | 0 |
+| Automated tests | 288 passing |
+
+The complete, checksummed result is in
+[`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
+
+![Validation scorecard](reports/releases/2026-08-07-full-universe/plots/validation_scorecard.png)
+
+![Walk-forward portfolio performance](reports/releases/2026-08-07-full-universe/plots/cumulative_returns.png)
+
+Conditional approval is deliberate. The free-source backtest reconstructs some
+filing availability and lacks immutable historical universe, volume, sentiment,
+narrative and regime vintages. This repository is research software and does not
+authorize unattended live trading.
+
+## Quick Start
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e .
+Copy-Item .env.example .env
+$env:USE_MOCK_DATA='true'
+python scripts\run_full_pipeline.py
+python -m pytest -q
+```
+
+Keep provider credentials in `.env` only. The tracked `.env.example` contains
+names and safe defaults, never usable credentials.
+
 Run the mock-data pipeline:
 
 ```bash
 python scripts/run_full_pipeline.py
 ```
+
+Pull free observed reference data and annual statements into DuckDB:
+
+~~~powershell
+python scripts/run_free_equity_enrichment.py all --candidates-per-region 250
+python scripts/run_free_equity_enrichment.py status
+~~~
+
+The reference phase scans every active equity in provider batches and stores market
+capitalisation plus three-month average traded value. The fundamentals phase then
+deduplicates issuers and fetches four reported annual periods for the strongest
+liquid, dividend-paying candidates in every region. Both phases commit incrementally
+and skip completed rows on restart. Use --workers 1 --request-interval-seconds 0.75
+for a paced retry after a provider rate limit.
+
+Run the observed DuckDB universe with resumable regional model batches:
+
+~~~powershell
+python scripts/run_two_phase_pipeline.py phase1 --batch-size 2500
+python scripts/run_two_phase_pipeline.py status
+python scripts/run_two_phase_pipeline.py phase2 --with-governance
+~~~
+
+Phase 1 uses observed metadata and reported annual statements by default. It partitions
+DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong under
+data/interim/observed_full_universe_pipeline/. Completed batches are skipped on
+restart. Phase 2 merges every region before cross-sectional ranks, portfolio
+optimisation, risk and DRL, so batch boundaries do not become investment boundaries.
+Use all for one foreground command. Synthetic test data requires the explicit
+--input-mode synthetic_test option.
 
 Build the feature store and scorecard outputs:
 
@@ -93,15 +167,21 @@ python scripts/pull_external_data.py --start 2020-01-01
 
 `configs/data_sources.yaml` maps providers to the full DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong universe. Add private credentials to `.env` using the placeholders in `.env.example`. With `USE_MOCK_DATA=false`, the price loader queries every enabled provider for which credentials are available, cross-validates overlapping closes and retains the configured highest-priority observation. It does not silently treat a failed provider as valid data.
 
-Configured sources include yfinance, Alpaca, EODHD, Finnhub, Alpha Vantage and iTick for market data; Frankfurter for FX; FRED, ECB, ONS, Bank of England, China Data and HKMA for economic and financial-system data. Alpha Vantage also exposes configured fundamental, FX, macro, commodity, news and sentiment capabilities. FRED and ECB requests preserve revision/vintage information where exposed. The supplied Medium articles are retained as non-authoritative engineering references; primary provider documentation controls endpoint and licensing decisions.
+Configured sources include yfinance, TickDB, Alpaca, EODHD, Finnhub, Alpha Vantage and iTick for market data; Frankfurter for FX; FRED, ECB, ONS, Bank of England, China Data and HKMA for economic and financial-system data. Alpha Vantage also exposes configured fundamental, FX, macro, commodity, news and sentiment capabilities. FRED and ECB requests preserve revision/vintage information where exposed. The supplied Medium articles are retained as non-authoritative engineering references; primary provider documentation controls endpoint and licensing decisions.
 
-Mock mode remains the safe default. To use yfinance data in the model, set `USE_MOCK_DATA=false` and `DATA_PROVIDER=yfinance` in `.env`.
+The legacy single-process pipeline can still use mock mode. The two-phase production
+runner defaults to observed DuckDB inputs and never silently substitutes mock
+fundamentals.
 
 Run tests:
 
-```bash
-pytest
+```powershell
+$env:USE_MOCK_DATA='true'
+python -m pytest -q
 ```
+
+The explicit process-local flag keeps tests deterministic when a developer has
+configured live providers in `.env`.
 
 Outputs are saved in `reports/outputs/`.
 
@@ -109,7 +189,7 @@ Architecture diagrams and stage-by-stage diagnostic checks are documented in `do
 
 ## Data Backend Foundation
 
-The model now has a DuckDB + Parquet data foundation underneath the existing CSV/mock pipeline. The default backend is still `legacy_csv`, so existing behaviour is preserved. Configure backend migration in `configs/data.yaml`:
+The model now has a DuckDB + Parquet data foundation underneath the existing CSV/mock pipeline. The configured backend is `duckdb`, with CSV/mock fallback retained for controlled testing. Configure backend migration in `configs/data.yaml`:
 
 - `legacy_csv`: current CSV/mock behaviour.
 - `shadow`: compare legacy CSV outputs with DuckDB-backed snapshots while continuing to use legacy outputs.
@@ -236,6 +316,32 @@ python scripts/run_validation_smoke_test.py
 python scripts/run_model_validation.py --mode full
 python scripts/run_model_validation.py --mode release_candidate --strict
 ```
+
+Build the complete reconstructed point-in-time evidence set and immediately run
+full governance validation:
+
+```bash
+python scripts/run_walk_forward_validation.py
+```
+
+Build the compact GitHub release package after validation and IC reporting:
+
+```bash
+python scripts/build_release_evidence.py --release-id 2026-08-07-full-universe
+```
+
+The command writes immutable forecast, realised-outcome, monthly portfolio,
+constraint, transaction-cost and daily EWMA VaR/Expected Shortfall evidence to
+`reports/outputs/walk_forward/`. It then writes the approval bundle to
+`reports/outputs/validation/<validation_run_id>/` and refreshes
+`reports/outputs/validation/latest/`.
+
+Free-source history supports conditional use only. Filing availability is
+reconstructed with a conservative lag, the universe does not contain historical
+delisted constituents, historical volume is unavailable, and sentiment,
+narrative and regime vintages were not archived. These limitations are recorded
+in `walk_forward_manifest.json` and cap governance at
+`CONDITIONALLY_APPROVED` until observed historical vintages replace the proxies.
 
 Every run is preserved under `reports/outputs/validation/<validation_run_id>/`; `reports/outputs/validation/latest/` is a copied view. Missing realised history is reported as `INSUFFICIENT_DATA`, never as a pass. Critical leakage, point-in-time, lineage, reproducibility or hard-constraint failures force `REJECTED`.
 

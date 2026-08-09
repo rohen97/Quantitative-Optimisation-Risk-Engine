@@ -10,6 +10,7 @@ from src.reporting.models import ICDataBundle
 
 REQUIRED_FRAMES = (
     "current_portfolio",
+    "final_portfolio_weights",
     "final_recommendations",
     "risk_report",
     "stress_report",
@@ -53,6 +54,74 @@ def build_report_data_quality(bundle: ICDataBundle, final_portfolio: pd.DataFram
         add("portfolio", "finite_weights", "pass" if weights.notna().all() and np.isfinite(weights).all() else "fail", "Weights must be finite.")
         add("portfolio", "long_only", "pass" if (weights >= -1e-10).all() else "fail", "Long-only portfolio cannot have negative weights.")
         add("portfolio", "weights_sum_to_one", "pass" if np.isclose(weights.sum(), 1.0, atol=1e-5) else "fail", f"Weights sum to {weights.sum():.6f}.")
+        if "issuer_id" in final_portfolio:
+            issuer = final_portfolio["issuer_id"].dropna().astype(str)
+            add(
+                "portfolio",
+                "unique_issuers",
+                "pass" if issuer.is_unique else "fail",
+                "Cross-listed securities must not create duplicate issuer exposure.",
+            )
+        for column in ("sector", "country", "region", "currency"):
+            if column not in final_portfolio:
+                add("data_provenance", f"{column}_available", "fail", f"{column} metadata is required.")
+                continue
+            values = final_portfolio[column].fillna("Unknown").astype(str).str.strip().str.lower()
+            known = ~values.isin({"", "unknown", "nan", "none", "n/a", "<na>"})
+            add(
+                "data_provenance",
+                f"{column}_known",
+                "pass" if known.all() else "fail",
+                f"Every selected holding requires known {column} metadata.",
+            )
+        recommendation = final_portfolio.get(
+            "final_recommendation",
+            pd.Series("", index=final_portfolio.index),
+        ).fillna("").astype(str)
+        prohibited = recommendation.str.contains("avoid|exclude", case=False, regex=True)
+        add(
+            "portfolio",
+            "selected_names_are_investable",
+            "pass" if not prohibited.any() else "fail",
+            "Selected holdings cannot carry Avoid or Exclude recommendations.",
+        )
+        synthetic = (
+            final_portfolio.get("is_synthetic_data", pd.Series(False, index=final_portfolio.index))
+            .fillna(False)
+            .astype(bool)
+            | final_portfolio.get(
+                "is_synthetic_fundamentals",
+                pd.Series(False, index=final_portfolio.index),
+            )
+            .fillna(False)
+            .astype(bool)
+        )
+        add(
+            "data_provenance",
+            "observed_investment_inputs",
+            "pass" if not synthetic.any() else "fail",
+            "Synthetic metadata or fundamentals are allowed for testing but block deployment.",
+        )
+        fallback = final_portfolio.get(
+            "fallback_eligibility_used",
+            pd.Series(False, index=final_portfolio.index),
+        ).fillna(False).astype(bool)
+        add(
+            "portfolio",
+            "hard_eligibility_not_bypassed",
+            "pass" if not fallback.any() else "fail",
+            "Final holdings must come from the strict hard-eligibility set.",
+        )
+        feasible = final_portfolio.get(
+            "optimisation_feasible",
+            pd.Series(False, index=final_portfolio.index),
+        ).fillna(False).astype(bool)
+        add(
+            "portfolio",
+            "optimiser_feasible",
+            "pass" if feasible.all() else "fail",
+            "The selected optimiser must report a feasible hard-constraint solution.",
+        )
     current = bundle.frames.get("current_portfolio", pd.DataFrame())
     nav = pd.to_numeric(current.get("market_value_usd", pd.Series(dtype=float)), errors="coerce").sum() if not current.empty else 0.0
     add("portfolio", "current_nav_positive", "pass" if nav > 0 else "warning", "Current NAV should be positive when current portfolio is available.")

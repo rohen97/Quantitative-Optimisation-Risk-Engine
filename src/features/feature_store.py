@@ -17,6 +17,8 @@ def build_feature_store(
     sentiment: pd.DataFrame,
     portfolio: pd.DataFrame,
     regime: pd.DataFrame,
+    *,
+    price_risk_features: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Build stock-level monthly features from raw/mock inputs."""
     data = universe.merge(fundamentals.drop(columns=["sector"], errors="ignore"), on=["security_id", "ticker"], how="left")
@@ -25,7 +27,8 @@ def build_feature_store(
     data = build_financial_features(data)
     data = build_dividend_features(data)
     data = build_valuation_features(data)
-    data = data.merge(build_price_risk_features(prices), on="ticker", how="left")
+    risk_features = price_risk_features if price_risk_features is not None else build_price_risk_features(prices)
+    data = data.merge(risk_features, on="ticker", how="left")
     data = data.merge(build_liquidity_features(universe, float(portfolio["market_value_usd"].sum())), on="ticker", how="left")
     data = data.merge(sentiment, on=["security_id", "ticker"], how="left")
     if "liquidity_stress_score_x" in data.columns or "liquidity_stress_score_y" in data.columns:

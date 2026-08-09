@@ -11,8 +11,8 @@ from src.regime.regime_classifier import build_regime_features
 
 def _features():
     universe = build_universe(n=8)
-    prices = load_prices(universe)
-    fundamentals = load_fundamentals(universe)
+    prices = load_prices(universe, use_mock=True)
+    fundamentals = load_fundamentals(universe, use_mock=True)
     sentiment = universe[["security_id", "ticker"]].copy()
     portfolio = load_current_portfolio("data/external/current_portfolio_template.csv")
     features = build_feature_store(universe, prices, fundamentals, sentiment, portfolio, build_regime_features(universe))
@@ -34,6 +34,21 @@ def test_distributional_forecaster_outputs_parameters_and_risk_metrics():
     assert (distributional["expected_shortfall_5_12m"] <= distributional["var_5_12m"]).all()
     assert distributional["tail_risk_score"].between(0, 100).all()
     assert distributional["skewness_risk_score"].between(0, 100).all()
+
+
+def test_distributional_forecaster_accepts_nullable_provider_numbers():
+    features = _features()
+    base = build_ml_forecast_features(features)["ml_features"]
+    numeric = [
+        column
+        for column in base
+        if column.startswith(("expected_total_return_", "expected_volatility_"))
+        or column in {"dividend_cut_probability", "large_drawdown_probability_12m"}
+    ]
+    base[numeric] = base[numeric].astype(object)
+    distributional = build_distributional_forecasts(features, base)
+    assert distributional["p5_return_12m"].notna().all()
+    assert distributional["distribution_nu_12m"].dtype.kind == "f"
 
 
 def test_future_architecture_placeholders_include_transformer_and_xlstm():

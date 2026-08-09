@@ -41,10 +41,14 @@ def derive_distributional_risk_metrics(parameters: pd.DataFrame) -> pd.DataFrame
     output = parameters.copy()
     for months in HORIZONS_MONTHS:
         dist = output[f"distribution_name_{months}m"].iloc[0] if len(output) else "student_t"
-        mu = output[f"distribution_mu_{months}m"]
-        sigma = output[f"distribution_sigma_{months}m"]
-        nu = output[f"distribution_nu_{months}m"]
-        xi = output[f"distribution_xi_{months}m"]
+        mu = pd.to_numeric(output[f"distribution_mu_{months}m"], errors="coerce").astype(float)
+        sigma = pd.to_numeric(output[f"distribution_sigma_{months}m"], errors="coerce").astype(float)
+        nu = pd.to_numeric(output[f"distribution_nu_{months}m"], errors="coerce").astype(float)
+        xi = pd.to_numeric(output[f"distribution_xi_{months}m"], errors="coerce").astype(float)
+        output[f"distribution_mu_{months}m"] = mu
+        output[f"distribution_sigma_{months}m"] = sigma
+        output[f"distribution_nu_{months}m"] = nu
+        output[f"distribution_xi_{months}m"] = xi
         p1 = distribution_ppf(dist, 0.01, mu, sigma, nu, xi)
         p5 = distribution_ppf(dist, 0.05, mu, sigma, nu, xi)
         p50 = distribution_ppf(dist, 0.50, mu, sigma, nu, xi)

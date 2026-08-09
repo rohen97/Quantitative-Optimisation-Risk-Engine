@@ -11,9 +11,22 @@ def _count_mentions(text: str, ticker: str, company_name: str) -> int:
 def map_entities(documents: pd.DataFrame, universe: pd.DataFrame, min_confidence: float = 0.70) -> pd.DataFrame:
     """Map documents to securities using ticker/company mentions with a conservative threshold."""
     rows = []
+    by_security_id = universe.drop_duplicates("security_id").copy()
+    by_security_id.index = by_security_id["security_id"].astype(str)
+    by_ticker = universe.drop_duplicates("ticker").copy()
+    by_ticker.index = by_ticker["ticker"].astype(str).str.casefold()
     for _, document in documents.iterrows():
         text = f"{document.get('title', '')} {document.get('body_text', '')}"
-        for _, security in universe.iterrows():
+        candidates = pd.DataFrame()
+        security_id = document.get("security_id")
+        ticker = document.get("ticker")
+        if pd.notna(security_id) and str(security_id) in by_security_id.index:
+            candidates = by_security_id.loc[[str(security_id)]]
+        elif pd.notna(ticker) and str(ticker).casefold() in by_ticker.index:
+            candidates = by_ticker.loc[[str(ticker).casefold()]]
+        else:
+            candidates = universe
+        for _, security in candidates.iterrows():
             count = _count_mentions(text, security["ticker"], security["company_name"])
             if count <= 0:
                 continue

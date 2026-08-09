@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -6,10 +7,14 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
-def _run_script(script: str, timeout: int = 300) -> None:
+def _run_script(script: str, output_dir: Path, timeout: int = 300) -> None:
+    environment = os.environ.copy()
+    environment["PIPELINE_OUTPUT_DIR"] = str(output_dir)
+    environment["PIPELINE_REGISTER_MODEL_RUN"] = "false"
     result = subprocess.run(
         [sys.executable, script],
         cwd=REPO_ROOT,
+        env=environment,
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -17,8 +22,9 @@ def _run_script(script: str, timeout: int = 300) -> None:
     assert result.returncode == 0, result.stdout + result.stderr
 
 
-def test_drl_and_full_pipeline_scripts_run_and_write_expected_outputs():
-    _run_script("scripts/run_full_pipeline.py", timeout=420)
+def test_drl_and_full_pipeline_scripts_run_and_write_expected_outputs(tmp_path):
+    output_dir = tmp_path / "outputs"
+    _run_script("scripts/run_full_pipeline.py", output_dir, timeout=420)
     for script in [
         "scripts/run_drl_environment_check.py",
         "scripts/run_drl_training.py",
@@ -26,9 +32,8 @@ def test_drl_and_full_pipeline_scripts_run_and_write_expected_outputs():
         "scripts/run_drl_explainability.py",
         "scripts/run_drl_pipeline.py",
     ]:
-        _run_script(script, timeout=300)
+        _run_script(script, output_dir, timeout=300)
 
-    output_dir = REPO_ROOT / "reports" / "outputs"
     expected = [
         "drl_state_schema.csv",
         "drl_training_summary.csv",

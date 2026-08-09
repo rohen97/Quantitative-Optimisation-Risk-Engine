@@ -141,7 +141,9 @@ class AlpacaMarketDataAdapter:
     ) -> pd.DataFrame:
         """Fetch daily bars and normalize them to the model price schema."""
         if not symbols:
-            return pd.DataFrame(columns=["date", "ticker", "close", "return"])
+            return pd.DataFrame(
+                columns=["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+            )
         end_dt = datetime.now(UTC) if end is None else pd.Timestamp(end).to_pydatetime()
         start_dt = end_dt - timedelta(days=365 * 3) if start is None else pd.Timestamp(start).to_pydatetime()
         rows = []
@@ -162,11 +164,17 @@ class AlpacaMarketDataAdapter:
             )
             for symbol, bars in payload.get("bars", {}).items():
                 for bar in bars:
+                    close = float(bar["c"])
                     rows.append(
                         {
                             "date": pd.to_datetime(bar["t"]).normalize(),
                             "ticker": symbol,
-                            "close": float(bar["c"]),
+                            "open": float(bar.get("o", close)),
+                            "high": float(bar.get("h", close)),
+                            "low": float(bar.get("l", close)),
+                            "close": close,
+                            "adjusted_close": close,
+                            "volume": float(bar["v"]) if bar.get("v") is not None else float("nan"),
                         }
                     )
             page_token = payload.get("next_page_token")
@@ -178,10 +186,14 @@ class AlpacaMarketDataAdapter:
             )
         data = pd.DataFrame(rows)
         if data.empty:
-            return pd.DataFrame(columns=["date", "ticker", "close", "return"])
+            return pd.DataFrame(
+                columns=["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+            )
         data = data.sort_values(["ticker", "date"]).reset_index(drop=True)
         data["return"] = data.groupby("ticker")["close"].pct_change().fillna(0.0)
-        return data[["date", "ticker", "close", "return"]]
+        return data[
+            ["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+        ]
 
 
 class AlpacaSdkMarketDataAdapter:
@@ -200,7 +212,9 @@ class AlpacaSdkMarketDataAdapter:
     @staticmethod
     def _normalise_bars(frame: pd.DataFrame) -> pd.DataFrame:
         if frame is None or frame.empty:
-            return pd.DataFrame(columns=["date", "ticker", "close", "return"])
+            return pd.DataFrame(
+                columns=["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+            )
         data = frame.reset_index()
         symbol_column = "symbol" if "symbol" in data.columns else "ticker"
         timestamp_column = "timestamp" if "timestamp" in data.columns else "date"
@@ -208,13 +222,20 @@ class AlpacaSdkMarketDataAdapter:
             {
                 "date": pd.to_datetime(data[timestamp_column], utc=True).dt.tz_localize(None).dt.normalize(),
                 "ticker": data[symbol_column].astype(str),
+                "open": pd.to_numeric(data.get("open"), errors="coerce"),
+                "high": pd.to_numeric(data.get("high"), errors="coerce"),
+                "low": pd.to_numeric(data.get("low"), errors="coerce"),
                 "close": pd.to_numeric(data["close"], errors="coerce"),
+                "adjusted_close": pd.to_numeric(data["close"], errors="coerce"),
+                "volume": pd.to_numeric(data.get("volume"), errors="coerce"),
             }
         )
         output = output.dropna(subset=["date", "ticker", "close"])
         output = output.sort_values(["ticker", "date"]).drop_duplicates(["ticker", "date"], keep="last")
         output["return"] = output.groupby("ticker")["close"].pct_change().fillna(0.0)
-        return output[["date", "ticker", "close", "return"]].reset_index(drop=True)
+        return output[
+            ["date", "ticker", "open", "high", "low", "close", "adjusted_close", "volume", "return"]
+        ].reset_index(drop=True)
 
     @staticmethod
     def _datetime(value: str | None, fallback: datetime) -> datetime:

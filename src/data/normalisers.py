@@ -78,8 +78,8 @@ def normalise_prices(
     data["high_price"] = pd.to_numeric(data.get("high_price", data.get("high", data["close_price"])), errors="coerce")
     data["low_price"] = pd.to_numeric(data.get("low_price", data.get("low", data["close_price"])), errors="coerce")
     data["adjusted_close"] = pd.to_numeric(data.get("adjusted_close", data.get("adj_close", data["close_price"])), errors="coerce")
-    volume = data["volume"] if "volume" in data else pd.Series(0.0, index=data.index)
-    data["volume"] = pd.to_numeric(volume, errors="coerce").fillna(0.0)
+    volume = data["volume"] if "volume" in data else pd.Series(float("nan"), index=data.index)
+    data["volume"] = pd.to_numeric(volume, errors="coerce")
     data["trading_currency"] = data.get("trading_currency", data.get("currency", "USD"))
     data["source"] = source
     data["retrieved_at"] = pd.Timestamp(retrieved_at).tz_localize(None) if retrieved_at is not None else _now()
@@ -125,7 +125,7 @@ def normalise_fundamentals(
     data["security_id"] = data["security_id"].astype(str).str.upper()
     data["fiscal_period_end"] = pd.to_datetime(data["fiscal_period_end"]).dt.normalize()
     data["filing_date"] = pd.to_datetime(data["filing_date"]).dt.normalize()
-    data["available_from"] = pd.to_datetime(data.get("available_from", data["filing_date"])).dt.normalize()
+    data["available_from"] = pd.to_datetime(data.get("available_from", data["filing_date"]))
     data["currency"] = data.get("currency", "USD")
     canonical_metrics = {
         "revenue": "revenue",
@@ -143,6 +143,8 @@ def normalise_fundamentals(
         "shareholders_equity": "shareholders_equity",
         "dividends_paid": "dividends_paid",
         "diluted_shares": "diluted_shares",
+        "ebitda": "ebitda",
+        "interest_expense": "interest_expense",
     }
     for output_column in set(canonical_metrics.values()):
         source_column = next((candidate for candidate, target in canonical_metrics.items() if target == output_column and candidate in data), None)
@@ -179,6 +181,8 @@ def normalise_fundamentals(
             "shareholders_equity",
             "dividends_paid",
             "diluted_shares",
+            "ebitda",
+            "interest_expense",
             "source",
             "retrieved_at",
             "ingestion_run_id",
@@ -228,8 +232,8 @@ def normalise_news_documents(frame: pd.DataFrame, source: str = "mock") -> pd.Da
     data = frame.copy()
     data["document_id"] = data["document_id"].astype(str)
     data["published_at"] = pd.to_datetime(data.get("published_at", pd.NaT))
-    data["available_from"] = pd.to_datetime(data.get("available_from", data["published_at"])).fillna(pd.Timestamp.utcnow().tz_localize(None))
-    data["retrieved_at"] = pd.to_datetime(data.get("retrieved_at", pd.Timestamp.utcnow().tz_localize(None)))
+    data["available_from"] = pd.to_datetime(data.get("available_from", data["published_at"])).fillna(pd.Timestamp.now('UTC').tz_localize(None))
+    data["retrieved_at"] = pd.to_datetime(data.get("retrieved_at", pd.Timestamp.now('UTC').tz_localize(None)))
     data["source"] = source
     data["headline"] = data.get("headline", data.get("title", ""))
     data["body_text"] = data.get("body_text", data.get("body", ""))

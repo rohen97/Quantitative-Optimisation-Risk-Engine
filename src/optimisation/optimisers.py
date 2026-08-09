@@ -18,27 +18,83 @@ def _normalise_scores(scores: pd.Series) -> pd.Series:
     return scores / scores.sum() if scores.sum() > 0 else scores
 
 
+def _candidate_mask(
+    data: pd.DataFrame,
+    eligible: pd.Series,
+    scores: pd.Series,
+    maximum_candidates: int,
+) -> pd.Series:
+    """Deduplicate issuers and retain a region-sector-balanced shortlist."""
+    candidates = data.loc[eligible].copy()
+    if candidates.empty:
+        return pd.Series(False, index=data.index)
+    candidates["_objective_score"] = pd.to_numeric(scores.loc[candidates.index], errors="coerce").fillna(0.0)
+    issuer_fallback = (
+        candidates.get("company_name", candidates.get("ticker", candidates.index.to_series()))
+        .astype(str)
+        .str.lower()
+        .str.replace(r"[^a-z0-9]+", "", regex=True)
+        .radd("NAME:")
+    )
+    candidates["_issuer_key"] = candidates.get("issuer_id", issuer_fallback).fillna(issuer_fallback).astype(str)
+    candidates["_ticker_key"] = candidates.get("ticker", candidates.index.to_series()).astype(str)
+    ranked = candidates.sort_values(
+        ["_objective_score", "_ticker_key"],
+        ascending=[False, True],
+        kind="stable",
+    ).drop_duplicates("_issuer_key", keep="first")
+    if maximum_candidates > 0 and len(ranked) > maximum_candidates:
+        group_columns = [column for column in ("region", "sector") if column in ranked]
+        if group_columns:
+            group_count = max(int(ranked.groupby(group_columns, dropna=False).ngroups), 1)
+            quota = max(maximum_candidates // group_count, 1)
+            diversified = ranked.groupby(group_columns, dropna=False, sort=False).head(quota)
+            remaining = ranked.loc[~ranked.index.isin(diversified.index)]
+            ranked = pd.concat(
+                [diversified, remaining.head(maximum_candidates - len(diversified))],
+                axis=0,
+            ).head(maximum_candidates)
+        else:
+            ranked = ranked.head(maximum_candidates)
+    mask = pd.Series(False, index=data.index)
+    mask.loc[ranked.index] = True
+    return mask
+
+
 def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: dict | None, method: str) -> pd.DataFrame:
-    eligible = build_eligibility_mask(data, constraints)
+    limits = constraints or {}
+    eligible = build_eligibility_mask(data, limits)
     fallback_used = False
     if eligible.sum() == 0:
-        eligible = build_fallback_eligibility_mask(data, constraints)
+        eligible = build_fallback_eligibility_mask(data, limits)
         fallback_used = True
-    eligible_scores = scores.where(eligible, 0)
+    candidate_mask = _candidate_mask(
+        data,
+        eligible,
+        scores,
+        int(limits.get("maximum_candidates", 2000)),
+    )
+    eligible_scores = scores.where(candidate_mask, 0)
     if eligible_scores.sum() <= 0 and eligible.sum() > 0:
-        eligible_scores = pd.Series(1.0, index=data.index).where(eligible, 0)
-    elif eligible.sum() > 0:
-        eligible_scores = eligible_scores + eligible.astype(float) * max(float(eligible_scores.max()), 1.0) * 0.01
+        eligible_scores = pd.Series(1.0, index=data.index).where(candidate_mask, 0)
+    elif candidate_mask.sum() > 0:
+        eligible_scores = eligible_scores + candidate_mask.astype(float) * max(float(eligible_scores.max()), 1.0) * 0.01
     raw = _normalise_scores(eligible_scores)
-    weights = apply_diversification_caps(raw, data, constraints)
-    weights = weights.where(eligible, 0)
-    weights = apply_diversification_caps(weights, data, constraints)
-    portfolio = data.copy()
-    portfolio["target_weight"] = weights
+    weights = apply_diversification_caps(raw, data, limits)
+    feasible = bool(weights.attrs.get("feasible", False))
+    status = str(weights.attrs.get("status", "unknown"))
+    weights = weights.where(candidate_mask, 0.0)
+    retained = candidate_mask | pd.to_numeric(data.get("current_weight", 0.0), errors="coerce").fillna(0.0).gt(0)
+    portfolio = data.loc[retained].copy()
+    portfolio["target_weight"] = weights.loc[portfolio.index].to_numpy()
     portfolio["portfolio_method"] = method
-    portfolio["eligible_for_optimisation"] = eligible
+    portfolio["eligible_for_optimisation"] = candidate_mask.loc[portfolio.index].to_numpy()
     portfolio["fallback_eligibility_used"] = fallback_used
-    return portfolio
+    portfolio["optimisation_feasible"] = feasible
+    portfolio["optimisation_status"] = status
+    portfolio["eligible_security_count"] = int(eligible.sum())
+    portfolio["candidate_security_count"] = int(candidate_mask.sum())
+    return portfolio.reset_index(drop=True)
 
 
 def equal_weight_eligible_portfolio(data: pd.DataFrame, constraints: dict | None = None) -> pd.DataFrame:
@@ -82,7 +138,11 @@ def regime_aware_portfolio(data: pd.DataFrame, constraints: dict | None = None, 
 
 def run_all_optimisers(data: pd.DataFrame, optimisation_config: dict | None = None, dominant_regime: str = "steady_state_low_chaos") -> dict[str, pd.DataFrame]:
     config = (optimisation_config or {}).get("optimisation", optimisation_config or {})
-    constraints = config.get("constraints", {})
+    constraints = {
+        **config.get("constraints", {}),
+        "maximum_candidates": int(config.get("maximum_candidates", 2000)),
+        "allow_synthetic_data": str(config.get("mode", "")).lower() == "mock",
+    }
     methods = config.get("methods", {})
     outputs = {}
     if methods.get("equal_weight", {}).get("enabled", True):

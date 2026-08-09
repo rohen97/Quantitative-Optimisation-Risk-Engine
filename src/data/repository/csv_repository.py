@@ -115,7 +115,7 @@ class CSVRepository:
             return
         mask = data["model_run_id"].astype(str).eq(model_run_id)
         data.loc[mask, "status"] = status
-        data.loc[mask, "completed_at"] = pd.Timestamp.utcnow().tz_localize(None)
+        data.loc[mask, "completed_at"] = pd.Timestamp.now('UTC').tz_localize(None)
         data.loc[mask, "output_path"] = output_path
         data.loc[mask, "error_message"] = error_message
         self.write_table("model_runs", data)

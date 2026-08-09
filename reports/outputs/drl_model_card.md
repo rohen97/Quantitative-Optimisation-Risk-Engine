@@ -52,7 +52,7 @@ Outputs include constraint traces, feature-group attributions, asset-time attrib
 ## Validation And Benchmarks
 
 Validation uses chronological walk-forward splits, train-only scaling, an embargo between train/validation/test windows, multiple seeds and validation-only model selection. Benchmark comparisons are labelled as fair information-set comparisons or full Wolf comparisons so DRL is not credited for richer input data without disclosure.
-Benchmark success rate across windows: 100.00%
+Benchmark success rate across windows: 0.00%
 
 Ablation tests compare regime/no-regime, distributional/no-distributional, sentiment/narrative variants, reward variants, transaction-cost assumptions, universal versus specialist policies, MLP versus optional TCN/GAP and no-throttle versus Wolf Chaos throttle.
 

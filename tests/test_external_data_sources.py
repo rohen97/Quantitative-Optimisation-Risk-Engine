@@ -14,6 +14,7 @@ from src.data_ingestion.external_adapters import (
     FrankfurterAdapter,
     FredAdapter,
     ITickAdapter,
+    TickDbAdapter,
 )
 from src.data_ingestion.http_client import HttpResponse, redact_url
 from src.data_ingestion.price_ingestion import _combine_provider_prices, _provider_symbols
@@ -73,14 +74,15 @@ def test_eodhd_daily_bars_are_normalised(monkeypatch):
     monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
     client = FakeClient(
         [
-            {"date": "2026-01-02", "close": 100.0, "adjusted_close": 99.0},
-            {"date": "2026-01-03", "close": 102.0, "adjusted_close": 101.0},
+            {"date": "2026-01-02", "close": 100.0, "adjusted_close": 99.0, "volume": 1500},
+            {"date": "2026-01-03", "close": 102.0, "adjusted_close": 101.0, "volume": 1700},
         ]
     )
     frame = EodhdAdapter(provider("eodhd", "https://example.test", "EODHD_API_TOKEN"), client).load_daily_bars(
         ["SAP.XETRA"], "2026-01-01", "2026-01-04"
     )
     assert frame["close"].tolist() == [99.0, 101.0]
+    assert frame["volume"].tolist() == [1500, 1700]
     assert frame["source"].eq("eodhd").all()
 
 
@@ -123,6 +125,34 @@ def test_alpha_vantage_daily_bars_are_normalised(monkeypatch):
     assert client.calls[0][1]["outputsize"] == "compact"
 
 
+
+def test_tickdb_daily_bars_are_normalised(monkeypatch):
+    monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
+    client = FakeClient(
+        {
+            "code": 0,
+            "message": "success",
+            "data": {
+                "symbol": "700.HK",
+                "interval": "1d",
+                "klines": [
+                    {"time": 1767312000000, "open": "100", "high": "102", "low": "99", "close": "101", "volume": "1000"},
+                    {"time": 1767398400000, "open": "101", "high": "103", "low": "100", "close": "102", "volume": "1200"},
+                ],
+            },
+        }
+    )
+    frame = TickDbAdapter(provider("tickdb", "https://example.test", "TICKDB_API_KEY"), client).load_daily_bars(
+        ["700.HK"], start="2026-01-01", end="2026-01-03"
+    )
+    assert frame["ticker"].eq("700.HK").all()
+    assert frame["close"].tolist() == [101.0, 102.0]
+    assert frame["volume"].tolist() == [1000.0, 1200.0]
+    assert frame["source"].eq("tickdb").all()
+    assert client.calls[0][1]["interval"] == "1d"
+    assert client.calls[0][2]["X-API-Key"] == "token"
+    assert client.calls[0][2]["X-TickDB-Key"] == "token"
+
 def test_itick_medium_article_response_shape_is_normalised(monkeypatch):
     monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
     client = FakeClient(
@@ -139,6 +169,7 @@ def test_itick_medium_article_response_shape_is_normalised(monkeypatch):
     )
     assert frame["ticker"].eq("700").all()
     assert frame["close"].tolist() == [101.0, 102.0]
+    assert frame["volume"].tolist() == [1000.0, 1200.0]
     assert client.calls[0][1]["region"] == "HK"
 
 

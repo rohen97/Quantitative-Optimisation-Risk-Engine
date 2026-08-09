@@ -2,7 +2,10 @@
 
 ## Current MVP Note
 
-A runnable mock-data MVP has been scaffolded ahead of the full roadmap. Treat it as the baseline for Sprint 1/Sprint 2 validation and iterate issue-by-issue from here.
+The roadmap implementation is now an observed-data release candidate. Sprints 1
+through 11 are complete. Sprint 12 is conditionally complete: the model and
+reports run end to end, while unconditional production approval remains blocked
+on immutable historical source vintages and credential-history remediation.
 
 ## Sprint Overview
 

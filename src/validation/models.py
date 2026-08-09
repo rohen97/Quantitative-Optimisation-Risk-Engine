@@ -60,6 +60,9 @@ class ValidationDataPackage:
     drl_benchmark_results: pd.DataFrame = field(default_factory=pd.DataFrame)
     constraint_reports: dict[str, pd.DataFrame] = field(default_factory=dict)
     lineage: pd.DataFrame = field(default_factory=pd.DataFrame)
+    historical_portfolio_weights: pd.DataFrame = field(default_factory=pd.DataFrame)
+    evidence_mode: str = 'current_snapshot'
+    evidence_manifest: dict[str, Any] = field(default_factory=dict)
     issues: list[ValidationIssue] = field(default_factory=list)
 
 

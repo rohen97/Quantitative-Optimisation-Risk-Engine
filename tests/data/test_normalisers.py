@@ -7,6 +7,7 @@ def test_normalisers_add_lineage_and_vintage_columns():
     prices = normalise_prices(pd.DataFrame({"date": ["2026-01-01", "2026-01-02"], "ticker": ["aaa", "aaa"], "close": [100, 105]}), "yfinance")
     assert prices["security_id"].tolist() == ["AAA", "AAA"]
     assert {"source", "retrieved_at", "row_hash", "trade_date", "close_price"}.issubset(prices.columns)
+    assert prices["volume"].isna().all()
 
     fundamentals = normalise_fundamentals(
         pd.DataFrame({"ticker": ["AAA"], "fiscal_period_end": ["2026-03-31"], "filing_date": ["2026-04-30"], "revenue": [10.0]})

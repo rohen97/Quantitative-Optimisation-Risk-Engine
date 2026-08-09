@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 from src.utils.config import ROOT
@@ -10,11 +11,13 @@ from src.utils.config import ROOT
 REQUIRED_OPTIMISER_COLUMNS = [
     "security_id",
     "ticker",
+    "issuer_id",
     "company_name",
     "country",
     "region",
     "sector",
     "currency",
+    "industry",
     "current_weight",
     "current_market_value_usd",
     "final_recommendation",
@@ -40,6 +43,8 @@ REQUIRED_OPTIMISER_COLUMNS = [
     "forecast_uncertainty_score",
     "liquidity_score",
     "average_daily_value_usd",
+    "liquidity_observation_count",
+    "market_cap_usd",
     "dividend_yield",
     "free_cash_flow_yield",
     "balance_sheet_strength_score",
@@ -51,6 +56,14 @@ REQUIRED_OPTIMISER_COLUMNS = [
     "reframing_exclusion_flag",
     "alt_data_review_required_flag",
     "alt_data_exclusion_flag",
+    "price_data_quality_score",
+    "price_data_exclusion_flag",
+    "sector_data_source",
+    "liquidity_data_source",
+    "market_cap_data_source",
+    "fundamentals_data_source",
+    "is_synthetic_data",
+    "is_synthetic_fundamentals",
 ]
 
 
@@ -80,10 +93,18 @@ def build_optimiser_input_dataset(
         current_weights["current_weight"] = current_weights["current_market_value_usd"] / nav if nav > 0 else 0.0
         data = data.merge(current_weights[["ticker", "current_market_value_usd", "current_weight"]], on="ticker", how="left")
     if final_recommendations is not None and not final_recommendations.empty and "final_recommendation" in final_recommendations:
-        data = data.merge(final_recommendations[["ticker", "final_recommendation"]], on="ticker", how="left", suffixes=("", "_branch"))
+        resolved = final_recommendations[["ticker", "final_recommendation"]].rename(
+            columns={"final_recommendation": "_resolved_recommendation"}
+        )
+        data = data.merge(resolved, on="ticker", how="left")
     data["current_weight"] = _series(data, "current_weight", 0.0).fillna(0.0)
     data["current_market_value_usd"] = _series(data, "current_market_value_usd", 0.0).fillna(0.0)
-    data["final_recommendation"] = _series(data, "final_recommendation", data.get("recommendation", "Hold")).fillna(_series(data, "recommendation", "Hold"))
+    scorecard_recommendation = _series(data, "recommendation", "Hold")
+    data["final_recommendation"] = _series(
+        data,
+        "_resolved_recommendation",
+        scorecard_recommendation,
+    ).fillna(scorecard_recommendation)
     data["scorecard_score"] = _series(data, "final_recommendation_score", 50).fillna(50)
     data["portfolio_fit_score"] = _series(data, "portfolio_fit_score", data.get("diversification_benefit_score", 50)).fillna(50)
     data["cashflow_quality_score"] = _series(data, "cashflow_quality_score", data.get("cash_flow_quality_score", 50)).fillna(50)
@@ -103,7 +124,6 @@ def build_optimiser_input_dataset(
         "sentiment_alt_data_score": 50,
         "narrative_reframing_score": 50,
         "liquidity_score": 50,
-        "average_daily_value_usd": 5_000_000,
         "tail_risk_score": 50,
         "skewness_risk_score": 50,
         "forecast_uncertainty_score": 50,
@@ -116,11 +136,33 @@ def build_optimiser_input_dataset(
         "reframing_exclusion_flag": False,
         "alt_data_review_required_flag": False,
         "alt_data_exclusion_flag": False,
+        "price_data_quality_score": 50,
+        "price_data_exclusion_flag": False,
+        "sector_data_source": "missing",
+        "liquidity_data_source": "missing",
+        "market_cap_data_source": "missing",
+        "fundamentals_data_source": "missing",
+        "is_synthetic_data": False,
+        "is_synthetic_fundamentals": False,
+        "liquidity_observation_count": 0,
     }
     for column, default in fallback_values.items():
         data[column] = _series(data, column, default).fillna(default)
-    for column in ["security_id", "company_name", "country", "region", "sector", "currency"]:
+    for column in ["security_id", "company_name", "country", "region", "sector", "currency", "industry"]:
         data[column] = _series(data, column, "Unknown").fillna("Unknown")
+    issuer_fallback = (
+        data["company_name"]
+        .astype(str)
+        .str.lower()
+        .str.replace(r"[^a-z0-9]+", "", regex=True)
+        .radd("NAME:")
+    )
+    data["issuer_id"] = _series(data, "issuer_id", issuer_fallback).fillna(issuer_fallback).astype(str)
+    data["average_daily_value_usd"] = pd.to_numeric(
+        _series(data, "average_daily_value_usd", np.nan),
+        errors="coerce",
+    )
+    data["market_cap_usd"] = pd.to_numeric(_series(data, "market_cap_usd", np.nan), errors="coerce")
     data["dividend_yield"] = _series(data, "dividend_yield", 0.03).fillna(0.03)
     data["final_recommendation_score"] = _series(data, "final_recommendation_score", data["scorecard_score"]).fillna(50)
     data["instrument_type"] = _series(data, "instrument_type", "Equity").fillna("Equity")

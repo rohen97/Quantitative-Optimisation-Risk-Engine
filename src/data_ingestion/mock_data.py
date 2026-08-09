@@ -17,6 +17,54 @@ REGIONS = [
 ]
 
 
+def prepare_synthetic_test_universe(universe: pd.DataFrame) -> pd.DataFrame:
+    """Fill unavailable metadata only for an explicitly synthetic test run."""
+    data = universe.copy()
+    identifiers = data.get(
+        "security_id",
+        data.get("ticker", pd.Series(data.index, index=data.index)),
+    ).astype(str)
+    hashes = pd.util.hash_pandas_object(identifiers, index=False).to_numpy(dtype="uint64")
+
+    sector = data.get("sector", pd.Series("Unknown", index=data.index)).fillna("Unknown").astype(str)
+    missing_sector = sector.str.strip().str.lower().isin({"", "unknown", "nan", "none"})
+    synthetic_sector = pd.Series(
+        [SECTORS[int(value % len(SECTORS))] for value in hashes],
+        index=data.index,
+    )
+    data["sector"] = sector.where(~missing_sector, synthetic_sector)
+
+    adv = pd.to_numeric(
+        data["avg_daily_traded_value_usd"]
+        if "avg_daily_traded_value_usd" in data
+        else pd.Series(np.nan, index=data.index),
+        errors="coerce",
+    )
+    missing_adv = adv.isna() | adv.le(0)
+    synthetic_adv = 5_000_000.0 + (hashes % 95_000_001).astype(float)
+    data["avg_daily_traded_value_usd"] = adv.where(~missing_adv, synthetic_adv)
+
+    market_cap = pd.to_numeric(
+        data["market_cap_usd"]
+        if "market_cap_usd" in data
+        else pd.Series(np.nan, index=data.index),
+        errors="coerce",
+    )
+    missing_market_cap = market_cap.isna() | market_cap.le(0)
+    synthetic_market_cap = 1_000_000_000.0 + (hashes % 49_000_000_001).astype(float)
+    data["market_cap_usd"] = market_cap.where(~missing_market_cap, synthetic_market_cap)
+
+    data["issuer_id"] = data.get("issuer_id", identifiers).fillna(identifiers).astype(str)
+    data["sector_data_source"] = data.get("sector_data_source", "missing")
+    data.loc[missing_sector, "sector_data_source"] = "synthetic_test"
+    data["liquidity_data_source"] = data.get("liquidity_data_source", "missing")
+    data.loc[missing_adv, "liquidity_data_source"] = "synthetic_test"
+    data["market_cap_data_source"] = data.get("market_cap_data_source", "missing")
+    data.loc[missing_market_cap, "market_cap_data_source"] = "synthetic_test"
+    data["is_synthetic_data"] = True
+    return data
+
+
 def generate_mock_universe(n: int = 24, seed: int = 42) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     rows = []
@@ -27,6 +75,7 @@ def generate_mock_universe(n: int = 24, seed: int = 42) -> pd.DataFrame:
             {
                 "security_id": f"WOLF{i + 1:03d}",
                 "ticker": f"WLF{i + 1:03d}",
+                "issuer_id": f"WOLF{i + 1:03d}",
                 "company_name": f"Wolf {country} {sector} {i + 1}",
                 "region": region,
                 "country": country,
@@ -34,6 +83,10 @@ def generate_mock_universe(n: int = 24, seed: int = 42) -> pd.DataFrame:
                 "sector": sector,
                 "market_cap_usd": float(rng.uniform(1_000_000_000, 90_000_000_000)),
                 "avg_daily_traded_value_usd": float(rng.uniform(2_000_000, 120_000_000)),
+                "sector_data_source": "synthetic_mock",
+                "liquidity_data_source": "synthetic_mock",
+                "market_cap_data_source": "synthetic_mock",
+                "is_synthetic_data": True,
             }
         )
     return pd.DataFrame(rows)
@@ -45,7 +98,7 @@ def generate_mock_prices(universe: pd.DataFrame, days: int = 756, seed: int = 42
     frames = []
     for idx, row in universe.reset_index(drop=True).iterrows():
         drift = rng.uniform(0.00005, 0.00045)
-        vol = rng.uniform(0.008, 0.024)
+        vol = rng.uniform(0.006, 0.016)
         returns = rng.normal(drift, vol, size=len(dates))
         close = 40 * np.exp(np.cumsum(returns)) * (1 + idx / 40)
         frames.append(pd.DataFrame({"date": dates, "ticker": row["ticker"], "close": close, "return": returns}))
@@ -94,6 +147,8 @@ def generate_mock_fundamentals(universe: pd.DataFrame, seed: int = 42) -> pd.Dat
     data["solvency_ratio"] = np.where(data["sector"].isin(["Financials", "Insurance"]), rng.uniform(1.2, 2.4, len(data)), np.nan)
     data["npl_ratio"] = np.where(data["sector"].eq("Financials"), rng.uniform(0.005, 0.06, len(data)), np.nan)
     data["book_value_growth"] = np.where(data["sector"].eq("Financials"), rng.uniform(-0.02, 0.12, len(data)), np.nan)
+    data["fundamentals_data_source"] = "synthetic_mock"
+    data["is_synthetic_fundamentals"] = True
     return data
 
 

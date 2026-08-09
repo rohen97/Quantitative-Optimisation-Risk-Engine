@@ -19,6 +19,7 @@ def run_regime_pipeline(
     alt_features: pd.DataFrame | None = None,
     narrative_features: pd.DataFrame | None = None,
     regime_config: dict | None = None,
+    chaos_index: pd.DataFrame | None = None,
 ) -> dict[str, pd.DataFrame]:
     """Run factor, chaos, informational, fusion, transition and suitability engines."""
     config = (regime_config or {}).get("regime", regime_config or {})
@@ -26,7 +27,7 @@ def run_regime_pipeline(
     factor_features = standardise_factor_features(factor_lens)
     model = fit_gmm_regime_model(factor_features, config.get("factor_regime", {}).get("n_clusters", 4))
     factor_probs = predict_factor_regime_probabilities(factor_features, model)
-    chaos_index = calculate_wolf_chaos_index(prices)
+    chaos_index = chaos_index.copy() if chaos_index is not None else calculate_wolf_chaos_index(prices)
     thresholds = config.get("chaos_regime", {}).get("thresholds", {})
     chaos_probs = classify_chaos_regime(
         chaos_index,

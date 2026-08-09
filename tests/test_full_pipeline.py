@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from src.pipeline import run_full_pipeline
+import pandas as pd
+
+from src.pipeline import attach_drl_challenger_status, run_full_pipeline
 
 
 def test_full_pipeline_with_mock_data(tmp_path):
@@ -21,3 +23,28 @@ def test_full_pipeline_with_mock_data(tmp_path):
     assert "final_selected_weights_source" in outputs["final_recommendations"].columns
     assert "final_selected_weight" in outputs["final_recommendations"].columns
     assert "final_target_weight" in outputs["final_recommendations"].columns
+
+
+def test_drl_selected_weights_zero_names_outside_challenger():
+    recommendations = pd.DataFrame(
+        {
+            "ticker": ["AAA", "BBB", "CCC"],
+            "final_target_weight": [0.2, 0.3, 0.0],
+        }
+    )
+    drl_outputs = {
+        "drl_challenger_portfolio": pd.DataFrame(
+            {
+                "ticker": ["AAA", "CCC"],
+                "accepted_target_weight": [0.6, 0.4],
+            }
+        ),
+        "drl_acceptance_decision": pd.DataFrame(
+            [{"accepted": False, "selected_weights_source": "baseline_optimiser"}]
+        ),
+    }
+
+    result = attach_drl_challenger_status(recommendations, drl_outputs)
+
+    assert result["final_selected_weight"].tolist() == [0.6, 0.0, 0.4]
+    assert result["final_selected_weight"].sum() == 1.0
