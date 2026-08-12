@@ -274,13 +274,13 @@
     },
     {
       "path": "plots/cumulative_returns.png",
-      "sha256": "a834e8496ddb6d078fc8828ed8e8f8fcee4b39a64077937db5f46f9b7e9881c1",
-      "size_bytes": 135209
+      "sha256": "14eb4892c5f782e3789bdd6805c8633411378873ba85cf9776e1cf82cf64383b",
+      "size_bytes": 138298
     },
     {
       "path": "plots/distribution_coverage.png",
-      "sha256": "edd2afc8daf62b79dc41fdf3f067e5688938346b75d4aa6a5184779294288887",
-      "size_bytes": 45900
+      "sha256": "1c5aadfd819aad49aad3d1fa0f0feee52fd7a402e8ba80ba265a237c4f0e8c9f",
+      "size_bytes": 45857
     },
     {
       "path": "plots/final_portfolio_exposures.png",
@@ -289,33 +289,33 @@
     },
     {
       "path": "plots/forecast_quality.png",
-      "sha256": "e65d7e28efb64a758ea82e9b9aff06cea3082f061ba4a32872e716bf4f29af1a",
-      "size_bytes": 64296
+      "sha256": "994025dd85b9f2847735b9d93e307d5c9436fe7e86b6f3bb109227325a488eb3",
+      "size_bytes": 61181
     },
     {
       "path": "plots/portfolio_comparison.png",
-      "sha256": "a62581687501f9e78d057755fb5ab58a38c6d144e52182d386f2ab11fce070cb",
-      "size_bytes": 68775
+      "sha256": "1f7e907facc26caae6775b337f8ffe61036882ccb19590fe4318da84f8aa1abc",
+      "size_bytes": 73391
     },
     {
       "path": "plots/regional_rank_ic.png",
-      "sha256": "801fcdf0ab7801d324d1d0be6feb3f40c8e70d2c36a534ccee44c3def1d0cad7",
-      "size_bytes": 70374
+      "sha256": "f73d4aef5f99d55c081a297fa1bfbc091b899659b8beefb6905de5632c5a208f",
+      "size_bytes": 69839
     },
     {
       "path": "plots/risk_backtest.png",
-      "sha256": "f49730d39089586304d302a54932d390e0d73f056302f2cdfa1abde4d649c5b0",
-      "size_bytes": 50715
+      "sha256": "8610df4105e173c7db1ed43d5953aba5a754ee98b092f646bab9aaf9c3e92756",
+      "size_bytes": 49455
     },
     {
       "path": "plots/validation_scorecard.png",
-      "sha256": "89680cbad29f3f6ad7797bdcffa6c9b852f26c23f43e3762092a66ed28b9c9c4",
-      "size_bytes": 62152
+      "sha256": "796379c72e56c35444633fab125b8f0b9e530a1564ac0c104116477c96bbbdde",
+      "size_bytes": 61566
     },
     {
       "path": "README.md",
-      "sha256": "894b67f93dba6dcda7a433b5088584a181d5cfd12693702497ba13c714e24cea",
-      "size_bytes": 2815
+      "sha256": "79d65a44046a80250c0b8a6b0e7a2ce2d99bc49009e0a7c204239f4706689169",
+      "size_bytes": 2758
     },
     {
       "path": "universe_summary.csv",
@@ -329,18 +329,18 @@
     },
     {
       "path": "validation/benchmark_significance_report.csv",
-      "sha256": "9079a40620738f7f91ebf7ab3eae2977c9bf19cad36c4cb53bc508a36bbc4acf",
+      "sha256": "d421052c47d9809ff16b64fb6370abecf276fa0b951c6470b12caa3da5ecc004",
       "size_bytes": 314
     },
     {
       "path": "validation/binary_probability_calibration.csv",
-      "sha256": "7faf672efc3e476ebad157220b968dbda2b240c7ee88fd128a0013d8d772d008",
-      "size_bytes": 189
+      "sha256": "ad3486aafc7b3c46162cda6d379cb6d23859ed65f2a5d754fa3d2007bea5d7f1",
+      "size_bytes": 191
     },
     {
       "path": "validation/constraint_compliance_report.csv",
-      "sha256": "73948d107d3ed9b3b001f061ce5f54853c4bd221f84021d8860591cb6239816c",
-      "size_bytes": 17399
+      "sha256": "d913db04822088e18c609ed183c2bc3c17732dc44c0ba77df04490de2581e201",
+      "size_bytes": 42682
     },
     {
       "path": "validation/data_leakage_report.csv",
@@ -354,8 +354,8 @@
     },
     {
       "path": "validation/distribution_coverage_report.csv",
-      "sha256": "b689c454cb6060ec564ada243e3f66880685c8fe7b54333e7a93136e9940a6cc",
-      "size_bytes": 738
+      "sha256": "168995fc2048b891a512ab3e5099b5cbd42aa1515f3fb23b29ac2085275a2ded",
+      "size_bytes": 698
     },
     {
       "path": "validation/drl_governance_validation.csv",
@@ -369,32 +369,32 @@
     },
     {
       "path": "validation/forecast_accuracy_report.csv",
-      "sha256": "41c302a54c4f5815f4c507c55892941643ae4680d17dd1f7d7b88c7a14d7f629",
-      "size_bytes": 744
+      "sha256": "debb7273930463413c6bb2d7b082882e30633c08d089adb54930e8b4e9243868",
+      "size_bytes": 746
     },
     {
       "path": "validation/forecast_calibration_report.csv",
-      "sha256": "d78d01c62ec319f0be3af568ecc7bb3823af4902b81bc86afd85bac1569b6dab",
+      "sha256": "d94bc3fe3e762648d1654c5eb39dd86fefe06b6290a09ebf75d1d15d54de6869",
       "size_bytes": 590
     },
     {
       "path": "validation/model_approval_report.html",
-      "sha256": "6ac531cd83b4be0945fd86e68bc60a455fed7db5499174c8d3f0e17ae6ca854a",
-      "size_bytes": 52906
+      "sha256": "d0390d10a4e7b6c92f7e605a6432017fcf1edaa291b902a98ca0e9db34732dc0",
+      "size_bytes": 98567
     },
     {
       "path": "validation/model_approval_report.md",
-      "sha256": "ada2085a9f1f459e6c1c9e0c59b33d96f1e86d78d3c21d2a1cfb44a905fc6348",
-      "size_bytes": 50753
+      "sha256": "895347103582d7b9c820e40fc7ec43974f631b986e1b852ea205142c41a50ac0",
+      "size_bytes": 96404
     },
     {
       "path": "validation/model_component_approval.csv",
-      "sha256": "8509319750b548dd217aa5eb1ccbfd2d6733d07737d7ce638e60a5f4f7f39ab8",
+      "sha256": "6710e5190e54917704bdf28f6226f7040a511a73cb60ca98bb457aab7162e516",
       "size_bytes": 527
     },
     {
       "path": "validation/model_validation_scorecard.csv",
-      "sha256": "627de8077980f5030848b2dc5911a51828637a58b675c836ba40fc7977976f3b",
+      "sha256": "1db89e9199d855ad260559bdbd5ccc15aa8013d720edd4753d30610df92f309a",
       "size_bytes": 329
     },
     {
@@ -404,57 +404,57 @@
     },
     {
       "path": "validation/portfolio_monthly_returns.csv",
-      "sha256": "32c686dcab2bd0fc1d634979f3c51e36d1869fa66f2efdca47585aeea141bfba",
-      "size_bytes": 12770
+      "sha256": "5514ab09d8d76d2e1e813205691eefa83ff22ff73773f94ea4400e7cbc1873c5",
+      "size_bytes": 32145
     },
     {
       "path": "validation/portfolio_performance_by_period.csv",
-      "sha256": "73e1ece0995b364369d3bb594eb1b823a33e5f49dde7f6e703151340ef10f7ef",
-      "size_bytes": 4127
+      "sha256": "d0a0611c5434757228221fc10788fa1a5c0c31aa2e78bde6cea0373ddf502698",
+      "size_bytes": 10200
     },
     {
       "path": "validation/portfolio_strategy_comparison.csv",
-      "sha256": "3f51342efd59a16aab4196132b91de3ab8d96f0c1cdc6990d579ba15194969d4",
-      "size_bytes": 1326
+      "sha256": "c1b3d14dcdd58e2b00152b0158a24731f49ea423b6a13f6583a41fb0e8acbb2a",
+      "size_bytes": 1369
     },
     {
       "path": "validation/regime_performance_report.csv",
-      "sha256": "d151044ddb80f85f3c63b609ec4532a3085283c24c999b90f12c1981ab9b97d5",
-      "size_bytes": 410
+      "sha256": "49496a0b578224ff5ecaf7e66a4b102219e95516010527f33f52828692aa9dab",
+      "size_bytes": 620
     },
     {
       "path": "validation/regional_performance_report.csv",
-      "sha256": "17c2d22778acc12e1a43a9f074ce7c96fd98ace187b56da328bfab4b25ab7502",
-      "size_bytes": 3102
+      "sha256": "acc02bf4e7faca9f0e55b78368abd381b4c8a64d958ca31a296283daec423554",
+      "size_bytes": 3074
     },
     {
       "path": "validation/risk_backtesting_report.csv",
-      "sha256": "65263abc9bfccca7e89f79148f1e1ea0b8a500d2cf8c31b8f58272e9a14827ba",
-      "size_bytes": 679
+      "sha256": "19f838b76006ea5a8de34e71c1bc973cfa220e2ac486048180e91bab1725b0d1",
+      "size_bytes": 692
     },
     {
       "path": "validation/sensitivity_analysis.csv",
-      "sha256": "81f21f0b76d764567c0f644fd8717b7742fc4d2c79597e4f43b5b980de8ead32",
+      "sha256": "b1ca2c1f2f31d49414b7c2d3ee6d72f68d626de407606d7cc63991067f1a187c",
       "size_bytes": 900
     },
     {
       "path": "validation/transaction_cost_validation.csv",
-      "sha256": "34a23f14629412b4711e74b3178edb2b608cd757554cc706f4cd9ce32aa4a460",
-      "size_bytes": 1278
+      "sha256": "b4295a1c0009f4897e714023112e3e709b80450e78765e4554aad5965f2bf9de",
+      "size_bytes": 1262
     },
     {
       "path": "validation/validation_manifest.json",
-      "sha256": "ea1b902a6a44c974966f02bcfdb755327634cdea23f55c0c8b23139e5252cec0",
-      "size_bytes": 2543
+      "sha256": "d83b18ad7cf315297a8236448977cb82d9f2ee5151632a9eb31a56f217f89851",
+      "size_bytes": 2878
     },
     {
       "path": "walk_forward_manifest.json",
-      "sha256": "acbca1fb198e5a7483ce623aaeec3d5d55b172f96aec41b1fb25388b0f52ddde",
-      "size_bytes": 2574
+      "sha256": "d2d1e427ffae90ccacd26d3f4d19715770d8de95d0417c2ad51309f9bc5250f2",
+      "size_bytes": 3763
     }
   ],
-  "generated_at": "2026-08-12T08:36:00.973691+00:00",
-  "overall_score": 82.5,
+  "generated_at": "2026-08-12T11:00:04.581249+00:00",
+  "overall_score": 80.0,
   "release_id": "2026-08-07-full-universe",
-  "source_validation_run_id": "validation-20260812T083559-1d80b816"
+  "source_validation_run_id": "validation-20260812T110002-75367a51"
 }

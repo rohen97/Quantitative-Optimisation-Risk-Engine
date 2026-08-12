@@ -47,7 +47,7 @@
     <div class='metric'><strong>29.6</strong><span>requested historical years</span></div>
     <div class='metric'><strong>$186,060,522</strong><span>current-derived starting NAV</span></div>
     <div class='metric'><strong>2013-09-30</strong><span>common 80% investable start</span></div>
-    <div class='metric'><strong>25</strong><span>separate reconstructed PIT months</span></div>
+    <div class='metric'><strong>60</strong><span>separate reconstructed PIT months</span></div>
     <div class='metric'><strong>19</strong><span>standalone benchmark paths</span></div>
     <div class='metric'><strong>13</strong><span>source-backed macro-event windows</span></div>
   </div>
@@ -3975,7 +3975,7 @@
       <td>HIGH</td>
       <td>full stock-selection strategy</td>
       <td>SEPARATED</td>
-      <td>The 25-month reconstructed decision history is reported separately and never spliced into the long replay.</td>
+      <td>The dated reconstructed decision history is reported separately and never spliced into the long replay.</td>
     </tr>
     <tr>
       <td>corporate actions</td>
@@ -4076,32 +4076,32 @@
   <tbody>
     <tr>
       <td>wolf_cvar</td>
-      <td>25</td>
-      <td>19.39%</td>
-      <td>10.51%</td>
-      <td>1.85</td>
-      <td>-5.51%</td>
-      <td>1.97%</td>
+      <td>60</td>
+      <td>13.66%</td>
+      <td>11.76%</td>
+      <td>1.16</td>
+      <td>-13.72%</td>
+      <td>2.35%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
     <tr>
       <td>equal_weight_eligible</td>
-      <td>25</td>
-      <td>24.99%</td>
-      <td>11.29%</td>
-      <td>2.21</td>
-      <td>-5.17%</td>
-      <td>0.64%</td>
+      <td>60</td>
+      <td>14.84%</td>
+      <td>13.35%</td>
+      <td>1.11</td>
+      <td>-17.83%</td>
+      <td>0.77%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
     <tr>
       <td>cap_weight_eligible</td>
-      <td>25</td>
-      <td>17.62%</td>
-      <td>8.88%</td>
-      <td>1.98</td>
-      <td>-3.99%</td>
-      <td>0.57%</td>
+      <td>60</td>
+      <td>9.94%</td>
+      <td>11.10%</td>
+      <td>0.90</td>
+      <td>-15.03%</td>
+      <td>0.69%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
   </tbody>
@@ -4126,30 +4126,30 @@
     <tr>
       <td>wolf_cvar</td>
       <td>cap_weight_eligible</td>
-      <td>25</td>
-      <td>1.66%</td>
-      <td>3.37%</td>
-      <td>0.559</td>
-      <td>0.5763</td>
-      <td>1.40%</td>
-      <td>INSUFFICIENT_HISTORY</td>
+      <td>60</td>
+      <td>3.43%</td>
+      <td>4.40%</td>
+      <td>1.609</td>
+      <td>0.1077</td>
+      <td>1.67%</td>
+      <td>NOT_SIGNIFICANT</td>
       <td>NOT_ESTABLISHED</td>
     </tr>
     <tr>
       <td>wolf_cvar</td>
       <td>equal_weight_eligible</td>
-      <td>25</td>
-      <td>-4.75%</td>
-      <td>4.82%</td>
-      <td>0.770</td>
-      <td>0.4414</td>
-      <td>1.34%</td>
-      <td>INSUFFICIENT_HISTORY</td>
+      <td>60</td>
+      <td>-1.24%</td>
+      <td>3.29%</td>
+      <td>1.010</td>
+      <td>0.3123</td>
+      <td>1.58%</td>
+      <td>NOT_SIGNIFICANT</td>
       <td>NOT_ESTABLISHED</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>The point-in-time table contains 25 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -4.75% and the alpha verdict is INSUFFICIENT_HISTORY. Against cap-weight eligible stocks, annualised active return is 1.66% and the verdict is INSUFFICIENT_HISTORY. Native live evidence and at least 60 months are required before alpha can be considered deployable.</p>
+  <p class='interpretation'>The point-in-time table contains 60 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -1.24% and the alpha verdict is NOT_SIGNIFICANT. Against cap-weight eligible stocks, annualised active return is 3.43% and the verdict is NOT_SIGNIFICANT. Native live evidence and at least 60 months are required before alpha can be considered deployable.</p>
 
   <p class='footnote'>Research evidence only. The paper used as the methodological specification is <em>The Three Types of Backtests</em> (Joubert, Sestovic, Barziy, Distaso, and Lopez de Prado, 29 July 2024). Raw Yahoo Finance and FRED histories remain outside Git; compact outputs, manifests, and checksums are included.</p>
 </main>

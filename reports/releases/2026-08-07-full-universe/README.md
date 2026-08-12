@@ -1,15 +1,15 @@
 # Full-Universe Model Evidence
 
-Validation run: `validation-20260812T083559-1d80b816`
+Validation run: `validation-20260812T110002-75367a51`
 
 ## Decision
 
 - Governance status: **CONDITIONALLY_APPROVED**
-- Overall score: **82.5/100**
+- Overall score: **80.0/100**
 - Critical failures: **0**
 - Active universe: **55,504** of **112,570** listed and historical securities
-- Walk-forward evidence: **73,524** forecasts and **73,072** aligned outcomes
-- Portfolio: **25** monthly decisions, **19.4%** annualised net return, **1.85** Sharpe
+- Walk-forward evidence: **156,764** forecasts and **156,312** aligned outcomes
+- Portfolio: **60** monthly decisions, **13.7%** annualised net return, **1.16** Sharpe
 
 The result is capped at conditional approval because the free-source history reconstructs filing availability and does not provide immutable historical universe, volume, sentiment, narrative, or regime vintages.
 
@@ -20,8 +20,8 @@ The result is capped at conditional approval because the free-source history rec
 | data_integrity | 20.0/20 | PASS |
 | point_in_time | 7.5/15 | WARNING |
 | forecast_performance | 15.0/15 | PASS |
-| distribution_calibration | 5.0/10 | WARNING |
-| risk_backtesting | 15.0/15 | PASS |
+| distribution_calibration | 10.0/10 | PASS |
+| risk_backtesting | 7.5/15 | WARNING |
 | portfolio_net_of_costs | 5.0/10 | WARNING |
 | constraint_compliance | 10.0/10 | PASS |
 | stability_sensitivity | 5.0/5 | PASS |
@@ -30,7 +30,7 @@ The result is capped at conditional approval because the free-source history rec
 
 ## Forecasts
 
-All point-forecast horizons passed the configured directional-accuracy, rank-IC, and normalized-RMSE gates. Distribution coverage passes at 3M and 6M and remains a warning at 9M and 12M.
+The point-forecast component is **PASS** and the distribution-calibration component is **PASS** under the configured gates.
 
 ![Forecast quality](plots/forecast_quality.png)
 
@@ -38,7 +38,7 @@ All point-forecast horizons passed the configured directional-accuracy, rank-IC,
 
 ## Portfolio And Risk
 
-The constrained Wolf portfolio is **WARNING** on the net-of-cost gate: annual turnover is 1.96x and annualised cost drag is 1.97%. It returned -5.60% per year relative to equal weight over this short sample; the paired test p-value is 0.473. Hard constraints and the daily EWMA VaR backtest remain separate passing controls.
+The constrained Wolf portfolio is **WARNING** on the net-of-cost gate: annual turnover is 2.11x and annualised cost drag is 2.35%. It returned -1.18% per year relative to equal weight over this short sample; the paired test p-value is 0.741. Hard-constraint compliance is **PASS** and the daily EWMA VaR backtest is **WARNING**.
 
 ![Cumulative returns](plots/cumulative_returns.png)
 

@@ -39,6 +39,6 @@ This package compares every investable portfolio output currently produced by th
 - Newey-West alpha tests, block-bootstrap max-t control, and CSCV PBO diagnostics
 - HTML and PDF reports, source manifest, compact result tables, plots, and SHA-256 checksums
 
-Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis_latest.pdf](portfolio_backtest_analysis_latest.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
+Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis.pdf](portfolio_backtest_analysis.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
 
 Raw provider histories are intentionally excluded from Git. This is research evidence, not authorization for live trading.

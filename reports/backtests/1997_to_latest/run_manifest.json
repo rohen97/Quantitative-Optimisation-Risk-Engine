@@ -17,8 +17,8 @@
   "end_date": "2026-07-31",
   "evidence_boundary": "Long-history outputs are retrospective holdings replays; dated model evidence is separate.",
   "fixed_research_capital_usd": 100000.0,
-  "generated_at_utc": "2026-08-12T08:59:49.990349+00:00",
-  "git_commit": "9fe99d01cd9bdf687a21ddcdea358adc07398227",
+  "generated_at_utc": "2026-08-12T11:16:58.501185+00:00",
+  "git_commit": "b45211ba8910d59b426919b06777ea049432a83b",
   "macro_event_count": 13,
   "macro_event_method": "Monthly returns are selected when their period overlaps the configured event window; windows are descriptive and not causal estimates.",
   "macro_regimes": {
@@ -80,7 +80,7 @@
     "sha256": "07003e270e6f1e106d8e4bdb0f34e33e5e3f3dea3b92f117568badf05d18ceeb",
     "title": "The Three Types of Backtests"
   },
-  "point_in_time_months": 25,
+  "point_in_time_months": 60,
   "portfolio_output_count": 13,
   "requested_years": 29.57700205338809,
   "resampling": {

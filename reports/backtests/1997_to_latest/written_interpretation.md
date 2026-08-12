@@ -86,4 +86,4 @@ The limitation register distinguishes modeled, controlled, separated, and unreso
 
 ## Point-in-Time Evidence
 
-The point-in-time table contains 25 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -4.75% and the alpha verdict is INSUFFICIENT_HISTORY. Against cap-weight eligible stocks, annualised active return is 1.66% and the verdict is INSUFFICIENT_HISTORY. Native live evidence and at least 60 months are required before alpha can be considered deployable.
+The point-in-time table contains 60 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -1.24% and the alpha verdict is NOT_SIGNIFICANT. Against cap-weight eligible stocks, annualised active return is 3.43% and the verdict is NOT_SIGNIFICANT. Native live evidence and at least 60 months are required before alpha can be considered deployable.
