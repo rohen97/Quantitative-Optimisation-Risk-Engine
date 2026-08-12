@@ -6,6 +6,9 @@ corporate actions,MEDIUM,holding histories,MODELED,Yahoo adjusted closes include
 currency conversion,MEDIUM,non-USD holdings and indices,MODELED,Historical FRED FX converts local adjusted closes to USD; ECU bridges pre-euro observations.
 benchmark dividend consistency,MEDIUM,regional price indices,WARNING,DAX is a performance index; other regional index series may omit dividends. SPY is included as a total-return proxy.
 transaction costs and liquidity,MEDIUM,portfolio outputs and index challenger,MODELED,"Commission, spread, slippage, square-root impact, missing-ADV penalty, and 5% ADV caps are reported."
+annual bank AUM charge,MEDIUM,portfolio outputs and index challenger,MODELED,A 25 bp charge is deducted once each December from then-current AUM; external benchmarks remain uncharged references.
+conditional regime analysis,MEDIUM,"rate, market, and recession tables",DESCRIPTIVE,Rate and market inputs are lagged one month; NBER recession labels are retrospective and are not presented as tradable signals.
+macro-event windows,MEDIUM,event comparisons and shaded plots,DESCRIPTIVE,Configured market-response windows overlap monthly returns and do not assert legal conflict dates or isolate causal effects.
 short-sale constraints,LOW,all tested portfolios,NOT_APPLICABLE,Every tested allocation is long-only; no borrow availability or fee assumption is required.
 multiple testing,HIGH,portfolio comparison,CONTROLLED,Sidak FWER and Deflated Sharpe Ratios use both actual and correlation-clustered trial counts.
 non-stationarity,HIGH,all historical and simulated evidence,RESIDUAL_RISK,"Embargo, subperiod plots, block resampling, fat tails, and EWMA volatility expose but cannot remove structural breaks."

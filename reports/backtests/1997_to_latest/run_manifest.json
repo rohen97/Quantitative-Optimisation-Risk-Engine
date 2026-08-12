@@ -1,38 +1,65 @@
 {
+  "annual_bank_fee": {
+    "annual_rate": 0.0025,
+    "apply_to_external_benchmarks": false,
+    "apply_to_portfolios": true,
+    "apply_to_research_challenger": true,
+    "charge_month": 12,
+    "enabled": true,
+    "label": "Annual bank custody and AUM charge",
+    "reference_annual_charge_usd": 465151.305,
+    "reference_aum_usd": 186060522.0
+  },
   "command": "python scripts/run_portfolio_backtest_1997.py",
   "common_investable_start": "2013-09-30",
-  "current_portfolio_nav_usd": 80540.0,
+  "current_portfolio_nav_usd": 186060522.0,
   "end_date": "2026-07-31",
   "evidence_boundary": "Long-history outputs are retrospective holdings replays; dated model evidence is separate.",
   "fixed_research_capital_usd": 100000.0,
-  "generated_at_utc": "2026-08-12T03:42:26.473435+00:00",
-  "git_commit": "655ed454b3e2ef5400bc4e4f11e3b158f6c8e3c5",
+  "generated_at_utc": "2026-08-12T07:14:11.063857+00:00",
+  "git_commit": "7aaac228a34dbeb0b3e37e88498d317ed84ca6ae",
+  "macro_event_count": 13,
+  "macro_event_method": "Monthly returns are selected when their period overlaps the configured event window; windows are descriptive and not causal estimates.",
+  "macro_regimes": {
+    "high_rate_lower_pct": 4.0,
+    "low_rate_upper_pct": 2.0,
+    "market_benchmark_symbol": "^GSPC",
+    "market_high_volatility": 0.18,
+    "market_momentum_lookback_months": 12,
+    "market_volatility_lookback_months": 6,
+    "rate_direction_lookback_months": 12,
+    "rate_direction_threshold_pp": 0.75,
+    "rate_series": "DTB3",
+    "recession_series": "USREC"
+  },
   "market_data": {
     "cache_artifacts": [
       {
-        "name": "yfinance_fc24a79a5304eb52.parquet",
-        "sha256": "fbefb67f9cb743db853f6cef9cb7d2b86a5c26a8f13917ad3c3fd40b94539eeb"
+        "name": "yfinance_1951364d7b593d2f.parquet",
+        "sha256": "1a299608ba904c869b60a45102e21f444454fd5ca3b6875d64b39d4ead9c837e"
       },
       {
-        "name": "fred_86b38cf705ea6c04.parquet",
-        "sha256": "9a8f3c7904b1fad406bffbfeee7a1a201897d7b2a8dab9d7f2f8aa6c8c444c01"
+        "name": "fred_b386464b6689c333.parquet",
+        "sha256": "73ccb925b46dcf5e4eb9078837c9ae3d203f653a502f643386a9bdc669ae6bb2"
       }
     ],
     "fred_series": [
       "DEXCHUS",
       "DEXHKUS",
+      "DEXJPUS",
       "DEXSDUS",
       "DEXSZUS",
       "DEXUSEU",
       "DEXUSUK",
       "DTB3",
-      "EXUSEC"
+      "EXUSEC",
+      "USREC"
     ],
     "outlier_policy": "explicit_level_shift_repair",
     "price_adjustment_count": 6,
     "provider": "yfinance",
-    "requested_symbol_count": 110,
-    "returned_symbol_count": 110
+    "requested_symbol_count": 120,
+    "returned_symbol_count": 120
   },
   "monte_carlo": {
     "ewma_lambda": 0.94,
@@ -54,11 +81,11 @@
     "samples": 5000
   },
   "research_challenger_count": 1,
-  "schema_version": 1,
+  "schema_version": 2,
   "source_artifacts": [
     {
       "path": "configs/backtest.yaml",
-      "sha256": "317cbc96e80c558366121c51acc22eb2720441977fd235bfb71998fc2b929730"
+      "sha256": "e7b71d80d8d97f6e4e995c2a1c265d80bdefa2076c40880571615205b980714c"
     },
     {
       "path": "reports/outputs/current_portfolio_enriched.csv",
@@ -113,6 +140,7 @@
       "sha256": "4badfad28a594750eb3a60c68eb4fbb8228842c5e5cda862b65f5ec7bcbd09a1"
     }
   ],
+  "standalone_benchmark_count": 19,
   "start_date": "1997-01-01",
   "statistics": {
     "correlation_cluster_threshold": 0.75,

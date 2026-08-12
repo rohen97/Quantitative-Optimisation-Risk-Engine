@@ -1,0 +1,2 @@
+label,annual_rate,annual_rate_bps,charge_month,reference_aum_usd,configured_reference_charge_usd,calculated_reference_charge_usd,reconciliation_difference_usd,portfolio_outputs_charged,research_challenger_charged,external_benchmarks_charged
+Annual bank custody and AUM charge,0.0025,25.0,12,186060522.0,465151.305,465151.305,0.0,True,True,False
