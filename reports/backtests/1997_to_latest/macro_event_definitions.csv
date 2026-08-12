@@ -1,0 +1,14 @@
+event_id,label,category,start_date,end_date,source_url,window_days
+asian_financial_crisis,Asian financial crisis,financial_crisis,1997-07-02,1998-09-30,https://www.imf.org/external/pubs/ft/icm/icm98/pdf/file02.pdf,456
+dot_com_bust,Dot-com bust,market_crash,2000-03-10,2002-10-09,https://fraser.stlouisfed.org/title/economic-report-president-45/2002-8101/fulltext,944
+september_11_afghanistan,9/11 and Afghanistan war shock,war,2001-09-11,2001-12-31,https://www.911commission.gov/report/,112
+iraq_invasion,Iraq invasion shock,war,2003-03-20,2003-05-01,https://georgewbush-whitehouse.archives.gov/news/releases/2003/03/20030319-17.html,43
+global_financial_crisis,Global financial crisis,financial_crisis,2007-12-01,2009-06-30,https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions,578
+euro_debt_crisis,Euro-area sovereign debt crisis,financial_crisis,2010-01-01,2012-07-26,https://www.ecb.europa.eu/press/key/date/2012/html/sp120726.en.html,938
+crimea_shock,Crimea invasion and annexation shock,war,2014-02-20,2014-03-31,https://press.un.org/en/2014/ga11493.doc.htm,40
+brexit_referendum,Brexit referendum shock,political_shock,2016-06-23,2016-07-31,https://www.electoralcommission.org.uk/research-reports-and-data/our-reports-and-data-past-elections-and-referendums/eu-referendum,39
+covid_crash,COVID-19 market crash,pandemic,2020-02-19,2020-04-30,https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020,72
+russia_ukraine_invasion,Russia-Ukraine full-scale invasion shock,war,2022-02-24,2022-06-30,https://www.un.org/sg/en/content/sg/statements/2022-06-03/statement-the-secretary-general-the-100th-day-of-the-war-ukraine,127
+gaza_war,Gaza war shock,war,2023-10-07,2024-01-31,https://www.un.org/sg/en/content/sg/statement/2023-10-07/statement-attributable-the-spokesperson-for-the-secretary-general-regarding-the-situation-the-middle-east,117
+israel_iran_war,Israel-Iran war shock,war,2025-06-13,2025-06-24,https://www.un.org/sg/en/content/sg/statements/2025-06-18/statement-the-secretary-general-the-need-for-ceasefire-between-israel-and-iran,12
+us_iran_war,2026 US-Iran war shock,war,2026-02-28,2026-04-08,https://dppa.dfs.un.org/en/middle-east-live-8-april-us-iran-ceasefire-announced-strikes-continue-lebanon,40

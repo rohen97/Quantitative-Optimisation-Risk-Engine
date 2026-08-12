@@ -1,0 +1,156 @@
+{
+  "annual_bank_fee": {
+    "annual_rate": 0.0025,
+    "apply_to_external_benchmarks": false,
+    "apply_to_portfolios": true,
+    "apply_to_research_challenger": true,
+    "charge_month": 12,
+    "enabled": true,
+    "label": "Annual bank custody and AUM charge",
+    "reference_annual_charge_usd": 465151.305,
+    "reference_aum_usd": 186060522.0
+  },
+  "command": "python scripts/run_portfolio_backtest_1997.py",
+  "common_investable_start": "2013-09-30",
+  "current_portfolio_nav_usd": 186060522.0,
+  "end_date": "2026-07-31",
+  "evidence_boundary": "Long-history outputs are retrospective holdings replays; dated model evidence is separate.",
+  "fixed_research_capital_usd": 100000.0,
+  "generated_at_utc": "2026-08-12T07:14:11.063857+00:00",
+  "git_commit": "7aaac228a34dbeb0b3e37e88498d317ed84ca6ae",
+  "macro_event_count": 13,
+  "macro_event_method": "Monthly returns are selected when their period overlaps the configured event window; windows are descriptive and not causal estimates.",
+  "macro_regimes": {
+    "high_rate_lower_pct": 4.0,
+    "low_rate_upper_pct": 2.0,
+    "market_benchmark_symbol": "^GSPC",
+    "market_high_volatility": 0.18,
+    "market_momentum_lookback_months": 12,
+    "market_volatility_lookback_months": 6,
+    "rate_direction_lookback_months": 12,
+    "rate_direction_threshold_pp": 0.75,
+    "rate_series": "DTB3",
+    "recession_series": "USREC"
+  },
+  "market_data": {
+    "cache_artifacts": [
+      {
+        "name": "yfinance_1951364d7b593d2f.parquet",
+        "sha256": "1a299608ba904c869b60a45102e21f444454fd5ca3b6875d64b39d4ead9c837e"
+      },
+      {
+        "name": "fred_b386464b6689c333.parquet",
+        "sha256": "73ccb925b46dcf5e4eb9078837c9ae3d203f653a502f643386a9bdc669ae6bb2"
+      }
+    ],
+    "fred_series": [
+      "DEXCHUS",
+      "DEXHKUS",
+      "DEXJPUS",
+      "DEXSDUS",
+      "DEXSZUS",
+      "DEXUSEU",
+      "DEXUSUK",
+      "DTB3",
+      "EXUSEC",
+      "USREC"
+    ],
+    "outlier_policy": "explicit_level_shift_repair",
+    "price_adjustment_count": 6,
+    "provider": "yfinance",
+    "requested_symbol_count": 120,
+    "returned_symbol_count": 120
+  },
+  "monte_carlo": {
+    "ewma_lambda": 0.94,
+    "horizon_months": 0,
+    "maximum_degrees_of_freedom": 30.0,
+    "minimum_degrees_of_freedom": 5.0,
+    "paths": 5000
+  },
+  "paper": {
+    "sha256": "07003e270e6f1e106d8e4bdb0f34e33e5e3f3dea3b92f117568badf05d18ceeb",
+    "title": "The Three Types of Backtests"
+  },
+  "point_in_time_months": 25,
+  "portfolio_output_count": 13,
+  "requested_years": 29.57700205338809,
+  "resampling": {
+    "block_months": 12,
+    "confidence_level": 0.95,
+    "samples": 5000
+  },
+  "research_challenger_count": 1,
+  "schema_version": 2,
+  "source_artifacts": [
+    {
+      "path": "configs/backtest.yaml",
+      "sha256": "e7b71d80d8d97f6e4e995c2a1c265d80bdefa2076c40880571615205b980714c"
+    },
+    {
+      "path": "reports/outputs/current_portfolio_enriched.csv",
+      "sha256": "f26fbcb870ccc8b76eea80313ff2685ff75695dd6a5abdb93f56ad52017de917"
+    },
+    {
+      "path": "reports/outputs/drl_baseline_portfolio.csv",
+      "sha256": "9c69a2ca68e4ece99cc6e99e1ea472117be833826328764fa6d51990fa5c8102"
+    },
+    {
+      "path": "reports/outputs/drl_challenger_portfolio.csv",
+      "sha256": "97d8669e8958cf0fcbf7eaf5998e8b62a7259a3b0ca97759b1d7e2cb42911146"
+    },
+    {
+      "path": "reports/outputs/final_portfolio_weights.csv",
+      "sha256": "cedd1afe735f2608cb0c5db2965f49fc2150df4c80c07e6a1df893f67db1c5a9"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_cvar_constrained.csv",
+      "sha256": "1c2f2f3318347e65a4111ead5165417d36773129c332d8f3228190e07c154064"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_dividend_income.csv",
+      "sha256": "f57a99eb26c2fd4f482b8da6b5f86c125f331db423a171b215e6bb22aa464bee"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_mean_variance.csv",
+      "sha256": "a2ae740e058c42608cbb2c5c00487635e2b55ad4a2e0c2e031b2870579c4737f"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_regime_aware.csv",
+      "sha256": "5925d579773cb0e1d151ad24f14101e8b5ad777a0d4ae6b2e9b8ec4b87820e15"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_risk_parity.csv",
+      "sha256": "575ff3e19fae2c377127235a1143eda993fb7e98ef7638111890488cc2c12e89"
+    },
+    {
+      "path": "reports/outputs/optimised_portfolio_score_weighted.csv",
+      "sha256": "c0636221ef7b211d788f29bcb890016b43eda34bf6ea5fd2afe5c2248d821bba"
+    },
+    {
+      "path": "reports/outputs/proposed_portfolio.csv",
+      "sha256": "feed3ea783871bd0e08c7ec1382e20ef894e7321dcb30aa6a402f869cf97c0da"
+    },
+    {
+      "path": "reports/outputs/recommendations_clean_sheet.csv",
+      "sha256": "3f0c68c6f9156226407068a2d92d5e4565fdb516e3ce1ca54e17d076377d3f88"
+    },
+    {
+      "path": "reports/outputs/recommendations_llm_benchmark.csv",
+      "sha256": "4badfad28a594750eb3a60c68eb4fbb8228842c5e5cda862b65f5ec7bcbd09a1"
+    }
+  ],
+  "standalone_benchmark_count": 19,
+  "start_date": "1997-01-01",
+  "statistics": {
+    "correlation_cluster_threshold": 0.75,
+    "familywise_alpha": 0.05,
+    "lo_autocorrelation_lags": 6,
+    "sharpe_hurdle": 0.0
+  },
+  "uncommitted_simulation_distributions": {
+    "block_rows": 20000,
+    "monte_carlo_rows": 20000,
+    "reason": "Compact summaries and plots are committed; seeded path-level draws are reproducible and omitted."
+  }
+}
