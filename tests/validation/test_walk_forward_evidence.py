@@ -58,6 +58,35 @@ def test_realised_outcome_uses_next_trading_day_after_target():
     assert outcome.loc[0, 'realised_return'] == pytest.approx(0.10)
 
 
+def test_realised_outcome_allows_extended_exchange_holiday_gap():
+    prices = pd.DataFrame(
+        {
+            'security_id': ['A', 'A'],
+            'ticker': ['A', 'A'],
+            'trade_date': pd.to_datetime(['2023-08-31', '2023-10-09']),
+            'adjusted_close': [100.0, 105.0],
+            'close_price': [100.0, 105.0],
+            'return': [0.0, 0.05],
+            'return_outlier_flag': [False, False],
+        }
+    )
+    forecasts = pd.DataFrame(
+        {
+            'security_id': ['A'],
+            'ticker': ['A'],
+            'as_of_date': [pd.Timestamp('2023-08-31')],
+            'horizon': ['1M'],
+            'horizon_months': [1],
+        }
+    )
+
+    outcome = build_realised_outcomes(forecasts, _PriceMatcher(prices), 14)
+
+    assert outcome.loc[0, 'target_date'] == pd.Timestamp('2023-09-30')
+    assert outcome.loc[0, 'end_trade_date'] == pd.Timestamp('2023-10-09')
+    assert outcome.loc[0, 'realised_return'] == pytest.approx(0.05)
+
+
 def test_validation_loader_prefers_walk_forward_artifacts(tmp_path):
     directory = tmp_path / 'walk_forward'
     directory.mkdir()

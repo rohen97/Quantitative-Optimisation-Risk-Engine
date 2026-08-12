@@ -350,6 +350,7 @@ def _write_release_notes(
     scorecard: pd.DataFrame,
     strategies: pd.DataFrame,
     significance: pd.DataFrame,
+    final_portfolio_count: int,
 ) -> None:
     wolf = strategies.loc[strategies['strategy'].eq('wolf_cvar')].iloc[0]
     equal_weight = strategies.loc[
@@ -375,6 +376,15 @@ def _write_release_notes(
         lambda row: f'{float(row.score):.1f}/{float(row.maximum_score):.0f}',
         axis=1,
     )
+    component_status = component_table.set_index('component')['status'].astype(str)
+    forecast_status = component_status.get('forecast_performance', 'NOT_EVALUATED')
+    distribution_status = component_status.get(
+        'distribution_calibration', 'NOT_EVALUATED'
+    )
+    constraint_status = component_status.get(
+        'constraint_compliance', 'NOT_EVALUATED'
+    )
+    risk_status = component_status.get('risk_backtesting', 'NOT_EVALUATED')
     lines = [
         '# Full-Universe Model Evidence',
         '',
@@ -399,7 +409,11 @@ def _write_release_notes(
         '',
         '## Forecasts',
         '',
-        'All point-forecast horizons passed the configured directional-accuracy, rank-IC, and normalized-RMSE gates. Distribution coverage passes at 3M and 6M and remains a warning at 9M and 12M.',
+        (
+            f'The point-forecast component is **{forecast_status}** and the '
+            f'distribution-calibration component is **{distribution_status}** '
+            'under the configured gates.'
+        ),
         '',
         '![Forecast quality](plots/forecast_quality.png)',
         '',
@@ -413,8 +427,9 @@ def _write_release_notes(
             f'and annualised cost drag is {float(wolf.annualised_cost_drag):.2%}. '
             f'It returned {float(wolf.annualised_return - equal_weight.annualised_return):+.2%} '
             f'per year relative to equal weight over this short sample; the paired '
-            f'test p-value is {paired_p_value:.3f}. Hard constraints and the daily '
-            'EWMA VaR backtest remain separate passing controls.'
+            f'test p-value is {paired_p_value:.3f}. Hard-constraint compliance is '
+            f'**{constraint_status}** and the daily EWMA VaR backtest is '
+            f'**{risk_status}**.'
         ),
         '',
         '![Cumulative returns](plots/cumulative_returns.png)',
@@ -432,7 +447,10 @@ def _write_release_notes(
         '- `validation/`: complete governance output, including HTML and Markdown reports.',
         '- `validation/portfolio_monthly_returns.csv`: all dated Wolf, equal-weight, and cap-weight control returns.',
         '- `investment_committee/`: complete IC report bundle, PDF, data tables, and charts.',
-        '- `final_portfolio_weights.csv`: resolved 20-name final portfolio.',
+        (
+            f'- `final_portfolio_weights.csv`: resolved {final_portfolio_count}-name '
+            'final portfolio.'
+        ),
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
         '- `walk_forward_manifest.json`: source profile, chronology checks, limitations, and evidence counts.',
         '- `manifest.json`: SHA-256 checksum and byte size for every release artifact.',
@@ -502,6 +520,7 @@ def build_release_evidence(
         scorecard,
         strategies,
         significance,
+        int(len(portfolio)),
     )
     _normalise_text_whitespace(output)
     _normalise_json_paths(output)

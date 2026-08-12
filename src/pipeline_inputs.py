@@ -233,9 +233,14 @@ def load_observed_fundamentals(
                     ORDER BY
                         CASE
                             WHEN source = 'sec_companyfacts' THEN 1
-                            WHEN source LIKE 'akshare%' THEN 2
-                            WHEN source = 'yahoo_finance_timeseries' THEN 3
-                            ELSE 4
+                            WHEN source IN (
+                                'finnhub_reported',
+                                'eastmoney_china_financials',
+                                'eastmoney_hk_financials'
+                            ) THEN 2
+                            WHEN source LIKE 'akshare%' THEN 3
+                            WHEN source = 'yahoo_finance_timeseries' THEN 4
+                            ELSE 5
                         END,
                         available_from DESC,
                         retrieved_at DESC

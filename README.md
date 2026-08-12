@@ -14,20 +14,20 @@ The LLM benchmark is an explanation and comparison layer only. It cannot bypass 
 
 ## Current Validated Run
 
-The latest full-universe evidence package is dated 2026-08-07.
+The latest full-universe evidence package was regenerated on 2026-08-12.
 
 | Measure | Result |
 |---|---:|
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
 | Walk-forward eligible securities | 1,408 |
-| Historical forecasts | 73,524 |
-| Aligned realised outcomes | 73,072 |
-| Portfolio decisions | 25 monthly anchors |
-| Governance score | 87.5 / 100 |
+| Historical forecasts | 156,764 |
+| Aligned realised outcomes | 156,312 |
+| Portfolio decisions | 60 monthly anchors |
+| Governance score | 80.0 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Automated tests | 301 passing |
+| Automated tests | 322 passing |
 
 The complete, checksummed result is in
 [`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
@@ -60,7 +60,7 @@ Overfitting now distinguish measured replay alpha from credible deployable alpha
 
 > The long history is a retrospective replay of today's holdings. It is useful for
 > exposure, path, liquidity, and benchmark diagnostics, but it contains selection
-> look-ahead and survivorship bias. The dated 25-month model walk-forward remains a
+> look-ahead and survivorship bias. The dated 60-month model walk-forward remains a
 > separate evidence set. The current evidence does not establish deployable alpha.
 
 Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
@@ -200,9 +200,30 @@ python scripts/pull_external_data.py --status-only
 python scripts/pull_external_data.py --start 2020-01-01
 ```
 
+Backfill the 2018-2020 annual filings required by the 60-month reconstructed
+walk-forward, or inspect resumable coverage without making network requests:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --coverage-only
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --skip-migrations
+```
+
+The historical adapter uses Finnhub reported filings for US securities and public
+Eastmoney statements for Mainland China and Hong Kong. Observed filing dates are
+retained for US and Mainland statements; Hong Kong availability uses the configured
+120-day conservative lag because the endpoint does not expose a filing timestamp.
+The job writes in small resumable batches and never logs API keys.
+
 `configs/data_sources.yaml` maps providers to the full DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong universe. Add private credentials to `.env` using the placeholders in `.env.example`. With `USE_MOCK_DATA=false`, the price loader queries every enabled provider for which credentials are available, cross-validates overlapping closes and retains the configured highest-priority observation. It does not silently treat a failed provider as valid data.
 
 Configured sources include yfinance, TickDB, Alpaca, EODHD, Finnhub, Alpha Vantage and iTick for market data; Frankfurter for FX; FRED, ECB, ONS, Bank of England, China Data and HKMA for economic and financial-system data. Alpha Vantage also exposes configured fundamental, FX, macro, commodity, news and sentiment capabilities. FRED and ECB requests preserve revision/vintage information where exposed. The supplied Medium articles are retained as non-authoritative engineering references; primary provider documentation controls endpoint and licensing decisions.
+
+[OpenBB Workspace](https://docs.openbb.co/workspace/developers/data-integration)
+can display or integrate the model through a custom backend, but it is not an
+additional data vendor. [OpenBB provider extensions](https://docs.openbb.co/odp/python/extensions/providers)
+route requests to their underlying sources and subscriptions. The ingestion hot
+path therefore uses the source APIs directly, avoiding a large application
+dependency while preserving the same provider provenance in DuckDB.
 
 The legacy single-process pipeline can still use mock mode. The two-phase production
 runner defaults to observed DuckDB inputs and never silently substitutes mock

@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from scipy.optimize import Bounds, LinearConstraint, milp
 
 from src.data.config import load_data_config
 from src.data.repository.duckdb_repository import DuckDBRepository
@@ -25,8 +26,9 @@ from src.validation.transaction_cost_validation import estimate_transaction_cost
 
 
 LOGGER = logging.getLogger(__name__)
-ARTIFACT_VERSION = 2
+ARTIFACT_VERSION = 3
 FORECAST_HORIZONS = (3, 6, 9, 12)
+CASH_SECURITY_ID = 'CASH.USD'
 MONETARY_COLUMNS = (
     'revenue',
     'operating_income',
@@ -56,7 +58,7 @@ class WalkForwardConfig:
     minimum_annual_periods: int = 2
     minimum_training_price_rows: int = 756
     price_lookback_rows: int = 756
-    outcome_date_tolerance_days: int = 7
+    outcome_date_tolerance_days: int = 14
     portfolio_nav_usd: float = 100_000_000.0
     primary_strategy: str = 'wolf_cvar'
     approval_cap: str = 'CONDITIONALLY_APPROVED'
@@ -104,7 +106,7 @@ def load_walk_forward_config(
         minimum_annual_periods=int(values.get('minimum_annual_periods', 2)),
         minimum_training_price_rows=int(values.get('minimum_training_price_rows', 756)),
         price_lookback_rows=int(values.get('price_lookback_rows', 756)),
-        outcome_date_tolerance_days=int(values.get('outcome_date_tolerance_days', 7)),
+        outcome_date_tolerance_days=int(values.get('outcome_date_tolerance_days', 14)),
         portfolio_nav_usd=float(values.get('portfolio_nav_usd', 100_000_000)),
         primary_strategy=str(values.get('primary_strategy', 'wolf_cvar')),
         approval_cap=str(values.get('approval_cap', 'CONDITIONALLY_APPROVED')),
@@ -349,9 +351,14 @@ def _load_source_data(
                 ORDER BY
                     CASE
                         WHEN source = 'sec_companyfacts' THEN 1
-                        WHEN source LIKE 'akshare%' THEN 2
-                        WHEN source = 'yahoo_finance_timeseries' THEN 3
-                        ELSE 4
+                        WHEN source IN (
+                            'finnhub_reported',
+                            'eastmoney_china_financials',
+                            'eastmoney_hk_financials'
+                        ) THEN 2
+                        WHEN source LIKE 'akshare%' THEN 3
+                        WHEN source = 'yahoo_finance_timeseries' THEN 4
+                        ELSE 5
                     END,
                     retrieved_at DESC
             ) AS source_row
@@ -1073,7 +1080,7 @@ def build_realised_outcomes(
     ].reset_index(drop=True)
 
 
-def _greedy_constrained_portfolio(
+def _cardinality_constrained_portfolio(
     scorecard: pd.DataFrame,
     constraints: dict[str, Any],
 ) -> pd.DataFrame:
@@ -1083,37 +1090,99 @@ def _greedy_constrained_portfolio(
         ascending=[False, True],
         kind='stable',
     ).drop_duplicates('issuer_id')
-    selected: list[int] = []
-    counts: dict[tuple[str, str], int] = {}
+    if eligible.empty:
+        raise RuntimeError('No names satisfied the historical portfolio constraints.')
+    position_weight = float(constraints.get('max_single_name_weight', 0.05))
+    if not 0 < position_weight <= 1:
+        raise ValueError('max_single_name_weight must be between zero and one.')
+
+    def group_holding_limit(weight_limit: float) -> int:
+        return int(np.floor(weight_limit / position_weight + 1.0e-9))
+
     group_limits = {
-        'sector': int(float(constraints.get('max_sector_weight', 0.25)) / 0.05),
-        'country': int(float(constraints.get('max_country_weight', 0.30)) / 0.05),
-        'region': int(float(constraints.get('max_region_weight', 0.40)) / 0.05),
-        'currency': int(float(constraints.get('max_currency_weight', 0.40)) / 0.05),
+        'sector': group_holding_limit(
+            float(constraints.get('max_sector_weight', 0.25))
+        ),
+        'country': group_holding_limit(
+            float(constraints.get('max_country_weight', 0.30))
+        ),
+        'region': group_holding_limit(
+            float(constraints.get('max_region_weight', 0.40))
+        ),
+        'currency': group_holding_limit(
+            float(constraints.get('max_currency_weight', 0.40))
+        ),
     }
-    for index, row in eligible.iterrows():
-        allowed = True
-        for column, limit in group_limits.items():
-            key = (column, str(row[column]))
-            if counts.get(key, 0) >= limit:
-                allowed = False
-                break
-        if not allowed:
-            continue
-        selected.append(index)
-        for column in group_limits:
-            key = (column, str(row[column]))
-            counts[key] = counts.get(key, 0) + 1
-        if len(selected) == 20:
-            break
-    if len(selected) < 20:
+    constraint_rows = [np.ones(len(eligible), dtype=float)]
+    upper_bounds = [20.0]
+    for column, limit in group_limits.items():
+        labels = eligible[column].fillna('<missing>').astype(str)
+        for label in sorted(labels.unique()):
+            constraint_rows.append(labels.eq(label).to_numpy(dtype=float))
+            upper_bounds.append(float(limit))
+    scores = pd.to_numeric(
+        eligible['final_recommendation_score'],
+        errors='coerce',
+    ).fillna(0.0).clip(0.0, 100.0)
+    objective = -(1.0 + scores.to_numpy(dtype=float) * 1.0e-5)
+    result = milp(
+        c=objective,
+        integrality=np.ones(len(eligible), dtype=int),
+        bounds=Bounds(0.0, 1.0),
+        constraints=LinearConstraint(
+            np.vstack(constraint_rows),
+            np.full(len(constraint_rows), -np.inf),
+            np.asarray(upper_bounds, dtype=float),
+        ),
+        options={'time_limit': 5.0},
+    )
+    selected = (
+        eligible.index[np.asarray(result.x) > 0.5].tolist()
+        if result.success and result.x is not None
+        else []
+    )
+    minimum_holdings = int(constraints.get('minimum_effective_number_of_holdings', 15))
+    cash_weight = max(1.0 - len(selected) * position_weight, 0.0)
+    maximum_cash_weight = float(constraints.get('maximum_cash_weight', 0.25))
+    if len(selected) < minimum_holdings or cash_weight > maximum_cash_weight + 1.0e-9:
         raise RuntimeError(
-            f'Only {len(selected)} names satisfied the historical portfolio constraints.'
+            f'Only {len(selected)} names satisfied the historical portfolio constraints; '
+            f'required cash weight would be {cash_weight:.2%}.'
         )
     portfolio = scorecard.loc[selected].copy()
-    portfolio['target_weight'] = 0.05
+    portfolio['target_weight'] = position_weight
     portfolio['optimisation_feasible'] = True
-    portfolio['optimisation_status'] = 'greedy_constraint_fallback'
+    portfolio['optimisation_status'] = (
+        'cardinality_constraint_cash_fallback'
+        if cash_weight > 1.0e-10
+        else 'cardinality_constraint_fallback'
+    )
+    if cash_weight > 1.0e-10:
+        cash = {column: pd.NA for column in portfolio.columns}
+        cash.update(
+            {
+                'security_id': CASH_SECURITY_ID,
+                'ticker': CASH_SECURITY_ID,
+                'issuer_id': CASH_SECURITY_ID,
+                'company_name': 'USD Cash',
+                'instrument_type': 'Cash',
+                'listing_status': 'Active',
+                'exchange_code': 'CASH',
+                'country': 'Cash',
+                'region': 'Cash',
+                'sector': 'Cash',
+                'industry': 'Cash',
+                'currency': 'USD',
+                'market_cap_usd': 0.0,
+                'average_daily_value_usd': np.inf,
+                'volatility_1y': 0.0,
+                'passes_hard_filters': True,
+                'target_weight': cash_weight,
+                'optimisation_feasible': True,
+                'optimisation_status': 'cardinality_constraint_cash_fallback',
+            }
+        )
+        portfolio = pd.concat([portfolio, pd.DataFrame([cash])], ignore_index=True)
     return portfolio
 
 
@@ -1155,7 +1224,7 @@ def _build_anchor_portfolios(
         and abs(float(wolf['target_weight'].sum()) - 1.0) <= 1.0e-6
     )
     if not feasible:
-        wolf = _greedy_constrained_portfolio(scorecard, constraints)
+        wolf = _cardinality_constrained_portfolio(scorecard, constraints)
     wolf = wolf.copy()
     wolf['strategy'] = 'wolf_cvar'
     wolf['weight'] = pd.to_numeric(wolf['target_weight'], errors='coerce')
@@ -1194,13 +1263,30 @@ def _series_weights(portfolio: pd.DataFrame) -> pd.Series:
     )
 
 
+def _cash_mask(portfolio: pd.DataFrame) -> pd.Series:
+    instrument_type = portfolio.get(
+        'instrument_type',
+        pd.Series('', index=portfolio.index),
+    ).astype(str)
+    security_id = portfolio['security_id'].astype(str)
+    return instrument_type.str.casefold().eq('cash') | security_id.eq(CASH_SECURITY_ID)
+
+
 def _portfolio_outcome(
     portfolio: pd.DataFrame,
     as_of_date: pd.Timestamp,
     price_matcher: _PriceMatcher,
     tolerance_days: int,
 ) -> tuple[float, float]:
-    requests = portfolio[['security_id', 'ticker']].copy()
+    cash = _cash_mask(portfolio)
+    cash_weight = float(
+        pd.to_numeric(portfolio.loc[cash, 'weight'], errors='coerce')
+        .fillna(0.0)
+        .sum()
+    )
+    requests = portfolio.loc[~cash, ['security_id', 'ticker']].copy()
+    if requests.empty:
+        return 0.0, cash_weight
     requests['as_of_date'] = as_of_date
     requests['horizon'] = '1M'
     requests['horizon_months'] = 1
@@ -1209,7 +1295,7 @@ def _portfolio_outcome(
         return float('nan'), 0.0
     weights = _series_weights(portfolio)
     outcomes['weight'] = outcomes['security_id'].astype(str).map(weights)
-    valid_weight = float(outcomes['weight'].sum())
+    valid_weight = float(outcomes['weight'].sum()) + cash_weight
     if valid_weight < 0.95:
         return float('nan'), valid_weight
     realised = float(
@@ -1245,6 +1331,8 @@ def _portfolio_cost(
     for security_id, weight_change in delta.items():
         if abs(float(weight_change)) <= 1.0e-12:
             continue
+        if str(security_id) == CASH_SECURITY_ID:
+            continue
         row = lookup.loc[security_id] if security_id in lookup.index else pd.Series()
         estimate = estimate_transaction_cost(
             traded_notional=abs(float(weight_change)) * nav_usd,
@@ -1274,7 +1362,12 @@ def _weighted_daily_returns(
     )
     aligned_weights = weights.reindex(matrix.columns.astype(str), fill_value=0.0)
     aligned_weights.index = matrix.columns
-    coverage = matrix.notna().mul(aligned_weights, axis=1).sum(axis=1)
+    cash_weight = float(
+        weights.loc[weights.index.astype(str) == CASH_SECURITY_ID].sum()
+    )
+    coverage = (
+        matrix.notna().mul(aligned_weights, axis=1).sum(axis=1) + cash_weight
+    )
     weighted = matrix.fillna(0.0).mul(aligned_weights, axis=1).sum(axis=1)
     return (weighted / coverage.replace(0, np.nan)).loc[coverage.ge(minimum_coverage)].dropna()
 
@@ -1345,6 +1438,9 @@ def _constraint_rows(
     optimisation = load_yaml('configs/optimisation.yaml').get('optimisation', {})
     limits = optimisation.get('constraints', {})
     weights = _series_weights(portfolio)
+    risky_portfolio = portfolio.loc[~_cash_mask(portfolio)].copy()
+    risky_weights = _series_weights(risky_portfolio)
+    cash_weight = float(weights.get(CASH_SECURITY_ID, 0.0))
     rows = [
         {
             'as_of_date': as_of_date,
@@ -1360,10 +1456,20 @@ def _constraint_rows(
             'strategy': 'wolf_cvar',
             'constraint_name': 'maximum_single_name_weight',
             'constraint_type': 'hard',
-            'actual_value': float(weights.max()),
+            'actual_value': float(risky_weights.max()) if not risky_weights.empty else 0.0,
             'limit_value': float(limits.get('max_single_name_weight', 0.05)),
-            'breach_flag': float(weights.max())
+            'breach_flag': (float(risky_weights.max()) if not risky_weights.empty else 0.0)
             > float(limits.get('max_single_name_weight', 0.05)) + 1.0e-6,
+        },
+        {
+            'as_of_date': as_of_date,
+            'strategy': 'wolf_cvar',
+            'constraint_name': 'maximum_cash_weight',
+            'constraint_type': 'hard',
+            'actual_value': cash_weight,
+            'limit_value': float(limits.get('maximum_cash_weight', 0.25)),
+            'breach_flag': cash_weight
+            > float(limits.get('maximum_cash_weight', 0.25)) + 1.0e-6,
         },
     ]
     group_limits = {
@@ -1374,7 +1480,7 @@ def _constraint_rows(
     }
     for column, key in group_limits.items():
         exposure = (
-            portfolio.assign(_weight=portfolio['weight'])
+            risky_portfolio.assign(_weight=risky_portfolio['weight'])
             .groupby(column, dropna=False)['_weight']
             .sum()
         )
@@ -1524,7 +1630,18 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
                     'net_return': gross_return - transaction_cost,
                     'turnover': turnover,
                     'valid_outcome_weight': valid_weight,
-                    'holding_count': int(portfolio['weight'].gt(1.0e-10).sum()),
+                    'holding_count': int(
+                        (
+                            portfolio['weight'].gt(1.0e-10)
+                            & ~_cash_mask(portfolio)
+                        ).sum()
+                    ),
+                    'cash_weight': float(
+                        pd.to_numeric(
+                            portfolio.loc[_cash_mask(portfolio), 'weight'],
+                            errors='coerce',
+                        ).fillna(0.0).sum()
+                    ),
                     'regime': regime,
                     'evidence_mode': config.evidence_mode,
                 }
@@ -1540,12 +1657,39 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         if not risk.empty:
             risk_frames.append(risk)
         constraint_frames.append(_constraint_rows(wolf, pd.Timestamp(anchor)))
+        region_counts = (
+            features.groupby('region')['security_id']
+            .nunique()
+            .sort_index()
+            .astype(int)
+            .to_dict()
+        )
+        source_counts = (
+            features.groupby('fundamentals_data_source')['security_id']
+            .nunique()
+            .sort_index()
+            .astype(int)
+            .to_dict()
+        )
         anchor_rows.append(
             {
                 'as_of_date': pd.Timestamp(anchor),
                 'feature_security_count': len(features),
+                'feature_region_count': len(region_counts),
+                'feature_regions': ', '.join(region_counts),
+                'feature_region_counts': json.dumps(region_counts, sort_keys=True),
+                'feature_source_count': len(source_counts),
+                'feature_source_counts': json.dumps(source_counts, sort_keys=True),
                 'forecast_security_count': forecasts['security_id'].nunique(),
-                'wolf_holding_count': int(wolf['weight'].gt(1.0e-10).sum()),
+                'wolf_holding_count': int(
+                    (wolf['weight'].gt(1.0e-10) & ~_cash_mask(wolf)).sum()
+                ),
+                'wolf_cash_weight': float(
+                    pd.to_numeric(
+                        wolf.loc[_cash_mask(wolf), 'weight'],
+                        errors='coerce',
+                    ).fillna(0.0).sum()
+                ),
                 'latest_price_feature_date': pd.to_datetime(
                     features['price_feature_end_date']
                 ).max(),
@@ -1560,7 +1704,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             len(anchors),
             anchor.date(),
             len(features),
-            int(wolf['weight'].gt(1.0e-10).sum()),
+            int((wolf['weight'].gt(1.0e-10) & ~_cash_mask(wolf)).sum()),
         )
 
     historical_forecasts = pd.concat(forecast_frames, ignore_index=True)
@@ -1607,6 +1751,19 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     primary_returns = portfolio_returns.loc[
         portfolio_returns['strategy'].eq(config.primary_strategy)
     ]
+    statement_source_counts = (
+        statements.groupby('source').size().sort_index().astype(int).to_dict()
+    )
+    statement_region_counts = (
+        statements.merge(
+            universe[['security_id', 'region']],
+            on='security_id',
+            how='left',
+        )
+        .groupby(['region', 'source'])['security_id']
+        .nunique()
+        .sort_index()
+    )
     manifest = {
         'artifact_version': ARTIFACT_VERSION,
         'generated_at': datetime.now(UTC).isoformat(),
@@ -1628,6 +1785,14 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             'fundamental_max_period': pd.to_datetime(
                 statements['fiscal_period_end']
             ).max(),
+            'statement_rows_by_source': {
+                str(source): int(count)
+                for source, count in statement_source_counts.items()
+            },
+            'statement_securities_by_region_and_source': {
+                f'{region}|{source}': int(count)
+                for (region, source), count in statement_region_counts.items()
+            },
         },
         'artifact_profile': {
             'anchors': len(anchors),
@@ -1638,10 +1803,24 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             'portfolio_weight_rows': len(portfolio_weights),
             'risk_observations': len(risk_forecasts),
             'constraint_rows': len(constraints),
+            'first_anchor_security_count': int(
+                anchor_summary.iloc[0]['feature_security_count']
+            ),
+            'first_anchor_region_count': int(
+                anchor_summary.iloc[0]['feature_region_count']
+            ),
+            'last_anchor_security_count': int(
+                anchor_summary.iloc[-1]['feature_security_count']
+            ),
+            'last_anchor_region_count': int(
+                anchor_summary.iloc[-1]['feature_region_count']
+            ),
         },
         'chronology_checks': chronology_checks,
         'limitations': [
             'Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.',
+            'Early anchors include only regions and securities for which usable historical filings were available; region counts are reported for every anchor.',
+            'When represented countries cannot support full equity investment under hard concentration caps, the reconstruction holds up to 25% in zero-return cash rather than relaxing those caps.',
             'The current active universe and current sector metadata introduce survivorship and reference-data bias.',
             'Historical sentiment, narrative, and regime vintages are unavailable and are held neutral in this reconstruction.',
             'Stored candidate price bars have zero volume, so observed current 3-month ADV is used as a static liquidity proxy.',

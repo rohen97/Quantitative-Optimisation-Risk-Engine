@@ -12,7 +12,8 @@
 - A lagged trend and volatility-controlled regional-index challenger with point-in-time signals.
 - Circular moving-block resampling and correlated Student-t AR(1)/EWMA Monte Carlo evidence.
 - PSR, Minimum Track Record Length, Lo-adjusted Sharpe, Sidak family-wise control, correlation-clustered trial counts, and Deflated Sharpe Ratios.
-- Rendered HTML and 38-page PDF reports, 17 publication plots, plain-language interpretation for every table, compact CSV evidence, a source manifest, and SHA-256 checksums.
+- Finnhub and Eastmoney historical-fundamentals adapters with observed or conservatively reconstructed filing availability for US, Mainland China, and Hong Kong equities.
+- Rendered HTML and 42-page PDF reports, 17 publication plots, plain-language interpretation for every table, compact CSV evidence, a source manifest, and SHA-256 checksums.
 
 ### Changed
 
@@ -20,14 +21,18 @@
 - Updated current-derived starting capital from USD 80,540 to the supplied USD 186,060,522 AUM; independent optimiser, clean-sheet, LLM, and index paths remain at USD 100,000.
 - Converted non-USD holdings and benchmarks with historical FRED FX and assigned pre-listing cash to 3-month Treasury bills.
 - Added explicit, auditable adjusted-price spike and persistent-level-shift repairs.
-- Documented the paper-to-code mapping and separated retrospective holdings evidence from the existing 25-month point-in-time model record.
+- Extended the separate reconstructed point-in-time model record from 25 to 60 monthly decisions without splicing it into the retrospective holdings replay.
+- Added an exact cardinality fallback with a bounded cash sleeve for sparse early-region anchors while preserving every equity concentration cap.
 
 ### Validation
 
 - All requested market symbols have cached price histories from 1997 through the latest complete month where listed.
 - The common 80%-investable comparison window begins in September 2013.
 - Raw daily adjusted-close moves over 50% are reduced from seven to zero through six logged repair events.
-- 307 automated tests pass in deterministic mock mode; 18 focused backtest tests cover fees, drawdowns, causally lagged regimes, event overlap, interpretation rendering, execution, and statistical estimators.
+- 322 automated tests pass in deterministic mock mode, including historical-provider parsing, exchange-holiday alignment, constrained cash, and current-artifact precedence tests.
+- The reconstructed walk-forward contains 156,764 forecasts, 156,312 aligned outcomes, 60 monthly portfolio decisions, and 1,141 daily risk observations.
+- Governance is `CONDITIONALLY_APPROVED` at 80.0/100 with zero critical failures, zero chronology violations, and zero hard-constraint breaches.
+- Point-in-time alpha is not statistically significant against either equal-weight or cap-weight eligible controls; deployable alpha remains `NOT_ESTABLISHED`.
 - The annual reference charge reconciles to the cent; external benchmark paths remain uncharged.
 - The rendered report contains 19 standalone benchmark paths and all 13 configured event windows.
 - Long-history holdings results are labeled for critical selection look-ahead and survivorship limitations and are not presented as historical model-selection skill.

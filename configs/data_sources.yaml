@@ -55,6 +55,13 @@ data_sources:
       asset_classes: [equities, fundamentals, dividends, fx, macro, news, sentiment]
       regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
 
+    eastmoney:
+      enabled: true
+      credential_env: null
+      asset_classes: [fundamentals]
+      regions: [Mainland China, Hong Kong]
+      notes: Historical annual statements for reconstructed research evidence; validate terms and licensing before production use.
+
     alpha_vantage:
       enabled: true
       symbol_column: alpha_vantage_ticker

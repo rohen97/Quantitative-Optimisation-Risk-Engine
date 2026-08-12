@@ -10,7 +10,7 @@ This suite evaluates every investable portfolio output currently produced by The
 
 The long-history portfolio results are **retrospective holdings replays**. They apply today's selected securities and target weights to the history available for those securities. They therefore contain selection look-ahead and survivorship bias and cannot establish that the model would have selected those names in 1997.
 
-The repository's dated, reconstructed model decisions are retained as a separate 25-month point-in-time evidence set. The report never joins that shorter record to the long holdings replay. A lagged regional-index challenger supplies an additional long-horizon point-in-time strategy because its signals can be reconstructed without historical security-selection snapshots.
+The repository's dated, reconstructed model decisions are retained as a separate 60-month point-in-time evidence set. The report never joins that shorter record to the long holdings replay. A lagged regional-index challenger supplies an additional long-horizon point-in-time strategy because its signals can be reconstructed without historical security-selection snapshots.
 
 The dated evidence exports all three aligned monthly paths: `wolf_cvar`,
 `equal_weight_eligible`, and `cap_weight_eligible`. Paired Newey-West alpha tests

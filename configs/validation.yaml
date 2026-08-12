@@ -20,14 +20,14 @@ validation:
   walk_forward:
     output_directory: reports/outputs/walk_forward
     evidence_mode: reconstructed_pit_proxy
-    start_date: 2024-06-30
+    start_date: 2021-07-31
     forecast_end_date: 2025-07-31
     strategy_end_date: 2026-06-30
     filing_lag_days: 120
     minimum_annual_periods: 2
     minimum_training_price_rows: 756
     price_lookback_rows: 756
-    outcome_date_tolerance_days: 7
+    outcome_date_tolerance_days: 14
     portfolio_nav_usd: 100000000
     primary_strategy: wolf_cvar
     approval_cap: CONDITIONALLY_APPROVED
@@ -69,7 +69,7 @@ validation:
     rebalance_frequency: monthly
     base_currency: USD
     cash_rate_column: cash_return
-    minimum_backtest_months: 24
+    minimum_backtest_months: 60
     maximum_turnover_annualised: 1.5
     maximum_annualised_cost_drag: 0.015
     minimum_net_sharpe: 0.25

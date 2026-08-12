@@ -63,16 +63,21 @@ def _git_commit(root: Path) -> str:
 
 def _load_point_in_time_evidence(root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     release = root / 'reports' / 'releases' / '2026-08-07-full-universe' / 'validation'
-    summary_path = release / 'portfolio_strategy_comparison.csv'
-    summary = pd.read_csv(summary_path) if summary_path.exists() else pd.DataFrame()
+    latest = root / 'reports' / 'outputs' / 'validation' / 'latest'
+    walk_forward = root / 'reports' / 'outputs' / 'walk_forward'
+    summary = pd.DataFrame()
+    for path in (
+        latest / 'portfolio_strategy_comparison.csv',
+        release / 'portfolio_strategy_comparison.csv',
+    ):
+        if path.exists():
+            summary = pd.read_csv(path)
+            break
     monthly = pd.DataFrame()
     monthly_candidates = (
+        walk_forward / 'historical_portfolio_returns.parquet',
+        latest / 'portfolio_monthly_returns.csv',
         release / 'portfolio_monthly_returns.csv',
-        root
-        / 'reports'
-        / 'outputs'
-        / 'walk_forward'
-        / 'historical_portfolio_returns.parquet',
         release / 'portfolio_performance_by_period.csv',
     )
     for path in monthly_candidates:
@@ -111,7 +116,7 @@ def _bias_and_limitations() -> pd.DataFrame:
                 'severity': 'HIGH',
                 'applies_to': 'full stock-selection strategy',
                 'status': 'SEPARATED',
-                'treatment': 'The 25-month reconstructed decision history is reported separately and never spliced into the long replay.',
+                'treatment': 'The dated reconstructed decision history is reported separately and never spliced into the long replay.',
             },
             {
                 'category': 'corporate actions',

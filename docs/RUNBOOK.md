@@ -47,6 +47,21 @@ python scripts/compare_legacy_vs_duckdb.py
 python scripts/export_duckdb_to_parquet.py
 ```
 
+Extend annual filing history for the 60-month reconstructed walk-forward:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --coverage-only
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --skip-migrations
+.\.venv\Scripts\python.exe scripts\run_walk_forward_validation.py --validation-mode full
+```
+
+The backfill is resumable. US and Mainland rows preserve observed filing dates;
+Hong Kong rows use fiscal period end plus 120 days and remain explicitly labelled
+as reconstructed evidence. Review
+`reports/outputs/walk_forward/historical_fundamentals_status.json` locally before
+running validation. The database and status artifact are intentionally ignored by
+Git.
+
 Default backend is `legacy_csv`. Change `configs/data.yaml` only after shadow comparisons pass. The configured DuckDB file is `data/database/wolf.duckdb`; large raw payloads are archived under `data/raw_archive/` with metadata registered separately. Local `.duckdb`, `.sqlite`, raw archive/cache and Parquet files are ignored and should not be committed.
 
 Build feature and scorecard outputs:

@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -1374,6 +1375,7 @@ def write_backtest_outputs(
         warning_lines = []
         try:
             pdf_candidate_path.replace(pdf_path)
+            shutil.copyfile(pdf_path, pdf_fallback_path)
             rendered_pdf_path = pdf_path
         except PermissionError:
             pdf_candidate_path.replace(pdf_fallback_path)
