@@ -20,6 +20,7 @@ dependencies = [
     'pyarrow>=17,<26',
     'jinja2>=3.1,<4',
     'weasyprint>=62,<67',
+    'python-pptx>=1.0,<2',
 ]
 
 [tool.setuptools.packages.find]

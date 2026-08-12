@@ -41,4 +41,9 @@ This package compares every investable portfolio output currently produced by th
 
 Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis.pdf](portfolio_backtest_analysis.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
 
+For a concise non-technical presentation of the current holdings, model
+evidence and live-pilot decision, open the
+[investment committee PowerPoint](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx)
+or its [rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf).
+
 Raw provider histories are intentionally excluded from Git. This is research evidence, not authorization for live trading.

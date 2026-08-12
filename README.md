@@ -27,10 +27,17 @@ The latest full-universe evidence package was regenerated on 2026-08-12.
 | Governance score | 80.0 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Automated tests | 322 passing |
+| Automated tests | 324 passing |
 
 The complete, checksummed result is in
 [`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
+
+The investment-principal package presents the results in plain language:
+[PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+and [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md).
+It recommends a controlled, human-supervised live pilot, not unattended or
+full-scale deployment.
 
 ![Validation scorecard](reports/releases/2026-08-07-full-universe/plots/validation_scorecard.png)
 

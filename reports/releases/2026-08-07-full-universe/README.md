@@ -61,3 +61,11 @@ The constrained Wolf portfolio is **WARNING** on the net-of-cost gate: annual tu
 - `manifest.json`: SHA-256 checksum and byte size for every release artifact.
 
 Research output only. Conditional approval is not authorization for unattended live trading.
+
+## Investment Committee Briefing
+
+The current evidence, target holdings, portfolio comparisons, risks and
+proposed live-pilot gates are published in the
+[PowerPoint briefing](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
+[rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+and [investment principal report](../../presentations/wolf_investment_principal/investment_principal_report.md).
