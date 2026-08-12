@@ -28,6 +28,7 @@ class MarketDataBundle:
     data_coverage: pd.DataFrame
     source_manifest: dict
     price_adjustments: pd.DataFrame = field(default_factory=pd.DataFrame)
+    macro_series: pd.DataFrame = field(default_factory=pd.DataFrame)
 
 
 @dataclass(frozen=True)

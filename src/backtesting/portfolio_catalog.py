@@ -161,7 +161,13 @@ def _weight_frame(data: pd.DataFrame, weight_column: str) -> pd.DataFrame:
     return data[['ticker', weight_column]].rename(columns={weight_column: 'weight'})
 
 
-def _current_nav(current: pd.DataFrame, configured_file: Path) -> float:
+def _current_nav(
+    current: pd.DataFrame,
+    configured_file: Path,
+    configured_aum: float | None = None,
+) -> float:
+    if configured_aum is not None and float(configured_aum) > 0:
+        return float(configured_aum)
     configured = pd.read_csv(configured_file) if configured_file.exists() else pd.DataFrame()
     for frame in (current, configured):
         if 'market_value_usd' in frame:
@@ -252,6 +258,7 @@ def build_portfolio_catalog(config: dict) -> list[PortfolioSpec]:
     current_nav = _current_nav(
         current,
         Path(config['backtest']['current_portfolio_file']),
+        config['backtest'].get('current_aum_usd'),
     )
 
     specs: list[PortfolioSpec] = []

@@ -17,7 +17,8 @@ EULER_MASCHERONI = 0.5772156649015329
 
 def drawdown_series(returns: pd.Series) -> pd.Series:
     wealth = (1.0 + pd.to_numeric(returns, errors='coerce')).cumprod()
-    return wealth / wealth.cummax() - 1.0
+    running_peak = wealth.cummax().clip(lower=1.0)
+    return wealth / running_peak - 1.0
 
 
 def maximum_drawdown_duration(drawdown: pd.Series) -> int:
@@ -44,7 +45,18 @@ def lo_adjusted_sharpe(
     maximum_lag = min(int(lags), len(values) - 2)
     adjustment = 1.0
     for lag in range(1, maximum_lag + 1):
-        autocorrelation = float(values.autocorr(lag=lag))
+        current = values.iloc[lag:].to_numpy(dtype=float, copy=True)
+        previous = values.iloc[:-lag].to_numpy(dtype=float, copy=True)
+        current -= current.mean()
+        previous -= previous.mean()
+        denominator = float(
+            np.sqrt(np.square(current).sum() * np.square(previous).sum())
+        )
+        autocorrelation = (
+            float(np.dot(current, previous) / denominator)
+            if denominator > 1e-15
+            else np.nan
+        )
         if np.isfinite(autocorrelation):
             weight = 1.0 - lag / (maximum_lag + 1.0)
             adjustment += 2.0 * weight * autocorrelation
@@ -156,6 +168,28 @@ def performance_summary(
             int(config['backtest']['annual_periods']),
             int(config['statistics']['lo_autocorrelation_lags']),
         )
+        pre_bank_fee_returns = monthly.get(
+            'pre_bank_fee_return',
+            monthly['net_return'],
+        )
+        pre_bank_fee = performance_metrics(
+            pre_bank_fee_returns,
+            result.initial_capital_usd,
+            monthly_cash,
+            int(config['backtest']['annual_periods']),
+            int(config['statistics']['lo_autocorrelation_lags']),
+        )
+        transaction_costs = pd.to_numeric(
+            monthly.get(
+                'transaction_cost_usd',
+                pd.Series(0.0, index=monthly.index),
+            ),
+            errors='coerce',
+        ).fillna(0.0)
+        bank_fees = pd.to_numeric(
+            monthly.get('bank_fee_usd', pd.Series(0.0, index=monthly.index)),
+            errors='coerce',
+        ).fillna(0.0)
         rows.append(
             {
                 'strategy': result.strategy,
@@ -167,8 +201,21 @@ def performance_summary(
                 'full_investment_start': result.full_investment_start,
                 **metrics,
                 'gross_cagr': gross['cagr'],
+                'pre_bank_fee_cagr': pre_bank_fee['cagr'],
+                'annualised_transaction_cost_drag': (
+                    gross['cagr'] - pre_bank_fee['cagr']
+                ),
+                'annualised_bank_fee_drag': (
+                    pre_bank_fee['cagr'] - metrics['cagr']
+                ),
                 'annualised_cost_drag': gross['cagr'] - metrics['cagr'],
-                'total_transaction_cost_usd': float(monthly['transaction_cost_usd'].sum()),
+                'total_transaction_cost_usd': float(transaction_costs.sum()),
+                'total_bank_fee_usd': float(bank_fees.sum()),
+                'total_modeled_cost_usd': float(transaction_costs.sum() + bank_fees.sum()),
+                'ending_value_before_bank_fee_usd': pre_bank_fee['ending_value_usd'],
+                'ending_value_bank_fee_drag_usd': (
+                    pre_bank_fee['ending_value_usd'] - metrics['ending_value_usd']
+                ),
                 'annualised_turnover': float(monthly['turnover'].mean() * 12.0),
                 'average_live_weight': float(monthly['live_weight'].mean()),
                 'minimum_live_weight': float(monthly['live_weight'].min()),

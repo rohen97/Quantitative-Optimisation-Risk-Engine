@@ -23,6 +23,18 @@ def _monthly_cash_returns(cash_returns: pd.Series) -> pd.Series:
     return (1.0 + values).resample('ME').prod() - 1.0
 
 
+def _annual_bank_fee_rate(
+    fee_config: dict | None,
+    end_date: pd.Timestamp,
+) -> float:
+    settings = fee_config or {}
+    if not settings.get('enabled', False):
+        return 0.0
+    if int(end_date.month) != int(settings.get('charge_month', 12)):
+        return 0.0
+    return float(settings.get('annual_rate', 0.0))
+
+
 def _execution_cost(
     asset_delta: np.ndarray,
     adv: np.ndarray,
@@ -128,8 +140,14 @@ def replay_portfolio(
     pre_trade[-1] = 1.0
     net_value = float(spec.initial_capital_usd)
     gross_value = float(spec.initial_capital_usd)
+    pre_bank_fee_value = float(spec.initial_capital_usd)
     rows = []
     execution = config['execution']
+    fee_config = (
+        config.get('annual_bank_fee', {})
+        if config.get('annual_bank_fee', {}).get('apply_to_portfolios', True)
+        else {}
+    )
     minimum_live = float(config['backtest']['minimum_live_weight'])
     intended_invested_weight = float(targets.sum())
     full_investment_start = None
@@ -172,9 +190,14 @@ def replay_portfolio(
             [np.nan_to_num(period_assets, nan=0.0), [float(cash.iloc[index])]]
         )
         gross_return = float(target @ period_returns)
-        net_return = (1.0 - cost_fraction) * (1.0 + gross_return) - 1.0
+        pre_bank_fee_return = (1.0 - cost_fraction) * (1.0 + gross_return) - 1.0
+        fee_rate = _annual_bank_fee_rate(fee_config, end_date)
+        value_before_bank_fee = net_value * (1.0 + pre_bank_fee_return)
+        bank_fee_usd = value_before_bank_fee * fee_rate
+        net_return = (1.0 + pre_bank_fee_return) * (1.0 - fee_rate) - 1.0
         gross_value *= 1.0 + gross_return
-        net_value *= 1.0 + net_return
+        pre_bank_fee_value *= 1.0 + pre_bank_fee_return
+        net_value = value_before_bank_fee - bank_fee_usd
         pre_trade = _drift_weights(target, period_returns)
         live_weight = float(target_assets.sum())
         required_live_weight = minimum_live * intended_invested_weight
@@ -187,11 +210,17 @@ def replay_portfolio(
                 'strategy': spec.key,
                 'strategy_label': spec.label,
                 'gross_return': gross_return,
+                'pre_bank_fee_return': pre_bank_fee_return,
                 'net_return': net_return,
                 'turnover': turnover,
                 'transaction_cost_usd': cost_usd,
                 'transaction_cost_return': cost_fraction,
+                'bank_fee_usd': bank_fee_usd,
+                'bank_fee_return': fee_rate,
+                'bank_fee_assessment_aum_usd': value_before_bank_fee if fee_rate else 0.0,
+                'total_cost_usd': cost_usd + bank_fee_usd,
                 'gross_value_usd': gross_value,
+                'pre_bank_fee_value_usd': pre_bank_fee_value,
                 'net_value_usd': net_value,
                 'live_weight': live_weight,
                 'available_target_weight': available_target_weight,
@@ -235,6 +264,7 @@ def _replay_weight_schedule(
     initial_capital: float,
     evidence_type: str,
     linear_cost_bps: float = 0.0,
+    annual_bank_fee: dict | None = None,
 ) -> ReplayResult:
     aligned_weights = weights.reindex(asset_returns.index).fillna(0.0)
     cash = cash_returns.reindex(asset_returns.index).fillna(0.0)
@@ -242,6 +272,7 @@ def _replay_weight_schedule(
     pre_trade[-1] = 1.0
     net_value = float(initial_capital)
     gross_value = float(initial_capital)
+    pre_bank_fee_value = float(initial_capital)
     rows = []
     first_live = None
     for index in range(1, len(asset_returns)):
@@ -264,10 +295,15 @@ def _replay_weight_schedule(
         traded_weight = float(np.abs(target_assets - pre_trade[:-1]).sum())
         cost_fraction = traded_weight * linear_cost_bps / 10_000.0
         gross_return = float(target @ period_returns)
-        net_return = (1.0 - cost_fraction) * (1.0 + gross_return) - 1.0
+        pre_bank_fee_return = (1.0 - cost_fraction) * (1.0 + gross_return) - 1.0
+        fee_rate = _annual_bank_fee_rate(annual_bank_fee, end_date)
+        value_before_bank_fee = net_value * (1.0 + pre_bank_fee_return)
+        bank_fee_usd = value_before_bank_fee * fee_rate
+        net_return = (1.0 + pre_bank_fee_return) * (1.0 - fee_rate) - 1.0
         cost_usd = net_value * cost_fraction
         gross_value *= 1.0 + gross_return
-        net_value *= 1.0 + net_return
+        pre_bank_fee_value *= 1.0 + pre_bank_fee_return
+        net_value = value_before_bank_fee - bank_fee_usd
         pre_trade = _drift_weights(target, period_returns)
         live_weight = float(target_assets.sum())
         if first_live is None and live_weight >= 0.80:
@@ -279,11 +315,17 @@ def _replay_weight_schedule(
                 'strategy': key,
                 'strategy_label': label,
                 'gross_return': gross_return,
+                'pre_bank_fee_return': pre_bank_fee_return,
                 'net_return': net_return,
                 'turnover': turnover,
                 'transaction_cost_usd': cost_usd,
                 'transaction_cost_return': cost_fraction,
+                'bank_fee_usd': bank_fee_usd,
+                'bank_fee_return': fee_rate,
+                'bank_fee_assessment_aum_usd': value_before_bank_fee if fee_rate else 0.0,
+                'total_cost_usd': cost_usd + bank_fee_usd,
                 'gross_value_usd': gross_value,
+                'pre_bank_fee_value_usd': pre_bank_fee_value,
                 'net_value_usd': net_value,
                 'live_weight': live_weight,
                 'cash_weight': target_cash,
@@ -321,6 +363,11 @@ def _capped_weights(values: pd.Series, maximum: float) -> pd.Series:
             weights += proposal
             break
     return weights.clip(lower=0.0, upper=maximum)
+
+
+def _benchmark_key(prefix: str, value: str) -> str:
+    slug = ''.join(character.lower() if character.isalnum() else '_' for character in value)
+    return prefix + '_' + '_'.join(part for part in slug.split('_') if part)
 
 
 def build_index_results(
@@ -378,6 +425,26 @@ def build_index_results(
             )
         )
 
+    standalone_definitions = [
+        (_benchmark_key('region_index', region), definition)
+        for region, definition in benchmark_config['regions'].items()
+    ]
+    standalone_definitions.extend(benchmark_config.get('additional', {}).items())
+    for key, definition in standalone_definitions:
+        symbol = definition['symbol']
+        schedule = pd.DataFrame(1.0, index=prices.index, columns=[symbol])
+        benchmark_results.append(
+            _replay_weight_schedule(
+                key,
+                definition['label'],
+                returns[[symbol]],
+                schedule,
+                cash,
+                float(config['backtest']['default_capital_usd']),
+                'standalone_market_benchmark',
+            )
+        )
+
     regional = list(region_symbols.values())
     equal_schedule = pd.DataFrame(
         1.0 / len(regional),
@@ -429,5 +496,13 @@ def build_index_results(
         float(config['backtest']['default_capital_usd']),
         'point_in_time_index_challenger',
         float(challenger_config['linear_cost_bps']),
+        (
+            config.get('annual_bank_fee', {})
+            if config.get('annual_bank_fee', {}).get(
+                'apply_to_research_challenger',
+                True,
+            )
+            else None
+        ),
     )
     return benchmark_results, challenger

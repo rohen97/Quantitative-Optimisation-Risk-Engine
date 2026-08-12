@@ -4,6 +4,7 @@ import pandas as pd
 from src.backtesting.models import ReplayResult
 from src.backtesting.statistics import (
     benchmark_relative_summary,
+    drawdown_series,
     minimum_track_record_length,
     monte_carlo_simulation,
     moving_block_indices,
@@ -35,6 +36,14 @@ def test_performance_metrics_projects_assigned_capital() -> None:
     assert metrics['cagr'] > 0.12
     assert metrics['ending_value_usd'] > 126_000.0
     assert metrics['maximum_drawdown'] == 0.0
+
+
+def test_drawdown_counts_a_loss_in_the_first_observation() -> None:
+    returns = pd.Series([-0.10, 0.05])
+    drawdown = drawdown_series(returns)
+
+    assert np.isclose(drawdown.iloc[0], -0.10)
+    assert np.isclose(drawdown.iloc[1], -0.055)
 
 
 def _result(key: str, values: np.ndarray, label: str | None = None) -> ReplayResult:

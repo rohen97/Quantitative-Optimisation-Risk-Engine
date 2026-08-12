@@ -10,6 +10,11 @@ from src.backtesting.models import MarketDataBundle, PortfolioSpec
 def _config() -> dict:
     return {
         'backtest': {'minimum_live_weight': 0.80},
+        'annual_bank_fee': {
+            'enabled': True,
+            'annual_rate': 0.0025,
+            'charge_month': 12,
+        },
         'execution': {
             'commission_bps': 1.0,
             'half_spread_bps': 5.0,
@@ -24,7 +29,11 @@ def _config() -> dict:
 
 
 def _bundle(prices: pd.DataFrame) -> MarketDataBundle:
-    calendar = pd.date_range('1997-01-01', '1997-03-31', freq='D')
+    calendar = pd.date_range(
+        prices.index.min().replace(day=1),
+        prices.index.max(),
+        freq='D',
+    )
     volume = pd.DataFrame(10_000_000.0, index=prices.index, columns=prices.columns)
     return MarketDataBundle(
         prices_usd=prices,
@@ -101,3 +110,28 @@ def test_liquidity_cap_leaves_unfilled_weight_in_cash() -> None:
     assert np.isclose(executed[0], 0.0005)
     assert unfilled > 0.49
     assert breaches == 1
+
+
+def test_annual_bank_fee_is_assessed_once_on_december_aum() -> None:
+    dates = pd.to_datetime(['1997-11-30', '1997-12-31', '1998-01-31'])
+    prices = pd.DataFrame({'AAA': [100.0, 100.0, 100.0]}, index=dates)
+    holdings = pd.DataFrame(
+        {
+            'ticker': ['AAA'],
+            'yfinance_ticker': ['AAA'],
+            'weight': [1.0],
+        }
+    )
+
+    result = replay_portfolio(_spec(holdings), _bundle(prices), _config())
+    december = result.monthly.iloc[0]
+    january = result.monthly.iloc[1]
+
+    assert np.isclose(
+        december['bank_fee_usd'],
+        december['bank_fee_assessment_aum_usd'] * 0.0025,
+    )
+    assert np.isclose(december['bank_fee_return'], 0.0025)
+    assert january['bank_fee_usd'] == 0.0
+    assert result.monthly['bank_fee_usd'].gt(0.0).sum() == 1
+    assert result.monthly.iloc[-1]['pre_bank_fee_value_usd'] > result.monthly.iloc[-1]['net_value_usd']

@@ -44,5 +44,7 @@ reports/outputs/equity_universe.csv
 reports/outputs/*_smoke.pdf
 reports/outputs/gtk_pango_check.pdf
 reports/outputs/walk_forward/
+reports/backtests/1997_to_latest/backtest_report.pdf
+reports/backtests/1997_to_latest/backtest_report_expanded.pdf
 data/locks/*
 !data/locks/.gitkeep

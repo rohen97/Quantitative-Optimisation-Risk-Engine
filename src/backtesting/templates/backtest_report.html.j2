@@ -33,6 +33,7 @@
     .two > * { flex: 1 1 380px; min-width: 0; }
     .method { padding: 12px 14px; border: 1px solid var(--line); background: #fbfcfe; }
     .method strong { color: var(--teal); }
+    .interpretation { margin: 10px 0 16px; padding: 10px 13px; border-left: 4px solid var(--gold); background: #fbfcfe; }
     .footnote { color: var(--muted); font-size: 10px; }
   </style>
 </head>
@@ -47,24 +48,69 @@
     <div class='metric'><strong>{{ current_nav }}</strong><span>current-derived starting NAV</span></div>
     <div class='metric'><strong>{{ common_start }}</strong><span>common 80% investable start</span></div>
     <div class='metric'><strong>{{ pit_months }}</strong><span>separate reconstructed PIT months</span></div>
+    <div class='metric'><strong>{{ benchmark_count }}</strong><span>standalone benchmark paths</span></div>
+    <div class='metric'><strong>{{ event_count }}</strong><span>source-backed macro-event windows</span></div>
   </div>
+  <p class='interpretation'>{{ interpretations.overall }}</p>
 
   <h2>Executive Comparison</h2>
   <div class='table-wrap'>{{ performance_table }}</div>
+  <p class='interpretation'>{{ interpretations.executive }}</p>
   <div class='figure'><img src='plots/wealth_paths.png' alt='Portfolio wealth paths'><p class='caption'>Indexed growth uses each portfolio's assigned capital only for PnL; this chart rebases every series to 100 for comparability.</p></div>
   <div class='two'>
     <div class='figure'><img src='plots/ending_pnl.png' alt='Ending PnL'></div>
     <div class='figure'><img src='plots/risk_return.png' alt='Risk and return'></div>
   </div>
 
-  <h2>Historical Risk</h2>
+  <h2>Paper Ratios and Annual Bank Charge</h2>
+  <h3>Performance Ratios on the Common Investable Window</h3>
+  <div class='table-wrap'>{{ ratio_table }}</div>
+  <p class='interpretation'>{{ interpretations.ratios }}</p>
+  <h3>Annual Fee Assumption</h3>
+  <div class='table-wrap'>{{ fee_assumption_table }}</div>
+  <p class='interpretation'>{{ interpretations.fee_assumption }}</p>
+  <h3>Fee Impact by Portfolio</h3>
+  <div class='table-wrap'>{{ fee_impact_table }}</div>
+  <p class='interpretation'>{{ interpretations.fee_impact }}</p>
+
+  <h2>Major Index Benchmarks</h2>
   <div class='figure'><img src='plots/benchmark_comparison.png' alt='Index benchmark comparison'><p class='caption'>Dashed lines are broad or regional index benchmarks. Portfolio-specific relative statistics use each allocation's geographic index blend on the common investable window.</p></div>
-  <h3>Primary Index Performance, Common Investable Window</h3>
+  <div class='figure'><img src='plots/major_indices.png' alt='Major index benchmarks in USD'></div>
+  <h3>Standalone Index Performance, Common Investable Window</h3>
   <div class='table-wrap'>{{ benchmark_performance_table }}</div>
+  <p class='interpretation'>{{ interpretations.benchmarks }}</p>
   <div class='figure'><img src='plots/drawdowns.png' alt='Drawdowns'></div>
   <div class='figure'><img src='plots/annual_returns.png' alt='Annual return heatmap'></div>
   <h3>Portfolio-Relative Regional Benchmark Results</h3>
   <div class='table-wrap'>{{ benchmark_table }}</div>
+  <p class='interpretation'>{{ interpretations.relative_benchmarks }}</p>
+
+  <h2>Interest Rates and Market Regimes</h2>
+  <div class='figure'><img src='plots/interest_rate_history.png' alt='Interest-rate history'></div>
+  <h3>Interest-Rate Level Performance</h3>
+  <div class='figure'><img src='plots/interest_rate_performance.png' alt='Performance across interest-rate levels'></div>
+  <div class='table-wrap'>{{ rate_level_table }}</div>
+  <p class='interpretation'>{{ interpretations.rate_level }}</p>
+  <h3>Interest-Rate Direction Performance</h3>
+  <div class='table-wrap'>{{ rate_direction_table }}</div>
+  <p class='interpretation'>{{ interpretations.rate_direction }}</p>
+  <h3>Lagged Market Regime Performance</h3>
+  <div class='figure'><img src='plots/market_regime_performance.png' alt='Performance across market regimes'></div>
+  <div class='table-wrap'>{{ market_regime_table }}</div>
+  <p class='interpretation'>{{ interpretations.market_regime }}</p>
+  <h3>Retrospective Economic-Cycle Performance</h3>
+  <div class='table-wrap'>{{ economic_cycle_table }}</div>
+  <p class='interpretation'>{{ interpretations.economic_cycle }}</p>
+
+  <h2>Major Macro Events</h2>
+  <div class='figure'><img src='plots/macro_event_timeline.png' alt='Wealth through major macro events'><p class='caption'>Shading includes the Asian crisis, dot-com bust, global financial crisis, COVID-19, political shocks, and war windows through the 2026 US-Iran conflict.</p></div>
+  <div class='figure'><img src='plots/macro_event_returns.png' alt='Returns during macro-event windows'></div>
+  <h3>Configured Event Windows</h3>
+  <div class='table-wrap'>{{ event_definition_table }}</div>
+  <p class='interpretation'>{{ interpretations.event_definitions }}</p>
+  <h3>Portfolio and S&amp;P 500 Event Performance</h3>
+  <div class='table-wrap'>{{ event_table }}</div>
+  <p class='interpretation'>{{ interpretations.events }}</p>
 
   <h2>The Three Backtests</h2>
   <div class='two'>
@@ -77,21 +123,37 @@
     <div class='figure'><img src='plots/block_resampling.png' alt='Block bootstrap intervals'></div>
     <div class='figure'><img src='plots/monte_carlo.png' alt='Monte Carlo intervals'></div>
   </div>
+  <h3>Moving-Block Resampling Summary</h3>
+  <div class='table-wrap'>{{ resampling_table }}</div>
+  <p class='interpretation'>{{ interpretations.resampling }}</p>
+  <h3>Monte Carlo Summary</h3>
+  <div class='table-wrap'>{{ monte_carlo_table }}</div>
+  <p class='interpretation'>{{ interpretations.monte_carlo }}</p>
+  <h3>Untouched Embargo Comparison</h3>
   <div class='figure'><img src='plots/embargo.png' alt='Embargo comparison'></div>
+  <div class='table-wrap'>{{ embargo_table }}</div>
+  <p class='interpretation'>{{ interpretations.embargo }}</p>
+  <h3>Statistical Significance and Multiple Testing</h3>
   <div class='table-wrap'>{{ significance_table }}</div>
+  <p class='interpretation'>{{ interpretations.significance }}</p>
 
   <h2>Data Quality and Causality</h2>
   <h3>Execution and Liquidity</h3>
   <div class='table-wrap'>{{ execution_table }}</div>
+  <p class='interpretation'>{{ interpretations.execution }}</p>
   <h3>Adjusted-Price Repairs</h3>
   <div class='table-wrap'>{{ repair_table }}</div>
+  <p class='interpretation'>{{ interpretations.repairs }}</p>
   <div class='figure'><img src='plots/investable_starts.png' alt='Investable starts'></div>
   <div class='figure'><img src='plots/causal_graph.png' alt='Causal graph'></div>
+  <h3>Bias and Limitation Register</h3>
   <div class='table-wrap'>{{ limitation_table }}</div>
+  <p class='interpretation'>{{ interpretations.limitations }}</p>
 
   <h2>Point-in-Time Model Evidence</h2>
   <p>The repository's reconstructed model walk-forward is not spliced into the 1997 holdings replay. It remains a separate, shorter evidence set because it uses dated model decisions and realised outcomes.</p>
   <div class='table-wrap'>{{ pit_table }}</div>
+  <p class='interpretation'>{{ interpretations.pit }}</p>
 
   <p class='footnote'>Research evidence only. The paper used as the methodological specification is <em>The Three Types of Backtests</em> (Joubert, Sestovic, Barziy, Distaso, and Lopez de Prado, 29 July 2024). Raw Yahoo Finance and FRED histories remain outside Git; compact outputs, manifests, and checksums are included.</p>
 </main>

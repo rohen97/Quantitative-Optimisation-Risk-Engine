@@ -3,6 +3,7 @@ backtest:
   end_date: null
   base_currency: USD
   default_capital_usd: 100000.0
+  current_aum_usd: 186060522.0
   current_portfolio_file: data/external/current_portfolio_template.csv
   output_directory: reports/backtests/1997_to_latest
   cache_directory: data/backtests/cache
@@ -47,6 +48,9 @@ market_data:
     SEK:
       primary: DEXSDUS
       direction: units_per_usd
+    JPY:
+      primary: DEXJPUS
+      direction: units_per_usd
 
 benchmarks:
   common:
@@ -84,6 +88,57 @@ benchmarks:
       symbol: ^HSI
       label: Hang Seng Index
       currency: HKD
+  additional:
+    dow_jones:
+      symbol: ^DJI
+      label: Dow Jones Industrial Average
+      region: US
+      currency: USD
+    nasdaq_composite:
+      symbol: ^IXIC
+      label: Nasdaq Composite Index
+      region: US
+      currency: USD
+    russell_2000:
+      symbol: ^RUT
+      label: Russell 2000 Index
+      region: US
+      currency: USD
+    ftse_250:
+      symbol: ^FTMC
+      label: FTSE 250 Index
+      region: UK
+      currency: GBP
+    cac_40:
+      symbol: ^FCHI
+      label: CAC 40 Index
+      region: EU ex-DACH
+      currency: EUR
+    euro_stoxx_50:
+      symbol: ^STOXX50E
+      label: EURO STOXX 50 Index
+      region: EU ex-DACH
+      currency: EUR
+    nikkei_225:
+      symbol: ^N225
+      label: Nikkei 225 Index
+      region: Japan
+      currency: JPY
+    swiss_market:
+      symbol: ^SSMI
+      label: Swiss Market Index
+      region: DACH
+      currency: CHF
+    msci_eafe_proxy:
+      symbol: EFA
+      label: iShares MSCI EAFE adjusted-close proxy
+      region: Global ex-US
+      currency: USD
+    msci_acwi_proxy:
+      symbol: ACWI
+      label: iShares MSCI ACWI adjusted-close proxy
+      region: Global
+      currency: USD
 
 execution:
   commission_bps: 1.0
@@ -94,6 +149,109 @@ execution:
   maximum_impact_bps: 50.0
   maximum_adv_participation: 0.05
   missing_liquidity_penalty_bps: 15.0
+
+annual_bank_fee:
+  enabled: true
+  label: Annual bank custody and AUM charge
+  annual_rate: 0.0025
+  charge_month: 12
+  reference_aum_usd: 186060522.0
+  reference_annual_charge_usd: 465151.305
+  apply_to_portfolios: true
+  apply_to_research_challenger: true
+  apply_to_external_benchmarks: false
+
+macro_regimes:
+  rate_series: DTB3
+  recession_series: USREC
+  low_rate_upper_pct: 2.0
+  high_rate_lower_pct: 4.0
+  rate_direction_lookback_months: 12
+  rate_direction_threshold_pp: 0.75
+  market_benchmark_symbol: ^GSPC
+  market_momentum_lookback_months: 12
+  market_volatility_lookback_months: 6
+  market_high_volatility: 0.18
+
+macro_events:
+  - event_id: asian_financial_crisis
+    label: Asian financial crisis
+    category: financial_crisis
+    start_date: 1997-07-02
+    end_date: 1998-09-30
+    source_url: https://www.imf.org/external/pubs/ft/icm/icm98/pdf/file02.pdf
+  - event_id: dot_com_bust
+    label: Dot-com bust
+    category: market_crash
+    start_date: 2000-03-10
+    end_date: 2002-10-09
+    source_url: https://fraser.stlouisfed.org/title/economic-report-president-45/2002-8101/fulltext
+  - event_id: september_11_afghanistan
+    label: 9/11 and Afghanistan war shock
+    category: war
+    start_date: 2001-09-11
+    end_date: 2001-12-31
+    source_url: https://www.911commission.gov/report/
+  - event_id: iraq_invasion
+    label: Iraq invasion shock
+    category: war
+    start_date: 2003-03-20
+    end_date: 2003-05-01
+    source_url: https://georgewbush-whitehouse.archives.gov/news/releases/2003/03/20030319-17.html
+  - event_id: global_financial_crisis
+    label: Global financial crisis
+    category: financial_crisis
+    start_date: 2007-12-01
+    end_date: 2009-06-30
+    source_url: https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions
+  - event_id: euro_debt_crisis
+    label: Euro-area sovereign debt crisis
+    category: financial_crisis
+    start_date: 2010-01-01
+    end_date: 2012-07-26
+    source_url: https://www.ecb.europa.eu/press/key/date/2012/html/sp120726.en.html
+  - event_id: crimea_shock
+    label: Crimea invasion and annexation shock
+    category: war
+    start_date: 2014-02-20
+    end_date: 2014-03-31
+    source_url: https://press.un.org/en/2014/ga11493.doc.htm
+  - event_id: brexit_referendum
+    label: Brexit referendum shock
+    category: political_shock
+    start_date: 2016-06-23
+    end_date: 2016-07-31
+    source_url: https://www.electoralcommission.org.uk/research-reports-and-data/our-reports-and-data-past-elections-and-referendums/eu-referendum
+  - event_id: covid_crash
+    label: COVID-19 market crash
+    category: pandemic
+    start_date: 2020-02-19
+    end_date: 2020-04-30
+    source_url: https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020
+  - event_id: russia_ukraine_invasion
+    label: Russia-Ukraine full-scale invasion shock
+    category: war
+    start_date: 2022-02-24
+    end_date: 2022-06-30
+    source_url: https://www.un.org/sg/en/content/sg/statements/2022-06-03/statement-the-secretary-general-the-100th-day-of-the-war-ukraine
+  - event_id: gaza_war
+    label: Gaza war shock
+    category: war
+    start_date: 2023-10-07
+    end_date: 2024-01-31
+    source_url: https://www.un.org/sg/en/content/sg/statement/2023-10-07/statement-attributable-the-spokesperson-for-the-secretary-general-regarding-the-situation-the-middle-east
+  - event_id: israel_iran_war
+    label: Israel-Iran war shock
+    category: war
+    start_date: 2025-06-13
+    end_date: 2025-06-24
+    source_url: https://www.un.org/sg/en/content/sg/statements/2025-06-18/statement-the-secretary-general-the-need-for-ceasefire-between-israel-and-iran
+  - event_id: us_iran_war
+    label: 2026 US-Iran war shock
+    category: war
+    start_date: 2026-02-28
+    end_date: 2026-04-08
+    source_url: https://dppa.dfs.un.org/en/middle-east-live-8-april-us-iran-ceasefire-announced-strikes-continue-lebanon
 
 resampling:
   samples: 5000

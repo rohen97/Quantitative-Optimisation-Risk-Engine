@@ -16,6 +16,10 @@ import numpy as np
 import pandas as pd
 from jinja2 import Template
 
+from src.backtesting.interpretation import (
+    build_report_interpretations,
+    written_interpretation_markdown,
+)
 from src.backtesting.models import ReplayResult
 from src.backtesting.runtime import configure_font_environment
 from src.backtesting.statistics import drawdown_series
@@ -363,6 +367,246 @@ def plot_causal_graph(path: Path) -> None:
     _save(fig, path)
 
 
+def plot_major_indices(
+    benchmark_monthly: pd.DataFrame,
+    labels: dict[str, str],
+    path: Path,
+) -> None:
+    panels = [
+        (
+            'United States',
+            ['common_index', 'dow_jones', 'nasdaq_composite', 'russell_2000'],
+        ),
+        (
+            'Europe and Asia',
+            [
+                'region_index_uk',
+                'ftse_250',
+                'region_index_dach',
+                'cac_40',
+                'euro_stoxx_50',
+                'region_index_eu_ex_dach',
+                'region_index_mainland_china',
+                'region_index_hong_kong',
+                'nikkei_225',
+                'swiss_market',
+            ],
+        ),
+    ]
+    _style()
+    fig, axes = plt.subplots(2, 1, figsize=(14, 11), sharex=True)
+    for axis, (title, strategies) in zip(axes, panels, strict=True):
+        plotted = 0
+        for strategy in strategies:
+            group = benchmark_monthly.loc[
+                benchmark_monthly['strategy'].eq(strategy)
+            ].sort_values('date')
+            if group.empty:
+                continue
+            indexed = (
+                group['net_value_usd']
+                / float(group['initial_capital_usd'].iloc[0])
+                * 100.0
+            )
+            axis.plot(
+                pd.to_datetime(group['date']),
+                indexed,
+                label=labels.get(strategy, strategy),
+                color=PALETTE[plotted % len(PALETTE)],
+                linewidth=1.45,
+            )
+            plotted += 1
+        axis.set_yscale('log')
+        axis.set_title(title)
+        axis.set_ylabel('USD wealth, start = 100')
+        axis.legend(loc='upper left', bbox_to_anchor=(1.01, 1.0), fontsize=8)
+    axes[-1].set_xlabel('')
+    fig.suptitle('Major Index Benchmarks in USD', fontsize=14, fontweight='bold')
+    fig.tight_layout()
+    _save(fig, path)
+
+
+def plot_interest_rate_history(regimes: pd.DataFrame, path: Path) -> None:
+    _style()
+    data = regimes.dropna(subset=['rate_pct']).sort_values('date')
+    fig, axis = plt.subplots(figsize=(13, 5.5))
+    axis.axhspan(0.0, 2.0, color='#DCEFEA', alpha=0.70, label='Low (<2%)')
+    axis.axhspan(2.0, 4.0, color='#F9E8C7', alpha=0.60, label='Moderate (2-4%)')
+    upper = max(7.0, float(data['rate_pct'].max()) + 0.5)
+    axis.axhspan(4.0, upper, color='#F4D9D9', alpha=0.55, label='High (>=4%)')
+    axis.plot(
+        pd.to_datetime(data['date']),
+        data['rate_pct'],
+        color='#172033',
+        linewidth=1.5,
+        label='Lagged 3-month T-bill yield',
+    )
+    axis.set_ylim(0.0, upper)
+    axis.set_title('Interest-Rate Environments Used for Conditional Returns')
+    axis.set_ylabel('Annual yield')
+    axis.yaxis.set_major_formatter(lambda value, _: f'{value:.1f}%')
+    axis.legend(loc='upper left', ncol=4, fontsize=8)
+    _save(fig, path)
+
+
+def plot_regime_heatmap(
+    data: pd.DataFrame,
+    labels: dict[str, str],
+    environments: list[str],
+    path: Path,
+    title: str,
+) -> None:
+    selected = [
+        'current_portfolio',
+        'final_portfolio',
+        'clean_sheet',
+        'llm_benchmark',
+        'trend_risk_controlled_indices',
+        'common_index',
+        'region_index_dach',
+        'region_index_uk',
+    ]
+    pivot = data.pivot_table(
+        index='strategy',
+        columns='environment',
+        values='annualised_geometric_return',
+    )
+    pivot = pivot.reindex(
+        index=[key for key in selected if key in pivot.index],
+        columns=[value for value in environments if value in pivot.columns],
+    )
+    _style()
+    fig, axis = plt.subplots(figsize=(12, max(5.5, len(pivot) * 0.55 + 2)))
+    values = pivot.to_numpy(dtype=float)
+    image = axis.imshow(values, aspect='auto', cmap='RdYlGn', vmin=-0.20, vmax=0.20)
+    axis.set_xticks(range(len(pivot.columns)), pivot.columns)
+    axis.set_yticks(
+        range(len(pivot.index)),
+        [labels.get(strategy, strategy) for strategy in pivot.index],
+    )
+    for row in range(values.shape[0]):
+        for column in range(values.shape[1]):
+            value = values[row, column]
+            if np.isfinite(value):
+                axis.text(
+                    column,
+                    row,
+                    f'{value:.1%}',
+                    ha='center',
+                    va='center',
+                    fontsize=8,
+                    color='#172033',
+                )
+    axis.set_title(title)
+    axis.grid(False)
+    colorbar = fig.colorbar(image, ax=axis, fraction=0.025, pad=0.02)
+    colorbar.ax.yaxis.set_major_formatter(lambda value, _: f'{value:.0%}')
+    _save(fig, path)
+
+
+def plot_macro_event_timeline(
+    monthly: pd.DataFrame,
+    benchmark_monthly: pd.DataFrame,
+    events: pd.DataFrame,
+    labels: dict[str, str],
+    path: Path,
+) -> None:
+    selected = ['current_portfolio', 'final_portfolio', 'common_index']
+    combined = pd.concat([monthly, benchmark_monthly], ignore_index=True)
+    category_colors = {
+        'financial_crisis': '#C44E52',
+        'market_crash': '#B35C1E',
+        'pandemic': '#5B4B8A',
+        'war': '#6B7280',
+        'political_shock': '#D69E2E',
+    }
+    _style()
+    fig, axis = plt.subplots(figsize=(15, 8))
+    for index, strategy in enumerate(selected):
+        group = combined.loc[combined['strategy'].eq(strategy)].sort_values('date')
+        if group.empty:
+            continue
+        indexed = (
+            group['net_value_usd']
+            / float(group['initial_capital_usd'].iloc[0])
+            * 100.0
+        )
+        axis.plot(
+            pd.to_datetime(group['date']),
+            indexed,
+            label=labels.get(strategy, strategy),
+            color=PALETTE[index],
+            linewidth=1.8,
+            zorder=3,
+        )
+    for index, event in events.reset_index(drop=True).iterrows():
+        start = pd.Timestamp(event['start_date'])
+        end = pd.Timestamp(event['end_date'])
+        color = category_colors.get(event['category'], '#94A3B8')
+        axis.axvspan(start, end, color=color, alpha=0.13, linewidth=0)
+        midpoint = start + (end - start) / 2
+        axis.text(
+            midpoint,
+            0.98 - 0.06 * (index % 3),
+            event['label'],
+            transform=axis.get_xaxis_transform(),
+            rotation=90,
+            ha='right',
+            va='top',
+            fontsize=6.5,
+            color='#334155',
+        )
+    axis.set_yscale('log')
+    axis.set_title('Portfolio Wealth Through Major Crises, Wars, and Macro Shocks')
+    axis.set_ylabel('USD wealth, start = 100')
+    axis.legend(loc='lower right', fontsize=8)
+    _save(fig, path)
+
+
+def plot_macro_event_returns(
+    event_performance: pd.DataFrame,
+    labels: dict[str, str],
+    path: Path,
+) -> None:
+    selected = ['current_portfolio', 'final_portfolio', 'common_index']
+    data = event_performance.loc[
+        event_performance['strategy'].isin(selected)
+    ].copy()
+    event_order = (
+        data[['event_label', 'event_start']]
+        .drop_duplicates()
+        .sort_values('event_start')['event_label']
+        .tolist()
+    )
+    pivot = data.pivot(
+        index='event_label',
+        columns='strategy',
+        values='cumulative_return',
+    ).reindex(event_order)
+    _style()
+    fig, axis = plt.subplots(figsize=(13, 9))
+    y = np.arange(len(pivot))
+    width = 0.24
+    for index, strategy in enumerate(selected):
+        values = pivot.get(strategy, pd.Series(np.nan, index=pivot.index))
+        axis.barh(
+            y + (index - 1) * width,
+            values,
+            height=width,
+            color=PALETTE[index],
+            label=labels.get(strategy, strategy),
+        )
+    axis.axvline(0.0, color='#334155', linewidth=0.8)
+    axis.set_yticks(y, pivot.index)
+    axis.invert_yaxis()
+    axis.set_title('Cumulative Return During Configured Macro-Event Windows')
+    axis.set_xlabel('Cumulative return')
+    axis.xaxis.set_major_formatter(lambda value, _: f'{value:.0%}')
+    axis.legend(loc='lower right')
+    axis.grid(axis='y', visible=False)
+    _save(fig, path)
+
+
 def _format_value(column: str, value: object) -> str:
     if pd.isna(value):
         return ''
@@ -371,10 +615,26 @@ def _format_value(column: str, value: object) -> str:
         return f'${float(value):,.0f}'
     if any(token in name for token in ('probabilistic', 'deflated', 'probability')):
         return f'{float(value):.2%}'
-    percentage_ratios = {'positive_month_ratio', 'outperformance_month_ratio'}
+    percentage_ratios = {
+        'annual_rate',
+        'environment_share',
+        'positive_month_ratio',
+        'outperformance_month_ratio',
+    }
     if name in percentage_ratios or any(
         token in name
-        for token in ('return', 'cagr', 'volatility', 'drawdown', 'alpha', 'turnover', 'weight', 'participation')
+        for token in (
+            'return',
+            'cagr',
+            'volatility',
+            'drawdown',
+            'alpha',
+            'turnover',
+            'weight',
+            'participation',
+            'var_5',
+            'expected_shortfall',
+        )
     ):
         return f'{float(value):.2%}'
     if any(token in name for token in ('sharpe', 'sortino', 'calmar', 'beta', 'information_ratio', 'capture')):
@@ -432,14 +692,17 @@ This package compares every investable portfolio output currently produced by th
 - monthly adjusted-close returns converted to USD with historical FRED FX
 - pre-listing and unallocated capital held at the 3-month Treasury-bill rate
 - monthly rebalancing with commissions, spread, slippage, market impact, and ADV checks
-- portfolio-specific regional index blends plus S&P 500 and SPY comparisons
+- a 25 bp annual bank AUM charge assessed once each December on then-current portfolio value
+- portfolio-specific regional blends plus DAX, FTSE, Dow, Nasdaq, S&P 500, and global index comparisons
+- lagged interest-rate and market-regime performance plus retrospective recession analysis
+- source-backed macro-event windows and charts from the Asian crisis through the 2026 US-Iran war
 - a lagged trend and risk-controlled regional-index challenger
 - 36-month untouched embargo evaluation
 - circular moving-block resampling and correlated fat-tailed Monte Carlo
 - PSR, Minimum Track Record Length, Sidak FWER, and Deflated Sharpe Ratios
 - HTML and PDF reports, source manifest, compact result tables, plots, and SHA-256 checksums
 
-Open [backtest_report.html](backtest_report.html) for the complete rendered report. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
+Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis.pdf](portfolio_backtest_analysis.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
 
 Raw provider histories are intentionally excluded from Git. This is research evidence, not authorization for live trading.
 '''
@@ -448,13 +711,35 @@ Raw provider histories are intentionally excluded from Git. This is research evi
 
 def _write_checksums(output_directory: Path) -> None:
     rows = []
+    local_legacy_artifacts = {
+        'backtest_report.pdf',
+        'backtest_report_expanded.pdf',
+    }
     for path in sorted(output_directory.rglob('*')):
-        if not path.is_file() or path.name == 'checksums.sha256':
+        if (
+            not path.is_file()
+            or path.name == 'checksums.sha256'
+            or path.name in local_legacy_artifacts
+        ):
             continue
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         relative = str(path.relative_to(output_directory)).replace(chr(92), '/')
         rows.append(f'{digest}  {relative}')
     (output_directory / 'checksums.sha256').write_text('\n'.join(rows) + '\n', encoding='ascii')
+
+
+def _meaningful_pdf_stderr(stderr: str) -> str:
+    ignored_fragments = (
+        'GLib-GIO-WARNING',
+        'Unexpectedly, UWP app',
+    )
+    lines = [
+        line
+        for line in stderr.splitlines()
+        if line.strip()
+        and not any(fragment in line for fragment in ignored_fragments)
+    ]
+    return '\n'.join(lines).strip()
 
 
 def write_backtest_outputs(
@@ -506,10 +791,51 @@ def write_backtest_outputs(
     plot_embargo(frames['embargo_comparison'], labels, plot_directory / 'embargo.png')
     plot_investable_starts(summary, plot_directory / 'investable_starts.png')
     plot_causal_graph(plot_directory / 'causal_graph.png')
+    plot_major_indices(
+        frames['benchmark_monthly_returns'],
+        labels,
+        plot_directory / 'major_indices.png',
+    )
+    plot_interest_rate_history(
+        frames['monthly_regimes'],
+        plot_directory / 'interest_rate_history.png',
+    )
+    plot_regime_heatmap(
+        frames['interest_rate_level_performance'],
+        labels,
+        ['Low (<2%)', 'Moderate (2-4%)', 'High (>=4%)'],
+        plot_directory / 'interest_rate_performance.png',
+        'Annualised Return Across Interest-Rate Levels',
+    )
+    plot_regime_heatmap(
+        frames['market_regime_performance'],
+        labels,
+        ['Bull / Calm', 'Bull / Volatile', 'Bear / Calm', 'Bear / Volatile'],
+        plot_directory / 'market_regime_performance.png',
+        'Annualised Return Across Lagged Market Regimes',
+    )
+    plot_macro_event_timeline(
+        monthly,
+        frames['benchmark_monthly_returns'],
+        frames['macro_event_definitions'],
+        labels,
+        plot_directory / 'macro_event_timeline.png',
+    )
+    plot_macro_event_returns(
+        frames['macro_event_performance'],
+        labels,
+        plot_directory / 'macro_event_returns.png',
+    )
 
     manifest_path = output_directory / 'run_manifest.json'
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True, default=str) + '\n', encoding='utf-8')
     requested = summary.loc[summary['window'].eq('requested_1997_window')].sort_values('sharpe', ascending=False)
+    interpretations = build_report_interpretations(frames, manifest)
+    interpretation_path = output_directory / 'written_interpretation.md'
+    interpretation_path.write_text(
+        written_interpretation_markdown(interpretations),
+        encoding='utf-8',
+    )
     performance_table = _html_table(
         requested,
         ['strategy_label', 'initial_capital_usd', 'cagr', 'annualised_volatility', 'sharpe', 'maximum_drawdown', 'ending_value_usd', 'pnl_usd'],
@@ -522,16 +848,21 @@ def write_backtest_outputs(
             'pnl_usd': 'PnL',
         },
     )
-    primary_benchmarks = {
+    report_strategies = {
+        'current_portfolio',
+        'final_portfolio',
+        'clean_sheet',
+        'llm_benchmark',
+        'trend_risk_controlled_indices',
         'common_index',
-        'total_return_proxy',
-        'equal_weight_regional_indices',
+        'dow_jones',
+        'region_index_dach',
+        'region_index_uk',
     }
-    benchmark_performance = frames['benchmark_performance']
+    benchmark_performance = frames['standalone_benchmark_performance']
     benchmark_performance = benchmark_performance.loc[
         benchmark_performance['window'].eq('common_investable_window')
-        & benchmark_performance['strategy'].isin(primary_benchmarks)
-    ].sort_values('sharpe', ascending=False)
+    ].sort_values('cagr', ascending=False)
     benchmark_performance_table = _html_table(
         benchmark_performance,
         ['strategy_label', 'cagr', 'annualised_volatility', 'sharpe', 'maximum_drawdown', 'ending_value_usd'],
@@ -540,6 +871,90 @@ def write_backtest_outputs(
             'annualised_volatility': 'Volatility',
             'maximum_drawdown': 'Max drawdown',
             'ending_value_usd': 'Ending value on $100k',
+        },
+    )
+    paper_ratios = frames['paper_ratio_summary']
+    paper_ratios = paper_ratios.loc[
+        paper_ratios['strategy'].isin(report_strategies)
+    ].sort_values('lo_adjusted_sharpe', ascending=False)
+    ratio_table = _html_table(
+        paper_ratios,
+        [
+            'strategy_label',
+            'cagr',
+            'sharpe',
+            'lo_adjusted_sharpe',
+            'sortino',
+            'calmar',
+            'maximum_drawdown',
+            'monthly_var_5_loss',
+            'monthly_expected_shortfall_5',
+            'probabilistic_sharpe_ratio',
+            'minimum_track_record_months',
+            'deflated_sharpe_ratio',
+        ],
+        {
+            'strategy_label': 'Portfolio or index',
+            'lo_adjusted_sharpe': 'Lo Sharpe',
+            'maximum_drawdown': 'Max drawdown',
+            'monthly_var_5_loss': 'Monthly VaR 5%',
+            'monthly_expected_shortfall_5': 'Monthly ES 5%',
+            'probabilistic_sharpe_ratio': 'PSR',
+            'minimum_track_record_months': 'MinTRL months',
+            'deflated_sharpe_ratio': 'DSR',
+        },
+    )
+    fee_assumption_table = _html_table(
+        frames['annual_bank_fee_assumption'],
+        [
+            'label',
+            'annual_rate',
+            'annual_rate_bps',
+            'charge_month',
+            'reference_aum_usd',
+            'configured_reference_charge_usd',
+            'calculated_reference_charge_usd',
+            'reconciliation_difference_usd',
+            'external_benchmarks_charged',
+        ],
+        {
+            'label': 'Charge',
+            'annual_rate': 'Annual rate',
+            'annual_rate_bps': 'Basis points',
+            'charge_month': 'Assessment month',
+            'reference_aum_usd': 'Reference AUM',
+            'configured_reference_charge_usd': 'Bank charge',
+            'calculated_reference_charge_usd': 'Calculated charge',
+            'reconciliation_difference_usd': 'Difference',
+            'external_benchmarks_charged': 'Benchmarks charged',
+        },
+    )
+    fee_impact_table = _html_table(
+        frames['cost_liquidity_summary'].sort_values(
+            'total_bank_fee_usd',
+            ascending=False,
+        ),
+        [
+            'strategy',
+            'total_transaction_cost_usd',
+            'total_bank_fee_usd',
+            'total_modeled_cost_usd',
+            'annual_bank_fee_assessments',
+            'ending_value_before_bank_fee_usd',
+            'ending_value_after_bank_fee_usd',
+            'ending_value_bank_fee_drag_usd',
+            'effective_bank_fee_bps',
+        ],
+        {
+            'strategy': 'Portfolio',
+            'total_transaction_cost_usd': 'Trading costs',
+            'total_bank_fee_usd': 'Bank fees paid',
+            'total_modeled_cost_usd': 'Total modeled costs',
+            'annual_bank_fee_assessments': 'Annual assessments',
+            'ending_value_before_bank_fee_usd': 'Ending value before fee',
+            'ending_value_after_bank_fee_usd': 'Ending value after fee',
+            'ending_value_bank_fee_drag_usd': 'Ending-value fee drag',
+            'effective_bank_fee_bps': 'Effective fee bps',
         },
     )
     benchmark_relative = frames['benchmark_relative_summary']
@@ -569,11 +984,21 @@ def write_backtest_outputs(
         ['strategy', 'observations', 'annualised_return', 'annualised_volatility', 'sharpe', 'maximum_drawdown', 'annualised_cost_drag', 'evidence_mode'],
     )
     execution_table = _html_table(
-        frames['cost_liquidity_summary'].sort_values('total_transaction_cost_usd', ascending=False),
-        ['strategy', 'total_transaction_cost_usd', 'annualised_turnover', 'maximum_adv_participation', 'liquidity_breach_count', 'maximum_unfilled_target_weight'],
+        frames['cost_liquidity_summary'].sort_values(
+            'total_modeled_cost_usd',
+            ascending=False,
+        ),
+        [
+            'strategy',
+            'total_modeled_cost_usd',
+            'annualised_turnover',
+            'maximum_adv_participation',
+            'liquidity_breach_count',
+            'maximum_unfilled_target_weight',
+        ],
         {
             'strategy': 'Portfolio',
-            'total_transaction_cost_usd': 'Total modeled cost',
+            'total_modeled_cost_usd': 'Total modeled cost',
             'annualised_turnover': 'Annual turnover',
             'maximum_adv_participation': 'Max ADV participation',
             'liquidity_breach_count': 'Constrained trade events',
@@ -591,6 +1016,145 @@ def write_backtest_outputs(
             'adjustment_factor': 'Scale factor',
         },
     )
+    conditional_columns = [
+        'environment',
+        'strategy_label',
+        'observations',
+        'annualised_geometric_return',
+        'annualised_volatility',
+        'sharpe',
+        'maximum_drawdown',
+        'worst_month',
+    ]
+    conditional_rename = {
+        'environment': 'Environment',
+        'strategy_label': 'Portfolio or index',
+        'observations': 'Months',
+        'annualised_geometric_return': 'Conditional annual return',
+        'annualised_volatility': 'Volatility',
+        'maximum_drawdown': 'Conditional max drawdown',
+        'worst_month': 'Worst month',
+    }
+
+    def conditional_table(frame: pd.DataFrame) -> str:
+        selected = frame.loc[frame['strategy'].isin(report_strategies)].copy()
+        return _html_table(
+            selected.sort_values(['environment', 'strategy_label']),
+            conditional_columns,
+            conditional_rename,
+        )
+
+    rate_level_table = conditional_table(
+        frames['interest_rate_level_performance']
+    )
+    rate_direction_table = conditional_table(
+        frames['interest_rate_direction_performance']
+    )
+    market_regime_table = conditional_table(frames['market_regime_performance'])
+    economic_cycle_table = conditional_table(
+        frames['economic_cycle_performance']
+    )
+    event_definition_table = _html_table(
+        frames['macro_event_definitions'],
+        ['label', 'category', 'start_date', 'end_date', 'window_days'],
+        {
+            'label': 'Event window',
+            'category': 'Type',
+            'start_date': 'Start',
+            'end_date': 'End',
+            'window_days': 'Days',
+        },
+    )
+    event_table = _html_table(
+        frames['macro_event_performance'].loc[
+            frames['macro_event_performance']['strategy'].isin(
+                {'current_portfolio', 'final_portfolio', 'common_index'}
+            )
+        ].sort_values(['event_start', 'strategy_label']),
+        [
+            'event_label',
+            'strategy_label',
+            'observations',
+            'cumulative_return',
+            'maximum_drawdown',
+            'worst_month',
+            'event_start_aum_usd',
+            'event_pnl_usd',
+        ],
+        {
+            'event_label': 'Event window',
+            'strategy_label': 'Portfolio or index',
+            'observations': 'Months',
+            'maximum_drawdown': 'Max drawdown',
+            'event_start_aum_usd': 'Starting AUM',
+            'event_pnl_usd': 'Event PnL',
+        },
+    )
+    resampling_table = _html_table(
+        frames['block_resampling_summary'].sort_values(
+            'cagr_median',
+            ascending=False,
+        ),
+        [
+            'strategy',
+            'cagr_p05',
+            'cagr_median',
+            'cagr_p95',
+            'maximum_drawdown_p05',
+            'probability_of_loss',
+            'probability_outperform_regional_benchmark',
+        ],
+        {
+            'strategy': 'Portfolio',
+            'maximum_drawdown_p05': 'Drawdown 5th percentile',
+            'probability_of_loss': 'Loss probability',
+            'probability_outperform_regional_benchmark': 'Regional outperformance',
+        },
+    )
+    monte_carlo_table = _html_table(
+        frames['monte_carlo_summary'].sort_values(
+            'cagr_median',
+            ascending=False,
+        ),
+        [
+            'strategy',
+            'cagr_p05',
+            'cagr_median',
+            'cagr_p95',
+            'maximum_drawdown_p05',
+            'ending_value_p05_usd',
+            'ending_value_median_usd',
+            'ending_value_p95_usd',
+            'probability_of_loss',
+        ],
+        {
+            'strategy': 'Portfolio',
+            'maximum_drawdown_p05': 'Drawdown 5th percentile',
+            'ending_value_p05_usd': 'Ending value 5th percentile',
+            'ending_value_median_usd': 'Median ending value',
+            'ending_value_p95_usd': 'Ending value 95th percentile',
+            'probability_of_loss': 'Loss probability',
+        },
+    )
+    embargo_table = _html_table(
+        frames['embargo_comparison'].sort_values(['strategy', 'period']),
+        [
+            'strategy',
+            'period',
+            'observations',
+            'cagr',
+            'annualised_volatility',
+            'sharpe',
+            'maximum_drawdown',
+        ],
+        {
+            'strategy': 'Portfolio',
+            'period': 'Sample',
+            'observations': 'Months',
+            'annualised_volatility': 'Volatility',
+            'maximum_drawdown': 'Max drawdown',
+        },
+    )
 
     template_path = Path(__file__).parent / 'templates' / 'backtest_report.html.j2'
     template = Template(template_path.read_text(encoding='utf-8'))
@@ -606,9 +1170,24 @@ def write_backtest_outputs(
         current_nav=f'${current_nav:,.0f}',
         common_start=manifest.get('common_investable_start', 'Not reached'),
         pit_months=manifest.get('point_in_time_months', 0),
+        benchmark_count=manifest.get('standalone_benchmark_count', 0),
+        event_count=manifest.get('macro_event_count', 0),
+        interpretations=interpretations,
         performance_table=performance_table,
+        ratio_table=ratio_table,
+        fee_assumption_table=fee_assumption_table,
+        fee_impact_table=fee_impact_table,
         benchmark_performance_table=benchmark_performance_table,
         benchmark_table=benchmark_table,
+        rate_level_table=rate_level_table,
+        rate_direction_table=rate_direction_table,
+        market_regime_table=market_regime_table,
+        economic_cycle_table=economic_cycle_table,
+        event_definition_table=event_definition_table,
+        event_table=event_table,
+        resampling_table=resampling_table,
+        monte_carlo_table=monte_carlo_table,
+        embargo_table=embargo_table,
         significance_table=significance_table,
         limitation_table=limitation_table,
         pit_table=pit_table,
@@ -617,7 +1196,7 @@ def write_backtest_outputs(
     )
     html_path = output_directory / 'backtest_report.html'
     html_path.write_text(html, encoding='utf-8')
-    pdf_path = output_directory / 'backtest_report.pdf'
+    pdf_path = output_directory / 'portfolio_backtest_analysis.pdf'
     pdf_warning_path = output_directory / 'pdf_render_warning.txt'
     try:
         font_cache = Path(config['backtest']['cache_directory']) / 'fontconfig'
@@ -642,8 +1221,12 @@ def write_backtest_outputs(
         if completed.returncode != 0:
             detail = completed.stderr.strip() or completed.stdout.strip()
             raise RuntimeError(detail or f'PDF renderer exited with {completed.returncode}.')
-        if completed.stderr.strip():
-            pdf_warning_path.write_text(completed.stderr, encoding='utf-8')
+        meaningful_stderr = _meaningful_pdf_stderr(completed.stderr)
+        if meaningful_stderr:
+            pdf_warning_path.write_text(
+                meaningful_stderr + '\n',
+                encoding='utf-8',
+            )
         elif pdf_warning_path.exists():
             pdf_warning_path.unlink()
     except Exception as exc:
@@ -658,4 +1241,5 @@ def write_backtest_outputs(
         'html_report': html_path,
         'pdf_report': pdf_path,
         'manifest': manifest_path,
+        'written_interpretation': interpretation_path,
     }

@@ -44,12 +44,17 @@ authorize unattended live trading.
 ## 1997-Present Portfolio Backtest
 
 The repository now includes a checksummed backtest package for every current
-portfolio output, using the observed USD 80,540 NAV for current-derived portfolios
+portfolio output, using USD 186,060,522 AUM for current-derived portfolios
 and USD 100,000 for independent optimiser, clean-sheet, LLM, and index strategies.
 It compares the portfolios with broad and region-matched indices, models USD FX,
-cash, transaction costs, market impact, and a hard 5% ADV execution cap, and adds
-moving-block resampling, fat-tailed Monte Carlo, a 36-month embargo, PSR, MinTRL,
-Sidak control, and Deflated Sharpe Ratios.
+cash, transaction costs, market impact, a hard 5% ADV execution cap, and a 25 bp
+bank charge assessed annually on then-current AUM. DAX, FTSE 100 and 250, Dow
+Jones, Nasdaq, Russell 2000, CAC 40, EURO STOXX 50, Nikkei 225, Swiss Market,
+Shanghai, Hang Seng, S&P 500, and global ETF proxies supply benchmark context.
+Lagged interest-rate and market regimes, retrospective NBER recession labels,
+13 source-backed macro-event windows, moving-block resampling, fat-tailed Monte
+Carlo, a 36-month embargo, PSR, MinTRL, Sidak control, and Deflated Sharpe Ratios
+complete the analysis.
 
 > The long history is a retrospective replay of today's holdings. It is useful for
 > exposure, path, liquidity, and benchmark diagnostics, but it contains selection
@@ -57,9 +62,11 @@ Sidak control, and Deflated Sharpe Ratios.
 > separate evidence set.
 
 Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
-or review the [methodology and paper mapping](docs/BACKTEST_METHODOLOGY.md).
+or review the [38-page PDF analysis](reports/backtests/1997_to_latest/portfolio_backtest_analysis.pdf),
+[plain-language interpretation](reports/backtests/1997_to_latest/written_interpretation.md),
+and [methodology and paper mapping](docs/BACKTEST_METHODOLOGY.md).
 
-![Portfolio and index benchmark comparison](reports/backtests/1997_to_latest/plots/benchmark_comparison.png)
+![Portfolio wealth through major macro events](reports/backtests/1997_to_latest/plots/macro_event_timeline.png)
 
 Run it locally with cached provider data:
 

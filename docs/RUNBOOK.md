@@ -19,9 +19,12 @@ Run the complete 1997-present portfolio-output backtest:
 ```
 
 Use `--refresh-data` to replace the ignored yfinance and FRED caches. The command
-replays all current portfolio outputs, regional benchmark blends, and the lagged
-index challenger; runs block resampling and correlated fat-tailed Monte Carlo; and
-writes a checksummed HTML/PDF evidence package to
+replays all current portfolio outputs at their assigned AUM, applies transaction
+costs, liquidity caps, and the annual 25 bp bank charge, and compares 19 standalone
+major-index paths. It also evaluates lagged interest-rate and market regimes,
+retrospective recessions, 13 macro-event windows, block resampling, and correlated
+fat-tailed Monte Carlo. The command writes checksummed HTML,
+`portfolio_backtest_analysis.pdf`, plain-language interpretation, CSV, and plot evidence to
 `reports/backtests/1997_to_latest/`. Read
 `docs/BACKTEST_METHODOLOGY.md` before interpreting long-history results: current
 holdings are retrospective exposure replays, while dated point-in-time model

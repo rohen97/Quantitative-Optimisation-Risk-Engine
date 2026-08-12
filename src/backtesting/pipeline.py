@@ -12,6 +12,12 @@ from src.backtesting.engine import build_index_results, replay_all_portfolios
 from src.backtesting.market_data import load_market_data
 from src.backtesting.portfolio_catalog import build_portfolio_catalog, portfolio_definitions
 from src.backtesting.reporting import write_backtest_outputs
+from src.backtesting.scenarios import (
+    build_monthly_regimes,
+    conditional_performance,
+    event_definitions,
+    macro_event_performance,
+)
 from src.backtesting.statistics import (
     annual_return_table,
     benchmark_relative_summary,
@@ -114,6 +120,27 @@ def _bias_and_limitations() -> pd.DataFrame:
                 'treatment': 'Commission, spread, slippage, square-root impact, missing-ADV penalty, and 5% ADV caps are reported.',
             },
             {
+                'category': 'annual bank AUM charge',
+                'severity': 'MEDIUM',
+                'applies_to': 'portfolio outputs and index challenger',
+                'status': 'MODELED',
+                'treatment': 'A 25 bp charge is deducted once each December from then-current AUM; external benchmarks remain uncharged references.',
+            },
+            {
+                'category': 'conditional regime analysis',
+                'severity': 'MEDIUM',
+                'applies_to': 'rate, market, and recession tables',
+                'status': 'DESCRIPTIVE',
+                'treatment': 'Rate and market inputs are lagged one month; NBER recession labels are retrospective and are not presented as tradable signals.',
+            },
+            {
+                'category': 'macro-event windows',
+                'severity': 'MEDIUM',
+                'applies_to': 'event comparisons and shaded plots',
+                'status': 'DESCRIPTIVE',
+                'treatment': 'Configured market-response windows overlap monthly returns and do not assert legal conflict dates or isolate causal effects.',
+            },
+            {
                 'category': 'short-sale constraints',
                 'severity': 'LOW',
                 'applies_to': 'all tested portfolios',
@@ -146,10 +173,45 @@ def _cost_liquidity_summary(results: list) -> pd.DataFrame:
             monthly.get('unfilled_target_weight', pd.Series(0.0, index=monthly.index)),
             errors='coerce',
         ).fillna(0.0)
+        bank_fees = pd.to_numeric(
+            monthly.get('bank_fee_usd', pd.Series(0.0, index=monthly.index)),
+            errors='coerce',
+        ).fillna(0.0)
+        assessments = pd.to_numeric(
+            monthly.get(
+                'bank_fee_assessment_aum_usd',
+                pd.Series(0.0, index=monthly.index),
+            ),
+            errors='coerce',
+        ).fillna(0.0)
+        transaction_costs = pd.to_numeric(
+            monthly['transaction_cost_usd'],
+            errors='coerce',
+        ).fillna(0.0)
         rows.append(
             {
                 'strategy': result.strategy,
-                'total_transaction_cost_usd': float(monthly['transaction_cost_usd'].sum()),
+                'total_transaction_cost_usd': float(transaction_costs.sum()),
+                'total_bank_fee_usd': float(bank_fees.sum()),
+                'total_modeled_cost_usd': float(
+                    transaction_costs.sum() + bank_fees.sum()
+                ),
+                'annual_bank_fee_assessments': int(bank_fees.gt(0.0).sum()),
+                'ending_value_before_bank_fee_usd': float(
+                    monthly['pre_bank_fee_value_usd'].iloc[-1]
+                ),
+                'ending_value_after_bank_fee_usd': float(
+                    monthly['net_value_usd'].iloc[-1]
+                ),
+                'ending_value_bank_fee_drag_usd': float(
+                    monthly['pre_bank_fee_value_usd'].iloc[-1]
+                    - monthly['net_value_usd'].iloc[-1]
+                ),
+                'effective_bank_fee_bps': (
+                    float(bank_fees.sum() / assessments.sum() * 10_000.0)
+                    if assessments.sum() > 0
+                    else 0.0
+                ),
                 'average_monthly_turnover': float(monthly['turnover'].mean()),
                 'annualised_turnover': float(monthly['turnover'].mean() * 12.0),
                 'maximum_adv_participation': float(monthly['maximum_adv_participation'].max()),
@@ -161,6 +223,39 @@ def _cost_liquidity_summary(results: list) -> pd.DataFrame:
             }
         )
     return pd.DataFrame(rows)
+
+
+def _annual_bank_fee_assumption(config: dict) -> pd.DataFrame:
+    settings = config['annual_bank_fee']
+    reference_aum = float(settings['reference_aum_usd'])
+    annual_rate = float(settings['annual_rate'])
+    configured_charge = float(settings['reference_annual_charge_usd'])
+    calculated_charge = reference_aum * annual_rate
+    return pd.DataFrame(
+        [
+            {
+                'label': settings['label'],
+                'annual_rate': annual_rate,
+                'annual_rate_bps': annual_rate * 10_000.0,
+                'charge_month': int(settings['charge_month']),
+                'reference_aum_usd': reference_aum,
+                'configured_reference_charge_usd': configured_charge,
+                'calculated_reference_charge_usd': calculated_charge,
+                'reconciliation_difference_usd': (
+                    configured_charge - calculated_charge
+                ),
+                'portfolio_outputs_charged': bool(
+                    settings['apply_to_portfolios']
+                ),
+                'research_challenger_charged': bool(
+                    settings['apply_to_research_challenger']
+                ),
+                'external_benchmarks_charged': bool(
+                    settings['apply_to_external_benchmarks']
+                ),
+            }
+        ]
+    )
 
 
 def run_backtest_suite(
@@ -221,6 +316,56 @@ def run_backtest_suite(
         [benchmark_requested, benchmark_common],
         ignore_index=True,
     )
+    standalone_evidence = {
+        'common_market_benchmark',
+        'standalone_market_benchmark',
+        'index_benchmark',
+    }
+    standalone_benchmarks = [
+        result
+        for result in benchmark_results
+        if result.evidence_type in standalone_evidence
+    ]
+    standalone_benchmark_performance = benchmark_performance.loc[
+        benchmark_performance['evidence_type'].isin(standalone_evidence)
+    ].reset_index(drop=True)
+    analysis_results = [*strategy_results, *standalone_benchmarks]
+    monthly_regimes = build_monthly_regimes(market_data, config)
+    rate_level_performance = conditional_performance(
+        analysis_results,
+        monthly_regimes,
+        market_data.cash_returns,
+        config,
+        'rate_level',
+    )
+    rate_direction_performance = conditional_performance(
+        analysis_results,
+        monthly_regimes,
+        market_data.cash_returns,
+        config,
+        'rate_direction',
+    )
+    market_regime_performance = conditional_performance(
+        analysis_results,
+        monthly_regimes,
+        market_data.cash_returns,
+        config,
+        'market_regime',
+    )
+    economic_cycle_performance = conditional_performance(
+        analysis_results,
+        monthly_regimes,
+        market_data.cash_returns,
+        config,
+        'economic_cycle',
+    )
+    events = event_definitions(config)
+    event_performance = macro_event_performance(
+        analysis_results,
+        events,
+        market_data.cash_returns,
+        config,
+    )
     requested_relative = benchmark_relative_summary(strategy_results, benchmark_results)
     common_relative = benchmark_relative_summary(
         strategy_results,
@@ -230,6 +375,31 @@ def run_backtest_suite(
     )
     relative = pd.concat([requested_relative, common_relative], ignore_index=True)
     significance = statistical_significance(strategy_results, market_data.cash_returns, config)
+    ratio_summary = pd.concat(
+        [
+            common_summary,
+            standalone_benchmark_performance.loc[
+                standalone_benchmark_performance['window'].eq(
+                    'common_investable_window'
+                )
+            ],
+        ],
+        ignore_index=True,
+    )
+    ratio_summary = ratio_summary.merge(
+        significance[
+            [
+                'strategy',
+                'probabilistic_sharpe_ratio',
+                'minimum_track_record_months',
+                'deflated_sharpe_ratio',
+                'cluster_adjusted_deflated_sharpe_ratio',
+                'sidak_significant',
+            ]
+        ],
+        on='strategy',
+        how='left',
+    )
     embargo = embargo_comparison(strategy_results, market_data.cash_returns, config)
     annual = annual_return_table(strategy_results)
     resampling_summary, resampling_distribution = block_resampling(
@@ -251,7 +421,9 @@ def run_backtest_suite(
         'benchmark_monthly_returns': benchmark_monthly,
         'performance_summary': performance,
         'benchmark_performance': benchmark_performance,
+        'standalone_benchmark_performance': standalone_benchmark_performance,
         'benchmark_relative_summary': relative,
+        'paper_ratio_summary': ratio_summary,
         'annual_returns': annual,
         'embargo_comparison': embargo,
         'statistical_significance': significance,
@@ -259,6 +431,14 @@ def run_backtest_suite(
         'monte_carlo_summary': monte_carlo_summary,
         'monte_carlo_diagnostics': monte_carlo_diagnostics,
         'cost_liquidity_summary': _cost_liquidity_summary(strategy_results),
+        'annual_bank_fee_assumption': _annual_bank_fee_assumption(config),
+        'monthly_regimes': monthly_regimes,
+        'interest_rate_level_performance': rate_level_performance,
+        'interest_rate_direction_performance': rate_direction_performance,
+        'market_regime_performance': market_regime_performance,
+        'economic_cycle_performance': economic_cycle_performance,
+        'macro_event_definitions': events,
+        'macro_event_performance': event_performance,
         'data_coverage': market_data.data_coverage,
         'price_quality_adjustments': market_data.price_adjustments,
         'bias_and_limitations': _bias_and_limitations(),
@@ -278,7 +458,7 @@ def run_backtest_suite(
     end = pd.Timestamp(config['backtest']['end_date'])
     pit_months = int(point_in_time_monthly['date'].nunique()) if 'date' in point_in_time_monthly else 0
     manifest = {
-        'schema_version': 1,
+        'schema_version': 2,
         'generated_at_utc': datetime.now(UTC).isoformat(),
         'start_date': start.date().isoformat(),
         'end_date': end.date().isoformat(),
@@ -286,6 +466,8 @@ def run_backtest_suite(
         'common_investable_start': common_start.date().isoformat(),
         'portfolio_output_count': len(specs),
         'research_challenger_count': 1,
+        'standalone_benchmark_count': len(standalone_benchmarks),
+        'macro_event_count': len(events),
         'current_portfolio_nav_usd': next(
             spec.initial_capital_usd for spec in specs if spec.key == 'current_portfolio'
         ),
@@ -297,6 +479,12 @@ def run_backtest_suite(
         'resampling': config['resampling'],
         'monte_carlo': config['monte_carlo'],
         'statistics': config['statistics'],
+        'annual_bank_fee': config['annual_bank_fee'],
+        'macro_regimes': config['macro_regimes'],
+        'macro_event_method': (
+            'Monthly returns are selected when their period overlaps the configured '
+            'event window; windows are descriptive and not causal estimates.'
+        ),
         'source_artifacts': _source_hashes(source_paths, root),
         'git_commit': _git_commit(root),
         'command': 'python scripts/run_portfolio_backtest_1997.py',
@@ -320,6 +508,7 @@ def run_backtest_suite(
         'market_data': market_data,
         'strategy_results': strategy_results,
         'benchmark_results': benchmark_results,
+        'standalone_benchmark_results': standalone_benchmarks,
         'frames': frames,
         'manifest': manifest,
         'paths': paths,

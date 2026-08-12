@@ -205,6 +205,10 @@ def _benchmark_metadata(config: dict) -> pd.DataFrame:
         row['benchmark_key'] = f'region_{region}'
         row['region'] = region
         rows.append(row)
+    for key, definition in values.get('additional', {}).items():
+        row = dict(definition)
+        row['benchmark_key'] = key
+        rows.append(row)
     return pd.DataFrame(rows).drop_duplicates('benchmark_key')
 
 
@@ -454,6 +458,7 @@ def build_market_data_bundle(
         data_coverage=coverage,
         source_manifest=manifest,
         price_adjustments=price_adjustments,
+        macro_series=fred_daily,
     )
 
 
@@ -470,6 +475,12 @@ def load_market_data(
     symbols = sorted(set(stock_metadata['symbol']) | set(benchmarks['symbol']))
     fx_definitions = config['market_data']['fx_series'].values()
     series_ids = {config['market_data']['risk_free_series']}
+    macro_config = config.get('macro_regimes', {})
+    series_ids.update(
+        value
+        for key, value in macro_config.items()
+        if key.endswith('_series') and isinstance(value, str)
+    )
     for definition in fx_definitions:
         series_ids.add(definition['primary'])
         if definition.get('pre_euro'):

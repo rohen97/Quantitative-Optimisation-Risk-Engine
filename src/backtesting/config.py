@@ -38,6 +38,22 @@ def load_backtest_config(path: str | Path | None = None) -> dict[str, Any]:
     for key in ('current_portfolio_file', 'output_directory', 'cache_directory'):
         value = Path(values[key])
         values[key] = value if value.is_absolute() else root / value
+    fee = config.get('annual_bank_fee', {})
+    if fee.get('enabled', False):
+        annual_rate = float(fee.get('annual_rate', 0.0))
+        charge_month = int(fee.get('charge_month', 12))
+        if not 0.0 <= annual_rate < 1.0:
+            raise ValueError('annual_bank_fee.annual_rate must be in [0, 1).')
+        if not 1 <= charge_month <= 12:
+            raise ValueError('annual_bank_fee.charge_month must be between 1 and 12.')
+        reference_aum = float(fee.get('reference_aum_usd', 0.0))
+        reference_charge = float(fee.get('reference_annual_charge_usd', 0.0))
+        expected_charge = reference_aum * annual_rate
+        if reference_charge and not abs(reference_charge - expected_charge) <= 0.01:
+            raise ValueError(
+                'annual_bank_fee reference charge does not reconcile to '
+                'reference AUM times annual rate.'
+            )
     config['_meta'] = {
         'repository_root': root,
         'config_path': config_path,
