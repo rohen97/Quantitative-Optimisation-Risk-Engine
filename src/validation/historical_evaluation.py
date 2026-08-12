@@ -467,6 +467,8 @@ def _evaluate_portfolio(
             >= float(portfolio_config.get('maximum_single_period_loss', -0.20)),
             'annualised_turnover': float(row['annualised_turnover'])
             <= float(portfolio_config.get('maximum_turnover_annualised', 4.0)),
+            'annualised_cost_drag': float(row['annualised_cost_drag'])
+            <= float(portfolio_config.get('maximum_annualised_cost_drag', 0.015)),
         }
         if all(checks.values()):
             portfolio_status = 'PASS'
@@ -520,13 +522,23 @@ def _evaluate_portfolio(
             block_size=block_size,
             seed=seed,
         )
+        positive_significant = bool(
+            float(test['mean_difference']) > 0
+            and float(test['p_value']) < 0.05
+            and lower > 0
+        )
+        negative_significant = bool(
+            float(test['mean_difference']) < 0
+            and float(test['p_value']) < 0.05
+            and upper < 0
+        )
         significance_status = (
             'PASS'
-            if float(test['mean_difference']) > 0 and float(test['p_value']) < 0.05
+            if positive_significant
             else 'WARNING'
             if float(test['mean_difference']) > 0
             else 'FAIL'
-            if float(test['p_value']) < 0.05
+            if negative_significant
             else 'WARNING'
         )
         significance = pd.DataFrame(
@@ -538,6 +550,8 @@ def _evaluate_portfolio(
                     **test,
                     'difference_ci_lower': lower,
                     'difference_ci_upper': upper,
+                    'bootstrap_block_size': block_size,
+                    'bootstrap_significant': bool(lower > 0 or upper < 0),
                     'status': significance_status,
                 }
             ]
@@ -548,6 +562,21 @@ def _evaluate_portfolio(
             'NOT_EVALUATED',
             'Primary and equal-weight returns were not aligned.',
         )
+    if bool(portfolio_config.get('require_significant_benchmark_outperformance', True)):
+        benchmark_status = str(significance.iloc[0].get('status', 'NOT_EVALUATED'))
+        if portfolio_status not in {'FAIL', 'NOT_EVALUATED'}:
+            if benchmark_status == 'FAIL':
+                portfolio_status = 'FAIL'
+            elif benchmark_status != 'PASS':
+                portfolio_status = (
+                    'WARNING'
+                    if benchmark_status == 'WARNING'
+                    else 'NOT_EVALUATED'
+                )
+        benchmark.loc[
+            benchmark['strategy'].eq(primary),
+            'status',
+        ] = portfolio_status
     return benchmark, period, transaction, regime, significance, portfolio_status
 
 

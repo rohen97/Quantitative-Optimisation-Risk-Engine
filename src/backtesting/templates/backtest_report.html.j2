@@ -136,6 +136,12 @@
   <h3>Statistical Significance and Multiple Testing</h3>
   <div class='table-wrap'>{{ significance_table }}</div>
   <p class='interpretation'>{{ interpretations.significance }}</p>
+  <h3>Alpha and Strategy-Selection Overfitting</h3>
+  <div class='figure'><img src='plots/alpha_significance.png' alt='Matched-benchmark alpha significance'></div>
+  <div class='table-wrap'>{{ overfitting_table }}</div>
+  <div class='table-wrap'>{{ reality_check_table }}</div>
+  <div class='table-wrap'>{{ alpha_table }}</div>
+  <p class='interpretation'>{{ interpretations.alpha_overfitting }}</p>
 
   <h2>Data Quality and Causality</h2>
   <h3>Execution and Liquidity</h3>
@@ -153,6 +159,8 @@
   <h2>Point-in-Time Model Evidence</h2>
   <p>The repository's reconstructed model walk-forward is not spliced into the 1997 holdings replay. It remains a separate, shorter evidence set because it uses dated model decisions and realised outcomes.</p>
   <div class='table-wrap'>{{ pit_table }}</div>
+  <h3>Point-in-Time Alpha Tests</h3>
+  <div class='table-wrap'>{{ pit_alpha_table }}</div>
   <p class='interpretation'>{{ interpretations.pit }}</p>
 
   <p class='footnote'>Research evidence only. The paper used as the methodological specification is <em>The Three Types of Backtests</em> (Joubert, Sestovic, Barziy, Distaso, and Lopez de Prado, 29 July 2024). Raw Yahoo Finance and FRED histories remain outside Git; compact outputs, manifests, and checksums are included.</p>

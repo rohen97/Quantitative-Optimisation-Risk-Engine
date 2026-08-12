@@ -207,6 +207,38 @@ def build_report_interpretations(
         'does not remove retrospective selection look-ahead.'
     )
 
+    alpha_tests = frames['benchmark_alpha_significance']
+    common_alpha = alpha_tests.loc[
+        alpha_tests['window'].eq('common_investable_window')
+    ]
+    reality = frames['strategy_reality_check']
+    overfitting = frames['strategy_overfitting_summary']
+    alpha_overfitting = (
+        'Newey-West regressions test alpha against each portfolio-specific regional '
+        'index blend while allowing serial correlation. The block-bootstrap max-t '
+        'test controls selection across the whole strategy family, and CSCV repeatedly '
+        'selects in one half of the history and ranks that winner in the other half. '
+    )
+    if not overfitting.empty:
+        audit = overfitting.iloc[0]
+        alpha_overfitting += (
+            f'{int(reality.familywise_significant.fillna(False).sum())} unique results '
+            f'clear the max-t family-wise test. CSCV estimates PBO at '
+            f'{_percent(audit.probability_of_backtest_overfitting)}, while the median '
+            f'selected information ratio falls from '
+            f'{_number(audit.median_selected_is_information_ratio)} in-sample to '
+            f'{_number(audit.median_selected_oos_information_ratio)} out-of-sample. '
+        )
+    if not common_alpha.empty:
+        best_alpha = common_alpha.loc[common_alpha['annualised_alpha'].idxmax()]
+        alpha_overfitting += (
+            f'The largest measured common-window alpha is '
+            f'{_percent(best_alpha.annualised_alpha)} for '
+            f'{best_alpha.strategy_label}. Every long portfolio path is still a '
+            'retrospective holdings replay, so these tests measure path robustness, '
+            'not deployable stock-selection alpha.'
+        )
+
     block = frames['block_resampling_summary']
     block_low = block.loc[block['cagr_p05'].idxmin()] if not block.empty else None
     resampling = (
@@ -240,6 +272,35 @@ def build_report_interpretations(
     repairs = frames['price_quality_adjustments']
     repair_word = 'repairs' if len(repairs) != 1 else 'repair'
     point_in_time_months = int(manifest.get('point_in_time_months', 0))
+    pit_alpha = frames.get('point_in_time_alpha_significance', pd.DataFrame())
+    pit_text = (
+        f'The point-in-time table contains {point_in_time_months} '
+        'dated decision months and remains separate from the long holdings replay. '
+        'It is the more relevant evidence for decisions made with contemporaneous data. '
+    )
+    if not pit_alpha.empty:
+        equal_weight = pit_alpha.loc[
+            pit_alpha['benchmark'].eq('equal_weight_eligible')
+        ]
+        cap_weight = pit_alpha.loc[
+            pit_alpha['benchmark'].eq('cap_weight_eligible')
+        ]
+        if not equal_weight.empty:
+            row = equal_weight.iloc[0]
+            pit_text += (
+                f'Against equal-weight eligible stocks, annualised active return is '
+                f'{_percent(row.annualised_active_return)} and the alpha verdict is '
+                f'{row.alpha_evidence_verdict}. '
+            )
+        if not cap_weight.empty:
+            row = cap_weight.iloc[0]
+            pit_text += (
+                f'Against cap-weight eligible stocks, annualised active return is '
+                f'{_percent(row.annualised_active_return)} and the verdict is '
+                f'{row.alpha_evidence_verdict}. Native live evidence and at least '
+                f'{int(row.minimum_required_months)} months are required before alpha '
+                'can be considered deployable.'
+            )
     return {
         'overall': overall,
         'executive': executive,
@@ -267,6 +328,7 @@ def build_report_interpretations(
         'event_definitions': event_definitions_text,
         'events': event_text,
         'significance': significance_text,
+        'alpha_overfitting': alpha_overfitting,
         'resampling': (
             resampling
         ),
@@ -291,11 +353,7 @@ def build_report_interpretations(
             'unresolved risks. The critical issue is that current holdings survived long '
             'enough to be selected today, so the 1997 replay cannot prove selection skill.'
         ),
-        'pit': (
-            f'The point-in-time table contains {point_in_time_months} '
-            'dated decision months and remains separate from the long holdings replay. '
-            'It is the more relevant evidence for decisions made with contemporaneous data.'
-        ),
+        'pit': pit_text,
     }
 
 
@@ -317,6 +375,7 @@ def written_interpretation_markdown(
         ('Macro-Event Definitions', 'event_definitions'),
         ('Macro-Event Performance', 'events'),
         ('Statistical Significance', 'significance'),
+        ('Alpha and Overfitting', 'alpha_overfitting'),
         ('Block Resampling', 'resampling'),
         ('Monte Carlo', 'monte_carlo'),
         ('Embargo Test', 'embargo'),

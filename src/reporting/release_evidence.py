@@ -349,8 +349,18 @@ def _write_release_notes(
     universe_summary: pd.DataFrame,
     scorecard: pd.DataFrame,
     strategies: pd.DataFrame,
+    significance: pd.DataFrame,
 ) -> None:
     wolf = strategies.loc[strategies['strategy'].eq('wolf_cvar')].iloc[0]
+    equal_weight = strategies.loc[
+        strategies['strategy'].eq('equal_weight_eligible')
+    ].iloc[0]
+    paired = significance.loc[
+        significance.get('strategy', pd.Series(dtype=str)).eq('wolf_cvar')
+    ]
+    paired_p_value = (
+        float(paired.iloc[0]['p_value']) if not paired.empty else float('nan')
+    )
     profile = walk_manifest['artifact_profile']
     overall = universe_summary.loc[universe_summary['region'].eq('ALL')].iloc[0]
     validation_run_id = str(validation_manifest['validation_run_id'])
@@ -397,7 +407,15 @@ def _write_release_notes(
         '',
         '## Portfolio And Risk',
         '',
-        'The constrained Wolf portfolio passes net-of-cost, turnover, drawdown, hard-constraint, and daily EWMA VaR backtests. Equal weight outperformed over this short sample, but the difference was not statistically significant.',
+        (
+            f'The constrained Wolf portfolio is **{str(wolf.status)}** on the '
+            f'net-of-cost gate: annual turnover is {float(wolf.annualised_turnover):.2f}x '
+            f'and annualised cost drag is {float(wolf.annualised_cost_drag):.2%}. '
+            f'It returned {float(wolf.annualised_return - equal_weight.annualised_return):+.2%} '
+            f'per year relative to equal weight over this short sample; the paired '
+            f'test p-value is {paired_p_value:.3f}. Hard constraints and the daily '
+            'EWMA VaR backtest remain separate passing controls.'
+        ),
         '',
         '![Cumulative returns](plots/cumulative_returns.png)',
         '',
@@ -412,6 +430,7 @@ def _write_release_notes(
         '## Package Contents',
         '',
         '- `validation/`: complete governance output, including HTML and Markdown reports.',
+        '- `validation/portfolio_monthly_returns.csv`: all dated Wolf, equal-weight, and cap-weight control returns.',
         '- `investment_committee/`: complete IC report bundle, PDF, data tables, and charts.',
         '- `final_portfolio_weights.csv`: resolved 20-name final portfolio.',
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
@@ -459,6 +478,9 @@ def build_release_evidence(
     distribution = _read_csv(validation_source / 'distribution_coverage_report.csv')
     risk = _read_csv(validation_source / 'risk_backtesting_report.csv')
     strategies = _read_csv(validation_source / 'portfolio_strategy_comparison.csv')
+    significance = _read_csv(
+        validation_source / 'benchmark_significance_report.csv'
+    )
     regional = _read_csv(validation_source / 'regional_performance_report.csv')
     returns = pd.read_parquet(walk_source / 'historical_portfolio_returns.parquet')
     portfolio = _read_csv(outputs / 'final_portfolio_weights.csv')
@@ -479,6 +501,7 @@ def build_release_evidence(
         universe_summary,
         scorecard,
         strategies,
+        significance,
     )
     _normalise_text_whitespace(output)
     _normalise_json_paths(output)

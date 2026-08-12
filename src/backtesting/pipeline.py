@@ -20,12 +20,15 @@ from src.backtesting.scenarios import (
 )
 from src.backtesting.statistics import (
     annual_return_table,
+    benchmark_alpha_significance,
     benchmark_relative_summary,
     block_resampling,
     embargo_comparison,
     monte_carlo_simulation,
     performance_summary,
+    point_in_time_alpha_significance,
     statistical_significance,
+    strategy_overfitting_diagnostics,
 )
 
 
@@ -61,9 +64,28 @@ def _git_commit(root: Path) -> str:
 def _load_point_in_time_evidence(root: Path) -> tuple[pd.DataFrame, pd.DataFrame]:
     release = root / 'reports' / 'releases' / '2026-08-07-full-universe' / 'validation'
     summary_path = release / 'portfolio_strategy_comparison.csv'
-    monthly_path = release / 'portfolio_performance_by_period.csv'
     summary = pd.read_csv(summary_path) if summary_path.exists() else pd.DataFrame()
-    monthly = pd.read_csv(monthly_path) if monthly_path.exists() else pd.DataFrame()
+    monthly = pd.DataFrame()
+    monthly_candidates = (
+        release / 'portfolio_monthly_returns.csv',
+        root
+        / 'reports'
+        / 'outputs'
+        / 'walk_forward'
+        / 'historical_portfolio_returns.parquet',
+        release / 'portfolio_performance_by_period.csv',
+    )
+    for path in monthly_candidates:
+        if not path.exists():
+            continue
+        monthly = (
+            pd.read_parquet(path)
+            if path.suffix.lower() == '.parquet'
+            else pd.read_csv(path)
+        )
+        if {'date', 'strategy', 'net_return'}.issubset(monthly):
+            break
+        monthly = pd.DataFrame()
     return summary, monthly
 
 
@@ -152,7 +174,14 @@ def _bias_and_limitations() -> pd.DataFrame:
                 'severity': 'HIGH',
                 'applies_to': 'portfolio comparison',
                 'status': 'CONTROLLED',
-                'treatment': 'Sidak FWER and Deflated Sharpe Ratios use both actual and correlation-clustered trial counts.',
+                'treatment': 'Sidak, Deflated Sharpe, block-bootstrap max-t, duplicate-trial removal, and CSCV PBO are reported.',
+            },
+            {
+                'category': 'deployable alpha',
+                'severity': 'CRITICAL',
+                'applies_to': 'strategy-selection claims',
+                'status': 'NOT_ESTABLISHED',
+                'treatment': 'Retrospective alpha is diagnostic only; approval requires native point-in-time outperformance with sufficient history.',
             },
             {
                 'category': 'non-stationarity',
@@ -374,6 +403,32 @@ def run_backtest_suite(
         window_label='common_investable_window',
     )
     relative = pd.concat([requested_relative, common_relative], ignore_index=True)
+    alpha_common = benchmark_alpha_significance(
+        strategy_results,
+        benchmark_results,
+        market_data.cash_returns,
+        config,
+        window_start=common_start,
+    )
+    alpha_trailing = benchmark_alpha_significance(
+        strategy_results,
+        benchmark_results,
+        market_data.cash_returns,
+        config,
+        window_start=common_start,
+        window_label='last_36_months',
+        trailing_months=int(config['backtest']['embargo_months']),
+    )
+    alpha_significance = pd.concat(
+        [alpha_common, alpha_trailing],
+        ignore_index=True,
+    )
+    reality_check, overfitting_summary = strategy_overfitting_diagnostics(
+        strategy_results,
+        benchmark_results,
+        config,
+        window_start=common_start,
+    )
     significance = statistical_significance(strategy_results, market_data.cash_returns, config)
     ratio_summary = pd.concat(
         [
@@ -412,6 +467,11 @@ def run_backtest_suite(
         config,
     )
     point_in_time_summary, point_in_time_monthly = _load_point_in_time_evidence(root)
+    point_in_time_alpha = point_in_time_alpha_significance(
+        point_in_time_monthly,
+        point_in_time_summary,
+        config,
+    )
     monthly = pd.concat([result.monthly for result in strategy_results], ignore_index=True)
     benchmark_monthly = pd.concat([result.monthly for result in benchmark_results], ignore_index=True)
 
@@ -423,6 +483,9 @@ def run_backtest_suite(
         'benchmark_performance': benchmark_performance,
         'standalone_benchmark_performance': standalone_benchmark_performance,
         'benchmark_relative_summary': relative,
+        'benchmark_alpha_significance': alpha_significance,
+        'strategy_reality_check': reality_check,
+        'strategy_overfitting_summary': overfitting_summary,
         'paper_ratio_summary': ratio_summary,
         'annual_returns': annual,
         'embargo_comparison': embargo,
@@ -444,6 +507,7 @@ def run_backtest_suite(
         'bias_and_limitations': _bias_and_limitations(),
         'point_in_time_summary': point_in_time_summary,
         'point_in_time_monthly_returns': point_in_time_monthly,
+        'point_in_time_alpha_significance': point_in_time_alpha,
     }
 
     source_paths = {Path(config['_meta']['config_path'])}
@@ -479,6 +543,12 @@ def run_backtest_suite(
         'resampling': config['resampling'],
         'monte_carlo': config['monte_carlo'],
         'statistics': config['statistics'],
+        'overfitting': config.get('overfitting', {}),
+        'deployable_alpha_status': (
+            str(overfitting_summary.iloc[0]['deployable_alpha_status'])
+            if not overfitting_summary.empty
+            else 'NOT_EVALUATED'
+        ),
         'annual_bank_fee': config['annual_bank_fee'],
         'macro_regimes': config['macro_regimes'],
         'macro_event_method': (

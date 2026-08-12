@@ -25,7 +25,7 @@ from src.validation.transaction_cost_validation import estimate_transaction_cost
 
 
 LOGGER = logging.getLogger(__name__)
-ARTIFACT_VERSION = 1
+ARTIFACT_VERSION = 2
 FORECAST_HORIZONS = (3, 6, 9, 12)
 MONETARY_COLUMNS = (
     'revenue',
@@ -60,6 +60,7 @@ class WalkForwardConfig:
     portfolio_nav_usd: float = 100_000_000.0
     primary_strategy: str = 'wolf_cvar'
     approval_cap: str = 'CONDITIONALLY_APPROVED'
+    maximum_rebalance_turnover: float = 0.10
     risk_ewma_decay: float = 0.94
     risk_lookback_rows: int = 252
 
@@ -88,6 +89,11 @@ def load_walk_forward_config(
     risk_ewma_decay = float(risk_forecast.get('ewma_decay', 0.94))
     if not 0 < risk_ewma_decay < 1:
         raise ValueError('Walk-forward risk EWMA decay must be between zero and one.')
+    maximum_rebalance_turnover = float(
+        values.get('maximum_rebalance_turnover', 0.10)
+    )
+    if not 0 <= maximum_rebalance_turnover <= 1:
+        raise ValueError('Walk-forward turnover limit must be between zero and one.')
     return WalkForwardConfig(
         output_directory=output,
         start_date=pd.Timestamp(values.get('start_date', '2024-06-30')).normalize(),
@@ -102,6 +108,7 @@ def load_walk_forward_config(
         portfolio_nav_usd=float(values.get('portfolio_nav_usd', 100_000_000)),
         primary_strategy=str(values.get('primary_strategy', 'wolf_cvar')),
         approval_cap=str(values.get('approval_cap', 'CONDITIONALLY_APPROVED')),
+        maximum_rebalance_turnover=maximum_rebalance_turnover,
         risk_ewma_decay=risk_ewma_decay,
         risk_lookback_rows=int(risk_forecast.get('lookback_rows', 252)),
     )
@@ -1113,6 +1120,8 @@ def _greedy_constrained_portfolio(
 def _build_anchor_portfolios(
     features: pd.DataFrame,
     forecast_wide: pd.DataFrame,
+    previous_wolf_weights: pd.Series | None = None,
+    maximum_rebalance_turnover: float = 0.10,
 ) -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
     merge_columns = [
         column
@@ -1129,7 +1138,15 @@ def _build_anchor_portfolios(
     optimisation = load_yaml('configs/optimisation.yaml').get('optimisation', {})
     constraints = dict(optimisation.get('constraints', {}))
     constraints['maximum_candidates'] = int(optimisation.get('maximum_candidates', 2000))
+    constraints['maximum_turnover'] = float(maximum_rebalance_turnover)
     optimiser_input = build_optimiser_input_dataset(scorecard)
+    if previous_wolf_weights is not None:
+        optimiser_input['current_weight'] = (
+            optimiser_input['security_id']
+            .astype(str)
+            .map(previous_wolf_weights)
+            .fillna(0.0)
+        )
     wolf = cvar_constrained_portfolio(optimiser_input, constraints)
     wolf = wolf.loc[pd.to_numeric(wolf['target_weight'], errors='coerce').gt(1.0e-10)]
     feasible = (
@@ -1465,7 +1482,12 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             forecast_frames.append(forecasts)
             outcome_frames.append(realised)
 
-        portfolios, scorecard = _build_anchor_portfolios(features, forecast_wide)
+        portfolios, scorecard = _build_anchor_portfolios(
+            features,
+            forecast_wide,
+            previous_weights.get(config.primary_strategy),
+            config.maximum_rebalance_turnover,
+        )
         regime = (
             'high_volatility'
             if float(features['volatility_1y'].median()) > 0.30

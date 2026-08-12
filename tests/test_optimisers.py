@@ -76,3 +76,25 @@ def test_cross_listed_issuer_is_allocated_once():
     portfolio = score_weighted_portfolio(data, {"max_single_name_weight": 0.10})
     invested = portfolio.loc[portfolio["target_weight"].gt(0)]
     assert invested["issuer_id"].is_unique
+
+
+def test_turnover_limit_projects_from_feasible_current_weights():
+    data = _data()
+    data['current_weight'] = 0.0
+    data.loc[data.index[10:], 'current_weight'] = 0.10
+
+    portfolio = cvar_constrained_portfolio(
+        data,
+        {
+            'max_single_name_weight': 0.10,
+            'maximum_turnover': 0.10,
+        },
+    )
+
+    turnover = 0.5 * (
+        portfolio['target_weight'] - portfolio['current_weight']
+    ).abs().sum()
+    assert abs(portfolio['target_weight'].sum() - 1.0) < 1.0e-10
+    assert turnover <= 0.10 + 1.0e-10
+    assert portfolio['turnover_constraint_applied'].all()
+    assert portfolio['optimisation_feasible'].all()

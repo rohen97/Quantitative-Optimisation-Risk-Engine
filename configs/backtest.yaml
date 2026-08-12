@@ -271,6 +271,13 @@ statistics:
   correlation_cluster_threshold: 0.75
   lo_autocorrelation_lags: 6
 
+overfitting:
+  bootstrap_samples: 5000
+  block_months: 12
+  cscv_slices: 12
+  minimum_point_in_time_months: 60
+  random_seed: 1997
+
 index_challenger:
   momentum_lookback_months: 12
   volatility_lookback_months: 6

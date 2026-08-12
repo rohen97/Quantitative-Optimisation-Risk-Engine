@@ -54,15 +54,17 @@ Shanghai, Hang Seng, S&P 500, and global ETF proxies supply benchmark context.
 Lagged interest-rate and market regimes, retrospective NBER recession labels,
 13 source-backed macro-event windows, moving-block resampling, fat-tailed Monte
 Carlo, a 36-month embargo, PSR, MinTRL, Sidak control, and Deflated Sharpe Ratios
-complete the analysis.
+complete the analysis. Newey-West benchmark-alpha tests, a circular-block max-t
+reality check, exact duplicate-trial removal, and CSCV Probability of Backtest
+Overfitting now distinguish measured replay alpha from credible deployable alpha.
 
 > The long history is a retrospective replay of today's holdings. It is useful for
 > exposure, path, liquidity, and benchmark diagnostics, but it contains selection
 > look-ahead and survivorship bias. The dated 25-month model walk-forward remains a
-> separate evidence set.
+> separate evidence set. The current evidence does not establish deployable alpha.
 
 Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
-or review the [38-page PDF analysis](reports/backtests/1997_to_latest/portfolio_backtest_analysis.pdf),
+or review the [42-page PDF analysis](reports/backtests/1997_to_latest/portfolio_backtest_analysis_latest.pdf),
 [plain-language interpretation](reports/backtests/1997_to_latest/written_interpretation.md),
 and [methodology and paper mapping](docs/BACKTEST_METHODOLOGY.md).
 

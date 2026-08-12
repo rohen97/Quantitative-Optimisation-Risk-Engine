@@ -18,6 +18,67 @@ def _normalise_scores(scores: pd.Series) -> pd.Series:
     return scores / scores.sum() if scores.sum() > 0 else scores
 
 
+def _apply_turnover_limit(
+    target_weights: pd.Series,
+    data: pd.DataFrame,
+    eligible: pd.Series,
+    limits: dict,
+) -> pd.Series:
+    '''Project a feasible target toward a fully invested feasible current portfolio.'''
+    status = dict(target_weights.attrs)
+    target = pd.Series(target_weights, index=data.index, dtype=float).fillna(0.0)
+    current = pd.to_numeric(
+        data.get('current_weight', pd.Series(0.0, index=data.index)),
+        errors='coerce',
+    ).fillna(0.0).clip(lower=0.0)
+    maximum_turnover = float(limits.get('maximum_turnover', 1.0))
+    unconstrained_turnover = float(0.5 * (target - current).abs().sum())
+    fully_invested_current = abs(float(current.sum()) - 1.0) <= 1.0e-6
+    hard_exit_required = bool(current.where(~eligible, 0.0).gt(1.0e-12).any())
+    current_feasible = bool(
+        current.max() <= float(limits.get('max_single_name_weight', 1.0)) + 1.0e-10
+    )
+    for column, key in (
+        ('sector', 'max_sector_weight'),
+        ('country', 'max_country_weight'),
+        ('region', 'max_region_weight'),
+        ('currency', 'max_currency_weight'),
+    ):
+        if column in data:
+            maximum_exposure = float(
+                pd.DataFrame({column: data[column], '_weight': current})
+                .groupby(column, dropna=False)['_weight']
+                .sum()
+                .max()
+            )
+            current_feasible &= maximum_exposure <= float(limits.get(key, 1.0)) + 1.0e-10
+    applied = False
+    if (
+        fully_invested_current
+        and current_feasible
+        and not hard_exit_required
+        and 0.0 <= maximum_turnover < unconstrained_turnover
+    ):
+        scale = maximum_turnover / unconstrained_turnover
+        target = current + scale * (target - current)
+        target = target.clip(lower=0.0)
+        target /= target.sum()
+        applied = True
+    status.update(
+        {
+            'unconstrained_turnover': unconstrained_turnover,
+            'turnover_constraint_applied': applied,
+            'turnover_constraint_skipped_for_hard_exit': hard_exit_required,
+            'turnover_constraint_skipped_for_infeasible_current': (
+                fully_invested_current and not current_feasible
+            ),
+            'projected_turnover': float(0.5 * (target - current).abs().sum()),
+        }
+    )
+    target.attrs.update(status)
+    return target
+
+
 def _candidate_mask(
     data: pd.DataFrame,
     eligible: pd.Series,
@@ -81,10 +142,11 @@ def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: d
         eligible_scores = eligible_scores + candidate_mask.astype(float) * max(float(eligible_scores.max()), 1.0) * 0.01
     raw = _normalise_scores(eligible_scores)
     weights = apply_diversification_caps(raw, data, limits)
+    weights = _apply_turnover_limit(weights, data, eligible, limits)
     feasible = bool(weights.attrs.get("feasible", False))
     status = str(weights.attrs.get("status", "unknown"))
-    weights = weights.where(candidate_mask, 0.0)
     retained = candidate_mask | pd.to_numeric(data.get("current_weight", 0.0), errors="coerce").fillna(0.0).gt(0)
+    weights = weights.where(retained, 0.0)
     portfolio = data.loc[retained].copy()
     portfolio["target_weight"] = weights.loc[portfolio.index].to_numpy()
     portfolio["portfolio_method"] = method
@@ -94,6 +156,21 @@ def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: d
     portfolio["optimisation_status"] = status
     portfolio["eligible_security_count"] = int(eligible.sum())
     portfolio["candidate_security_count"] = int(candidate_mask.sum())
+    portfolio['unconstrained_turnover'] = float(
+        weights.attrs.get('unconstrained_turnover', 0.0)
+    )
+    portfolio['projected_turnover'] = float(
+        weights.attrs.get('projected_turnover', 0.0)
+    )
+    portfolio['turnover_constraint_applied'] = bool(
+        weights.attrs.get('turnover_constraint_applied', False)
+    )
+    portfolio['turnover_constraint_skipped_for_hard_exit'] = bool(
+        weights.attrs.get('turnover_constraint_skipped_for_hard_exit', False)
+    )
+    portfolio['turnover_constraint_skipped_for_infeasible_current'] = bool(
+        weights.attrs.get('turnover_constraint_skipped_for_infeasible_current', False)
+    )
     return portfolio.reset_index(drop=True)
 
 

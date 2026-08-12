@@ -1,7 +1,7 @@
 import pandas as pd
 
 from src.backtesting.interpretation import build_report_interpretations
-from src.backtesting.reporting import _meaningful_pdf_stderr
+from src.backtesting.reporting import _format_value, _meaningful_pdf_stderr
 
 
 def test_report_interpretation_renders_all_sections() -> None:
@@ -104,6 +104,27 @@ def test_report_interpretation_renders_all_sections() -> None:
         'statistical_significance': pd.DataFrame(
             [{'sidak_significant': True}]
         ),
+        'benchmark_alpha_significance': pd.DataFrame(
+            [
+                {
+                    'window': 'common_investable_window',
+                    'strategy_label': 'Final Portfolio',
+                    'annualised_alpha': 0.04,
+                }
+            ]
+        ),
+        'strategy_reality_check': pd.DataFrame(
+            [{'familywise_significant': True}]
+        ),
+        'strategy_overfitting_summary': pd.DataFrame(
+            [
+                {
+                    'probability_of_backtest_overfitting': 0.20,
+                    'median_selected_is_information_ratio': 1.20,
+                    'median_selected_oos_information_ratio': 0.60,
+                }
+            ]
+        ),
         'block_resampling_summary': pd.DataFrame(
             [{'strategy': 'final_portfolio', 'cagr_p05': 0.02}]
         ),
@@ -116,6 +137,7 @@ def test_report_interpretation_renders_all_sections() -> None:
         'market_regime_performance': regime,
         'economic_cycle_performance': regime,
         'point_in_time_summary': pd.DataFrame(),
+        'point_in_time_alpha_significance': pd.DataFrame(),
     }
     interpretations = build_report_interpretations(
         frames,
@@ -126,7 +148,7 @@ def test_report_interpretation_renders_all_sections() -> None:
         },
     )
 
-    assert len(interpretations) == 21
+    assert len(interpretations) == 22
     assert '25 basis points' in interpretations['fee_assumption']
     assert '$465,151' in interpretations['fee_assumption']
     assert '29.5 years' in interpretations['overall']
@@ -139,3 +161,11 @@ def test_pdf_stderr_filter_keeps_real_errors() -> None:
     )
 
     assert _meaningful_pdf_stderr(stderr) == 'real renderer failure'
+
+
+def test_report_formatter_preserves_alpha_status_text() -> None:
+    assert _format_value('alpha_claim_status', 'RETROSPECTIVE_ONLY') == (
+        'RETROSPECTIVE_ONLY'
+    )
+    assert _format_value('annualised_cost_drag', 0.0197) == '1.97%'
+    assert _format_value('cscv_selection_frequency', 0.484) == '48.40%'
