@@ -4,7 +4,7 @@ build-backend = 'setuptools.build_meta'
 
 [project]
 name = 'the-wolf-quant-model'
-version = '1.6.0rc1'
+version = '1.7.0rc1'
 description = 'Full-universe conservative equity research and portfolio governance engine.'
 requires-python = '>=3.11'
 dependencies = [

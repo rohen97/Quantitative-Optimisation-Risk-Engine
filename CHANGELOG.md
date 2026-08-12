@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.7.0rc1 - 2026-08-12 - Portfolio Backtest Evidence Release Candidate
+
+### Added
+
+- A 1997-present monthly replay for all 13 investable portfolio outputs, with capital rules derived from the current portfolio and independent research allocations.
+- S&P 500, SPY adjusted-close, six regional indices, equal-region, and portfolio-specific regional benchmark comparisons in USD.
+- A lagged trend and volatility-controlled regional-index challenger with point-in-time signals.
+- Circular moving-block resampling and correlated Student-t AR(1)/EWMA Monte Carlo evidence.
+- PSR, Minimum Track Record Length, Lo-adjusted Sharpe, Sidak family-wise control, correlation-clustered trial counts, and Deflated Sharpe Ratios.
+- Rendered HTML/PDF reports, 11 publication plots, compact CSV evidence, a source manifest, and SHA-256 checksums.
+
+### Changed
+
+- Enforced a hard 5% ADV trade cap in historical replay; unfilled allocations now remain in cash and are reported.
+- Converted non-USD holdings and benchmarks with historical FRED FX and assigned pre-listing cash to 3-month Treasury bills.
+- Added explicit, auditable adjusted-price spike and persistent-level-shift repairs.
+- Documented the paper-to-code mapping and separated retrospective holdings evidence from the existing 25-month point-in-time model record.
+
+### Validation
+
+- All requested market symbols have cached price histories from 1997 through the latest complete month where listed.
+- The common 80%-investable comparison window begins in September 2013.
+- Raw daily adjusted-close moves over 50% are reduced from seven to zero through six logged repair events.
+- 301 automated tests pass in deterministic mock mode, including 13 focused backtest tests.
+- Long-history holdings results are labeled for critical selection look-ahead and survivorship limitations and are not presented as historical model-selection skill.
+
 ## 1.6.0rc1 - 2026-08-07 - Full-Universe Validation Release Candidate
 
 ### Added

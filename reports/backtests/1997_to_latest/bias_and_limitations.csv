@@ -1,0 +1,11 @@
+category,severity,applies_to,status,treatment
+selection look-ahead,CRITICAL,all current portfolio-output replays,ACKNOWLEDGED,Labelled retrospective holdings replay; excluded from claims of 1997 model selection skill.
+survivorship bias,CRITICAL,current selected securities,ACKNOWLEDGED,Pre-listing capital stays in T-bills; current holdings are never presented as a historical universe.
+point-in-time model evidence,HIGH,full stock-selection strategy,SEPARATED,The 25-month reconstructed decision history is reported separately and never spliced into the long replay.
+corporate actions,MEDIUM,holding histories,MODELED,Yahoo adjusted closes include splits and distributions where provider history supports them.
+currency conversion,MEDIUM,non-USD holdings and indices,MODELED,Historical FRED FX converts local adjusted closes to USD; ECU bridges pre-euro observations.
+benchmark dividend consistency,MEDIUM,regional price indices,WARNING,DAX is a performance index; other regional index series may omit dividends. SPY is included as a total-return proxy.
+transaction costs and liquidity,MEDIUM,portfolio outputs and index challenger,MODELED,"Commission, spread, slippage, square-root impact, missing-ADV penalty, and 5% ADV caps are reported."
+short-sale constraints,LOW,all tested portfolios,NOT_APPLICABLE,Every tested allocation is long-only; no borrow availability or fee assumption is required.
+multiple testing,HIGH,portfolio comparison,CONTROLLED,Sidak FWER and Deflated Sharpe Ratios use both actual and correlation-clustered trial counts.
+non-stationarity,HIGH,all historical and simulated evidence,RESIDUAL_RISK,"Embargo, subperiod plots, block resampling, fat tails, and EWMA volatility expose but cannot remove structural breaks."

@@ -27,7 +27,7 @@ The latest full-universe evidence package is dated 2026-08-07.
 | Governance score | 87.5 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Automated tests | 288 passing |
+| Automated tests | 301 passing |
 
 The complete, checksummed result is in
 [`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
@@ -40,6 +40,32 @@ Conditional approval is deliberate. The free-source backtest reconstructs some
 filing availability and lacks immutable historical universe, volume, sentiment,
 narrative and regime vintages. This repository is research software and does not
 authorize unattended live trading.
+
+## 1997-Present Portfolio Backtest
+
+The repository now includes a checksummed backtest package for every current
+portfolio output, using the observed USD 80,540 NAV for current-derived portfolios
+and USD 100,000 for independent optimiser, clean-sheet, LLM, and index strategies.
+It compares the portfolios with broad and region-matched indices, models USD FX,
+cash, transaction costs, market impact, and a hard 5% ADV execution cap, and adds
+moving-block resampling, fat-tailed Monte Carlo, a 36-month embargo, PSR, MinTRL,
+Sidak control, and Deflated Sharpe Ratios.
+
+> The long history is a retrospective replay of today's holdings. It is useful for
+> exposure, path, liquidity, and benchmark diagnostics, but it contains selection
+> look-ahead and survivorship bias. The dated 25-month model walk-forward remains a
+> separate evidence set.
+
+Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
+or review the [methodology and paper mapping](docs/BACKTEST_METHODOLOGY.md).
+
+![Portfolio and index benchmark comparison](reports/backtests/1997_to_latest/plots/benchmark_comparison.png)
+
+Run it locally with cached provider data:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_portfolio_backtest_1997.py
+```
 
 ## Quick Start
 

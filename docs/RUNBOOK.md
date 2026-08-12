@@ -12,6 +12,21 @@ Run the MVP pipeline:
 python scripts/run_full_pipeline.py
 ```
 
+Run the complete 1997-present portfolio-output backtest:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_portfolio_backtest_1997.py
+```
+
+Use `--refresh-data` to replace the ignored yfinance and FRED caches. The command
+replays all current portfolio outputs, regional benchmark blends, and the lagged
+index challenger; runs block resampling and correlated fat-tailed Monte Carlo; and
+writes a checksummed HTML/PDF evidence package to
+`reports/backtests/1997_to_latest/`. Read
+`docs/BACKTEST_METHODOLOGY.md` before interpreting long-history results: current
+holdings are retrospective exposure replays, while dated point-in-time model
+evidence is reported separately.
+
 Review the visual model flow and diagnostics map:
 
 ```text

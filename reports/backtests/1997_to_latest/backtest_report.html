@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1'>
+  <title>Portfolio Backtest Evidence: 1997-2026</title>
+  <style>
+    @page { size: A4 landscape; margin: 14mm; }
+    :root { --ink: #172033; --muted: #596579; --line: #d8dee8; --teal: #145a64; --gold: #d69e2e; --red: #a94442; --paper: #ffffff; --wash: #f6f8fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--wash); color: var(--ink); font-family: Arial, sans-serif; font-size: 13px; line-height: 1.5; }
+    main { max-width: 1320px; margin: 0 auto; background: var(--paper); padding: 34px 42px 48px; }
+    h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: 0; }
+    h2 { margin: 30px 0 12px; padding-bottom: 7px; border-bottom: 2px solid var(--teal); font-size: 20px; }
+    h3 { margin: 22px 0 8px; font-size: 15px; }
+    p { margin: 7px 0; }
+    .subtitle { color: var(--muted); font-size: 15px; }
+    .warning { margin: 20px 0; padding: 14px 16px; border-left: 5px solid var(--red); background: #fff4f2; font-weight: 600; }
+    .metrics { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0; }
+    .metric { flex: 1 1 150px; min-width: 0; border: 1px solid var(--line); border-top: 3px solid var(--gold); padding: 11px 12px; min-height: 78px; }
+    .metric strong { display: block; font-size: 20px; }
+    .metric span { color: var(--muted); font-size: 11px; }
+    .figure { margin: 15px 0 24px; page-break-inside: avoid; }
+    .figure img { width: 100%; max-height: 700px; object-fit: contain; border: 1px solid var(--line); }
+    .caption { color: var(--muted); font-size: 11px; margin-top: 4px; }
+    .table-wrap { margin: 10px 0 22px; }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    th { background: #e9f0f2; color: #233447; text-align: right; padding: 7px 8px; border: 1px solid var(--line); }
+    th:first-child, td:first-child { text-align: left; }
+    td { text-align: right; padding: 6px 8px; border: 1px solid var(--line); }
+    tr:nth-child(even) td { background: #fafbfc; }
+    .two { display: flex; flex-wrap: wrap; gap: 20px; }
+    .two > * { flex: 1 1 380px; min-width: 0; }
+    .method { padding: 12px 14px; border: 1px solid var(--line); background: #fbfcfe; }
+    .method strong { color: var(--teal); }
+    .footnote { color: var(--muted); font-size: 10px; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Portfolio Backtest Evidence: 1997-2026</h1>
+  <p class='subtitle'>Net USD evidence for every current portfolio output, regional index benchmarks, and an independent point-in-time index challenger.</p>
+  <div class='warning'>The long-history portfolio results are retrospective holdings replays, not point-in-time stock-selection backtests. Use them for exposure and path diagnostics, not as evidence that the current model could have selected these names in 1997.</div>
+  <div class='metrics'>
+    <div class='metric'><strong>13</strong><span>portfolio outputs tested</span></div>
+    <div class='metric'><strong>29.6</strong><span>requested historical years</span></div>
+    <div class='metric'><strong>$80,540</strong><span>current-derived starting NAV</span></div>
+    <div class='metric'><strong>2013-09-30</strong><span>common 80% investable start</span></div>
+    <div class='metric'><strong>25</strong><span>separate reconstructed PIT months</span></div>
+  </div>
+
+  <h2>Executive Comparison</h2>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Portfolio</th>
+      <th>Start</th>
+      <th>cagr</th>
+      <th>Volatility</th>
+      <th>sharpe</th>
+      <th>Max drawdown</th>
+      <th>Ending value</th>
+      <th>PnL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>LLM Analyst Benchmark</td>
+      <td>$100,000</td>
+      <td>9.77%</td>
+      <td>9.10%</td>
+      <td>0.83</td>
+      <td>-20.90%</td>
+      <td>$1,563,108</td>
+      <td>$1,463,108</td>
+    </tr>
+    <tr>
+      <td>Portfolio-Aware Overlay</td>
+      <td>$80,540</td>
+      <td>13.34%</td>
+      <td>14.34%</td>
+      <td>0.80</td>
+      <td>-39.00%</td>
+      <td>$3,242,312</td>
+      <td>$3,161,772</td>
+    </tr>
+    <tr>
+      <td>Risk-Parity Optimiser</td>
+      <td>$100,000</td>
+      <td>11.16%</td>
+      <td>11.56%</td>
+      <td>0.79</td>
+      <td>-30.39%</td>
+      <td>$2,266,941</td>
+      <td>$2,166,941</td>
+    </tr>
+    <tr>
+      <td>Current Portfolio</td>
+      <td>$80,540</td>
+      <td>14.75%</td>
+      <td>17.10%</td>
+      <td>0.77</td>
+      <td>-42.94%</td>
+      <td>$4,661,466</td>
+      <td>$4,580,926</td>
+    </tr>
+    <tr>
+      <td>Score-Weighted Optimiser</td>
+      <td>$100,000</td>
+      <td>10.84%</td>
+      <td>12.72%</td>
+      <td>0.71</td>
+      <td>-35.20%</td>
+      <td>$2,081,039</td>
+      <td>$1,981,039</td>
+    </tr>
+    <tr>
+      <td>Mean-Variance Optimiser</td>
+      <td>$100,000</td>
+      <td>9.53%</td>
+      <td>11.03%</td>
+      <td>0.69</td>
+      <td>-29.24%</td>
+      <td>$1,465,240</td>
+      <td>$1,365,240</td>
+    </tr>
+    <tr>
+      <td>Clean-Sheet Quant</td>
+      <td>$100,000</td>
+      <td>9.24%</td>
+      <td>10.72%</td>
+      <td>0.68</td>
+      <td>-27.73%</td>
+      <td>$1,355,449</td>
+      <td>$1,255,449</td>
+    </tr>
+    <tr>
+      <td>Regime-Aware Optimiser</td>
+      <td>$100,000</td>
+      <td>10.66%</td>
+      <td>13.08%</td>
+      <td>0.68</td>
+      <td>-36.43%</td>
+      <td>$1,982,460</td>
+      <td>$1,882,460</td>
+    </tr>
+    <tr>
+      <td>DRL Raw Challenger</td>
+      <td>$80,540</td>
+      <td>9.66%</td>
+      <td>11.47%</td>
+      <td>0.68</td>
+      <td>-30.55%</td>
+      <td>$1,221,878</td>
+      <td>$1,141,338</td>
+    </tr>
+    <tr>
+      <td>CVaR-Constrained Optimiser</td>
+      <td>$100,000</td>
+      <td>9.99%</td>
+      <td>12.18%</td>
+      <td>0.67</td>
+      <td>-31.93%</td>
+      <td>$1,657,883</td>
+      <td>$1,557,883</td>
+    </tr>
+    <tr>
+      <td>DRL Baseline Portfolio</td>
+      <td>$80,540</td>
+      <td>9.99%</td>
+      <td>12.18%</td>
+      <td>0.67</td>
+      <td>-31.93%</td>
+      <td>$1,335,175</td>
+      <td>$1,254,635</td>
+    </tr>
+    <tr>
+      <td>Final Resolved Portfolio</td>
+      <td>$80,540</td>
+      <td>9.99%</td>
+      <td>12.18%</td>
+      <td>0.67</td>
+      <td>-31.93%</td>
+      <td>$1,335,175</td>
+      <td>$1,254,635</td>
+    </tr>
+    <tr>
+      <td>Dividend-Income Optimiser</td>
+      <td>$100,000</td>
+      <td>10.78%</td>
+      <td>14.14%</td>
+      <td>0.64</td>
+      <td>-41.14%</td>
+      <td>$2,049,676</td>
+      <td>$1,949,676</td>
+    </tr>
+    <tr>
+      <td>Trend and Risk-Controlled Regional Indices</td>
+      <td>$100,000</td>
+      <td>4.68%</td>
+      <td>8.64%</td>
+      <td>0.32</td>
+      <td>-22.34%</td>
+      <td>$385,838</td>
+      <td>$285,838</td>
+    </tr>
+  </tbody>
+</table></div>
+  <div class='figure'><img src='plots/wealth_paths.png' alt='Portfolio wealth paths'><p class='caption'>Indexed growth uses each portfolio's assigned capital only for PnL; this chart rebases every series to 100 for comparability.</p></div>
+  <div class='two'>
+    <div class='figure'><img src='plots/ending_pnl.png' alt='Ending PnL'></div>
+    <div class='figure'><img src='plots/risk_return.png' alt='Risk and return'></div>
+  </div>
+
+  <h2>Historical Risk</h2>
+  <div class='figure'><img src='plots/benchmark_comparison.png' alt='Index benchmark comparison'><p class='caption'>Dashed lines are broad or regional index benchmarks. Portfolio-specific relative statistics use each allocation's geographic index blend on the common investable window.</p></div>
+  <h3>Primary Index Performance, Common Investable Window</h3>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Index benchmark</th>
+      <th>cagr</th>
+      <th>Volatility</th>
+      <th>sharpe</th>
+      <th>Max drawdown</th>
+      <th>Ending value on $100k</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SPDR S&amp;P 500 ETF adjusted-close proxy</td>
+      <td>14.41%</td>
+      <td>14.44%</td>
+      <td>0.88</td>
+      <td>-23.93%</td>
+      <td>$569,250</td>
+    </tr>
+    <tr>
+      <td>S&amp;P 500 Index</td>
+      <td>12.52%</td>
+      <td>14.45%</td>
+      <td>0.77</td>
+      <td>-24.77%</td>
+      <td>$458,656</td>
+    </tr>
+    <tr>
+      <td>Equal-Weight Regional Index Basket</td>
+      <td>6.20%</td>
+      <td>14.44%</td>
+      <td>0.36</td>
+      <td>-28.51%</td>
+      <td>$217,529</td>
+    </tr>
+  </tbody>
+</table></div>
+  <div class='figure'><img src='plots/drawdowns.png' alt='Drawdowns'></div>
+  <div class='figure'><img src='plots/annual_returns.png' alt='Annual return heatmap'></div>
+  <h3>Portfolio-Relative Regional Benchmark Results</h3>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Portfolio</th>
+      <th>Regional benchmark</th>
+      <th>annualised_alpha</th>
+      <th>beta</th>
+      <th>tracking_error</th>
+      <th>information_ratio</th>
+      <th>active_return_cumulative</th>
+      <th>Relative PnL</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Portfolio-Aware Overlay</td>
+      <td>Portfolio-Aware Overlay Regional Index Blend</td>
+      <td>8.57%</td>
+      <td>0.80</td>
+      <td>0.067</td>
+      <td>1.07</td>
+      <td>159.47%</td>
+      <td>$269,893</td>
+    </tr>
+    <tr>
+      <td>LLM Analyst Benchmark</td>
+      <td>LLM Analyst Benchmark Regional Index Blend</td>
+      <td>5.93%</td>
+      <td>0.88</td>
+      <td>0.059</td>
+      <td>0.91</td>
+      <td>97.94%</td>
+      <td>$164,592</td>
+    </tr>
+    <tr>
+      <td>Current Portfolio</td>
+      <td>Current Portfolio Regional Index Blend</td>
+      <td>8.52%</td>
+      <td>0.84</td>
+      <td>0.082</td>
+      <td>0.90</td>
+      <td>160.34%</td>
+      <td>$273,974</td>
+    </tr>
+    <tr>
+      <td>Dividend-Income Optimiser</td>
+      <td>Dividend-Income Optimiser Regional Index Blend</td>
+      <td>7.23%</td>
+      <td>0.86</td>
+      <td>0.072</td>
+      <td>0.88</td>
+      <td>128.25%</td>
+      <td>$252,289</td>
+    </tr>
+    <tr>
+      <td>Regime-Aware Optimiser</td>
+      <td>Regime-Aware Optimiser Regional Index Blend</td>
+      <td>7.03%</td>
+      <td>0.82</td>
+      <td>0.076</td>
+      <td>0.74</td>
+      <td>110.54%</td>
+      <td>$248,363</td>
+    </tr>
+    <tr>
+      <td>Score-Weighted Optimiser</td>
+      <td>Score-Weighted Optimiser Regional Index Blend</td>
+      <td>6.79%</td>
+      <td>0.79</td>
+      <td>0.073</td>
+      <td>0.74</td>
+      <td>104.76%</td>
+      <td>$219,865</td>
+    </tr>
+    <tr>
+      <td>Clean-Sheet Quant</td>
+      <td>Clean-Sheet Quant Regional Index Blend</td>
+      <td>5.33%</td>
+      <td>0.79</td>
+      <td>0.073</td>
+      <td>0.58</td>
+      <td>73.34%</td>
+      <td>$132,219</td>
+    </tr>
+    <tr>
+      <td>DRL Raw Challenger</td>
+      <td>DRL Raw Challenger Regional Index Blend</td>
+      <td>4.83%</td>
+      <td>0.77</td>
+      <td>0.071</td>
+      <td>0.45</td>
+      <td>54.89%</td>
+      <td>$96,796</td>
+    </tr>
+    <tr>
+      <td>DRL Baseline Portfolio</td>
+      <td>DRL Baseline Portfolio Regional Index Blend</td>
+      <td>4.93%</td>
+      <td>0.77</td>
+      <td>0.075</td>
+      <td>0.43</td>
+      <td>56.28%</td>
+      <td>$101,361</td>
+    </tr>
+    <tr>
+      <td>Final Resolved Portfolio</td>
+      <td>Final Resolved Portfolio Regional Index Blend</td>
+      <td>4.93%</td>
+      <td>0.77</td>
+      <td>0.075</td>
+      <td>0.43</td>
+      <td>56.28%</td>
+      <td>$101,361</td>
+    </tr>
+    <tr>
+      <td>CVaR-Constrained Optimiser</td>
+      <td>CVaR-Constrained Optimiser Regional Index Blend</td>
+      <td>4.92%</td>
+      <td>0.77</td>
+      <td>0.075</td>
+      <td>0.43</td>
+      <td>56.26%</td>
+      <td>$125,815</td>
+    </tr>
+    <tr>
+      <td>Mean-Variance Optimiser</td>
+      <td>Mean-Variance Optimiser Regional Index Blend</td>
+      <td>5.10%</td>
+      <td>0.72</td>
+      <td>0.075</td>
+      <td>0.42</td>
+      <td>55.39%</td>
+      <td>$121,354</td>
+    </tr>
+    <tr>
+      <td>Risk-Parity Optimiser</td>
+      <td>Risk-Parity Optimiser Regional Index Blend</td>
+      <td>4.09%</td>
+      <td>0.75</td>
+      <td>0.069</td>
+      <td>0.28</td>
+      <td>32.99%</td>
+      <td>$86,582</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>The Three Backtests</h2>
+  <div class='two'>
+    <div class='method'><strong>1. Historical / walk-forward</strong><p>Monthly execution with one-period signal lag for the index challenger. Current portfolio outputs are shown only as retrospective holdings replays and are explicitly flagged for selection look-ahead and survivorship bias.</p></div>
+    <div class='method'><strong>2. Resampling</strong><p>Circular 12-month moving blocks preserve serial dependence and cross-strategy alignment. The intervals show how path order changes CAGR, Sharpe, drawdown, and benchmark outperformance.</p></div>
+    <div class='method'><strong>3. Monte Carlo</strong><p>A correlated Student-t AR(1) process with EWMA conditional variance preserves cross-portfolio dependence, autocorrelation, fat tails, and volatility clustering without fitting a return target.</p></div>
+    <div class='method'><strong>Statistical integrity</strong><p>PSR, MinTRL, Sidak family-wise control, and Deflated Sharpe Ratios account for sample length, non-normal returns, and the number and correlation of portfolio trials.</p></div>
+  </div>
+  <div class='two'>
+    <div class='figure'><img src='plots/block_resampling.png' alt='Block bootstrap intervals'></div>
+    <div class='figure'><img src='plots/monte_carlo.png' alt='Monte Carlo intervals'></div>
+  </div>
+  <div class='figure'><img src='plots/embargo.png' alt='Embargo comparison'></div>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Portfolio</th>
+      <th>annualised_sharpe</th>
+      <th>PSR</th>
+      <th>MinTRL months</th>
+      <th>sidak_significant</th>
+      <th>DSR</th>
+      <th>cluster_adjusted_deflated_sharpe_ratio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>0.83</td>
+      <td>100.00%</td>
+      <td>50.998</td>
+      <td>True</td>
+      <td>99.95%</td>
+      <td>99.99%</td>
+    </tr>
+    <tr>
+      <td>portfolio_aware_overlay</td>
+      <td>0.80</td>
+      <td>100.00%</td>
+      <td>57.712</td>
+      <td>True</td>
+      <td>99.88%</td>
+      <td>99.98%</td>
+    </tr>
+    <tr>
+      <td>optimised_risk_parity</td>
+      <td>0.79</td>
+      <td>100.00%</td>
+      <td>59.550</td>
+      <td>True</td>
+      <td>99.85%</td>
+      <td>99.98%</td>
+    </tr>
+    <tr>
+      <td>current_portfolio</td>
+      <td>0.77</td>
+      <td>100.00%</td>
+      <td>61.213</td>
+      <td>True</td>
+      <td>99.82%</td>
+      <td>99.97%</td>
+    </tr>
+    <tr>
+      <td>optimised_score_weighted</td>
+      <td>0.71</td>
+      <td>99.99%</td>
+      <td>69.679</td>
+      <td>True</td>
+      <td>99.57%</td>
+      <td>99.93%</td>
+    </tr>
+    <tr>
+      <td>clean_sheet</td>
+      <td>0.68</td>
+      <td>99.99%</td>
+      <td>71.291</td>
+      <td>True</td>
+      <td>99.47%</td>
+      <td>99.91%</td>
+    </tr>
+    <tr>
+      <td>optimised_mean_variance</td>
+      <td>0.69</td>
+      <td>99.98%</td>
+      <td>75.153</td>
+      <td>True</td>
+      <td>99.38%</td>
+      <td>99.89%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>0.68</td>
+      <td>99.98%</td>
+      <td>74.444</td>
+      <td>True</td>
+      <td>99.37%</td>
+      <td>99.89%</td>
+    </tr>
+    <tr>
+      <td>drl_challenger_raw</td>
+      <td>0.68</td>
+      <td>99.98%</td>
+      <td>78.168</td>
+      <td>True</td>
+      <td>99.26%</td>
+      <td>99.86%</td>
+    </tr>
+    <tr>
+      <td>optimised_cvar_constrained</td>
+      <td>0.67</td>
+      <td>99.97%</td>
+      <td>79.991</td>
+      <td>True</td>
+      <td>99.17%</td>
+      <td>99.84%</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>0.67</td>
+      <td>99.97%</td>
+      <td>79.994</td>
+      <td>True</td>
+      <td>99.17%</td>
+      <td>99.84%</td>
+    </tr>
+    <tr>
+      <td>final_portfolio</td>
+      <td>0.67</td>
+      <td>99.97%</td>
+      <td>79.994</td>
+      <td>True</td>
+      <td>99.17%</td>
+      <td>99.84%</td>
+    </tr>
+    <tr>
+      <td>optimised_dividend_income</td>
+      <td>0.64</td>
+      <td>99.97%</td>
+      <td>81.220</td>
+      <td>True</td>
+      <td>99.02%</td>
+      <td>99.82%</td>
+    </tr>
+    <tr>
+      <td>trend_risk_controlled_indices</td>
+      <td>0.32</td>
+      <td>95.38%</td>
+      <td>338.108</td>
+      <td>False</td>
+      <td>72.79%</td>
+      <td>87.59%</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Data Quality and Causality</h2>
+  <h3>Execution and Liquidity</h3>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Portfolio</th>
+      <th>Total modeled cost</th>
+      <th>Annual turnover</th>
+      <th>Max ADV participation</th>
+      <th>Constrained trade events</th>
+      <th>Max unfilled target</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>current_portfolio</td>
+      <td>$16,843</td>
+      <td>29.93%</td>
+      <td>1.31%</td>
+      <td>0</td>
+      <td>0.00%</td>
+    </tr>
+    <tr>
+      <td>trend_risk_controlled_indices</td>
+      <td>$12,720</td>
+      <td>126.60%</td>
+      <td></td>
+      <td>0</td>
+      <td>0.00%</td>
+    </tr>
+    <tr>
+      <td>portfolio_aware_overlay</td>
+      <td>$12,091</td>
+      <td>29.71%</td>
+      <td>0.55%</td>
+      <td>0</td>
+      <td>0.00%</td>
+    </tr>
+    <tr>
+      <td>optimised_dividend_income</td>
+      <td>$11,447</td>
+      <td>30.88%</td>
+      <td>5.00%</td>
+      <td>10</td>
+      <td>0.53%</td>
+    </tr>
+    <tr>
+      <td>optimised_risk_parity</td>
+      <td>$11,163</td>
+      <td>27.98%</td>
+      <td>5.00%</td>
+      <td>1</td>
+      <td>0.82%</td>
+    </tr>
+    <tr>
+      <td>optimised_score_weighted</td>
+      <td>$10,431</td>
+      <td>28.98%</td>
+      <td>5.00%</td>
+      <td>10</td>
+      <td>0.47%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>$9,883</td>
+      <td>29.43%</td>
+      <td>5.00%</td>
+      <td>10</td>
+      <td>0.46%</td>
+    </tr>
+    <tr>
+      <td>optimised_cvar_constrained</td>
+      <td>$8,972</td>
+      <td>29.32%</td>
+      <td>5.00%</td>
+      <td>3</td>
+      <td>0.91%</td>
+    </tr>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>$8,503</td>
+      <td>24.14%</td>
+      <td>5.00%</td>
+      <td>62</td>
+      <td>4.43%</td>
+    </tr>
+    <tr>
+      <td>optimised_mean_variance</td>
+      <td>$7,546</td>
+      <td>27.13%</td>
+      <td>5.00%</td>
+      <td>5</td>
+      <td>4.42%</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>$7,127</td>
+      <td>29.34%</td>
+      <td>5.00%</td>
+      <td>1</td>
+      <td>0.70%</td>
+    </tr>
+    <tr>
+      <td>final_portfolio</td>
+      <td>$7,127</td>
+      <td>29.34%</td>
+      <td>5.00%</td>
+      <td>1</td>
+      <td>0.70%</td>
+    </tr>
+    <tr>
+      <td>drl_challenger_raw</td>
+      <td>$6,267</td>
+      <td>28.40%</td>
+      <td>5.00%</td>
+      <td>18</td>
+      <td>0.53%</td>
+    </tr>
+    <tr>
+      <td>clean_sheet</td>
+      <td>$6,083</td>
+      <td>25.90%</td>
+      <td>5.00%</td>
+      <td>11</td>
+      <td>4.05%</td>
+    </tr>
+  </tbody>
+</table></div>
+  <h3>Adjusted-Price Repairs</h3>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>symbol</th>
+      <th>Event date</th>
+      <th>Auditable repair</th>
+      <th>Raw return</th>
+      <th>Post-repair return</th>
+      <th>Scale factor</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>600018.SS</td>
+      <td>2006-10-26 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>-76.85%</td>
+      <td>0.00%</td>
+      <td>0.232</td>
+    </tr>
+    <tr>
+      <td>GEBN.SW</td>
+      <td>1999-06-22 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>-58.96%</td>
+      <td>0.00%</td>
+      <td>0.410</td>
+    </tr>
+    <tr>
+      <td>SHEL.L</td>
+      <td>1997-07-01 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>-71.74%</td>
+      <td>0.00%</td>
+      <td>0.283</td>
+    </tr>
+    <tr>
+      <td>TTE.PA</td>
+      <td>2005-12-26 00:00:00</td>
+      <td>isolated_spike_log_interpolation</td>
+      <td>300.00%</td>
+      <td>-0.16%</td>
+      <td>0.250</td>
+    </tr>
+    <tr>
+      <td>ULVR.L</td>
+      <td>1997-08-26 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>322.53%</td>
+      <td>0.00%</td>
+      <td>4.225</td>
+    </tr>
+    <tr>
+      <td>ULVR.L</td>
+      <td>1997-10-13 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>83.68%</td>
+      <td>0.00%</td>
+      <td>1.837</td>
+    </tr>
+  </tbody>
+</table></div>
+  <div class='figure'><img src='plots/investable_starts.png' alt='Investable starts'></div>
+  <div class='figure'><img src='plots/causal_graph.png' alt='Causal graph'></div>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>category</th>
+      <th>severity</th>
+      <th>applies_to</th>
+      <th>status</th>
+      <th>treatment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>selection look-ahead</td>
+      <td>CRITICAL</td>
+      <td>all current portfolio-output replays</td>
+      <td>ACKNOWLEDGED</td>
+      <td>Labelled retrospective holdings replay; excluded from claims of 1997 model selection skill.</td>
+    </tr>
+    <tr>
+      <td>survivorship bias</td>
+      <td>CRITICAL</td>
+      <td>current selected securities</td>
+      <td>ACKNOWLEDGED</td>
+      <td>Pre-listing capital stays in T-bills; current holdings are never presented as a historical universe.</td>
+    </tr>
+    <tr>
+      <td>point-in-time model evidence</td>
+      <td>HIGH</td>
+      <td>full stock-selection strategy</td>
+      <td>SEPARATED</td>
+      <td>The 25-month reconstructed decision history is reported separately and never spliced into the long replay.</td>
+    </tr>
+    <tr>
+      <td>corporate actions</td>
+      <td>MEDIUM</td>
+      <td>holding histories</td>
+      <td>MODELED</td>
+      <td>Yahoo adjusted closes include splits and distributions where provider history supports them.</td>
+    </tr>
+    <tr>
+      <td>currency conversion</td>
+      <td>MEDIUM</td>
+      <td>non-USD holdings and indices</td>
+      <td>MODELED</td>
+      <td>Historical FRED FX converts local adjusted closes to USD; ECU bridges pre-euro observations.</td>
+    </tr>
+    <tr>
+      <td>benchmark dividend consistency</td>
+      <td>MEDIUM</td>
+      <td>regional price indices</td>
+      <td>WARNING</td>
+      <td>DAX is a performance index; other regional index series may omit dividends. SPY is included as a total-return proxy.</td>
+    </tr>
+    <tr>
+      <td>transaction costs and liquidity</td>
+      <td>MEDIUM</td>
+      <td>portfolio outputs and index challenger</td>
+      <td>MODELED</td>
+      <td>Commission, spread, slippage, square-root impact, missing-ADV penalty, and 5% ADV caps are reported.</td>
+    </tr>
+    <tr>
+      <td>short-sale constraints</td>
+      <td>LOW</td>
+      <td>all tested portfolios</td>
+      <td>NOT_APPLICABLE</td>
+      <td>Every tested allocation is long-only; no borrow availability or fee assumption is required.</td>
+    </tr>
+    <tr>
+      <td>multiple testing</td>
+      <td>HIGH</td>
+      <td>portfolio comparison</td>
+      <td>CONTROLLED</td>
+      <td>Sidak FWER and Deflated Sharpe Ratios use both actual and correlation-clustered trial counts.</td>
+    </tr>
+    <tr>
+      <td>non-stationarity</td>
+      <td>HIGH</td>
+      <td>all historical and simulated evidence</td>
+      <td>RESIDUAL_RISK</td>
+      <td>Embargo, subperiod plots, block resampling, fat tails, and EWMA volatility expose but cannot remove structural breaks.</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <h2>Point-in-Time Model Evidence</h2>
+  <p>The repository's reconstructed model walk-forward is not spliced into the 1997 holdings replay. It remains a separate, shorter evidence set because it uses dated model decisions and realised outcomes.</p>
+  <div class='table-wrap'><table class="dataframe data-table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>strategy</th>
+      <th>observations</th>
+      <th>annualised_return</th>
+      <th>annualised_volatility</th>
+      <th>sharpe</th>
+      <th>maximum_drawdown</th>
+      <th>annualised_cost_drag</th>
+      <th>evidence_mode</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>wolf_cvar</td>
+      <td>25</td>
+      <td>18.93%</td>
+      <td>10.84%</td>
+      <td>1.75</td>
+      <td>-5.85%</td>
+      <td>0.025</td>
+      <td>reconstructed_pit_proxy</td>
+    </tr>
+    <tr>
+      <td>equal_weight_eligible</td>
+      <td>25</td>
+      <td>24.99%</td>
+      <td>11.29%</td>
+      <td>2.21</td>
+      <td>-5.17%</td>
+      <td>0.006</td>
+      <td>reconstructed_pit_proxy</td>
+    </tr>
+    <tr>
+      <td>cap_weight_eligible</td>
+      <td>25</td>
+      <td>17.62%</td>
+      <td>8.88%</td>
+      <td>1.98</td>
+      <td>-3.99%</td>
+      <td>0.006</td>
+      <td>reconstructed_pit_proxy</td>
+    </tr>
+  </tbody>
+</table></div>
+
+  <p class='footnote'>Research evidence only. The paper used as the methodological specification is <em>The Three Types of Backtests</em> (Joubert, Sestovic, Barziy, Distaso, and Lopez de Prado, 29 July 2024). Raw Yahoo Finance and FRED histories remain outside Git; compact outputs, manifests, and checksums are included.</p>
+</main>
+</body>
+</html>

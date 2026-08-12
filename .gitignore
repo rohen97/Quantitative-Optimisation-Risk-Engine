@@ -18,6 +18,8 @@ data/external/*
 !data/external/current_portfolio_template.csv
 data/parquet/*
 !data/parquet/.gitkeep
+data/backtests/*
+!data/backtests/.gitkeep
 data/raw/api_cache/*
 data/raw_archive/*
 !data/raw_archive/.gitkeep

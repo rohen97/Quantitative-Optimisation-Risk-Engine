@@ -1,0 +1,122 @@
+backtest:
+  start_date: 1997-01-01
+  end_date: null
+  base_currency: USD
+  default_capital_usd: 100000.0
+  current_portfolio_file: data/external/current_portfolio_template.csv
+  output_directory: reports/backtests/1997_to_latest
+  cache_directory: data/backtests/cache
+  rebalance_frequency: month_end
+  embargo_months: 36
+  minimum_live_weight: 0.80
+  annual_periods: 12
+  random_seed: 42
+
+market_data:
+  provider: yfinance
+  batch_size: 40
+  retries: 3
+  retry_wait_seconds: 2.0
+  refresh_cache: false
+  maximum_stale_days: 10
+  fred_csv_url: https://fred.stlouisfed.org/graph/fredgraph.csv
+  risk_free_series: DTB3
+  maximum_absolute_daily_return: 0.50
+  outlier_policy: explicit_level_shift_repair
+  fx_series:
+    EUR:
+      primary: DEXUSEU
+      pre_euro: EXUSEC
+      direction: usd_per_unit
+    GBP:
+      primary: DEXUSUK
+      direction: usd_per_unit
+    GBX:
+      primary: DEXUSUK
+      direction: usd_per_unit
+      unit_scale: 0.01
+    CHF:
+      primary: DEXSZUS
+      direction: units_per_usd
+    CNY:
+      primary: DEXCHUS
+      direction: units_per_usd
+    HKD:
+      primary: DEXHKUS
+      direction: units_per_usd
+    SEK:
+      primary: DEXSDUS
+      direction: units_per_usd
+
+benchmarks:
+  common:
+    symbol: ^GSPC
+    label: S&P 500 Index
+    region: US
+    currency: USD
+  total_return_proxy:
+    symbol: SPY
+    label: SPDR S&P 500 ETF adjusted-close proxy
+    region: US
+    currency: USD
+  regions:
+    US:
+      symbol: ^GSPC
+      label: S&P 500 Index
+      currency: USD
+    UK:
+      symbol: ^FTSE
+      label: FTSE 100 Index
+      currency: GBP
+    DACH:
+      symbol: ^GDAXI
+      label: DAX Performance Index
+      currency: EUR
+    EU ex-DACH:
+      symbol: ^STOXX
+      label: STOXX Europe 600 Index
+      currency: EUR
+    Mainland China:
+      symbol: 000001.SS
+      label: Shanghai Composite Index
+      currency: CNY
+    Hong Kong:
+      symbol: ^HSI
+      label: Hang Seng Index
+      currency: HKD
+
+execution:
+  commission_bps: 1.0
+  half_spread_bps: 5.0
+  slippage_bps: 4.0
+  market_impact_bps: 10.0
+  impact_reference_participation: 0.01
+  maximum_impact_bps: 50.0
+  maximum_adv_participation: 0.05
+  missing_liquidity_penalty_bps: 15.0
+
+resampling:
+  samples: 5000
+  block_months: 12
+  confidence_level: 0.95
+
+monte_carlo:
+  paths: 5000
+  horizon_months: 0
+  ewma_lambda: 0.94
+  minimum_degrees_of_freedom: 5.0
+  maximum_degrees_of_freedom: 30.0
+
+statistics:
+  familywise_alpha: 0.05
+  sharpe_hurdle: 0.0
+  correlation_cluster_threshold: 0.75
+  lo_autocorrelation_lags: 6
+
+index_challenger:
+  momentum_lookback_months: 12
+  volatility_lookback_months: 6
+  covariance_lookback_months: 36
+  target_volatility: 0.10
+  maximum_region_weight: 0.35
+  linear_cost_bps: 10.0
