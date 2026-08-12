@@ -2,10 +2,10 @@
 
 ## 1. Validation Overview
 
-- Validation run: `validation-20260807T092326-e5e0e476`
-- As-of date: `2026-08-07T09:23:26.276480`
-- Execution mode: `full`
-- Overall score: **87.5 / 100**
+- Validation run: `validation-20260812T083559-1d80b816`
+- As-of date: `2026-08-12T08:35:59.762589`
+- Execution mode: `release_candidate`
+- Overall score: **82.5 / 100**
 
 ## 2. Overall Approval Decision
 
@@ -25,7 +25,7 @@
 | forecast_performance | 15.0 | 15.0 | PASS | APPROVED |  |  |  |
 | distribution_calibration | 10.0 | 5.0 | WARNING | CONDITIONALLY_APPROVED |  |  |  |
 | risk_backtesting | 15.0 | 15.0 | PASS | APPROVED |  |  |  |
-| portfolio_net_of_costs | 10.0 | 10.0 | PASS | APPROVED |  |  |  |
+| portfolio_net_of_costs | 10.0 | 5.0 | WARNING | CONDITIONALLY_APPROVED |  |  |  |
 | constraint_compliance | 10.0 | 10.0 | PASS | APPROVED |  |  |  |
 | stability_sensitivity | 5.0 | 5.0 | PASS | APPROVED |  |  |  |
 
@@ -64,63 +64,63 @@
 ## 10. Risk Backtesting
 | confidence_level | observations | violations | violation_rate | lr_statistic | p_value | christoffersen_lr | christoffersen_p_value | expected_violation_rate | violation_rate_error | realised_tail_mean | mean_expected_shortfall | expected_shortfall_gap | status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 0.95 | 494 | 22 | 0.044534412955465584 | 0.3220292970860612 | 0.5703906563700292 | 3.075387300624726 | 0.07948565951795127 | 0.050000000000000044 | 0.00546558704453446 | -0.012311323507865686 | -0.01044191651178618 | -0.0018694069960795059 | PASS |
-| 0.99 | 494 | 9 | 0.018218623481781375 | 2.711264745425254 | 0.09964196520271197 | 0.3347300355845846 | 0.5628870567546442 | 0.010000000000000009 | 0.008218623481781366 | -0.02346658871002838 | -0.013491914275989668 | -0.009974674434038712 | PASS |
+| 0.95 | 487 | 19 | 0.039014373716632446 | 1.3341002465986378 | 0.24807708754244154 | 0.0876864501985608 | 0.7671392198590687 | 0.050000000000000044 | 0.010985626283367599 | -0.012204699380711892 | -0.010542984497734572 | -0.0016617148829773196 | PASS |
+| 0.99 | 487 | 9 | 0.018480492813141684 | 2.8298311951744495 | 0.09252808471914348 | 2.0807591685858 | 0.14916597214294428 | 0.010000000000000009 | 0.008480492813141675 | -0.0233554235686159 | -0.01362250338776081 | -0.00973292018085509 | PASS |
 
 ## 11. Portfolio Performance
 | date | as_of_date | strategy | gross_return | transaction_cost | net_return | turnover | valid_outcome_weight | holding_count | regime | evidence_mode |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 2024-07-30 00:00:00 | 2024-06-30 00:00:00 | wolf_cvar | 0.03458314439921517 | 0.004730501702422372 | 0.0298526426967928 | 1.0 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2024-08-31 00:00:00 | 2024-07-31 00:00:00 | wolf_cvar | 0.004885035101471144 | 0.0016698906386128198 | 0.0032151444628583242 | 0.15000000000000002 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2024-09-30 00:00:00 | 2024-08-31 00:00:00 | wolf_cvar | 0.02261371829717795 | 0.0014173660485783746 | 0.021196352248599577 | 0.15000000000000002 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2024-10-30 00:00:00 | 2024-09-30 00:00:00 | wolf_cvar | -0.008804706063523396 | 0.002094974759970345 | -0.01089968082349374 | 0.24999999999999978 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2024-11-30 00:00:00 | 2024-10-31 00:00:00 | wolf_cvar | 0.017890501466469314 | 0.0016675835048968403 | 0.016222917961572474 | 0.20000000000000007 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2024-12-30 00:00:00 | 2024-11-30 00:00:00 | wolf_cvar | -0.015307199690207652 | 0.0003273113142474879 | -0.01563451100445514 | 0.049999999999999725 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2025-01-31 00:00:00 | 2024-12-31 00:00:00 | wolf_cvar | 0.03912858923180091 | 0.0005569746909736338 | 0.038571614540827276 | 0.05000000000000002 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2025-02-28 00:00:00 | 2025-01-31 00:00:00 | wolf_cvar | 0.04718934786336486 | 0.0011667774362840021 | 0.046022570427080856 | 0.10000000000000031 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2025-03-28 00:00:00 | 2025-02-28 00:00:00 | wolf_cvar | 0.03209177279787144 | 0.0010833647577232633 | 0.031008408040148178 | 0.09999999999999978 | 1.0 | 20 | steady | reconstructed_pit_proxy |
-| 2025-04-30 00:00:00 | 2025-03-31 00:00:00 | wolf_cvar | -0.024596069127319518 | 0.0009538514821983282 | -0.025549920609517846 | 0.10000000000000005 | 1.0 | 20 | steady | reconstructed_pit_proxy |
-| 2025-05-30 00:00:00 | 2025-04-30 00:00:00 | wolf_cvar | 0.019112870902799145 | 0.005399432986752162 | 0.013713437916046983 | 0.5 | 1.0000000000000002 | 20 | high_volatility | reconstructed_pit_proxy |
+| 2024-08-31 00:00:00 | 2024-07-31 00:00:00 | wolf_cvar | 0.004338504724005188 | 0.0009731995279756852 | 0.0033653051960295033 | 0.10000000000000009 | 1.0 | 23 | steady | reconstructed_pit_proxy |
+| 2024-09-30 00:00:00 | 2024-08-31 00:00:00 | wolf_cvar | 0.02467601931846424 | 0.00074533124615244 | 0.0239306880723118 | 0.10000000000000005 | 1.0000000000000002 | 26 | steady | reconstructed_pit_proxy |
+| 2024-10-30 00:00:00 | 2024-09-30 00:00:00 | wolf_cvar | -0.011005718144086732 | 0.0006076696824124154 | -0.011613387826499146 | 0.10000000000000002 | 1.0000000000000002 | 30 | steady | reconstructed_pit_proxy |
+| 2024-11-30 00:00:00 | 2024-10-31 00:00:00 | wolf_cvar | 0.018090719660297353 | 0.000593658488163524 | 0.01749706117213383 | 0.09999999999999999 | 1.0 | 33 | steady | reconstructed_pit_proxy |
+| 2024-12-30 00:00:00 | 2024-11-30 00:00:00 | wolf_cvar | -0.0073608242542797945 | 0.0005699941691877458 | -0.00793081842346754 | 0.1 | 1.0 | 34 | steady | reconstructed_pit_proxy |
+| 2025-01-31 00:00:00 | 2024-12-31 00:00:00 | wolf_cvar | 0.03513158400418257 | 0.0006173557904803717 | 0.0345142282137022 | 0.1 | 1.0 | 34 | steady | reconstructed_pit_proxy |
+| 2025-02-28 00:00:00 | 2025-01-31 00:00:00 | wolf_cvar | 0.046440194135057775 | 0.0007366909423464525 | 0.045703503192711326 | 0.1 | 1.0000000000000002 | 35 | steady | reconstructed_pit_proxy |
+| 2025-03-28 00:00:00 | 2025-02-28 00:00:00 | wolf_cvar | 0.029643726523751135 | 0.0008243413661402877 | 0.028819385157610847 | 0.10000000000000002 | 1.0 | 36 | steady | reconstructed_pit_proxy |
+| 2025-04-30 00:00:00 | 2025-03-31 00:00:00 | wolf_cvar | -0.025156040862517857 | 0.000788049607561529 | -0.025944090470079385 | 0.09999999999999998 | 1.0 | 36 | steady | reconstructed_pit_proxy |
+| 2025-05-30 00:00:00 | 2025-04-30 00:00:00 | wolf_cvar | 0.019112870902799145 | 0.005329853375660173 | 0.013783017527138973 | 0.5196691591925839 | 1.0000000000000002 | 20 | high_volatility | reconstructed_pit_proxy |
 | 2025-06-30 00:00:00 | 2025-05-31 00:00:00 | wolf_cvar | 0.004375805285416307 | 0.0005738918296220721 | 0.003801913455794235 | 0.05 | 1.0000000000000002 | 20 | high_volatility | reconstructed_pit_proxy |
 | 2025-07-30 00:00:00 | 2025-06-30 00:00:00 | wolf_cvar | 0.0161120196028404 | 0.0013494175969883354 | 0.014762602005852065 | 0.1 | 1.0000000000000002 | 20 | high_volatility | reconstructed_pit_proxy |
 | 2025-08-31 00:00:00 | 2025-07-31 00:00:00 | wolf_cvar | 0.02913934494341859 | 0.000925945301714362 | 0.028213399641704228 | 0.09999999999999999 | 1.0000000000000002 | 20 | high_volatility | reconstructed_pit_proxy |
 | 2025-09-30 00:00:00 | 2025-08-31 00:00:00 | wolf_cvar | -0.012257909357987604 | 0.0005557982919395319 | -0.012813707649927135 | 0.049999999999999996 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
 | 2025-10-30 00:00:00 | 2025-09-30 00:00:00 | wolf_cvar | 0.022704436593705354 | 0.0010865003720677959 | 0.021617936221637556 | 0.1 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2025-11-30 00:00:00 | 2025-10-31 00:00:00 | wolf_cvar | 0.032996580013885425 | 0.0019531090162107573 | 0.03104347099767467 | 0.2000000000000003 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2025-12-30 00:00:00 | 2025-11-30 00:00:00 | wolf_cvar | -0.011726511305343112 | 0.0009271868912825869 | -0.0126536981966257 | 0.10000000000000031 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2026-01-31 00:00:00 | 2025-12-31 00:00:00 | wolf_cvar | 0.02353617333633247 | 0.00043469197054663564 | 0.023101481365785832 | 0.05000000000000002 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2026-02-28 00:00:00 | 2026-01-31 00:00:00 | wolf_cvar | 0.05625245346740138 | 0.0021070155686658846 | 0.0541454378987355 | 0.20000000000000037 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2026-03-28 00:00:00 | 2026-02-28 00:00:00 | wolf_cvar | 0.007936939352112026 | 0.0012709128317681991 | 0.006666026520343826 | 0.10000000000000003 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2026-04-30 00:00:00 | 2026-03-31 00:00:00 | wolf_cvar | 0.014220839633676055 | 0.0007281328706849918 | 0.013492706762991063 | 0.05000000000000029 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
-| 2026-05-30 00:00:00 | 2026-04-30 00:00:00 | wolf_cvar | -0.012982657024515088 | 0.007045254400909282 | -0.020027911425424372 | 0.4500000000000002 | 1.0 | 20 | steady | reconstructed_pit_proxy |
-| 2026-06-30 00:00:00 | 2026-05-31 00:00:00 | wolf_cvar | -0.03734419615871217 | 0.0019188223745210341 | -0.039263018533233204 | 0.20000000000000023 | 1.0 | 20 | steady | reconstructed_pit_proxy |
-| 2026-07-30 00:00:00 | 2026-06-30 00:00:00 | wolf_cvar | 0.11772695325252265 | 0.0023104772659251404 | 0.11541647598659752 | 0.20000000000000032 | 1.0000000000000002 | 20 | steady | reconstructed_pit_proxy |
+| 2025-11-30 00:00:00 | 2025-10-31 00:00:00 | wolf_cvar | 0.03438242973236011 | 0.0007930409414643138 | 0.0335893887908958 | 0.10000000000000002 | 1.0 | 24 | steady | reconstructed_pit_proxy |
+| 2025-12-30 00:00:00 | 2025-11-30 00:00:00 | wolf_cvar | -0.011168019158916775 | 0.0007468739302029256 | -0.0119148930891197 | 0.10000000000000002 | 0.9999999999999999 | 25 | steady | reconstructed_pit_proxy |
+| 2026-01-31 00:00:00 | 2025-12-31 00:00:00 | wolf_cvar | 0.024177197278922792 | 0.0007154723056330771 | 0.023461724973289716 | 0.09999999999999992 | 0.9999999999999998 | 26 | steady | reconstructed_pit_proxy |
+| 2026-02-28 00:00:00 | 2026-01-31 00:00:00 | wolf_cvar | 0.0539281239739523 | 0.0008025464239069795 | 0.05312557755004532 | 0.10000000000000012 | 1.0000000000000002 | 30 | steady | reconstructed_pit_proxy |
+| 2026-03-28 00:00:00 | 2026-02-28 00:00:00 | wolf_cvar | 0.007560067493430415 | 0.0008293317404689352 | 0.0067307357529614795 | 0.10000000000000002 | 1.0 | 31 | steady | reconstructed_pit_proxy |
+| 2026-04-30 00:00:00 | 2026-03-31 00:00:00 | wolf_cvar | 0.01375387915321747 | 0.0010269316710096034 | 0.012726947482207866 | 0.09999999999999999 | 0.9999999999999998 | 32 | steady | reconstructed_pit_proxy |
+| 2026-05-30 00:00:00 | 2026-04-30 00:00:00 | wolf_cvar | -0.012982657024515088 | 0.0070723432123010665 | -0.020055000236816153 | 0.45715323670878427 | 1.0 | 20 | steady | reconstructed_pit_proxy |
+| 2026-06-30 00:00:00 | 2026-05-31 00:00:00 | wolf_cvar | -0.034936961866542465 | 0.0007809187830428555 | -0.035717880649585323 | 0.09999999999999998 | 1.0 | 24 | steady | reconstructed_pit_proxy |
+| 2026-07-30 00:00:00 | 2026-06-30 00:00:00 | wolf_cvar | 0.11398892991392999 | 0.0007889311647556296 | 0.11319999874917436 | 0.09999999999999999 | 1.0 | 27 | steady | reconstructed_pit_proxy |
 
 ## 12. Transaction-Cost Robustness
 | strategy | cost_multiplier | gross_return | net_return | cost_drag | gross_alpha_consumed | status | evidence_mode |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | cap_weight_eligible | 1.0 | 0.35835176227954435 | 0.34811964781487925 | 0.010232114464665109 | 0.02855326955719895 | PASS | reconstructed_pit_proxy |
 | equal_weight_eligible | 1.0 | 0.49238773870032143 | 0.4816297652675761 | 0.010757973432745323 | 0.021848581081936474 | PASS | reconstructed_pit_proxy |
-| wolf_cvar | 1.0 | 0.41947727681387204 | 0.3752220909083658 | 0.04425518590550624 | 0.1055007943258459 | PASS | reconstructed_pit_proxy |
+| wolf_cvar | 1.0 | 0.41727086697012 | 0.38270627750649955 | 0.03456458946362048 | 0.08283489742430446 | PASS | reconstructed_pit_proxy |
 | cap_weight_eligible | 1.5 | 0.35835176227954435 | 0.3430035905825467 | 0.015348171696997663 | 0.042829904335798426 | PASS | reconstructed_pit_proxy |
 | equal_weight_eligible | 1.5 | 0.49238773870032143 | 0.47625077855120346 | 0.016136960149117984 | 0.03277287162290471 | PASS | reconstructed_pit_proxy |
-| wolf_cvar | 1.5 | 0.41947727681387204 | 0.35309449795561265 | 0.06638277885825936 | 0.15825119148876884 | PASS | reconstructed_pit_proxy |
+| wolf_cvar | 1.5 | 0.41727086697012 | 0.3654239827746893 | 0.05184688419543072 | 0.12425234613645669 | PASS | reconstructed_pit_proxy |
 | cap_weight_eligible | 2.0 | 0.35835176227954435 | 0.33788753335021415 | 0.020464228929330218 | 0.0571065391143979 | PASS | reconstructed_pit_proxy |
 | equal_weight_eligible | 2.0 | 0.49238773870032143 | 0.4708717918348308 | 0.021515946865490646 | 0.04369716216387295 | PASS | reconstructed_pit_proxy |
-| wolf_cvar | 2.0 | 0.41947727681387204 | 0.3309669050028595 | 0.08851037181101248 | 0.2110015886516918 | PASS | reconstructed_pit_proxy |
+| wolf_cvar | 2.0 | 0.41727086697012 | 0.34814168804287904 | 0.06912917892724096 | 0.16566979484860891 | PASS | reconstructed_pit_proxy |
 
 ## 13. Benchmark Comparison
 | strategy | observations | annualised_return | annualised_volatility | sharpe | sortino | maximum_drawdown | expected_shortfall | positive_period_ratio | worst_period | best_period | gross_annualised_return | annualised_cost_drag | annualised_turnover | total_transaction_cost | mean_net_return_ci_lower | mean_net_return_ci_upper | status | evidence_mode |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| wolf_cvar | 25 | 0.18934194552291794 | 0.108381437052904 | 1.7469960785858085 | 5.430082117069508 | -0.05850457370117923 | 0.032406469571375524 | 0.72 | -0.039263018533233204 | 0.11541647598659752 | 0.21449462814067477 | 0.025152682617756827 | 2.2080000000000006 | 0.04425518590550624 | 0.009221655167283712 | 0.0172730285730884 | PASS | reconstructed_pit_proxy |
-| equal_weight_eligible | 25 | 0.2499402591552753 | 0.11287833088750114 | 2.2142448173190594 | 4.174141646136274 | -0.051667835665107686 | 0.038654510800678867 | 0.76 | -0.05166783566510767 | 0.08518250117821669 | 0.25632072005183626 | 0.006380460896560969 | 1.1162132982009558 | 0.010757973432745323 | 0.014611143375057147 | 0.020487674225429166 |  | reconstructed_pit_proxy |
-| cap_weight_eligible | 25 | 0.1761642203304159 | 0.08875145490607421 | 1.984916422123454 | 4.260486654691978 | -0.03988962634918958 | 0.03495613373924607 | 0.76 | -0.03988962634918942 | 0.07710928234194482 | 0.18188666785906626 | 0.005722447528650365 | 1.1931790159784914 | 0.010232114464665109 | 0.009839783651082328 | 0.01428316199813174 |  | reconstructed_pit_proxy |
+| wolf_cvar | 25 | 0.19394235196053966 | 0.10511087493970635 | 1.8451216591222248 | 5.658562506031724 | -0.05505655878151561 | 0.030830985559832352 | 0.72 | -0.035717880649585323 | 0.11319999874917436 | 0.21368172863908153 | 0.019739376678541865 | 1.9568747500326569 | 0.03456458946362048 | 0.009196266159945244 | 0.018447431299726556 | WARNING | reconstructed_pit_proxy |
+| equal_weight_eligible | 25 | 0.2499402591552753 | 0.11287833088750114 | 2.2142448173190594 | 4.174141646136274 | -0.051667835665107686 | 0.038654510800678867 | 0.76 | -0.05166783566510767 | 0.08518250117821669 | 0.25632072005183626 | 0.006380460896560969 | 1.1162132982009558 | 0.010757973432745323 | 0.011030049543474535 | 0.02697355255297741 |  | reconstructed_pit_proxy |
+| cap_weight_eligible | 25 | 0.1761642203304159 | 0.08875145490607421 | 1.984916422123454 | 4.260486654691978 | -0.03988962634918958 | 0.03495613373924607 | 0.76 | -0.03988962634918942 | 0.07710928234194482 | 0.18188666785906626 | 0.005722447528650365 | 1.1931790159784914 | 0.010232114464665109 | 0.007629461530153679 | 0.018290562006982904 |  | reconstructed_pit_proxy |
 
 ## 14. Regime Performance
 | regime | observations | status | annualised_return | annualised_volatility | sharpe | sortino | maximum_drawdown | expected_shortfall | positive_period_ratio | worst_period | best_period |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | high_volatility | 4 | INSUFFICIENT_DATA |  |  |  |  |  |  |  |  |  |
-| steady | 21 | EVALUATED | 0.18792079322755773 | 0.11796109776613668 | 1.5930742998011036 | 5.3893253072492895 | -0.05850457370117912 | 0.032406469571375524 | 0.6666666666666666 | -0.039263018533233204 | 0.11541647598659752 |
+| steady | 21 | EVALUATED | 0.19334613182417315 | 0.11435473182339843 | 1.690757599106293 | 5.64116687854304 | -0.0550565587815155 | 0.030830985559832352 | 0.6666666666666666 | -0.035717880649585323 | 0.11319999874917436 |
 
 ## 15. Regional Performance
 | horizon | region | observation_count | status | mae | rmse | normalised_rmse | directional_accuracy | rank_ic |
@@ -182,60 +182,60 @@
 | maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-06-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
 | maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
 | maximum_country_weight | hard |  | 0.2999999999999999 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3500000000000001 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.2999999999999999 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.31666666666666665 | False |  |  |  | walk_forward | 2024-07-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3500000000000001 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.3333333333333334 | False |  |  |  | walk_forward | 2024-08-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.24705882352941178 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.2892156862745099 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.35686274509803934 | False |  |  |  | walk_forward | 2024-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.2157357179182911 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.2923857150929537 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.36954286037181455 | False |  |  |  | walk_forward | 2024-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.22855182748532796 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.29523373944118414 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.38093495776473624 | False |  |  |  | walk_forward | 2024-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.2999999999999998 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.2299891862861687 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.2655324285936606 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.2977006909992209 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.39080276399688346 | False |  |  |  | walk_forward | 2024-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.24286092802249265 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.2555413601516359 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.26701773207677715 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.3967187876135698 | False |  |  |  | walk_forward | 2025-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000001 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.24999999999999975 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.24999999999999975 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.4000000000000001 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.24768565051386332 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.25179640211778803 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.25551682061914865 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.39893629420961657 | False |  |  |  | walk_forward | 2025-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000005 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.20000000000000007 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.40000000000000013 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05000000000000001 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.2492940728218629 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.21579903476276274 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.2864316580175183 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.3996755464844566 | False |  |  |  | walk_forward | 2025-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2025-04-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2025-04-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
 | maximum_sector_weight | hard |  | 0.25 | False |  |  |  | walk_forward | 2025-04-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
@@ -272,42 +272,42 @@
 | maximum_country_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-09-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
 | maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-09-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05000000000000001 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.2499999999999999 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-10-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 0.9999999999999999 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.24999999999999994 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-11-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 0.9999999999999998 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2025-12-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.24999999999999978 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.050000000000000024 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.24242569511025872 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.30000000000000016 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.30000000000000016 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.30000000000000016 | False |  |  |  | walk_forward | 2026-01-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.23192605662305496 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
 | maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
 | maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-02-28 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.2500000000000001 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 0.9999999999999998 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.2485532874430361 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-03-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2026-04-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
 | maximum_single_name_weight | hard |  | 0.05000000000000001 | False |  |  |  | walk_forward | 2026-04-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
 | maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2026-04-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
@@ -315,17 +315,17 @@
 | maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2026-04-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2026-04-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 | weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.04999999999999999 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
-| maximum_sector_weight | hard |  | 0.24999999999999994 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.29999999999999993 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.29999999999999993 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.29999999999999993 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| weights_sum_to_one | hard |  | 1.0000000000000002 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
-| maximum_single_name_weight | hard |  | 0.05000000000000002 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
+| maximum_sector_weight | hard |  | 0.25 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.3 | False |  |  |  | walk_forward | 2026-05-31 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| weights_sum_to_one | hard |  | 1.0 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 1.0 |  |  |  |  |
+| maximum_single_name_weight | hard |  | 0.05000000000000001 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.05 |  |  |  |  |
 | maximum_sector_weight | hard |  | 0.25000000000000006 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.25 |  |  |  |  |
-| maximum_country_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
-| maximum_region_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
-| maximum_currency_weight | hard |  | 0.3000000000000001 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_country_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.3 |  |  |  |  |
+| maximum_region_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
+| maximum_currency_weight | hard |  | 0.30000000000000004 | False |  |  |  | walk_forward | 2026-06-30 00:00:00 | wolf_cvar | 0.4 |  |  |  |  |
 |  |  |  |  |  |  |  |  | selected_classical |  |  |  | finite_weights | PASS | 0.0 | True |
 |  |  |  |  |  |  |  |  | selected_classical |  |  |  | weights_sum_to_one | PASS | 0.0 | True |
 |  |  |  |  |  |  |  |  | selected_classical |  |  |  | long_only | PASS | 0.0 | True |
@@ -390,9 +390,9 @@
 | forecast_year | 2025 | 9145 | EVALUATED | 0.35837473295785105 | 0.5579616367757563 | 1.1284433291290337 | 0.5669764898851831 | 0.02258294411571683 | -0.016058230422111335 | PASS |
 
 ## 21. Statistical Confidence
-| strategy | baseline | observations | mean_difference | t_statistic | p_value | difference_ci_lower | difference_ci_upper | status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| wolf_cvar | equal_weight_eligible | 25 | -0.004256306974368408 | -0.7672637999380434 | 0.4429246868502338 | -0.007192629241473082 | -0.0014589536163096084 | WARNING |
+| strategy | baseline | observations | mean_difference | t_statistic | p_value | difference_ci_lower | difference_ci_upper | bootstrap_block_size | bootstrap_significant | status |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| wolf_cvar | equal_weight_eligible | 25 | -0.003956939510443061 | -0.7285320877656106 | 0.4733373395853032 | -0.014470865359821242 | 0.004636539658732527 | 6 | False | WARNING |
 
 ## 22. Known Limitations
 - Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.

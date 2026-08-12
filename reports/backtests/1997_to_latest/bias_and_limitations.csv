@@ -10,5 +10,6 @@ annual bank AUM charge,MEDIUM,portfolio outputs and index challenger,MODELED,A 2
 conditional regime analysis,MEDIUM,"rate, market, and recession tables",DESCRIPTIVE,Rate and market inputs are lagged one month; NBER recession labels are retrospective and are not presented as tradable signals.
 macro-event windows,MEDIUM,event comparisons and shaded plots,DESCRIPTIVE,Configured market-response windows overlap monthly returns and do not assert legal conflict dates or isolate causal effects.
 short-sale constraints,LOW,all tested portfolios,NOT_APPLICABLE,Every tested allocation is long-only; no borrow availability or fee assumption is required.
-multiple testing,HIGH,portfolio comparison,CONTROLLED,Sidak FWER and Deflated Sharpe Ratios use both actual and correlation-clustered trial counts.
+multiple testing,HIGH,portfolio comparison,CONTROLLED,"Sidak, Deflated Sharpe, block-bootstrap max-t, duplicate-trial removal, and CSCV PBO are reported."
+deployable alpha,CRITICAL,strategy-selection claims,NOT_ESTABLISHED,Retrospective alpha is diagnostic only; approval requires native point-in-time outperformance with sufficient history.
 non-stationarity,HIGH,all historical and simulated evidence,RESIDUAL_RISK,"Embargo, subperiod plots, block resampling, fat tails, and EWMA volatility expose but cannot remove structural breaks."

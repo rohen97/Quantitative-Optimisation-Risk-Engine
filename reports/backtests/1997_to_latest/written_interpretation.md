@@ -56,6 +56,10 @@ Event return compounds all overlapping monthly observations, event drawdown meas
 
 PSR and MinTRL evaluate reliability, Sidak controls family-wise error across tested strategies, and DSR penalizes multiple trials and non-normal returns. 13 of 14 results clear Sidak; significance does not remove retrospective selection look-ahead.
 
+## Alpha and Overfitting
+
+Newey-West regressions test alpha against each portfolio-specific regional index blend while allowing serial correlation. The block-bootstrap max-t test controls selection across the whole strategy family, and CSCV repeatedly selects in one half of the history and ranks that winner in the other half. 6 unique results clear the max-t family-wise test. CSCV estimates PBO at 19.91%, while the median selected information ratio falls from 1.32 in-sample to 0.66 out-of-sample. The largest measured common-window alpha is 8.33% for Current Portfolio. Every long portfolio path is still a retrospective holdings replay, so these tests measure path robustness, not deployable stock-selection alpha.
+
 ## Block Resampling
 
 The moving-block bootstrap rearranges 12-month blocks while preserving short-run dependence and cross-strategy alignment. Its 5th, median, and 95th percentiles show sensitivity to historical path order. The lowest 5th-percentile CAGR is trend_risk_controlled_indices at 1.46%.
@@ -82,4 +86,4 @@ The limitation register distinguishes modeled, controlled, separated, and unreso
 
 ## Point-in-Time Evidence
 
-The point-in-time table contains 25 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data.
+The point-in-time table contains 25 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -4.75% and the alpha verdict is INSUFFICIENT_HISTORY. Against cap-weight eligible stocks, annualised active return is 1.66% and the verdict is INSUFFICIENT_HISTORY. Native live evidence and at least 60 months are required before alpha can be considered deployable.

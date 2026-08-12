@@ -274,8 +274,8 @@
     },
     {
       "path": "plots/cumulative_returns.png",
-      "sha256": "c1630be99d16627c242dfa034583765235817f6d16be151a7cab7acdf02487e4",
-      "size_bytes": 134826
+      "sha256": "a834e8496ddb6d078fc8828ed8e8f8fcee4b39a64077937db5f46f9b7e9881c1",
+      "size_bytes": 135209
     },
     {
       "path": "plots/distribution_coverage.png",
@@ -294,8 +294,8 @@
     },
     {
       "path": "plots/portfolio_comparison.png",
-      "sha256": "1b31b40a25e6e49d0d4da251d74d41da812b0d86a68c26414d2cfa8b9d9bdcfc",
-      "size_bytes": 68772
+      "sha256": "a62581687501f9e78d057755fb5ab58a38c6d144e52182d386f2ab11fce070cb",
+      "size_bytes": 68775
     },
     {
       "path": "plots/regional_rank_ic.png",
@@ -304,18 +304,18 @@
     },
     {
       "path": "plots/risk_backtest.png",
-      "sha256": "7c2f8a67d2cb14650c2ea1edd2c6fcc1ccf06a3543a417126e63f4b227b87993",
-      "size_bytes": 49672
+      "sha256": "f49730d39089586304d302a54932d390e0d73f056302f2cdfa1abde4d649c5b0",
+      "size_bytes": 50715
     },
     {
       "path": "plots/validation_scorecard.png",
-      "sha256": "be893a497dbccf9ecbb5e8fdab01e49ad3d3d80dd9615fd9c0149874c6e3b4b3",
-      "size_bytes": 61689
+      "sha256": "89680cbad29f3f6ad7797bdcffa6c9b852f26c23f43e3762092a66ed28b9c9c4",
+      "size_bytes": 62152
     },
     {
       "path": "README.md",
-      "sha256": "cf8a1463205bc65fe5d64f2f972e5964eac4c1c4fc0812c2fe75708c6f9c2e31",
-      "size_bytes": 2601
+      "sha256": "894b67f93dba6dcda7a433b5088584a181d5cfd12693702497ba13c714e24cea",
+      "size_bytes": 2815
     },
     {
       "path": "universe_summary.csv",
@@ -329,8 +329,8 @@
     },
     {
       "path": "validation/benchmark_significance_report.csv",
-      "sha256": "f6a12cc14dec55e1a671476e2d257bf4acc047ea39f1271f1e68d70901d5ce93",
-      "size_bytes": 265
+      "sha256": "9079a40620738f7f91ebf7ab3eae2977c9bf19cad36c4cb53bc508a36bbc4acf",
+      "size_bytes": 314
     },
     {
       "path": "validation/binary_probability_calibration.csv",
@@ -339,8 +339,8 @@
     },
     {
       "path": "validation/constraint_compliance_report.csv",
-      "sha256": "35d6c743e9553048eca87f9861a6e4ab652d27654ab8c8725d1b4ebff4baf74d",
-      "size_bytes": 17724
+      "sha256": "73948d107d3ed9b3b001f061ce5f54853c4bd221f84021d8860591cb6239816c",
+      "size_bytes": 17399
     },
     {
       "path": "validation/data_leakage_report.csv",
@@ -379,23 +379,23 @@
     },
     {
       "path": "validation/model_approval_report.html",
-      "sha256": "792c19f1f9668445454ba586617b65992d98678a647fcff68cbfd57d46dddd94",
-      "size_bytes": 53278
+      "sha256": "6ac531cd83b4be0945fd86e68bc60a455fed7db5499174c8d3f0e17ae6ca854a",
+      "size_bytes": 52906
     },
     {
       "path": "validation/model_approval_report.md",
-      "sha256": "68e083443a3a8516309f06b3feba1adf4dd99d2d9a806acef673517ef8867861",
-      "size_bytes": 51125
+      "sha256": "ada2085a9f1f459e6c1c9e0c59b33d96f1e86d78d3c21d2a1cfb44a905fc6348",
+      "size_bytes": 50753
     },
     {
       "path": "validation/model_component_approval.csv",
-      "sha256": "e9fe4be0b19358b21cef5cba8583c0c1625aa8b4e0a8526c2c2225a63ab237bb",
-      "size_bytes": 511
+      "sha256": "8509319750b548dd217aa5eb1ccbfd2d6733d07737d7ce638e60a5f4f7f39ab8",
+      "size_bytes": 527
     },
     {
       "path": "validation/model_validation_scorecard.csv",
-      "sha256": "48c6eaf96284edca3f6f1abffcd3740d2a604246470aa50f1ca4a4454d0481fb",
-      "size_bytes": 327
+      "sha256": "627de8077980f5030848b2dc5911a51828637a58b675c836ba40fc7977976f3b",
+      "size_bytes": 329
     },
     {
       "path": "validation/point_in_time_validation.csv",
@@ -403,19 +403,24 @@
       "size_bytes": 455
     },
     {
+      "path": "validation/portfolio_monthly_returns.csv",
+      "sha256": "32c686dcab2bd0fc1d634979f3c51e36d1869fa66f2efdca47585aeea141bfba",
+      "size_bytes": 12770
+    },
+    {
       "path": "validation/portfolio_performance_by_period.csv",
-      "sha256": "40b4d2fd3f5f2c2b39cb5e9b846c010d57a03bd4fa83c6693249cfa3c4532f2a",
-      "size_bytes": 4268
+      "sha256": "73e1ece0995b364369d3bb594eb1b823a33e5f49dde7f6e703151340ef10f7ef",
+      "size_bytes": 4127
     },
     {
       "path": "validation/portfolio_strategy_comparison.csv",
-      "sha256": "a9cfa983c4e479980d3282fb5c4676f395bd2c50070383d3f2514c0dbbca3d06",
-      "size_bytes": 1319
+      "sha256": "3f51342efd59a16aab4196132b91de3ab8d96f0c1cdc6990d579ba15194969d4",
+      "size_bytes": 1326
     },
     {
       "path": "validation/regime_performance_report.csv",
-      "sha256": "8dec4c40e165c28ee1a5060dca8f515bb065b0c2b47fbd4eccb92928ac36ba8d",
-      "size_bytes": 414
+      "sha256": "d151044ddb80f85f3c63b609ec4532a3085283c24c999b90f12c1981ab9b97d5",
+      "size_bytes": 410
     },
     {
       "path": "validation/regional_performance_report.csv",
@@ -424,8 +429,8 @@
     },
     {
       "path": "validation/risk_backtesting_report.csv",
-      "sha256": "8b9e7c95fcde8d801959b740ef358ee6cb77cb76df1902428820bd6e2b34ce0a",
-      "size_bytes": 680
+      "sha256": "65263abc9bfccca7e89f79148f1e1ea0b8a500d2cf8c31b8f58272e9a14827ba",
+      "size_bytes": 679
     },
     {
       "path": "validation/sensitivity_analysis.csv",
@@ -434,22 +439,22 @@
     },
     {
       "path": "validation/transaction_cost_validation.csv",
-      "sha256": "2d3d29f6300e6bb79936b6c16599a51f412fe149555230ebb0ecb5ad0a2558fe",
-      "size_bytes": 1284
+      "sha256": "34a23f14629412b4711e74b3178edb2b608cd757554cc706f4cd9ce32aa4a460",
+      "size_bytes": 1278
     },
     {
       "path": "validation/validation_manifest.json",
-      "sha256": "b89cf2593123f4b9cb1ac6eaa8d144726ab44dd5ac83a810c4a2be3a127cd7e0",
-      "size_bytes": 2492
+      "sha256": "ea1b902a6a44c974966f02bcfdb755327634cdea23f55c0c8b23139e5252cec0",
+      "size_bytes": 2543
     },
     {
       "path": "walk_forward_manifest.json",
-      "sha256": "55959b6dbf5a24ea24ed4eb6911d78adbae1bd23db7f0dc69f25a82a134a445c",
-      "size_bytes": 2534
+      "sha256": "acbca1fb198e5a7483ce623aaeec3d5d55b172f96aec41b1fb25388b0f52ddde",
+      "size_bytes": 2574
     }
   ],
-  "generated_at": "2026-08-07T09:23:27.509723+00:00",
-  "overall_score": 87.5,
+  "generated_at": "2026-08-12T08:36:00.973691+00:00",
+  "overall_score": 82.5,
   "release_id": "2026-08-07-full-universe",
-  "source_validation_run_id": "validation-20260807T092326-e5e0e476"
+  "source_validation_run_id": "validation-20260812T083559-1d80b816"
 }
