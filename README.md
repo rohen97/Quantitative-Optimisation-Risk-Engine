@@ -101,6 +101,23 @@ python -m pytest -q
 Keep provider credentials in `.env` only. The tracked `.env.example` contains
 names and safe defaults, never usable credentials.
 
+### Bloomberg Desktop API
+
+On an entitled Windows workstation with Bloomberg Terminal open and logged in:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-bloomberg.txt
+.\.venv\Scripts\python.exe scripts\run_bloomberg_backfill.py --health-check
+.\.venv\Scripts\python.exe scripts\run_bloomberg_backfill.py `
+  --regions 'Mainland China' 'Hong Kong' --start 1997-01-01 --resume
+.\.venv\Scripts\python.exe scripts\run_bloomberg_pit_backfill.py --coverage-only
+```
+
+Bloomberg observations remain in the ignored local DuckDB. See
+[`docs/BLOOMBERG_DATA.md`](docs/BLOOMBERG_DATA.md) for limits and operations and
+[`docs/PRODUCTION_POINT_IN_TIME.md`](docs/PRODUCTION_POINT_IN_TIME.md) for vintage
+semantics, resume commands and measured gaps.
+
 Run the mock-data pipeline:
 
 ```bash
@@ -187,7 +204,7 @@ Run the constrained, regime-gated and explainable DRL allocation overlay:
 python scripts/run_drl_pipeline.py
 ```
 
-The DRL engine is a residual overlay, not a replacement for the selected optimiser. It proposes bounded active-weight deltas against the baseline optimiser, applies probabilistic regime gating and the Wolf Chaos risk throttle, then projects weights through hard constraints. The acceptance gate records whether the result is rejected, blended or accepted as a challenger, and final recommendations retain the baseline source separately from DRL challenger status.
+The DRL engine is a residual overlay, not a replacement for the selected optimiser. Production mode trains five Stable-Baselines3 PPO seeds on a chronological six-region panel with train-only scaling and embargoed validation/test splits. It proposes bounded active-weight deltas, applies the Wolf Chaos throttle, then projects through hard constraints. The current validation guard rejects the challenger because all validation information ratios are negative, leaving the baseline at 100%; the failed experiment remains published rather than hidden.
 
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
@@ -403,6 +420,15 @@ filing acceptance metadata, Nasdaq Mergent supplies entitlement-dependent annual
 fundamentals, and EODHD supplies delistings plus entitlement-dependent symbol and
 membership history. Provider failures do not become passes; measured coverage is
 written to `reports/outputs/validation/pit_evidence_coverage.json`.
+
+Pull immutable FRED/ALFRED macro vintages and register every walk-forward
+decision snapshot:
+
+```powershell
+python scripts/run_macro_vintage_backfill.py --start 1994-01-01
+python scripts/archive_walk_forward_snapshots.py
+python scripts/build_pit_coverage_report.py
+```
 
 Build the compact GitHub release package after validation and IC reporting:
 

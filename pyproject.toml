@@ -23,6 +23,9 @@ dependencies = [
     'python-pptx>=1.0,<2',
 ]
 
+[project.optional-dependencies]
+bloomberg = ['blpapi>=3.26,<4']
+
 [tool.setuptools.packages.find]
 where = ['.']
 include = ['src*']

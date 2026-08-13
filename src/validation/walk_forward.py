@@ -203,8 +203,24 @@ def reconstruct_statement_availability(
         errors='coerce',
         utc=True,
     ).dt.tz_localize(None)
+    explicit_available = pd.to_datetime(
+        result.get('available_from', pd.Series(pd.NaT, index=result.index)),
+        errors='coerce',
+        utc=True,
+    ).dt.tz_localize(None)
     proxy_date = period_end + pd.to_timedelta(int(filing_lag_days), unit='D')
     source = result.get('source', pd.Series('', index=result.index)).astype(str)
+    trusted_database_snapshot = source.str.contains(
+        'bloomberg_database_as_of',
+        case=False,
+        na=False,
+    )
+    valid_database_snapshot = (
+        trusted_database_snapshot
+        & explicit_available.notna()
+        & period_end.notna()
+        & explicit_available.ge(period_end)
+    )
     trusted_filing_source = ~source.str.contains(
         'yahoo_finance_timeseries',
         case=False,
@@ -221,13 +237,20 @@ def reconstruct_statement_availability(
         & period_end.notna()
         & observed_acceptance.ge(period_end)
     )
-    result['reconstructed_available_from'] = observed_acceptance.where(
-        valid_acceptance,
-        filing_date.where(valid_filing, proxy_date),
+    result['reconstructed_available_from'] = explicit_available.where(
+        valid_database_snapshot,
+        observed_acceptance.where(
+            valid_acceptance,
+            filing_date.where(valid_filing, proxy_date),
+        ),
     )
     result['availability_basis'] = np.select(
-        [valid_acceptance, valid_filing],
-        ['observed_sec_acceptance_datetime', 'reported_filing_date'],
+        [valid_database_snapshot, valid_acceptance, valid_filing],
+        [
+            'bloomberg_fundamental_database_as_of',
+            'observed_sec_acceptance_datetime',
+            'reported_filing_date',
+        ],
         default=f'fiscal_period_end_plus_{int(filing_lag_days)}d',
     )
     return result
@@ -273,6 +296,45 @@ class _FxMatcher:
             valid = matched >= 0
             output[indexes[valid]] = rates[matched[valid]]
         return pd.Series(output, index=original_index, dtype=float)
+
+
+class _MarketCapMatcher:
+    def __init__(self, snapshots: pd.DataFrame) -> None:
+        self._groups: dict[str, pd.DataFrame] = {}
+        if snapshots.empty:
+            return
+        clean = snapshots.copy()
+        clean['available_from'] = pd.to_datetime(clean['available_from'])
+        clean['as_of_date'] = pd.to_datetime(clean['as_of_date'])
+        clean = clean.sort_values(
+            ['security_id', 'available_from', 'as_of_date', 'retrieved_at']
+        )
+        for security_id, group in clean.groupby('security_id', sort=False):
+            self._groups[str(security_id)] = group.reset_index(drop=True)
+
+    def match(self, security_ids: pd.Series, as_of_date: pd.Timestamp) -> pd.DataFrame:
+        rows: list[dict[str, Any]] = []
+        target = np.datetime64(pd.Timestamp(as_of_date), 'ns')
+        for security_id in map(str, security_ids):
+            group = self._groups.get(security_id)
+            if group is None:
+                continue
+            dates = group['available_from'].to_numpy(dtype='datetime64[ns]')
+            position = int(np.searchsorted(dates, target, side='right')) - 1
+            if position < 0:
+                continue
+            row = group.iloc[position]
+            rows.append(
+                {
+                    'security_id': security_id,
+                    'pit_market_cap_local': row.get('market_cap_local'),
+                    'pit_shares_outstanding': row.get('shares_outstanding'),
+                    'pit_market_cap_currency': row.get('currency'),
+                    'pit_market_cap_as_of_date': row.get('as_of_date'),
+                    'pit_market_cap_available_from': row.get('available_from'),
+                }
+            )
+        return pd.DataFrame(rows)
 
 
 class _PriceMatcher:
@@ -383,7 +445,7 @@ class _PriceMatcher:
 def _load_source_data(
     repository: DuckDBRepository,
     config: WalkForwardConfig,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     minimum_periods = int(config.minimum_annual_periods)
     universe = repository.query(
         f'''
@@ -432,28 +494,31 @@ def _load_source_data(
     placeholder = chr(63)
     statements = repository.query(
         f'''
-        WITH selected AS (
-            SELECT *, ROW_NUMBER() OVER (
-                PARTITION BY security_id, fiscal_period_end, fiscal_period_type
-                ORDER BY
-                    CASE
-                        WHEN source = 'sec_companyfacts' THEN 1
-                        WHEN source IN (
-                            'finnhub_reported',
-                            'eastmoney_china_financials',
-                            'eastmoney_hk_financials'
-                        ) THEN 2
-                        WHEN source LIKE 'akshare%' THEN 3
-                        WHEN source = 'yahoo_finance_timeseries' THEN 4
-                        ELSE 5
-                    END,
-                    retrieved_at DESC
-            ) AS source_row
+        WITH ranked AS (
+            SELECT *,
+                CASE
+                    WHEN source = 'bloomberg_database_as_of' THEN 1
+                    WHEN source = 'sec_companyfacts' THEN 2
+                    WHEN source IN (
+                        'finnhub_reported',
+                        'eastmoney_china_financials',
+                        'eastmoney_hk_financials'
+                    ) THEN 3
+                    WHEN source LIKE 'akshare%' THEN 4
+                    WHEN source = 'yahoo_finance_timeseries' THEN 5
+                    ELSE 6
+                END AS source_priority
             FROM fundamentals_reported
             WHERE security_id IN (SELECT UNNEST({placeholder}))
               AND fiscal_period_type = 'annual'
               AND LOWER(source) NOT LIKE '%mock%'
               AND LOWER(source) NOT LIKE '%synthetic%'
+        ), selected AS (
+            SELECT * EXCLUDE (source_priority)
+            FROM ranked
+            QUALIFY source_priority = MIN(source_priority) OVER (
+                PARTITION BY security_id, fiscal_period_end, fiscal_period_type
+            )
         ), observed_filings AS (
             SELECT
                 security_id,
@@ -465,14 +530,13 @@ def _load_source_data(
             GROUP BY security_id, report_date
         )
         SELECT
-            selected.* EXCLUDE (source_row),
+            selected.*,
             observed_filings.observed_acceptance_datetime,
             observed_filings.filing_metadata_source
         FROM selected
         LEFT JOIN observed_filings
           ON selected.security_id = observed_filings.security_id
          AND selected.fiscal_period_end = observed_filings.report_date
-        WHERE selected.source_row = 1
         ORDER BY security_id, fiscal_period_end
         ''',
         [security_ids],
@@ -519,7 +583,19 @@ def _load_source_data(
         ORDER BY quote_currency, rate_date
         '''
     )
-    return universe, statements, prices, fx
+    market_caps = repository.query(
+        f'''
+        SELECT
+            security_id, as_of_date, available_from, market_cap_local,
+            shares_outstanding, currency, retrieved_at, vintage_id
+        FROM market_cap_vintages
+        WHERE security_id IN (SELECT UNNEST({placeholder}))
+          AND available_from <= {placeholder}
+        ORDER BY security_id, available_from, as_of_date
+        ''',
+        [security_ids, config.strategy_end_date],
+    )
+    return universe, statements, prices, fx, market_caps
 
 
 def _prepare_prices(prices: pd.DataFrame) -> pd.DataFrame:
@@ -603,6 +679,19 @@ def _fundamental_snapshot(
     ].copy()
     if available.empty:
         return pd.DataFrame()
+    available = available.sort_values(
+        [
+            'security_id',
+            'fiscal_period_end',
+            'reconstructed_available_from',
+            'retrieved_at',
+        ]
+    )
+    available = available.groupby(
+        ['security_id', 'fiscal_period_end', 'fiscal_period_type'],
+        as_index=False,
+        sort=False,
+    ).tail(1)
     available = available.sort_values(['security_id', 'fiscal_period_end'])
     available['_period_count'] = available.groupby('security_id')[
         'security_id'
@@ -664,6 +753,7 @@ def _build_anchor_inputs(
     statements: pd.DataFrame,
     price_matcher: _PriceMatcher,
     fx_matcher: _FxMatcher,
+    market_cap_matcher: _MarketCapMatcher,
     as_of_date: pd.Timestamp,
     config: WalkForwardConfig,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -720,11 +810,55 @@ def _build_anchor_inputs(
         candidates['price_scale'],
         errors='coerce',
     ).fillna(1.0)
-    candidates['market_cap_usd'] = (
+    matched_market_caps = market_cap_matcher.match(
+        candidates['security_id'],
+        as_of_date,
+    )
+    if not matched_market_caps.empty:
+        candidates = candidates.merge(
+            matched_market_caps,
+            on='security_id',
+            how='left',
+        )
+    else:
+        for column in (
+            'pit_market_cap_local',
+            'pit_shares_outstanding',
+            'pit_market_cap_currency',
+            'pit_market_cap_as_of_date',
+            'pit_market_cap_available_from',
+        ):
+            candidates[column] = np.nan
+    valuation_shares = pd.to_numeric(
+        candidates['pit_shares_outstanding'],
+        errors='coerce',
+    ).fillna(pd.to_numeric(candidates['diluted_shares'], errors='coerce'))
+    price_implied_market_cap = (
         candidates['anchor_close_price']
         * candidates['price_scale']
-        * pd.to_numeric(candidates['diluted_shares'], errors='coerce')
+        * valuation_shares
         / candidates['_quote_fx']
+    )
+    market_cap_currency = candidates['pit_market_cap_currency'].where(
+        candidates['pit_market_cap_currency'].fillna('').astype(str).str.strip().ne(''),
+        candidates['currency'],
+    )
+    market_cap_fx = fx_matcher.match(
+        market_cap_currency,
+        pd.Series(as_of_date, index=candidates.index),
+    )
+    pit_market_cap_usd = (
+        pd.to_numeric(candidates['pit_market_cap_local'], errors='coerce')
+        / market_cap_fx
+    )
+    candidates['market_cap_usd'] = pit_market_cap_usd.where(
+        pit_market_cap_usd.gt(0),
+        price_implied_market_cap,
+    )
+    candidates['market_cap_data_source'] = np.where(
+        pit_market_cap_usd.gt(0),
+        'bloomberg_point_in_time',
+        'price_times_available_shares',
     )
     candidates['revenue'] = pd.to_numeric(candidates['revenue_usd'], errors='coerce')
     candidates['operating_income'] = pd.to_numeric(
@@ -962,7 +1096,9 @@ def _build_anchor_inputs(
         'historical_price_volume_fx',
         'current_reference_adv_proxy',
     )
-    universe_snapshot['market_cap_data_source'] = 'historical_price_reported_shares'
+    universe_snapshot['market_cap_data_source'] = candidates[
+        'market_cap_data_source'
+    ].to_numpy()
     universe_snapshot['sector_data_source'] = 'current_security_reference_proxy'
     universe_snapshot['is_synthetic_data'] = False
 
@@ -1974,7 +2110,10 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     data_config = load_data_config()
     repository = DuckDBRepository(data_config.duckdb_path, read_only=True)
     LOGGER.info('Loading observed walk-forward source data from %s.', data_config.duckdb_path)
-    universe, statements_raw, prices_raw, fx = _load_source_data(repository, config)
+    universe, statements_raw, prices_raw, fx, market_caps = _load_source_data(
+        repository,
+        config,
+    )
     if universe.empty or statements_raw.empty or prices_raw.empty:
         raise RuntimeError('Observed walk-forward source data is incomplete.')
     fx_matcher = _FxMatcher(fx)
@@ -1986,6 +2125,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         config.filing_lag_days,
     )
     price_matcher = _PriceMatcher(prices)
+    market_cap_matcher = _MarketCapMatcher(market_caps)
     anchors = pd.date_range(
         config.start_date,
         config.strategy_end_date,
@@ -2008,6 +2148,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             statements,
             price_matcher,
             fx_matcher,
+            market_cap_matcher,
             pd.Timestamp(anchor),
             config,
         )

@@ -12,8 +12,8 @@ def test_structured_drl_config_loads_with_runtime_aliases():
     assert config["max_adjustment"] == 0.01
     assert config["max_delta_weight"] == 0.01
     assert config["random_seeds"] == (11, 23, 37, 53, 71)
-    assert config["maximum_drl_blend"] == 0.25
-    assert config["blend_weight_drl"] == 0.25
+    assert config["maximum_drl_blend"] == 0.10
+    assert config["blend_weight_drl"] == 0.10
     assert not config["allow_full_drl_replacement"]
 
 
@@ -48,3 +48,11 @@ def test_normalize_drl_config_preserves_inline_flat_overrides():
     assert config["lookback_days"] == 10
     assert config["cash_weight"] == 0.01
     assert config["deployment_mode"] == "reject"
+
+
+def test_explicit_mock_mode_disables_real_ppo(monkeypatch):
+    monkeypatch.setenv("DRL_MOCK_MODE", "true")
+    config = load_drl_config()
+    assert config["mode"] == "mock"
+    assert config["allow_mock_fallback"] is True
+    assert config["ppo"]["use_stable_baselines"] is False

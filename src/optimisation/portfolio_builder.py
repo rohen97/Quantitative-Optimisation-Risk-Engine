@@ -81,6 +81,25 @@ def build_final_portfolio_weights(
     overlapping = [column for column in metadata.columns if column != "ticker" and column in selected]
     selected = selected.drop(columns=overlapping, errors="ignore").merge(metadata, on="ticker", how="left")
     selected["final_weight"] = selected["target_weight"]
+    allocated = float(selected["target_weight"].sum())
+    if allocated < 1.0 - 1e-8:
+        cash = {column: pd.NA for column in selected.columns}
+        cash.update(
+            {
+                "security_id": "CASH",
+                "ticker": "CASH",
+                "company_name": "Cash",
+                "country": "Cash",
+                "region": "Cash",
+                "sector": "Cash",
+                "industry": "Cash",
+                "currency": "USD",
+                "target_weight": 1.0 - allocated,
+                "final_weight": 1.0 - allocated,
+                "portfolio_method": "cash_residual",
+            }
+        )
+        selected = pd.concat([selected, pd.DataFrame([cash])], ignore_index=True)
     selected = selected.sort_values(["target_weight", "ticker"], ascending=[False, True]).reset_index(drop=True)
     if not selected["ticker"].is_unique:
         raise RuntimeError("Final portfolio contains duplicate ticker rows.")

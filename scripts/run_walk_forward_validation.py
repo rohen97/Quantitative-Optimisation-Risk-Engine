@@ -9,6 +9,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from src.validation.validation_pipeline import run_validation_pipeline
+from src.validation.snapshot_archive import archive_walk_forward_snapshots
 from src.validation.walk_forward import load_walk_forward_config, run_walk_forward
 
 
@@ -50,12 +51,14 @@ def main() -> None:
         price_lookback_rows=args.price_lookback_rows,
     )
     result = run_walk_forward(config)
+    archive = archive_walk_forward_snapshots(result.output_directory)
     print(f'Walk-forward output: {result.output_directory}')
     print(f'Forecast rows: {result.forecast_rows}')
     print(f'Aligned outcomes: {result.outcome_rows}')
     print(f'Portfolio months: {result.portfolio_months}')
     print(f'Risk observations: {result.risk_observations}')
     print(f'Evidence mode: {result.evidence_mode}')
+    print(f'Archived decision snapshots: {archive.manifests}')
     if args.skip_validation:
         return
     validation = run_validation_pipeline(

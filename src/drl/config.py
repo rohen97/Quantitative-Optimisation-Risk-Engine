@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from src.utils.config import load_yaml
+from src.utils.env import env_flag
 
 
 @dataclass(frozen=True)
@@ -99,6 +100,13 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             "quarterly_max_delta_weight": quarterly_delta,
             "max_adjustment": float(_coalesce(raw.get("max_adjustment"), raw.get("max_delta_weight"), default=selected_delta)),
             "max_delta_weight": float(_coalesce(raw.get("max_delta_weight"), raw.get("max_adjustment"), default=selected_delta)),
+            "no_trade_band_weight": float(
+                _coalesce(
+                    action.get("no_trade_band_weight"),
+                    raw.get("no_trade_band_weight"),
+                    default=0.002,
+                )
+            ),
             "use_softmax": bool(_coalesce(action.get("use_softmax"), default=False)),
             "use_constraint_projection": bool(_coalesce(action.get("use_constraint_projection"), default=True)),
             "maximum_assets": int(_coalesce(action.get("maximum_assets"), raw.get("maximum_assets"), default=100)),
@@ -114,13 +122,38 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             "test_leakage_detected": bool(_coalesce(raw.get("test_leakage_detected"), default=False)),
             "primary_algorithm": str(_coalesce(algorithms.get("primary"), raw.get("primary_algorithm"), default="ppo")).upper(),
             "fallback_policy": _coalesce(algorithms.get("fallback_policy"), default="deterministic_mock"),
+            "allow_mock_fallback": bool(
+                _coalesce(algorithms.get("allow_mock_fallback"), raw.get("allow_mock_fallback"), default=True)
+            ),
             "random_seeds": tuple(_coalesce(seeds.get("values"), raw.get("random_seeds"), default=defaults.random_seeds)),
             "train_years": int(_coalesce(training.get("train_years"), raw.get("train_years"), default=5)),
             "validation_years": int(_coalesce(training.get("validation_years"), raw.get("validation_years"), default=1)),
             "test_years": int(_coalesce(training.get("test_years"), raw.get("test_years"), default=1)),
+            "train_fraction": float(
+                _coalesce(training.get("train_fraction"), raw.get("train_fraction"), default=defaults.train_fraction)
+            ),
+            "validation_fraction": float(
+                _coalesce(
+                    training.get("validation_fraction"),
+                    raw.get("validation_fraction"),
+                    default=defaults.validation_fraction,
+                )
+            ),
             "step_years": int(_coalesce(training.get("step_years"), raw.get("step_years"), default=1)),
             "embargo_periods": int(_coalesce(training.get("embargo_rebalance_periods"), raw.get("embargo_periods"), default=1)),
             "use_random_split": bool(_coalesce(training.get("use_random_split"), default=False)),
+            "minimum_oos_observations": int(
+                _coalesce(acceptance.get("minimum_oos_observations"), default=12)
+            ),
+            "minimum_oos_sharpe_improvement": float(
+                _coalesce(acceptance.get("minimum_oos_sharpe_improvement"), default=0.0)
+            ),
+            "oos_tail_risk_tolerance": float(
+                _coalesce(acceptance.get("oos_tail_risk_tolerance"), default=0.0)
+            ),
+            "require_positive_active_return_ci": bool(
+                _coalesce(acceptance.get("require_positive_active_return_ci"), default=True)
+            ),
         }
     )
 
@@ -203,6 +236,10 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
         ),
         "extreme_minimum_cash_weight": float(_coalesce(risk_throttle.get("extreme_minimum_cash_weight"), default=0.20)),
     }
+    if env_flag("DRL_MOCK_MODE", False):
+        merged["mode"] = "mock"
+        merged["allow_mock_fallback"] = True
+        merged["ppo"]["use_stable_baselines"] = False
     return merged
 
 

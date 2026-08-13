@@ -7,7 +7,9 @@ import pytest
 from src.validation.data_loader import load_validation_data
 from src.validation.governance import make_governance_decision
 from src.validation.walk_forward import (
+    _MarketCapMatcher,
     _PriceMatcher,
+    _fundamental_snapshot,
     _risk_rows,
     build_realised_outcomes,
     load_walk_forward_config,
@@ -44,6 +46,58 @@ def test_observed_sec_acceptance_takes_precedence_over_proxy_dates():
         '2022-02-28 18:30:00'
     )
     assert result.loc[0, 'availability_basis'] == 'observed_sec_acceptance_datetime'
+
+
+def test_bloomberg_database_date_is_the_trusted_availability_boundary():
+    statements = pd.DataFrame(
+        {
+            'security_id': ['A'],
+            'fiscal_period_end': ['2021-06-30'],
+            'filing_date': ['2021-08-19'],
+            'available_from': ['2021-08-31'],
+            'source': ['bloomberg_database_as_of'],
+        }
+    )
+    result = reconstruct_statement_availability(statements, 120)
+    assert result.loc[0, 'reconstructed_available_from'] == pd.Timestamp('2021-08-31')
+    assert result.loc[0, 'availability_basis'] == 'bloomberg_fundamental_database_as_of'
+
+
+def test_fundamental_snapshot_uses_latest_vintage_available_at_anchor():
+    statements = pd.DataFrame(
+        {
+            'security_id': ['A', 'A'],
+            'fiscal_period_end': pd.to_datetime(['2020-12-31', '2020-12-31']),
+            'fiscal_period_type': ['annual', 'annual'],
+            'reconstructed_available_from': pd.to_datetime(['2021-03-01', '2021-09-01']),
+            'retrieved_at': pd.to_datetime(['2026-08-13', '2026-08-13']),
+            'revenue_usd': [100.0, 120.0],
+            'free_cash_flow_usd': [10.0, 12.0],
+            'dps': [1.0, 1.0],
+        }
+    )
+    before_revision = _fundamental_snapshot(statements, pd.Timestamp('2021-08-31'), 1)
+    after_revision = _fundamental_snapshot(statements, pd.Timestamp('2021-09-30'), 1)
+    assert before_revision.loc[0, 'security_id'] == 'A'
+    assert before_revision.loc[0, 'revenue_usd'] == 100.0
+    assert after_revision.loc[0, 'revenue_usd'] == 120.0
+
+
+def test_market_cap_matcher_never_uses_future_snapshot():
+    snapshots = pd.DataFrame(
+        {
+            'security_id': ['A', 'A'],
+            'as_of_date': pd.to_datetime(['2024-01-31', '2024-02-29']),
+            'available_from': pd.to_datetime(['2024-01-31', '2024-02-29']),
+            'retrieved_at': pd.to_datetime(['2026-08-13', '2026-08-13']),
+            'market_cap_local': [100.0, 200.0],
+            'shares_outstanding': [10.0, 20.0],
+            'currency': ['USD', 'USD'],
+        }
+    )
+    match = _MarketCapMatcher(snapshots).match(pd.Series(['A']), pd.Timestamp('2024-02-15'))
+    assert match.loc[0, 'pit_market_cap_local'] == 100.0
+    assert match.loc[0, 'pit_market_cap_as_of_date'] == pd.Timestamp('2024-01-31')
 
 
 def test_realised_outcome_uses_next_trading_day_after_target():

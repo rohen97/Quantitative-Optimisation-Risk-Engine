@@ -32,13 +32,13 @@ def evaluate_drl_approval(
         reasons.append("DRL did not improve net Sharpe.")
     if drl_max_drawdown < classical_max_drawdown:
         reasons.append("DRL worsened maximum drawdown.")
-    if drl_expected_shortfall > classical_expected_shortfall:
+    if drl_expected_shortfall < classical_expected_shortfall:
         reasons.append("DRL worsened Expected Shortfall.")
     if seed_sharpe_std > maximum_seed_sharpe_std:
         reasons.append("DRL results were unstable across seeds.")
     if reasons:
         return DRLApprovalDecision("rejected", 0.0, tuple(reasons))
-    return DRLApprovalDecision("conditionally_accepted", min(maximum_blend, 0.25), ("DRL passed risk, stability and constraint requirements.",))
+    return DRLApprovalDecision("conditionally_accepted", min(maximum_blend, 0.10), ("DRL passed risk, stability and constraint requirements.",))
 
 
 def validate_seed_stability(seed_results: pd.DataFrame, minimum_seeds: int = 5, maximum_sharpe_std: float = 0.35, maximum_return_std: float = 0.10) -> pd.DataFrame:

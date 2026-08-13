@@ -112,7 +112,12 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
             "acceptance_selected_weights_source",
         ]
         available = [column for column in columns if column in challenger]
-        data = data.merge(challenger[available], on="ticker", how="left")
+        merge_mode = "outer" if challenger_supplies_weights else "left"
+        data = data.merge(
+            challenger[available].drop_duplicates("ticker", keep="last"),
+            on="ticker",
+            how=merge_mode,
+        )
     data["drl_challenger_status"] = "accepted_or_blended" if accepted else "rejected_baseline_fallback"
     data["final_selected_weights_source"] = source
     data["drl_rejection_reasons"] = rejection_reasons
@@ -120,6 +125,8 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
         data["final_selected_weight"] = pd.to_numeric(data["accepted_target_weight"], errors="coerce").fillna(0.0)
     else:
         data["final_selected_weight"] = pd.to_numeric(data.get("final_target_weight", 0.0), errors="coerce").fillna(0.0)
+    if "ticker" in data:
+        data = data.loc[data["ticker"].astype(str).str.upper().ne("CASH")].reset_index(drop=True)
     return data
 
 

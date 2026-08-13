@@ -235,11 +235,11 @@ def test_drl_acceptance_rejects_threshold_breaches_and_masked_weights():
         "portfolio_cvar_exceeds_configured_limit",
         "expected_shortfall_exceeds_configured_limit",
         "stress_test_loss_exceeds_severe_loss_limit",
-        "turnover_exceeds_hard_limit",
         "liquidity_requirement_fails",
         "model_confidence_below_threshold",
         "test_leakage_detected",
     }.issubset(set(decision.rejection_reasons))
+    assert "turnover_exceeds_hard_limit" not in decision.rejection_reasons
 
 
 def test_drl_acceptance_modes_cap_dry_run_blend_and_allow_explicit_challenger():

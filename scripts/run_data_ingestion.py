@@ -40,7 +40,7 @@ SECURITIES_COLUMNS = [
     "source",
 ]
 
-IDENTIFIER_COLUMNS = ["eodhd_ticker", "yfinance_ticker", "finnhub_ticker", "alpha_vantage_ticker", "alpaca_ticker", "tickdb_ticker", "itick_code", "itick_region", "isin"]
+IDENTIFIER_COLUMNS = ["bloomberg_ticker", "eodhd_ticker", "yfinance_ticker", "finnhub_ticker", "alpha_vantage_ticker", "alpaca_ticker", "tickdb_ticker", "itick_code", "itick_region", "isin"]
 
 
 def parse_args() -> argparse.Namespace:

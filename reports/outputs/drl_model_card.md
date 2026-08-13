@@ -8,9 +8,9 @@ The baseline optimiser remains the primary portfolio because it is deterministic
 
 ## Runtime Mode
 
-- Mode: `mock`
+- Mode: `historical_walk_forward`
 - Seeds: 11, 23, 37, 53, 71
-- Default deployment: maximum 25% DRL blend, baseline optimiser dominant.
+- Default deployment: maximum 10% DRL blend, baseline optimiser dominant.
 - Full DRL replacement: disabled unless explicitly configured and accepted.
 
 ## State Design
@@ -41,7 +41,7 @@ The Wolf Chaos risk throttle scales or blocks actions as chaos and crisis probab
 
 ## Algorithms
 
-The primary policy interface is PPO with continuous residual actions, deterministic evaluation and multiple seeds. Stable-Baselines3 is optional. If unavailable or disabled, the pipeline uses a deterministic mock policy and labels outputs as mock. SAC and TD3 are documented as optional challengers but are not active production policies.
+Production mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. It fails closed when historical evidence or the PPO dependency is unavailable. The deterministic fallback remains available only for explicitly configured tests and is labelled `mock_fallback`. SAC and TD3 are inactive research challengers.
 
 The TCN/GAP encoder is optional and dependency-light. When PyTorch is available, it supports causal dilated convolutions, residual blocks, Global Average Pooling, cross-asset layers and a cash logit. It is not a hard dependency.
 
@@ -62,9 +62,10 @@ The DRL allocation is rejected and replaced with the baseline optimiser for hard
 
 ## Current Limitations
 
-- MVP training uses deterministic local/mock policy mechanics.
-- Vendor point-in-time history is not yet connected.
-- PPO deep learning integration is optional and not required for pipeline success.
+- The real regional panel currently contains 59 monthly observations, so the untouched test contains only 12 months.
+- Bloomberg PIT fundamentals and market-cap vintages are being expanded; existing historical portfolio artifacts predate that backfill and must be regenerated before they inherit the new evidence grade.
+- The action space is regional; security selection remains with the constrained optimiser.
+- Current five-seed validation information ratios are negative, so the validation guard retains the baseline optimiser.
 - TCN/GAP and CAM paths are interfaces, not yet a fully validated production policy.
 - SAC, TD3, distributional RL and constrained policy optimisation are research extensions.
 - Outputs are research and decision-support artifacts, not trade execution instructions.

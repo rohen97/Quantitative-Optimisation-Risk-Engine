@@ -1121,8 +1121,8 @@ def _slide_workflow(
     _add_callout(
         slide,
         'DRL is a challenger, not the final authority',
-        'The current DRL proposal was rejected because turnover exceeded '
-        'its hard limit. The CVaR baseline remained selected.',
+        'Five real PPO seeds failed the validation hurdle and did not improve '
+        'untouched-test Sharpe. The CVaR baseline remains at 100%.',
         6.82, 4.64, 5.95, 1.14,
         fill=PALE_GOLD, accent=GOLD,
     )

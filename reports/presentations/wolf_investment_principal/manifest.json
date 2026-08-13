@@ -1,14 +1,14 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-08-13T06:27:32.157106+00:00",
+  "generated_at_utc": "2026-08-13T11:37:16.738579+00:00",
   "as_of_date": "13 August 2026",
   "approval_status": "CONDITIONALLY_APPROVED",
   "governance_score": 87.5,
   "slide_count": 18,
   "presentation": {
     "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx",
-    "sha256": "06ef71336ee6225f700c203b91c10d946163bb48727611b9f8398ff077da1d08",
-    "bytes": 1041978
+    "sha256": "503aed727fad4663ec084ba74445ac8f57d21e0b3be6f0e6809e8180cf129ade",
+    "bytes": 1041991
   },
   "report": {
     "path": "reports/presentations/wolf_investment_principal/investment_principal_report.md",
@@ -88,9 +88,9 @@
     }
   ],
   "rendered_pdf": {
-    "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-13.pdf",
-    "sha256": "b98d1d79e1eb7059820f9e40aae4575643008c7e1021f544596588cf6e187247",
-    "bytes": 1018606
+    "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-13_pit_drl.pdf",
+    "sha256": "cdacb1bd1eb4e039d50ce6257aab8b0e136d0fa61f2655042ef63ba8f42a6527",
+    "bytes": 1018625
   },
   "rendering": {
     "renderer": "Microsoft PowerPoint 16.0",

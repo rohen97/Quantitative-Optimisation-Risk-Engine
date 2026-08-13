@@ -25,6 +25,7 @@ from src.drl.explainability import (
 from src.drl.market_environment import DRLMarketEnvironment
 from src.drl.mock_drl_data import build_temporal_mock_features, read_output
 from src.drl.regime_gating import calculate_regime_agent_weights, calculate_risk_throttle_from_dashboard, risk_throttle_frame
+from src.drl.regional_ppo import build_regional_panel
 from src.drl.state_builder import build_drl_state, build_state_schema
 from src.drl.training import chronological_train_validation_test_split, run_seed_training
 from src.drl.trade_list import build_drl_trade_list
@@ -101,11 +102,49 @@ def _limit_drl_universe(baseline: pd.DataFrame, maximum_assets: int) -> pd.DataF
     return baseline.loc[active].copy()
 
 
+def _append_cash_allocation(
+    frame: pd.DataFrame,
+    *,
+    baseline_cash: float,
+    target_cash: float,
+    accepted_cash: float,
+    selected_source: str,
+) -> pd.DataFrame:
+    if max(abs(baseline_cash), abs(target_cash), abs(accepted_cash)) <= 1e-12:
+        return frame
+    row = {column: pd.NA for column in frame.columns}
+    row.update(
+        {
+            "security_id": "CASH",
+            "ticker": "CASH",
+            "company_name": "Cash",
+            "instrument_type": "Cash",
+            "country": "Cash",
+            "region": "Cash",
+            "sector": "Cash",
+            "industry": "Cash",
+            "currency": "USD",
+            "baseline_weight": baseline_cash,
+            "target_weight": target_cash,
+            "accepted_target_weight": accepted_cash,
+            "raw_drl_weight": target_cash,
+            "projected_drl_weight": target_cash,
+            "selected_weight": accepted_cash,
+            "eligible_for_drl": True,
+            "portfolio_method": "constrained_regime_gated_drl",
+            "acceptance_selected_weights_source": selected_source,
+            "selected_weights_source": selected_source,
+        }
+    )
+    return pd.concat([frame, pd.DataFrame([row])], ignore_index=True)
+
+
 def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
     """Create a DRL model card covering role, design, controls and limits."""
     success_rate = float(benchmark["drl_success_flag"].mean()) if not benchmark.empty else 0.0
     mode = config.get("mode", "mock")
     seeds = ", ".join(str(seed) for seed in config.get("random_seeds", ()))
+    max_blend = float(config.get("maximum_drl_blend", 0.10))
     return "\n".join(
         [
             "# DRL Allocation Engine Model Card",
@@ -120,7 +159,7 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             f"- Mode: `{mode}`",
             f"- Seeds: {seeds}",
-            "- Default deployment: maximum 25% DRL blend, baseline optimiser dominant.",
+            f"- Default deployment: maximum {max_blend:.0%} DRL blend, baseline optimiser dominant.",
             "- Full DRL replacement: disabled unless explicitly configured and accepted.",
             "",
             "## State Design",
@@ -151,7 +190,7 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             "## Algorithms",
             "",
-            "The primary policy interface is PPO with continuous residual actions, deterministic evaluation and multiple seeds. Stable-Baselines3 is optional. If unavailable or disabled, the pipeline uses a deterministic mock policy and labels outputs as mock. SAC and TD3 are documented as optional challengers but are not active production policies.",
+            "Production mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. It fails closed when historical evidence or the PPO dependency is unavailable. The deterministic fallback remains available only for explicitly configured tests and is labelled `mock_fallback`. SAC and TD3 are inactive research challengers.",
             "",
             "The TCN/GAP encoder is optional and dependency-light. When PyTorch is available, it supports causal dilated convolutions, residual blocks, Global Average Pooling, cross-asset layers and a cash logit. It is not a hard dependency.",
             "",
@@ -172,9 +211,10 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             "## Current Limitations",
             "",
-            "- MVP training uses deterministic local/mock policy mechanics.",
-            "- Vendor point-in-time history is not yet connected.",
-            "- PPO deep learning integration is optional and not required for pipeline success.",
+            "- The real regional panel currently contains 59 monthly observations, so the untouched test contains only 12 months.",
+            "- Bloomberg PIT fundamentals and market-cap vintages are being expanded; existing historical portfolio artifacts predate that backfill and must be regenerated before they inherit the new evidence grade.",
+            "- The action space is regional; security selection remains with the constrained optimiser.",
+            "- Current five-seed validation information ratios are negative, so the validation guard retains the baseline optimiser.",
             "- TCN/GAP and CAM paths are interfaces, not yet a fully validated production policy.",
             "- SAC, TD3, distributional RL and constrained policy optimisation are research extensions.",
             "- Outputs are research and decision-support artifacts, not trade execution instructions.",
@@ -278,7 +318,7 @@ def build_validation_report(seed_results: pd.DataFrame, benchmark: pd.DataFrame)
             "",
             "## Current Limitations",
             "",
-            "The current implementation is mock/local, dependency-light and designed for reproducibility. It does not execute trades, does not use live point-in-time vendor history and does not claim causal validity of input features.",
+            "Production evaluation uses Stable-Baselines3 PPO over a chronological regional panel with train-only scaling, embargoes, validation-only seed selection and an untouched test. The current policy is rejected because validation and OOS active performance do not beat the optimiser. It does not execute trades and does not claim causal validity of input features.",
             "",
             "## Future Research",
             "",
@@ -347,8 +387,41 @@ def run_drl_pipeline(
         eligibility_mask,
     )
     state_schema = build_state_schema(state.feature_names)
-    seed_results, actions, reward_rows = run_seed_training(baseline, baseline_weights, eligibility_mask, gate_weights, constraints, effective_config, throttle)
-    avg_action = np.vstack(list(actions.values())).mean(axis=0) if actions else np.zeros(len(baseline))
+    historical_panel = frames.get("drl_historical_panel", pd.DataFrame())
+    if historical_panel.empty and bool(
+        effective_config.get("ppo", {}).get("use_stable_baselines", False)
+    ):
+        historical_panel = build_regional_panel(out)
+    seed_results, actions, reward_rows, oos_paths = run_seed_training(
+        baseline,
+        baseline_weights,
+        eligibility_mask,
+        gate_weights,
+        constraints,
+        effective_config,
+        throttle,
+        historical_panel=historical_panel,
+    )
+    validation_guard_triggered = False
+    if actions and "model_mode" in seed_results and seed_results["model_mode"].astype(str).eq("real").all():
+        positive_validation = seed_results.loc[
+            pd.to_numeric(seed_results["validation_reward"], errors="coerce").gt(0.0),
+            ["seed", "validation_reward"],
+        ]
+        if positive_validation.empty:
+            avg_action = np.zeros(len(baseline), dtype=float)
+            validation_guard_triggered = True
+        else:
+            validation_scores = positive_validation["validation_reward"].to_numpy(dtype=float)
+            ensemble_weights = validation_scores / validation_scores.sum()
+            avg_action = np.average(
+                np.vstack([actions[int(seed)] for seed in positive_validation["seed"]]),
+                axis=0,
+                weights=ensemble_weights,
+            )
+    else:
+        avg_action = np.vstack(list(actions.values())).mean(axis=0) if actions else np.zeros(len(baseline))
+    effective_config["historical_validation_guard_triggered"] = validation_guard_triggered
     if throttle.fallback_to_baseline:
         avg_action = np.zeros_like(avg_action)
     env = DRLMarketEnvironment(baseline, baseline_weights, eligibility_mask, constraints, effective_config)
@@ -383,6 +456,10 @@ def run_drl_pipeline(
         seed_results=seed_results,
     )
     accepted_weights = acceptance.blend_weight_drl * target_weights + acceptance.blend_weight_baseline * baseline_weights
+    accepted_cash = (
+        acceptance.blend_weight_drl * target_cash
+        + acceptance.blend_weight_baseline * baseline_cash
+    )
     drl_portfolio["accepted_target_weight"] = accepted_weights
     drl_portfolio["acceptance_selected_weights_source"] = acceptance.selected_weights_source
     baseline_portfolio = baseline.copy()
@@ -396,6 +473,13 @@ def run_drl_pipeline(
     challenger_portfolio["projected_drl_weight"] = target_weights
     challenger_portfolio["selected_weight"] = accepted_weights
     challenger_portfolio["selected_weights_source"] = acceptance.selected_weights_source
+    challenger_portfolio = _append_cash_allocation(
+        challenger_portfolio,
+        baseline_cash=baseline_cash,
+        target_cash=target_cash,
+        accepted_cash=accepted_cash,
+        selected_source=acceptance.selected_weights_source,
+    )
     final_source_frame = pd.DataFrame(
         [
             {
@@ -429,21 +513,46 @@ def run_drl_pipeline(
     reward_report = pd.DataFrame(reward_rows + [{"seed": "ensemble", **result.reward_parts}])
     seed_evaluation = build_seed_evaluation(seed_results)
     ablation = build_ablation_results(benchmark)
-    split = chronological_train_validation_test_split(pd.date_range("2020-01-31", periods=36, freq="ME"), config["train_fraction"], config["validation_fraction"])
     training_summary = seed_results.copy()
-    training_summary["policy_type"] = "mock_mlp_ppo_with_regime_specialists"
-    training_summary["train_start_index"] = split["train"][0]
-    training_summary["train_end_index"] = split["train"][1]
-    training_summary["validation_start_index"] = split["validation"][0]
-    training_summary["validation_end_index"] = split["validation"][1]
-    training_summary["test_start_index"] = split["test"][0]
-    training_summary["test_end_index"] = split["test"][1]
+    real_training = bool(
+        not training_summary.empty
+        and training_summary["model_mode"].astype(str).eq("real").all()
+    )
+    if real_training:
+        training_summary["policy_type"] = "stable_baselines3_ppo_regional_residual"
+        training_summary["train_start_index"] = 0
+        training_summary["train_end_index"] = np.nan
+        training_summary["validation_start_index"] = np.nan
+        training_summary["validation_end_index"] = np.nan
+        training_summary["test_start_index"] = np.nan
+        training_summary["test_end_index"] = np.nan
+    else:
+        split = chronological_train_validation_test_split(
+            pd.date_range("2020-01-31", periods=36, freq="ME"),
+            config["train_fraction"],
+            config["validation_fraction"],
+        )
+        training_summary["policy_type"] = "deterministic_mock_regime_specialists"
+        training_summary["train_start_index"] = split["train"][0]
+        training_summary["train_end_index"] = split["train"][1]
+        training_summary["validation_start_index"] = split["validation"][0]
+        training_summary["validation_end_index"] = split["validation"][1]
+        training_summary["test_start_index"] = split["test"][0]
+        training_summary["test_end_index"] = split["test"][1]
     training_summary["mean_seed_reward"] = float(seed_results["test_reward"].mean())
     training_summary["std_seed_reward"] = float(seed_results["test_reward"].std(ddof=0))
     training_summary["constraint_projection_applied"] = True
     training_summary["risk_throttle_action_scale"] = throttle.action_scale
     training_summary["risk_throttle_minimum_cash_weight"] = throttle.minimum_cash_weight
     training_summary["risk_throttle_reason"] = throttle.reason
+    training_summary["historical_validation_guard_triggered"] = validation_guard_triggered
+    drl_portfolio_output = _append_cash_allocation(
+        drl_portfolio,
+        baseline_cash=baseline_cash,
+        target_cash=target_cash,
+        accepted_cash=accepted_cash,
+        selected_source=acceptance.selected_weights_source,
+    )
     model_card = build_model_card(config, legacy_benchmark)
     validation_report = build_validation_report(seed_results, benchmark)
     acceptance_frame = pd.DataFrame([acceptance.__dict__])
@@ -451,13 +560,14 @@ def run_drl_pipeline(
         "drl_state_schema": state_schema,
         "drl_training_summary": training_summary,
         "drl_seed_results": seed_evaluation,
+        "drl_oos_monthly_results": oos_paths,
         "drl_backtest_results": backtest,
         "drl_benchmark_comparison": benchmark,
         "drl_acceptance_decision": acceptance_frame,
         "drl_baseline_portfolio": baseline_portfolio,
         "drl_challenger_portfolio": challenger_portfolio,
         "drl_final_selected_weights_source": final_source_frame,
-        "drl_target_weights": drl_portfolio,
+        "drl_target_weights": drl_portfolio_output,
         "drl_trade_list": trade_list,
         "drl_constraint_adjustments": constraint_explanations,
         "drl_reward_decomposition": reward_report,

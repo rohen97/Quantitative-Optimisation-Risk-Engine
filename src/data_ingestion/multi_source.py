@@ -76,7 +76,7 @@ def pull_configured_macro_and_fx(
             frame = FrankfurterAdapter(frankfurter, client).load_fx_rates("USD", currencies, start, end)
             fx_frames.append(frame)
             record("frankfurter", "fx_rates", "completed", len(frame))
-        except DataSourceRequestError as exc:
+        except (DataSourceRequestError, ValueError, KeyError) as exc:
             record("frankfurter", "fx_rates", "failed", error=str(exc))
 
     fred = registry.providers["fred"]
@@ -87,7 +87,7 @@ def pull_configured_macro_and_fx(
                 frame = adapter.load_series(str(series_id), start, end, preserve_vintages=True)
                 macro_frames.append(frame)
                 record("fred", str(label), "completed", len(frame))
-            except DataSourceRequestError as exc:
+            except (DataSourceRequestError, ValueError, KeyError) as exc:
                 record("fred", str(label), "failed", error=str(exc))
     else:
         record("fred", "configured_series", "credentials_missing")

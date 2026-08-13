@@ -4,6 +4,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
@@ -11,6 +12,7 @@ from src.data.config import load_data_config
 from src.data.repository.duckdb_repository import DUCKDB_AVAILABLE, DuckDBRepository
 from src.data.schemas import SCHEMAS
 from src.data_ingestion.multi_source import build_source_status, pull_configured_macro_and_fx
+from src.data_ingestion.macro_vintages import normalise_macro_release_vintages
 from src.utils.config import ensure_output_dir
 
 
@@ -42,10 +44,21 @@ def main() -> int:
     if DUCKDB_AVAILABLE and (data_config.mode in {"duckdb", "shadow"} or data_config.dual_write_duckdb):
         repo = DuckDBRepository(data_config.duckdb_path)
         repo.execute_migrations(data_config.migrations_path)
+        ingestion_run_id = str(uuid4())
         if not result.fx_rates.empty:
-            repo.write_table("fx_rates", result.fx_rates, SCHEMAS["fx_rates"].primary_key)
+            fx_rates = result.fx_rates.copy()
+            fx_rates["ingestion_run_id"] = ingestion_run_id
+            repo.write_table("fx_rates", fx_rates, SCHEMAS["fx_rates"].primary_key)
         if not result.macro_observations.empty:
-            repo.write_table("macro_observations", result.macro_observations, SCHEMAS["macro_observations"].primary_key)
+            macro = result.macro_observations.copy()
+            macro["ingestion_run_id"] = ingestion_run_id
+            repo.write_table("macro_observations", macro, SCHEMAS["macro_observations"].primary_key)
+            macro_vintages = normalise_macro_release_vintages(macro, ingestion_run_id)
+            repo.write_table(
+                "macro_release_vintages",
+                macro_vintages,
+                SCHEMAS["macro_release_vintages"].primary_key,
+            )
         repo.close()
         LOGGER.info("Wrote external FX and macro frames to DuckDB at %s.", data_config.duckdb_path)
     failed = int((result.source_status["status"] == "failed").sum()) if not result.source_status.empty else 0

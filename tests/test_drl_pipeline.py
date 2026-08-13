@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from src.drl.drl_pipeline import _limit_drl_universe, run_drl_pipeline
 
@@ -103,3 +104,6 @@ def test_drl_pipeline_generates_required_outputs(tmp_path):
     assert not outputs["drl_training_summary"]["random_split_used"].any()
     assert not outputs["drl_training_summary"]["test_period_model_selection_used"].any()
     assert "drl_model_card" in outputs
+    challenger = outputs["drl_challenger_portfolio"]
+    assert challenger["ticker"].eq("CASH").any()
+    assert challenger["selected_weight"].sum() == pytest.approx(1.0)

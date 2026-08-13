@@ -66,7 +66,7 @@ DRL is rejected for constraint violations, CVaR breaches, Expected Shortfall bre
 
 ## Current Limitations
 
-The current implementation is mock/local, dependency-light and designed for reproducibility. It does not execute trades, does not use live point-in-time vendor history and does not claim causal validity of input features.
+Production evaluation uses Stable-Baselines3 PPO over a chronological regional panel with train-only scaling, embargoes, validation-only seed selection and an untouched test. The current policy is rejected because validation and OOS active performance do not beat the optimiser. It does not execute trades and does not claim causal validity of input features.
 
 ## Future Research
 

@@ -5,6 +5,7 @@ import logging
 import pandas as pd
 
 from src.data_ingestion.alpaca_adapter import ALPACA_PY_AVAILABLE, AlpacaMarketDataAdapter, AlpacaSdkMarketDataAdapter
+from src.data_ingestion.bloomberg_adapter import BloombergDesktopAdapter
 from src.data_ingestion.external_adapters import AlphaVantageAdapter, EodhdAdapter, FinnhubAdapter, ITickAdapter, TickDbAdapter
 from src.data_ingestion.http_client import DataSourceRequestError, HttpClient, HttpClientConfig
 from src.data_ingestion.mock_data import generate_mock_prices
@@ -45,6 +46,8 @@ def _load_provider(
         data = adapter.load_daily_bars(symbols)
         data["source"] = "alpaca"
         return data
+    if provider_name == "bloomberg":
+        return BloombergDesktopAdapter().load_daily_bars(symbols)
     if provider is None:
         raise NotImplementedError(f"Unsupported price data provider: {provider_name}")
     if provider_name == "eodhd":
