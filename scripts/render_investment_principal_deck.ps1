@@ -1,4 +1,4 @@
-param([switch]$SkipBuild)
+param([switch]$SkipBuild, [string]$PdfPath)
 
 $ErrorActionPreference = 'Stop'
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -7,7 +7,15 @@ $Output = Join-Path $RepoRoot (
     'reports\presentations\wolf_investment_principal'
 )
 $Deck = Join-Path $Output 'wolf_quant_model_ic_briefing.pptx'
-$Pdf = Join-Path $Output 'wolf_quant_model_ic_briefing.pdf'
+if ([string]::IsNullOrWhiteSpace($PdfPath)) {
+    $Pdf = Join-Path $Output 'wolf_quant_model_ic_briefing.pdf'
+}
+elseif ([IO.Path]::IsPathRooted($PdfPath)) {
+    $Pdf = $PdfPath
+}
+else {
+    $Pdf = Join-Path $RepoRoot $PdfPath
+}
 
 if (-not $SkipBuild) {
     & $Python (
@@ -34,7 +42,7 @@ finally {
 
 & $Python (
     Join-Path $PSScriptRoot 'build_investment_principal_deck.py'
-) --register-rendered-pdf
+) --register-rendered-pdf --rendered-pdf $Pdf
 
 if ($LASTEXITCODE -ne 0) {
     throw 'Rendered PDF manifest registration failed.'

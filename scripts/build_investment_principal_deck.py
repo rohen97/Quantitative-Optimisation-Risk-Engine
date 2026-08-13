@@ -34,6 +34,12 @@ def parse_args() -> argparse.Namespace:
         action='store_true',
         help='Register an existing PowerPoint-rendered PDF in the manifest.',
     )
+    parser.add_argument(
+        '--rendered-pdf',
+        type=Path,
+        default=None,
+        help='Optional rendered PDF path to register.',
+    )
     return parser.parse_args()
 
 
@@ -44,6 +50,7 @@ def main() -> int:
         manifest = register_rendered_pdf(
             args.repo_root,
             args.output_directory,
+            pdf_path=args.rendered_pdf,
         )
         logging.info('Registered rendered PDF: %s', manifest)
         return 0

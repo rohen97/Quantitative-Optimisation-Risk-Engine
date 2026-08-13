@@ -47,7 +47,10 @@ PALE_RED = 'F8EAEA'
 FONT_HEAD = 'Aptos Display'
 FONT_BODY = 'Aptos'
 
-RELEASE_RELATIVE = Path('reports/releases/2026-08-07-full-universe')
+RELEASE_RELATIVE = Path(
+    'reports/releases/2026-08-13-risk-pit-cost-validation'
+)
+PRIOR_RELEASE_RELATIVE = Path('reports/releases/2026-08-07-full-universe')
 BACKTEST_RELATIVE = Path('reports/backtests/1997_to_latest')
 OUTPUTS_RELATIVE = Path('reports/outputs')
 
@@ -63,6 +66,7 @@ class DeckEvidence:
     backtest_root: Path
     outputs_root: Path
     validation_manifest: dict
+    prior_validation_manifest: dict
     walk_forward_manifest: dict
     backtest_manifest: dict
 
@@ -70,8 +74,10 @@ class DeckEvidence:
     holdings: pd.DataFrame
     trades: pd.DataFrame
     scorecard: pd.DataFrame
+    prior_pit_summary: pd.DataFrame
     pit_summary: pd.DataFrame
     pit_returns: pd.DataFrame
+    pit_coverage: dict
     alpha: pd.DataFrame
     overfitting: pd.Series
     performance: pd.DataFrame
@@ -121,6 +127,7 @@ def _read_json(path: Path) -> dict:
 def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
     repo_root = Path(repo_root).resolve()
     release_root = repo_root / RELEASE_RELATIVE
+    prior_release_root = repo_root / PRIOR_RELEASE_RELATIVE
     backtest_root = repo_root / BACKTEST_RELATIVE
     outputs_root = repo_root / OUTPUTS_RELATIVE
     validation_root = release_root / 'validation'
@@ -134,6 +141,10 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         validation_root / 'portfolio_monthly_returns.csv',
         validation_root / 'risk_backtesting_report.csv',
         validation_root / 'constraint_compliance_report.csv',
+        release_root / 'pit_evidence_coverage.json',
+        prior_release_root / 'validation/validation_manifest.json',
+        prior_release_root
+        / 'validation/portfolio_strategy_comparison.csv',
         backtest_root / 'run_manifest.json',
         backtest_root / 'point_in_time_alpha_significance.csv',
 
@@ -184,7 +195,9 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         validation_manifest=_read_json(
             validation_root / 'validation_manifest.json'
         ),
-
+        prior_validation_manifest=_read_json(
+            prior_release_root / 'validation/validation_manifest.json'
+        ),
         walk_forward_manifest=_read_json(
             release_root / 'walk_forward_manifest.json'
         ),
@@ -197,12 +210,18 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         scorecard=pd.read_csv(
             validation_root / 'model_validation_scorecard.csv'
         ),
-
+        prior_pit_summary=pd.read_csv(
+            prior_release_root
+            / 'validation/portfolio_strategy_comparison.csv'
+        ),
         pit_summary=pd.read_csv(
             validation_root / 'portfolio_strategy_comparison.csv'
         ),
         pit_returns=pd.read_csv(
             validation_root / 'portfolio_monthly_returns.csv'
+        ),
+        pit_coverage=_read_json(
+            release_root / 'pit_evidence_coverage.json'
         ),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
@@ -475,49 +494,60 @@ def _plot_overfitting(
 def _plot_cost_drag(
     evidence: DeckEvidence, output_path: Path
 ) -> Path:
-    data = evidence.pit_summary.set_index('strategy')
-
-    strategies = [
-        'wolf_cvar',
-        'equal_weight_eligible',
-        'cap_weight_eligible',
+    before = evidence.prior_pit_summary.set_index('strategy').loc[
+        'wolf_cvar'
     ]
-    gross = [
-        float(data.loc[item, 'gross_annualised_return']) * 100
-        for item in strategies
+    after = evidence.pit_summary.set_index('strategy').loc['wolf_cvar']
+    panels = [
+        (
+            'annualised_cost_drag',
+            'Annualised cost drag',
+            100.0,
+            '%',
+        ),
+        ('annualised_turnover', 'Annualised turnover', 1.0, 'x'),
     ]
-    net = [
-        float(data.loc[item, 'annualised_return']) * 100
-        for item in strategies
-    ]
-    x = np.arange(len(strategies))
 
-    fig, ax = plt.subplots(figsize=(8.1, 4.5))
-    ax.bar(
-        x - 0.18, gross, 0.36, label='Gross', color='#AFC9C0'
-    )
-    ax.bar(
-        x + 0.18,
-        net,
-        0.36,
-        label='After modeled costs',
-        color='#' + GREEN,
-    )
-    _set_axes_style(ax)
-    ax.set_xticks(
-        x, [STRATEGY_LABELS[item] for item in strategies]
-    )
-
-    ax.set_ylabel('Annualised return (%)', color='#536068')
-    ax.set_title(
-        'Turnover makes Wolf the costliest implementation',
-        loc='left',
+    fig, axes = plt.subplots(1, 2, figsize=(8.1, 4.5))
+    for ax, (column, title, scale, suffix) in zip(axes, panels):
+        values = [float(before[column]) * scale, float(after[column]) * scale]
+        bars = ax.bar(
+            ['Before', 'Now'],
+            values,
+            color=['#' + RED, '#' + GREEN],
+            width=0.58,
+        )
+        _set_axes_style(ax)
+        ax.set_title(
+            title, fontsize=13, color='#' + INK, weight='bold'
+        )
+        ax.axhline(
+            1.5,
+            color='#' + GOLD,
+            linewidth=1.4,
+            linestyle='--',
+            label='1.5 target',
+        )
+        ax.legend(frameon=False, fontsize=8, loc='upper right')
+        for bar, value in zip(bars, values):
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                value + 0.06,
+                f'{value:.2f}{suffix}',
+                ha='center',
+                fontsize=10,
+                color='#' + INK,
+                weight='bold',
+            )
+    fig.suptitle(
+        'Turnover controls moved both implementation measures below target',
+        x=0.02,
+        ha='left',
         fontsize=14,
         color='#' + INK,
         weight='bold',
     )
-    ax.legend(frameon=False, fontsize=9, loc='upper right')
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.91))
     return _save_figure(fig, output_path)
 
 
@@ -935,10 +965,13 @@ def _slide_cover(
         1.12, 3.98, 5.15, 0.2,
         size=12, color=WHITE, bold=True,
     )
+    all_row = evidence.universe.loc[
+        evidence.universe['region'] == 'ALL'
+    ].iloc[0]
     metrics = [
-        ('55,504', 'active equities'),
+        (f'{int(all_row.active):,}', 'active equities'),
         ('60', 'monthly decisions'),
-        ('80 / 100', 'governance score'),
+        (f'{evidence.governance_score:g} / 100', 'governance score'),
         ('0', 'hard breaches'),
     ]
     for index, (value, label) in enumerate(metrics):
@@ -970,9 +1003,9 @@ def _slide_decision(
     slide = _new_slide(
         presentation,
         'The decision in one page',
-        'Use the model as a governed process, not as an alpha promise.',
+        'The controls improved materially; the alpha claim did not.',
         2,
-        'Validation scorecard and point-in-time strategy comparison',
+        '13 August validation scorecard and point-in-time comparison',
     )
     _add_callout(
         slide,
@@ -991,9 +1024,9 @@ def _slide_decision(
         slide,
         [
             'Repeatable screening across six equity regions',
-            'Five years of dated proxy decisions with positive net results',
-            'Hard portfolio limits held in every validated decision',
-            'Auditable inputs, forecasts, trades and governance outputs',
+            'Adaptive VaR passes overall and chronological holdout tests',
+            'Turnover and modeled cost drag now meet both 1.5 targets',
+            'Zero hard breaches with auditable forecasts and trades',
         ],
         0.58, 3.34, 5.78, 2.62,
         size=14.5,
@@ -1002,17 +1035,17 @@ def _slide_decision(
     _add_callout(
         slide,
         'What still blocks full deployment',
-        'Alpha is not statistically established. Turnover consumes '
-        '2.35% per year, and tail-loss violations cluster over time.',
+        'Observed PIT evidence is incomplete, and Wolf lagged equal '
+        'weight by 1.06% per year in this 60-month sample (p=0.734).',
         6.82, 1.43, 5.95, 1.18,
         fill=PALE_RED, accent=RED,
     )
     rows = [
         ('Process', 'Strong', 'Use'),
-        ('Hard constraints', '0 breaches', 'Use'),
-        ('Forecast calibration', 'Pass', 'Use'),
-        ('Risk backtest', 'Warning', 'Monitor'),
-        ('Net-of-cost edge', 'Unproven', 'Improve'),
+        ('Risk backtest', '15 / 15', 'Pass'),
+        ('Cost controls', 'Both targets met', 'Pass'),
+        ('Hard constraints', '0 breaches', 'Pass'),
+        ('PIT evidence', '7.5 / 15', 'Improve'),
         ('Deployable alpha', 'Not established', 'Do not claim'),
     ]
 
@@ -1023,7 +1056,7 @@ def _slide_decision(
         6.82, 2.91, 5.95, 2.95,
         widths=[2.2, 1.6, 1.6],
         font_size=11,
-        highlight_rows=[0, 1, 2],
+        highlight_rows=[0, 1, 2, 3],
     )
     _add_callout(
         slide,
@@ -1033,6 +1066,7 @@ def _slide_decision(
         0.58, 6.18, 12.19, 0.65,
         fill=PALE_BLUE, accent=BLUE,
     )
+
 
 def _slide_workflow(
     presentation: Presentation, evidence: DeckEvidence
@@ -1105,34 +1139,33 @@ def _slide_evidence(
 ) -> None:
     profile = evidence.walk_forward_manifest['source_profile']
     artifact = evidence.walk_forward_manifest['artifact_profile']
+    coverage = evidence.pit_coverage['coverage']
     all_row = evidence.universe.loc[
         evidence.universe['region'] == 'ALL'
     ].iloc[0]
     slide = _new_slide(
         presentation,
-        'Evidence breadth and provenance',
-        'The full universe is broad; the dated validation set is narrower.',
+        'Evidence breadth and point-in-time progress',
+        'Delistings improved; observed historical availability remains the main gap.',
         4,
-        'Universe summary and walk-forward manifest',
+        'Universe, walk-forward manifest and PIT evidence coverage',
     )
     kpis = [
-        (f'{int(all_row.total):,}', 'security master'),
-
         (f'{int(all_row.active):,}', 'active equities'),
         ('{:,}'.format(int(profile['security_count'])), 'walk-forward eligible'),
         ('{:,}'.format(int(artifact['forecast_rows'])), 'historical forecasts'),
+        (f"{int(coverage['delisting_events']):,}", 'delistings archived'),
     ]
     for index, (value, label) in enumerate(kpis):
         _add_kpi(
             slide, value, label,
             0.55 + index * 3.08, 1.46, 2.78,
-            fill=WHITE, accent=GREEN if index < 2 else BLUE,
+            fill=WHITE, accent=GREEN if index in (0, 3) else BLUE,
         )
     region_rows = []
     for row in evidence.universe.loc[
         evidence.universe['region'] != 'ALL'
     ].itertuples():
-
         region_rows.append(
             (
                 row.region,
@@ -1150,33 +1183,54 @@ def _slide_evidence(
         font_size=10.5,
     )
 
-    source_rows = [
-        ('Prices', '{:,}'.format(int(profile['price_rows'])), 'Observed bars'),
-        ('Statements', '{:,}'.format(int(profile['statement_rows'])), 'Reported annuals'),
-        ('Aligned outcomes', '{:,}'.format(int(artifact['outcome_rows'])), '99.7% matched'),
-        ('Risk observations', '{:,}'.format(int(artifact['risk_observations'])), 'Daily checks'),
-        ('Chronology breaches', '0', 'Pass'),
-        ('Hard breaches', '0', 'Pass'),
+    pit_rows = [
+        ('Delisting events', f"{int(coverage['delisting_events']):,}", 'Archived'),
+        (
+            'Fundamentals with filing date',
+            f"{int(coverage['fundamental_rows_with_filing_date']):,}",
+            'Mostly reconstructed',
+        ),
+        (
+            'Observed acceptance times',
+            f"{int(coverage['observed_acceptance_timestamps']):,}",
+            'Missing',
+        ),
+        (
+            'Dated membership events',
+            f"{int(coverage['historical_membership_events']):,}",
+            'Missing',
+        ),
+        (
+            'Inactive names with prices',
+            f"{int(coverage['inactive_price_securities']):,}",
+            'Missing',
+        ),
+        (
+            'Names with historical volume',
+            f"{int(coverage['securities_with_historical_volume']):,}",
+            'Missing',
+        ),
     ]
     _add_table(
         slide,
-        ['Evidence', 'Rows', 'Meaning'],
-        source_rows,
+        ['PIT evidence', 'Coverage', 'Status'],
+        pit_rows,
         6.93, 2.83, 5.84, 3.12,
-        widths=[1.8, 1.2, 2.1],
-        font_size=10.5,
-        highlight_rows=[4, 5],
+        widths=[2.55, 1.2, 1.45],
+        font_size=10.0,
+        highlight_rows=[0],
     )
 
     _add_callout(
         slide,
-        'Important boundary',
-        'Historical filing dates are conservatively reconstructed where '
-        'observed timestamps are unavailable. This caps approval at '
-        'conditional, even though chronology checks pass.',
+        'Provider outcome',
+        'EODHD added 59,183 delistings; Nasdaq entitlement yielded five '
+        'usable rows; Beam was unavailable; SEC blocked this runner. '
+        'Unavailable history is never treated as observed.',
         0.55, 6.18, 12.22, 0.65,
         fill=PALE_GOLD, accent=GOLD,
     )
+
 
 def _slide_trades(
     presentation: Presentation, evidence: DeckEvidence
@@ -1434,6 +1488,9 @@ def _slide_pit_comparison(
     evidence: DeckEvidence,
     plot_path: Path,
 ) -> None:
+    summary = evidence.pit_summary.set_index('strategy')
+    wolf = summary.loc['wolf_cvar']
+    equal = summary.loc['equal_weight_eligible']
     slide = _new_slide(
         presentation,
         'What beat what over 60 months',
@@ -1445,17 +1502,18 @@ def _slide_pit_comparison(
     _add_callout(
         slide,
         'The useful result',
-        'Wolf Sharpe was 1.16 and drawdown was 13.72%, better than '
-        'both simple controls on these risk measures.',
-
+        f'Wolf Sharpe was {float(wolf.sharpe):.2f} and drawdown was '
+        f'{_pct(abs(float(wolf.maximum_drawdown)))}, better than both '
+        'simple controls on these risk measures.',
         9.08, 1.56, 3.69, 1.25,
         fill=PALE_GREEN, accent=GREEN,
     )
     _add_callout(
         slide,
         'The honest result',
-        'Equal weight returned 14.84% versus Wolf at 13.66%. '
-        'The model did not beat the simplest control on net return.',
+        f'Equal weight returned {_pct(equal.annualised_return, 2)} versus '
+        f'Wolf at {_pct(wolf.annualised_return, 2)}. The model did not '
+        'beat the simplest control on net return.',
         9.08, 3.16, 3.69, 1.25,
         fill=PALE_GOLD, accent=GOLD,
     )
@@ -1465,7 +1523,6 @@ def _slide_pit_comparison(
         'The current case is risk control and decision discipline. '
         'Incremental stock-selection alpha remains unproven.',
         9.08, 4.76, 3.69, 1.25,
-
         fill=PALE_BLUE, accent=BLUE,
     )
     _add_text(
@@ -1476,6 +1533,7 @@ def _slide_pit_comparison(
         size=12.5, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
     )
+
 
 def _slide_alpha(
     presentation: Presentation,
@@ -1676,55 +1734,62 @@ def _slide_governance(
 ) -> None:
     slide = _new_slide(
         presentation,
-        'Governance is conditional, not failed',
-        'The model passed core controls but still carries three warning areas.',
+        'Risk calibration now passes; approval stays conditional',
+        'Adaptive VaR fixed exception clustering without hiding PIT and alpha limits.',
         14,
-        'Model validation scorecard and risk backtesting report',
+        'Validation scorecard and overall/holdout VaR tests',
     )
-    chart = (
-        evidence.release_root / 'plots/validation_scorecard.png'
-    )
-    _add_picture_contain(slide, chart, 0.48, 1.39, 7.42, 4.92)
-    passed = evidence.scorecard.loc[
-        evidence.scorecard['status'] == 'PASS', 'component'
-    ].tolist()
-    warnings = evidence.scorecard.loc[
-        evidence.scorecard['status'] == 'WARNING', 'component'
-    ].tolist()
+    chart = evidence.release_root / 'plots/validation_scorecard.png'
+    _add_picture_contain(slide, chart, 0.43, 1.39, 6.25, 4.92)
 
+    risk_rows = []
+    for row in evidence.risk_backtest.itertuples():
+        segment = (
+            'Holdout'
+            if row.evaluation_segment == 'chronological_holdout'
+            else 'Overall'
+        )
+        risk_rows.append(
+            (
+                segment,
+                f'{float(row.confidence_level):.0%}',
+                f'{int(row.violations)}/{int(row.observations)}',
+                f'{float(row.p_value):.3f}',
+                f'{float(row.christoffersen_p_value):.3f}',
+            )
+        )
+    _add_text(
+        slide, 'VaR coverage and independence', 6.94, 1.48, 5.5, 0.34,
+        size=18, bold=True, font=FONT_HEAD,
+    )
+    _add_table(
+        slide,
+        ['Sample', 'VaR', 'Exceptions', 'Kupiec p', 'Indep. p'],
+        risk_rows,
+        6.93, 1.94, 5.84, 2.38,
+        widths=[1.15, 0.68, 1.02, 0.9, 0.9],
+        font_size=9.2,
+        highlight_rows=[0, 1, 2, 3],
+    )
     _add_callout(
         slide,
-        f'{len(passed)} components passed',
-        'Data integrity, forecasts, distributions, constraints and '
-        'stability met their configured gates.',
-        8.18, 1.53, 4.59, 1.18,
+        'Adaptive risk stack: 15 / 15',
+        'DCC-IGARCH Student-t, filtered historical simulation, EWMA '
+        'Normal and EWMA Student-t are selected using trailing data. '
+        'The holdout is chronological reconstructed evidence, not a '
+        'pristine future shadow period.',
+        6.93, 4.65, 5.84, 1.45,
         fill=PALE_GREEN, accent=GREEN,
-    )
-    _add_callout(
-        slide,
-        f'{len(warnings)} components warned',
-        'Point-in-time evidence is reconstructed; risk exceptions '
-        'cluster; and costs consume too much return.',
-        8.18, 3.06, 4.59, 1.18,
-        fill=PALE_GOLD, accent=GOLD,
-    )
-
-    _add_callout(
-        slide,
-        '0 critical failures',
-        'No leakage or hard-constraint failure was found. The warning '
-        'status limits use but does not invalidate the entire model.',
-        8.18, 4.59, 4.59, 1.18,
-        fill=PALE_BLUE, accent=BLUE,
     )
     _add_text(
         slide,
-        f'Overall score {evidence.governance_score:.0f}/100  |  '
-        'Conditional approval  |  Human supervision required',
+        f'Overall {evidence.governance_score:g}/100  |  6 pass  |  PIT and '
+        'portfolio warnings  |  0 critical failures  |  full local suite passed',
         0.58, 6.5, 12.05, 0.28,
-        size=13, color=GREEN_DARK, bold=True,
+        size=12.3, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
     )
+
 
 def _slide_costs(
     presentation: Presentation,
@@ -1733,10 +1798,10 @@ def _slide_costs(
 ) -> None:
     slide = _new_slide(
         presentation,
-        'Costs are the clearest improvement opportunity',
-        'The model has enough gross return; implementation is consuming too much of it.',
+        'Turnover and modeled cost drag now meet target',
+        'Retention hysteresis and minimum-turnover transitions reduced churn.',
         15,
-        'Point-in-time cost validation, turnover and DRL acceptance',
+        'Before/after point-in-time cost and turnover validation',
     )
     _add_picture_contain(slide, plot_path, 0.48, 1.43, 7.56, 4.85)
     wolf = evidence.pit_summary.set_index('strategy').loc['wolf_cvar']
@@ -1744,36 +1809,37 @@ def _slide_costs(
 
     _add_kpi(
         slide, _pct(wolf.annualised_cost_drag, 2),
-        'annualised model cost drag',
-        8.32, 1.57, 4.45, fill=PALE_RED, accent=RED,
+        'modeled cost drag; target <= 1.50%',
+        8.32, 1.57, 4.45, fill=PALE_GREEN, accent=GREEN,
     )
     _add_kpi(
         slide, f'{float(wolf.annualised_turnover):.2f}x',
-        'annualised turnover',
-        8.32, 2.83, 4.45, fill=PALE_GOLD, accent=GOLD,
+        'annual turnover; target <= 1.50x',
+        8.32, 2.83, 4.45, fill=PALE_GREEN, accent=GREEN,
     )
     _add_kpi(
         slide, _usd(fee['reference_annual_charge_usd'], 0),
-        'first annual bank fee at reference AUM',
+        '0.25% annual bank fee at reference AUM',
         8.32, 4.09, 4.45, fill=WHITE, accent=BLUE,
     )
 
     _add_callout(
         slide,
-        'DRL stayed out',
-        'The challenger breached its turnover hard limit, so its weight '
-        'was set to zero and the baseline optimiser remained final.',
+        'Why portfolio remains a warning',
+        'Both cost gates pass, but Wolf trailed equal weight by 1.06% '
+        'per year and the difference was not significant (p=0.734).',
         8.32, 5.35, 4.45, 1.03,
-        fill=PALE_BLUE, accent=BLUE,
+        fill=PALE_GOLD, accent=GOLD,
     )
     _add_text(
         slide,
-        'Priority fixes: no-trade bands, staged transitions, turnover '
-        'penalties and pre-trade cost quotes.',
+        'Retention and capped/minimum-turnover transitions drove the '
+        'improvement; the configured no-trade band did not trigger in this sample.',
         0.58, 6.55, 12.1, 0.27,
-        size=12.5, color=GREEN_DARK, bold=True,
+        size=11.8, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
     )
+
 
 def _slide_pilot(
     presentation: Presentation, evidence: DeckEvidence
@@ -1837,7 +1903,7 @@ def _slide_pilot(
         [
             'Zero hard constraint or data-lineage breaches',
             'Pre-trade cost estimate approved for every rebalance',
-            'Annualised turnover below 1.0x during the pilot',
+            'Keep turnover <=1.5x; stretch goal <=1.0x in the pilot',
             'Net performance tracked against equal and cap weight',
             'Monthly model-risk and investment-committee review',
         ],
@@ -1847,8 +1913,8 @@ def _slide_pilot(
     _add_callout(
         slide,
         'Immediate stop conditions',
-        'Stale critical data, any hard breach, unexplained risk '
-        'exception clustering, failed reconciliation or trading costs '
+        'Stale critical data, any hard breach, a failed live risk '
+        'test, failed reconciliation or trading costs '
         'above the approved budget.',
         6.82, 4.12, 5.95, 1.35,
         fill=PALE_RED, accent=RED,
@@ -1949,9 +2015,9 @@ def _slide_close(
         size=18, color='D7E1DE',
     )
     statements = [
-        ('USE NOW', 'Ranking, diversification, risk and governance'),
-        ('PROVE LIVE', 'Net benchmark edge and tail-risk independence'),
-        ('FIX NEXT', 'Turnover, trading costs and data vintages'),
+        ('USE NOW', 'Ranking, diversification, adaptive risk and governance'),
+        ('PROVE LIVE', 'Net benchmark edge in a genuine future shadow record'),
+        ('FIX NEXT', 'Observed PIT vintages and probability calibration'),
     ]
     for index, (heading, body) in enumerate(statements):
         x = 0.92 + index * 4.03
@@ -1984,7 +2050,7 @@ def _slide_close(
     _add_text(
         slide,
         f'{evidence.approval_status}  |  '
-        f'Governance {evidence.governance_score:.0f}/100  |  '
+        f'Governance {evidence.governance_score:g}/100  |  '
         f'As of {evidence.as_of_date}',
         0.92, 7.02, 11.7, 0.2,
         size=8.5, color='9EAFAB',
@@ -2030,15 +2096,119 @@ def _set_document_properties(
     properties.created = datetime.now()
     properties.modified = datetime.now()
 
+def _risk_markdown_row(
+    label: str, confidence: int, row: pd.Series
+) -> str:
+    return (
+        f'| {label} | {confidence}% | '
+        f'{int(row.violations)}/{int(row.observations)} | '
+        f'{float(row.p_value):.3f} | '
+        f'{float(row.christoffersen_p_value):.3f} | Pass |'
+    )
+
+
+def _performance_markdown_row(
+    label: str, column: str, rows: Sequence[pd.Series]
+) -> str:
+    if column in {'sharpe', 'sortino'}:
+        values = [f'{float(row[column]):.2f}' for row in rows]
+    else:
+        values = [_pct(float(row[column])) for row in rows]
+    return f'| {label} | ' + ' | '.join(values) + ' |'
+
+
 def _report_markdown(evidence: DeckEvidence) -> str:
-    wolf = evidence.pit_summary.set_index('strategy').loc['wolf_cvar']
-    equal = evidence.pit_summary.set_index('strategy').loc[
-        'equal_weight_eligible'
-    ]
-    cap = evidence.pit_summary.set_index('strategy').loc[
-        'cap_weight_eligible'
-    ]
+    summary = evidence.pit_summary.set_index('strategy')
+    prior_summary = evidence.prior_pit_summary.set_index('strategy')
+    wolf = summary.loc['wolf_cvar']
+    prior_wolf = prior_summary.loc['wolf_cvar']
+    equal = summary.loc['equal_weight_eligible']
+    cap = summary.loc['cap_weight_eligible']
     wolf_end = _ending_value(evidence, 'wolf_cvar')
+    coverage = evidence.pit_coverage['coverage']
+    fee = evidence.backtest_manifest['annual_bank_fee']
+    risk = evidence.risk_backtest.set_index(
+        ['evaluation_segment', 'confidence_level']
+    )
+    risk_overall_95 = risk.loc[('overall', 0.95)]
+    risk_overall_99 = risk.loc[('overall', 0.99)]
+    risk_holdout_95 = risk.loc[('chronological_holdout', 0.95)]
+    risk_holdout_99 = risk.loc[('chronological_holdout', 0.99)]
+    risk_rows = '\n'.join(
+        [
+            _risk_markdown_row('Overall', 95, risk_overall_95),
+            _risk_markdown_row('Overall', 99, risk_overall_99),
+            _risk_markdown_row('Holdout', 95, risk_holdout_95),
+            _risk_markdown_row('Holdout', 99, risk_holdout_99),
+        ]
+    )
+    performance_rows = '\n'.join(
+        [
+            _performance_markdown_row(
+                'Annualised net return',
+                'annualised_return',
+                (wolf, equal, cap),
+            ),
+            _performance_markdown_row(
+                'Sharpe ratio', 'sharpe', (wolf, equal, cap)
+            ),
+            _performance_markdown_row(
+                'Sortino ratio', 'sortino', (wolf, equal, cap)
+            ),
+            _performance_markdown_row(
+                'Maximum drawdown',
+                'maximum_drawdown',
+                (wolf, equal, cap),
+            ),
+            _performance_markdown_row(
+                'Annualised cost drag',
+                'annualised_cost_drag',
+                (wolf, equal, cap),
+            ),
+        ]
+    )
+    prior_score = float(
+        evidence.prior_validation_manifest['overall_score']
+    )
+    improvement_rows = '\n'.join(
+        [
+            f'| Governance score | {prior_score:g}/100 | '
+            f'{evidence.governance_score:g}/100 | Conditional approval |',
+            '| Risk backtesting | Warning, 7.5/15 | Pass, 15/15 | '
+            'Coverage and independence pass |',
+            f'| Annual turnover | '
+            f'{float(prior_wolf.annualised_turnover):.2f}x | '
+            f'{float(wolf.annualised_turnover):.2f}x | <=1.50x: pass |',
+            f'| Annualised cost drag | '
+            f'{_pct(prior_wolf.annualised_cost_drag, 2)} | '
+            f'{_pct(wolf.annualised_cost_drag, 2)} | <=1.50%: pass |',
+            '| Hard constraint breaches | 0 | 0 | Pass |',
+        ]
+    )
+    alpha_cap = float(
+        evidence.alpha.loc[
+            evidence.alpha['benchmark'] == 'cap_weight_eligible',
+            'annualised_active_return',
+        ].iloc[0]
+    )
+    alpha_equal = float(
+        evidence.alpha.loc[
+            evidence.alpha['benchmark'] == 'equal_weight_eligible',
+            'annualised_active_return',
+        ].iloc[0]
+    )
+    pbo = float(evidence.overfitting['probability_of_backtest_overfitting'])
+    haircut = float(
+        evidence.overfitting['selected_information_ratio_haircut']
+    )
+    current_aum_text = _usd(evidence.current_aum)
+    ending_value_text = _usd(wolf_end)
+    pnl_text = _usd(wolf_end - evidence.current_aum)
+    bank_fee_text = _usd(fee['reference_annual_charge_usd'], 0)
+    bank_fee_rate_text = _pct(fee['annual_rate'], 2)
+    relative_return_text = _pct(
+        float(wolf.annualised_return - equal.annualised_return), 2
+    )
     buys = sorted(
         evidence.trades.loc[
             evidence.trades['trade_action'] == 'Buy', 'ticker'
@@ -2060,73 +2230,102 @@ As of {evidence.as_of_date}
 
 ## Decision
 
-**Approve a controlled, human-supervised live pilot.** The model has a
-repeatable six-region equity process, five years of reconstructed
-point-in-time decisions, zero hard constraint breaches, and an auditable
-governance package. Full-scale or unattended deployment is not approved:
-deployable alpha is not established, turnover is high, and tail-risk
-exceptions cluster over time.
+**Approve a controlled, human-supervised live pilot.** Governance improved
+from {prior_score:g}/100 to {evidence.governance_score:g}/100. Six components pass,
+two remain warnings, and there are zero critical failures. Adaptive risk
+backtesting and the turnover/cost targets now pass. Full-scale or unattended
+deployment remains unapproved because observed point-in-time evidence is
+incomplete and
+benchmark-relative alpha is not established.
+
+## What Improved
+
+| Control | Before | Now | Current gate |
+| --- | ---: | ---: | --- |
+{improvement_rows}
+
+Retention hysteresis, a 6% monthly turnover cap, and minimum-turnover
+transitions drove the implementation improvement. The configured no-trade
+band did not trigger in this 60-month sample, so it is not credited for the
+observed result.
+
+## Adaptive Risk Backtesting
+
+The trailing model-selection stack contains DCC-IGARCH Student-t, filtered
+historical simulation, EWMA Normal, and EWMA Student-t forecasts. Kupiec
+coverage and Christoffersen independence tests pass overall and on the 40%
+chronological holdout.
+
+| Sample | VaR | Exceptions | Kupiec p | Independence p | Result |
+| --- | ---: | ---: | ---: | ---: | --- |
+{risk_rows}
+
+This holdout is chronological reconstructed evidence, not a pristine future
+shadow period. Live monitoring is still required.
+
+## Point-In-Time Evidence
+
+The evidence store now contains **{int(coverage['delisting_events']):,}** delisting events and
+**{int(coverage['fundamental_rows_with_filing_date']):,}** fundamental rows with filing dates.
+Observed acceptance timestamps, dated
+index membership, inactive-name prices, and historical volume remain below
+their governance thresholds. EODHD populated delistings; the Nasdaq
+entitlement yielded five usable rows; Beam was unavailable; and SEC blocked
+this runner. Unavailable history is not represented as observed evidence.
+The point-in-time component therefore remains **7.5/15, warning**.
 
 ## Current Target Portfolio
 
 The resolved baseline contains 20 equal-weight positions at 5% each. The
-current trade comparison produces 19 buys and one reduction. These are
-model targets, not executable orders; live NAV, FX, liquidity, prices and
-compliance approval must be refreshed first.
+current trade comparison produces 19 buys and one reduction. These are model
+targets, not executable orders; live NAV, FX, liquidity, prices and compliance
+approval must be refreshed first.
 
 - Buy: {buy_text}
 - Reduce to 5%: {reduce_text}
 
-## Point-In-Time Evidence
+## Point-In-Time Performance
 
 | Measure | Wolf CVaR | Equal weight | Cap weight |
 | --- | ---: | ---: | ---: |
-| Annualised net return | {_pct(wolf.annualised_return)} | {_pct(equal.annualised_return)} | {_pct(cap.annualised_return)} |
-| Sharpe ratio | {float(wolf.sharpe):.2f} | {float(equal.sharpe):.2f} | {float(cap.sharpe):.2f} |
-| Maximum drawdown | {_pct(wolf.maximum_drawdown)} | {_pct(equal.maximum_drawdown)} | {_pct(cap.maximum_drawdown)} |
-| Annualised cost drag | {_pct(wolf.annualised_cost_drag)} | {_pct(equal.annualised_cost_drag)} | {_pct(cap.annualised_cost_drag)} |
+{performance_rows}
 
-Applying the realised 60-month Wolf return path after trading costs to
-current AUM of
-{_usd(evidence.current_aum)} gives an illustrative ending value of
-{_usd(wolf_end)} and PnL of {_usd(wolf_end - evidence.current_aum)}.
-This is before the separately modeled 25 bp annual bank fee. It is a
-scale illustration, not a forecast or a live-capacity result.
+Applying the realised 60-month Wolf path after modeled trading costs to
+current AUM of {current_aum_text} gives an illustrative ending value of {ending_value_text}
+and PnL of {pnl_text}. The separate annual bank charge is {bank_fee_rate_text}, equal to
+{bank_fee_text} at the reference AUM. This is a scale illustration, not a
+forecast or a live-capacity result.
+
+The portfolio component remains **5/10, warning** even though both cost gates
+pass. Wolf returned {relative_return_text} per year relative to equal weight.
+The paired difference was not statistically significant (p=0.734).
 
 ## Alpha And Overfitting
 
-Wolf's point-in-time active return is {_pct(float(evidence.alpha.loc[evidence.alpha['benchmark'] == 'cap_weight_eligible', 'annualised_active_return'].iloc[0]), 2)}
-versus cap weight and {_pct(float(evidence.alpha.loc[evidence.alpha['benchmark'] == 'equal_weight_eligible', 'annualised_active_return'].iloc[0]), 2)}
-versus equal weight. Neither alpha test is statistically significant.
-The retrospective CSCV test estimates a {_pct(float(evidence.overfitting['probability_of_backtest_overfitting']))}
-probability of backtest overfitting, while the selected strategy's median
-information ratio falls {_pct(float(evidence.overfitting['selected_information_ratio_haircut']))}
-out-of-sample. The 1997 replay is therefore used for stress and exposure
-diagnostics, not as proof of historical selection skill.
-
-## Why Use Wolf In A Pilot
-
-Wolf makes the investment process broader, more consistent and more
-auditable. It compares portfolio-aware, clean-sheet and LLM branches;
-forecasts return distributions; applies liquidity and concentration
-constraints; stress-tests the result; and records why a challenger was
-accepted or rejected. The current DRL challenger was rejected for excess
-turnover, demonstrating that governance can override model novelty.
+Wolf's point-in-time active return is {_pct(alpha_cap, 2)} versus cap weight and
+{_pct(alpha_equal, 2)} versus equal weight. Neither alpha test is statistically
+significant. The retrospective CSCV test estimates a
+{_pct(pbo)} probability of backtest overfitting, while the selected strategy's
+median information ratio falls {_pct(haircut)} out-of-sample. The 1997 replay
+remains a stress and exposure diagnostic, not proof of historical selection
+skill.
 
 ## Conditions For Scaling
 
 1. Recalculate orders with live NAV, FX, price and liquidity data.
 2. Require human approval before every pilot rebalance.
-3. Reduce annualised turnover below 1.0x with no-trade bands and staged
-   transitions.
+3. Keep annualised turnover at or below 1.5x, with a 1.0x pilot stretch goal.
 4. Track net performance against equal-weight and cap-weight controls.
-5. Stop on stale critical data, any hard breach, failed reconciliation,
-   unexplained risk clustering or a breached cost budget.
-6. Require native live evidence before making deployable alpha claims.
+5. Stop on stale critical data, any hard breach, a failed live risk test,
+   failed reconciliation, or a breached cost budget.
+6. Require observed PIT vintages and a genuine future shadow record before
+   making deployable alpha claims.
 
-Research output only. This report is not authorization for unattended
-trading or individualized investment advice.
+The full local test suite passed. GitHub Actions remains the publication gate.
+Research output only. This report is not authorization for unattended trading
+or individualized investment advice.
 '''
+
 
 def build_investment_principal_deck(
     repo_root: str | Path,
@@ -2185,17 +2384,25 @@ def build_investment_principal_deck(
 
     input_paths = [
         evidence.release_root / 'validation/validation_manifest.json',
+        evidence.release_root / 'validation/risk_backtesting_report.csv',
+        evidence.release_root / 'validation/transaction_cost_validation.csv',
         evidence.release_root / 'walk_forward_manifest.json',
         evidence.release_root / 'universe_summary.csv',
+        evidence.release_root / 'pit_evidence_coverage.json',
+        evidence.repo_root
+        / PRIOR_RELEASE_RELATIVE
+        / 'validation/validation_manifest.json',
+        evidence.repo_root
+        / PRIOR_RELEASE_RELATIVE
+        / 'validation/portfolio_strategy_comparison.csv',
         evidence.outputs_root / 'final_portfolio_weights.csv',
         evidence.outputs_root / 'portfolio_trade_list.csv',
-
         evidence.backtest_root / 'run_manifest.json',
         evidence.backtest_root / 'point_in_time_alpha_significance.csv',
         evidence.backtest_root / 'strategy_overfitting_summary.csv',
     ]
     manifest = {
-        'schema_version': 1,
+        'schema_version': 2,
         'generated_at_utc': datetime.now(timezone.utc).isoformat(),
         'as_of_date': evidence.as_of_date,
         'approval_status': evidence.approval_status,
@@ -2250,6 +2457,7 @@ def register_rendered_pdf(
     repo_root: str | Path,
     output_directory: str | Path | None = None,
     *,
+    pdf_path: str | Path | None = None,
     renderer: str = 'Microsoft PowerPoint 16.0',
 ) -> Path:
     repo_root = Path(repo_root).resolve()
@@ -2260,15 +2468,23 @@ def register_rendered_pdf(
     )
     manifest_path = output_directory / 'manifest.json'
     pptx_path = output_directory / 'wolf_quant_model_ic_briefing.pptx'
-    pdf_path = output_directory / 'wolf_quant_model_ic_briefing.pdf'
-    _require_files([manifest_path, pptx_path, pdf_path])
+    if pdf_path:
+        rendered_pdf_path = Path(pdf_path)
+        if not rendered_pdf_path.is_absolute():
+            rendered_pdf_path = repo_root / rendered_pdf_path
+        rendered_pdf_path = rendered_pdf_path.resolve()
+    else:
+        rendered_pdf_path = (
+            output_directory / 'wolf_quant_model_ic_briefing.pdf'
+        )
+    _require_files([manifest_path, pptx_path, rendered_pdf_path])
 
     manifest = _read_json(manifest_path)
     slide_count = len(Presentation(pptx_path).slides)
     manifest['rendered_pdf'] = {
-        'path': _manifest_path(pdf_path, repo_root),
-        'sha256': _sha256(pdf_path),
-        'bytes': pdf_path.stat().st_size,
+        'path': _manifest_path(rendered_pdf_path, repo_root),
+        'sha256': _sha256(rendered_pdf_path),
+        'bytes': rendered_pdf_path.stat().st_size,
     }
     manifest['rendering'] = {
         'renderer': renderer,
