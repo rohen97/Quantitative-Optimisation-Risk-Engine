@@ -17,6 +17,7 @@ jobs:
     timeout-minutes: 15
     env:
       USE_MOCK_DATA: 'true'
+      DRL_MOCK_MODE: 'true'
       PIPELINE_INPUT_SOURCE: ''
       LOKY_MAX_CPU_COUNT: '2'
     steps:
