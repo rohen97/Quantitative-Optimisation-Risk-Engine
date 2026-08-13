@@ -69,6 +69,96 @@ def build_eligibility_mask(data: pd.DataFrame, constraints: dict | None = None) 
     return mask
 
 
+def build_retention_eligibility_mask(
+    data: pd.DataFrame,
+    constraints: dict | None = None,
+) -> pd.Series:
+    """Use hysteresis for held names while preserving non-negotiable exclusions."""
+
+    limits = constraints or {}
+    entry = build_eligibility_mask(data, limits)
+    current = pd.to_numeric(
+        _series(data, "current_weight", 0.0), errors="coerce"
+    ).fillna(0.0).gt(1.0e-12)
+    recommendation = _series(data, "final_recommendation", "Avoid").astype(str).str.lower()
+    allowed_recommendation = (
+        ~recommendation.str.contains("exclude|avoid", na=False)
+        & recommendation.str.contains(
+            "buy|hold|watchlist|accumulate|core income", na=False
+        )
+    )
+    hard_safe = (
+        _series(data, "instrument_type", "Equity").fillna("Equity").eq("Equity")
+        & _series(data, "listing_status", "Active").fillna("Active").eq("Active")
+        & allowed_recommendation
+        & ~_series(data, "regime_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "reframing_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "alt_data_exclusion_flag", False).fillna(False).astype(bool)
+        & ~_series(data, "price_data_exclusion_flag", False).fillna(False).astype(bool)
+    )
+    for column, key in GROUP_CAPS:
+        if float(limits.get(key, 1.0)) < 1.0 and column in data:
+            hard_safe &= _known(data[column])
+    if not bool(limits.get("allow_synthetic_data", False)):
+        hard_safe &= ~_series(data, "is_synthetic_data", False).fillna(False).astype(bool)
+        hard_safe &= ~_series(data, "is_synthetic_fundamentals", False).fillna(False).astype(bool)
+
+    minimum_factor = float(limits.get("retention_minimum_factor", 0.80))
+    maximum_factor = float(limits.get("retention_maximum_factor", 1.15))
+    buffered = (
+        pd.to_numeric(_series(data, "liquidity_score", np.nan), errors="coerce")
+        >= float(limits.get("minimum_liquidity_score", 40)) * minimum_factor
+    ) & (
+        pd.to_numeric(
+            _series(data, "average_daily_value_usd", np.nan), errors="coerce"
+        )
+        >= float(limits.get("minimum_average_daily_value_usd", 5_000_000))
+        * minimum_factor
+    ) & (
+        pd.to_numeric(
+            _series(data, "dividend_cut_probability", np.nan), errors="coerce"
+        )
+        <= min(
+            float(limits.get("maximum_dividend_cut_probability", 0.35))
+            * maximum_factor,
+            1.0,
+        )
+    ) & (
+        pd.to_numeric(
+            _series(data, "large_drawdown_probability_12m", np.nan),
+            errors="coerce",
+        )
+        <= min(
+            float(limits.get("maximum_large_drawdown_probability", 0.35))
+            * maximum_factor,
+            1.0,
+        )
+    ) & (
+        pd.to_numeric(
+            _series(data, "forecast_uncertainty_score", np.nan), errors="coerce"
+        )
+        <= min(
+            float(limits.get("maximum_forecast_uncertainty_score", 80))
+            * maximum_factor,
+            100.0,
+        )
+    ) & (
+        pd.to_numeric(_series(data, "tail_risk_score", np.nan), errors="coerce")
+        <= min(
+            float(limits.get("maximum_tail_risk_score", 80)) * maximum_factor,
+            100.0,
+        )
+    )
+    if "liquidity_observation_count" in data:
+        buffered &= pd.to_numeric(
+            data["liquidity_observation_count"], errors="coerce"
+        ).fillna(0).ge(
+            int(limits.get("minimum_liquidity_observations", 20))
+            * minimum_factor
+        )
+    return entry | (current & hard_safe & buffered)
+
+
 def build_fallback_eligibility_mask(data: pd.DataFrame, constraints: dict | None = None, min_names: int = 20) -> pd.Series:
     """Select a ranked subset without relaxing any hard eligibility rule."""
     base = build_eligibility_mask(data, constraints)

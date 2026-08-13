@@ -40,6 +40,9 @@ optimisation:
     maximum_portfolio_cvar_5: -0.25
     maximum_portfolio_expected_shortfall_5: -0.25
     maximum_turnover: 0.35
+    minimum_rebalance_turnover: 0.01
+    retention_minimum_factor: 0.80
+    retention_maximum_factor: 1.15
     maximum_hhi: 0.15
     minimum_effective_number_of_holdings: 15
     maximum_cash_weight: 0.25

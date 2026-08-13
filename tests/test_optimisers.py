@@ -98,3 +98,37 @@ def test_turnover_limit_projects_from_feasible_current_weights():
     assert turnover <= 0.10 + 1.0e-10
     assert portfolio['turnover_constraint_applied'].all()
     assert portfolio['optimisation_feasible'].all()
+
+
+def test_retention_buffer_prevents_forced_exit_on_marginal_liquidity_move():
+    data = _data()
+    data.loc[data.index[10:], 'current_weight'] = 0.10
+    data.loc[10, 'average_daily_value_usd'] = 4_500_000
+    portfolio = cvar_constrained_portfolio(
+        data,
+        {
+            'max_single_name_weight': 0.10,
+            'minimum_average_daily_value_usd': 5_000_000,
+            'maximum_turnover': 0.10,
+            'retention_minimum_factor': 0.80,
+        },
+    )
+    held = portfolio.loc[portfolio['ticker'].eq('T10')].iloc[0]
+    assert bool(held['retention_eligible'])
+    assert not bool(held['turnover_constraint_skipped_for_hard_exit'])
+    assert portfolio['turnover_constraint_applied'].all()
+
+
+def test_no_trade_band_keeps_feasible_current_portfolio():
+    data = _data()
+    data['current_weight'] = 0.05
+    portfolio = cvar_constrained_portfolio(
+        data,
+        {
+            'max_single_name_weight': 0.05,
+            'maximum_turnover': 1.0,
+            'minimum_rebalance_turnover': 1.0,
+        },
+    )
+    assert portfolio['no_trade_band_applied'].all()
+    assert portfolio['target_weight'].equals(portfolio['current_weight'])

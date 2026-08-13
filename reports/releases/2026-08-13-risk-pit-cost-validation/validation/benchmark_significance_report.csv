@@ -1,0 +1,2 @@
+strategy,baseline,observations,mean_difference,t_statistic,p_value,difference_ci_lower,difference_ci_upper,bootstrap_block_size,bootstrap_significant,status
+wolf_cvar,equal_weight_eligible,60,-0.0010185278307096456,-0.3413005711923903,0.734089857686517,-0.006076911798219972,0.004104474697829473,6,False,WARNING

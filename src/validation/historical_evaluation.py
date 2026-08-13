@@ -323,54 +323,70 @@ def _evaluate_risk(
             ),
             'NOT_EVALUATED',
         )
+    ordered = risk_forecasts.copy()
+    if 'date' in ordered:
+        ordered = ordered.assign(
+            date=pd.to_datetime(ordered['date'], errors='coerce')
+        ).sort_values('date', kind='stable')
+    ordered = ordered.reset_index(drop=True)
+    segments: list[tuple[str, pd.DataFrame]] = [('overall', ordered)]
+    holdout_fraction = float(config.get('chronological_holdout_fraction', 0.0))
+    minimum_holdout = int(config.get('minimum_holdout_observations', 252))
+    if 0 < holdout_fraction < 1:
+        holdout_rows = max(int(np.floor(len(ordered) * holdout_fraction)), 1)
+        if holdout_rows >= minimum_holdout and len(ordered) - holdout_rows >= minimum_holdout:
+            segments.append(('chronological_holdout', ordered.tail(holdout_rows)))
+
     rows: list[dict] = []
     tolerance = float(config.get('violation_rate_tolerance', 0.02))
     kupiec_threshold = float(config.get('kupiec_pvalue_threshold', 0.05))
     independence_threshold = float(
         config.get('christoffersen_pvalue_threshold', 0.05)
     )
-    for confidence, var_column, es_column in (
-        (0.95, 'var_95', 'expected_shortfall_95'),
-        (0.99, 'var_99', 'expected_shortfall_99'),
-    ):
-        result = backtest_var(
-            risk_forecasts['realised_return'],
-            risk_forecasts[var_column],
-            confidence,
-        )
-        expected_rate = 1.0 - confidence
-        rate_error = abs(float(result['violation_rate']) - expected_rate)
-        passed = (
-            rate_error <= tolerance
-            and float(result['p_value']) >= kupiec_threshold
-            and float(result['christoffersen_p_value']) >= independence_threshold
-        )
-        warning = (
-            rate_error <= 2 * tolerance
-            and float(result['p_value']) >= kupiec_threshold / 2
-        )
-        status = 'PASS' if passed else 'WARNING' if warning else 'FAIL'
-        realised = pd.to_numeric(
-            risk_forecasts['realised_return'],
-            errors='coerce',
-        )
-        forecast_es = pd.to_numeric(
-            risk_forecasts.get(es_column),
-            errors='coerce',
-        )
-        tail = realised.loc[realised.le(realised.quantile(expected_rate))]
-        rows.append(
-            {
-                'confidence_level': confidence,
-                **result,
-                'expected_violation_rate': expected_rate,
-                'violation_rate_error': rate_error,
-                'realised_tail_mean': float(tail.mean()),
-                'mean_expected_shortfall': float(forecast_es.mean()),
-                'expected_shortfall_gap': float(tail.mean() - forecast_es.mean()),
-                'status': status,
-            }
-        )
+    for segment_name, segment in segments:
+        for confidence, var_column, es_column in (
+            (0.95, 'var_95', 'expected_shortfall_95'),
+            (0.99, 'var_99', 'expected_shortfall_99'),
+        ):
+            result = backtest_var(
+                segment['realised_return'],
+                segment[var_column],
+                confidence,
+            )
+            expected_rate = 1.0 - confidence
+            rate_error = abs(float(result['violation_rate']) - expected_rate)
+            passed = (
+                rate_error <= tolerance
+                and float(result['p_value']) >= kupiec_threshold
+                and float(result['christoffersen_p_value']) >= independence_threshold
+            )
+            warning = (
+                rate_error <= 2 * tolerance
+                and float(result['p_value']) >= kupiec_threshold / 2
+            )
+            status = 'PASS' if passed else 'WARNING' if warning else 'FAIL'
+            realised = pd.to_numeric(
+                segment['realised_return'],
+                errors='coerce',
+            )
+            forecast_es = pd.to_numeric(
+                segment.get(es_column),
+                errors='coerce',
+            )
+            tail = realised.loc[realised.le(realised.quantile(expected_rate))]
+            rows.append(
+                {
+                    'evaluation_segment': segment_name,
+                    'confidence_level': confidence,
+                    **result,
+                    'expected_violation_rate': expected_rate,
+                    'violation_rate_error': rate_error,
+                    'realised_tail_mean': float(tail.mean()),
+                    'mean_expected_shortfall': float(forecast_es.mean()),
+                    'expected_shortfall_gap': float(tail.mean() - forecast_es.mean()),
+                    'status': status,
+                }
+            )
     frame = pd.DataFrame(rows)
     return frame, _aggregate_status(frame['status'].tolist())
 

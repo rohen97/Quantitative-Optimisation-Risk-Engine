@@ -1,10 +1,88 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
+
 import pandas as pd
 
 from src.validation.models import ValidationIssue
 
 TARGET_PATTERNS = ("forward_", "future_", "target_", "realised_", "realized_")
+
+
+def _coverage_ratio(numerator: object, denominator: object) -> float:
+    try:
+        top = max(float(numerator), 0.0)
+        bottom = max(float(denominator), 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+    return min(top / bottom, 1.0) if bottom else 0.0
+
+
+def point_in_time_evidence_report(
+    coverage: Mapping[str, object] | None,
+    thresholds: Mapping[str, object] | None = None,
+) -> pd.DataFrame:
+    """Evaluate externally archived PIT evidence without treating proxies as facts."""
+
+    values = dict(coverage or {})
+    limits = dict(thresholds or {})
+    checks = (
+        (
+            "observed_filing_acceptance_coverage",
+            _coverage_ratio(
+                values.get("filing_metadata_securities", 0),
+                values.get(
+                    "us_fundamental_securities",
+                    values.get("fundamental_securities", 0),
+                ),
+            ),
+            float(limits.get("minimum_filing_acceptance_security_fraction", 0.80)),
+            "Observed regulator acceptance timestamps by fundamental security.",
+        ),
+        (
+            "historical_membership_evidence",
+            float(values.get("historical_membership_events", 0) or 0),
+            float(limits.get("minimum_historical_membership_events", 1)),
+            "Dated index or universe membership events.",
+        ),
+        (
+            "delisting_evidence",
+            float(values.get("delisting_events", 0) or 0),
+            float(limits.get("minimum_delisting_events", 1)),
+            "Archived delisting events used to measure survivorship coverage.",
+        ),
+        (
+            "inactive_security_price_coverage",
+            _coverage_ratio(
+                values.get("inactive_price_securities", 0),
+                values.get("inactive_securities", 0),
+            ),
+            float(limits.get("minimum_inactive_price_security_fraction", 0.50)),
+            "Inactive securities with archived price history.",
+        ),
+        (
+            "historical_volume_coverage",
+            _coverage_ratio(
+                values.get("securities_with_historical_volume", 0),
+                values.get("price_securities", 0),
+            ),
+            float(limits.get("minimum_historical_volume_security_fraction", 0.80)),
+            "Priced securities with observed historical volume.",
+        ),
+    )
+    rows = []
+    for check_name, metric, threshold, commentary in checks:
+        rows.append(
+            {
+                "check_name": check_name,
+                "status": "PASS" if metric >= threshold else "WARNING",
+                "failures": 0,
+                "metric_value": metric,
+                "threshold": threshold,
+                "commentary": commentary,
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def check_availability_dates(

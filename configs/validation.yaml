@@ -17,6 +17,13 @@ validation:
     purge_days: 5
     embargo_days: 5
 
+  point_in_time_evidence:
+    minimum_filing_acceptance_security_fraction: 0.80
+    minimum_historical_membership_events: 1
+    minimum_delisting_events: 1
+    minimum_inactive_price_security_fraction: 0.50
+    minimum_historical_volume_security_fraction: 0.80
+
   walk_forward:
     output_directory: reports/outputs/walk_forward
     evidence_mode: reconstructed_pit_proxy
@@ -31,11 +38,24 @@ validation:
     portfolio_nav_usd: 100000000
     primary_strategy: wolf_cvar
     approval_cap: CONDITIONALLY_APPROVED
-    maximum_rebalance_turnover: 0.10
+    maximum_rebalance_turnover: 0.06
     risk_forecast:
-      model: ewma_normal
+      candidate_models:
+        - ewma_normal
+        - ewma_student_t
+        - filtered_historical_simulation
+        - dcc_igarch_student_t
       ewma_decay: 0.94
       lookback_rows: 252
+      calibration_rows: 63
+      minimum_training_rows: 120
+      student_t_degrees_freedom: 7.0
+      dcc_alpha: 0.03
+      dcc_beta: 0.95
+      correlation_shrinkage: 0.10
+      calibration_scale_factors: [1.00]
+      exception_response_multiplier: 1.10
+      exception_response_days: 1
 
   horizons: [3M, 6M, 9M, 12M]
 
@@ -63,6 +83,8 @@ validation:
     violation_rate_tolerance: 0.02
     kupiec_pvalue_threshold: 0.05
     christoffersen_pvalue_threshold: 0.05
+    chronological_holdout_fraction: 0.40
+    minimum_holdout_observations: 252
     expected_shortfall_bootstrap_samples: 1000
 
   portfolio:

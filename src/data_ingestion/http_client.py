@@ -64,6 +64,31 @@ class HttpClient:
         params: dict[str, object] | None = None,
         headers: dict[str, str] | None = None,
     ) -> HttpResponse:
+        return self._request("GET", url, params=params, headers=headers)
+
+    def post_json(
+        self,
+        url: str,
+        payload: object,
+        headers: dict[str, str] | None = None,
+    ) -> HttpResponse:
+        request_headers = {"Content-Type": "application/json", **(headers or {})}
+        return self._request(
+            "POST",
+            url,
+            headers=request_headers,
+            body=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
+        )
+
+    def _request(
+        self,
+        method: str,
+        url: str,
+        *,
+        params: dict[str, object] | None = None,
+        headers: dict[str, str] | None = None,
+        body: bytes | None = None,
+    ) -> HttpResponse:
         query = urlencode(
             [(key, str(value)) for key, value in (params or {}).items() if value is not None],
             doseq=True,
@@ -76,7 +101,12 @@ class HttpClient:
 
         for attempt in range(max(self.config.retry_attempts, 1)):
             try:
-                request = Request(request_url, headers=request_headers, method="GET")
+                request = Request(
+                    request_url,
+                    data=body,
+                    headers=request_headers,
+                    method=method.upper(),
+                )
                 with urlopen(request, timeout=self.config.timeout_seconds) as response:
                     return HttpResponse(
                         body=response.read(),
@@ -85,9 +115,11 @@ class HttpClient:
                         url=request_url,
                     )
             except HTTPError as exc:
-                body = exc.read().decode("utf-8", errors="replace")
+                error_body = exc.read().decode("utf-8", errors="replace")
                 if exc.code < 500 and exc.code != 429:
-                    raise DataSourceRequestError(f"HTTP {exc.code} from {safe_url}: {body}") from exc
+                    raise DataSourceRequestError(
+                        f"HTTP {exc.code} from {safe_url}: {error_body}"
+                    ) from exc
                 last_error = exc
             except (URLError, TimeoutError, OSError) as exc:
                 last_error = exc

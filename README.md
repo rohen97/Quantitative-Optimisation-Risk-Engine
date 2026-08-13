@@ -14,23 +14,25 @@ The LLM benchmark is an explanation and comparison layer only. It cannot bypass 
 
 ## Current Validated Run
 
-The latest full-universe evidence package was regenerated on 2026-08-12.
+The latest full-universe evidence package was regenerated on 2026-08-13.
 
 | Measure | Result |
 |---|---:|
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
-| Walk-forward eligible securities | 1,408 |
-| Historical forecasts | 156,764 |
-| Aligned realised outcomes | 156,312 |
+| Walk-forward eligible securities | 1,409 |
+| Historical forecasts | 156,960 |
+| Aligned realised outcomes | 156,508 |
 | Portfolio decisions | 60 monthly anchors |
-| Governance score | 80.0 / 100 |
+| Governance score | 87.5 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Automated tests | 324 passing |
+| Annual turnover | 1.33x |
+| Annualised cost drag | 1.28% |
+| 95% / 99% VaR backtests | `PASS` / `PASS` |
 
 The complete, checksummed result is in
-[`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
+[`reports/releases/2026-08-13-risk-pit-cost-validation`](reports/releases/2026-08-13-risk-pit-cost-validation/README.md).
 
 The investment-principal package presents the results in plain language:
 [PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
@@ -39,13 +41,14 @@ and [written decision report](reports/presentations/wolf_investment_principal/in
 It recommends a controlled, human-supervised live pilot, not unattended or
 full-scale deployment.
 
-![Validation scorecard](reports/releases/2026-08-07-full-universe/plots/validation_scorecard.png)
+![Validation scorecard](reports/releases/2026-08-13-risk-pit-cost-validation/plots/validation_scorecard.png)
 
-![Walk-forward portfolio performance](reports/releases/2026-08-07-full-universe/plots/cumulative_returns.png)
+![Walk-forward portfolio performance](reports/releases/2026-08-13-risk-pit-cost-validation/plots/cumulative_returns.png)
 
-Conditional approval is deliberate. The free-source backtest reconstructs some
-filing availability and lacks immutable historical universe, volume, sentiment,
-narrative and regime vintages. This repository is research software and does not
+Conditional approval is deliberate. The evidence store now archives 59,183
+delisting events, but observed filing acceptance, dated membership,
+inactive-security prices, historical volume, sentiment, narrative and regime
+vintages remain incomplete. This repository is research software and does not
 authorize unattended live trading.
 
 ## 1997-Present Portfolio Backtest
@@ -387,23 +390,44 @@ full governance validation:
 python scripts/run_walk_forward_validation.py
 ```
 
+Archive free point-in-time evidence before the walk-forward:
+
+```powershell
+$env:SEC_USER_AGENT='The Wolf Quant Model research-contact@example.com'
+python scripts/run_point_in_time_evidence_backfill.py --sources beam sec nasdaq eodhd --start-year 1997
+python scripts/run_point_in_time_evidence_backfill.py --coverage-only --skip-migrations
+```
+
+Credentials stay in environment variables. Beam and the SEC supply observed
+filing acceptance metadata, Nasdaq Mergent supplies entitlement-dependent annual
+fundamentals, and EODHD supplies delistings plus entitlement-dependent symbol and
+membership history. Provider failures do not become passes; measured coverage is
+written to `reports/outputs/validation/pit_evidence_coverage.json`.
+
 Build the compact GitHub release package after validation and IC reporting:
 
 ```bash
-python scripts/build_release_evidence.py --release-id 2026-08-07-full-universe
+python scripts/build_release_evidence.py --release-id 2026-08-13-risk-pit-cost-validation
 ```
 
 The command writes immutable forecast, realised-outcome, monthly portfolio,
-constraint, transaction-cost and daily EWMA VaR/Expected Shortfall evidence to
+constraint, transaction-cost and adaptive VaR/Expected Shortfall evidence to
 `reports/outputs/walk_forward/`. It then writes the approval bundle to
 `reports/outputs/validation/<validation_run_id>/` and refreshes
 `reports/outputs/validation/latest/`.
 
-Free-source history supports conditional use only. Filing availability is
-reconstructed with a conservative lag, the universe does not contain historical
-delisted constituents, historical volume is unavailable, and sentiment,
-narrative and regime vintages were not archived. These limitations are recorded
-in `walk_forward_manifest.json` and cap governance at
+The risk forecaster selects chronologically from EWMA Normal, EWMA Student-t,
+filtered historical simulation and DCC-IGARCH Student-t candidates. Overall and
+separately labelled chronological-holdout Kupiec and Christoffersen tests must
+pass. The optimiser uses retention hysteresis, a no-trade band and a small
+linear-programming rebalance controller to minimise forced-exit turnover while
+preserving hard caps.
+
+Free-source history supports conditional use only. Filing availability is still
+reconstructed when observed timestamps are missing, historical membership and
+inactive-name price coverage are incomplete, historical volume is unavailable,
+and sentiment, narrative and regime vintages were not archived. These
+limitations are recorded in `walk_forward_manifest.json` and cap governance at
 `CONDITIONALLY_APPROVED` until observed historical vintages replace the proxies.
 
 Every run is preserved under `reports/outputs/validation/<validation_run_id>/`; `reports/outputs/validation/latest/` is a copied view. Missing realised history is reported as `INSUFFICIENT_DATA`, never as a pass. Critical leakage, point-in-time, lineage, reproducibility or hard-constraint failures force `REJECTED`.

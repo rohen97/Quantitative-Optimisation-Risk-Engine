@@ -1,0 +1,60 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 32px;
+  color: #1f2933;
+  line-height: 1.45;
+}
+header {
+  border-bottom: 2px solid #1f2933;
+  margin-bottom: 24px;
+}
+h1, h2 {
+  letter-spacing: 0;
+}
+section {
+  margin: 24px 0;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+}
+th, td {
+  border: 1px solid #d6d9de;
+  padding: 6px;
+  text-align: left;
+}
+th {
+  background: #eef2f6;
+}
+thead {
+  display: table-header-group;
+}
+img {
+  max-width: 100%;
+  margin: 12px 0 20px;
+}
+.cover {
+  min-height: 240px;
+  page-break-after: always;
+}
+.warning-panel {
+  border-left: 5px solid #a15c00;
+  background: #fff8e8;
+  padding: 12px 16px;
+}
+pre {
+  white-space: pre-wrap;
+  background: #f6f8fa;
+  padding: 12px;
+}
+@page {
+  margin: 18mm;
+  @bottom-right {
+    content: "Wolf Quant IC Report";
+    font-size: 9px;
+    color: #687385;
+  }
+}

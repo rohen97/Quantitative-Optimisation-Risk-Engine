@@ -1,0 +1,30 @@
+section,rule,status,message
+portfolio,target_portfolio_available,pass,Target portfolio is available.
+portfolio,security_ids_present,pass,Security IDs are required.
+portfolio,unique_holdings,pass,Holdings must be unique by security_id.
+portfolio,finite_weights,pass,Weights must be finite.
+portfolio,long_only,pass,Long-only portfolio cannot have negative weights.
+portfolio,weights_sum_to_one,pass,Weights sum to 1.000000.
+portfolio,unique_issuers,pass,Cross-listed securities must not create duplicate issuer exposure.
+data_provenance,sector_known,pass,Every selected holding requires known sector metadata.
+data_provenance,country_known,pass,Every selected holding requires known country metadata.
+data_provenance,region_known,pass,Every selected holding requires known region metadata.
+data_provenance,currency_known,pass,Every selected holding requires known currency metadata.
+portfolio,selected_names_are_investable,pass,Selected holdings cannot carry Avoid or Exclude recommendations.
+data_provenance,observed_investment_inputs,pass,Synthetic metadata or fundamentals are allowed for testing but block deployment.
+portfolio,hard_eligibility_not_bypassed,pass,Final holdings must come from the strict hard-eligibility set.
+portfolio,optimiser_feasible,pass,The selected optimiser must report a feasible hard-constraint solution.
+portfolio,current_nav_positive,pass,Current NAV should be positive when current portfolio is available.
+forecasts,expected_total_return_finite,pass,expected_total_return must be finite.
+forecasts,p5_return_finite,pass,p5_return must be finite.
+forecasts,p50_return_finite,pass,p50_return must be finite.
+forecasts,p95_return_finite,pass,p95_return must be finite.
+forecasts,quantile_order,pass,Forecast quantiles require P5 <= P50 <= P95.
+forecasts,dividend_cut_probability_bounds,pass,dividend_cut_probability must be between 0 and 1.
+forecasts,large_drawdown_probability_bounds,pass,large_drawdown_probability must be between 0 and 1.
+risk,expected_shortfall_vs_var,pass,Expected Shortfall should be at least as severe as VaR under negative-loss convention.
+stress,scenario_names_unique,pass,Stress scenario names must be unique.
+stress,loss_sign_convention,pass,Stress losses should use negative-loss convention.
+regime,probability_bounds,pass,Regime probabilities must be between 0 and 1.
+drl,seed_results_available,pass,Seed results should be available when DRL is active.
+lineage,model_run_id_present,pass,Model run ID must be present.

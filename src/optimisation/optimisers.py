@@ -3,7 +3,12 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from src.optimisation.constraints import apply_diversification_caps, build_eligibility_mask, build_fallback_eligibility_mask
+from src.optimisation.constraints import (
+    apply_diversification_caps,
+    build_eligibility_mask,
+    build_fallback_eligibility_mask,
+    build_retention_eligibility_mask,
+)
 from src.optimisation.objectives import (
     cvar_expected_shortfall_objective,
     dividend_income_objective,
@@ -34,7 +39,10 @@ def _apply_turnover_limit(
     maximum_turnover = float(limits.get('maximum_turnover', 1.0))
     unconstrained_turnover = float(0.5 * (target - current).abs().sum())
     fully_invested_current = abs(float(current.sum()) - 1.0) <= 1.0e-6
-    hard_exit_required = bool(current.where(~eligible, 0.0).gt(1.0e-12).any())
+    retention_eligible = build_retention_eligibility_mask(data, limits)
+    hard_exit_required = bool(
+        current.where(~retention_eligible, 0.0).gt(1.0e-12).any()
+    )
     current_feasible = bool(
         current.max() <= float(limits.get('max_single_name_weight', 1.0)) + 1.0e-10
     )
@@ -52,12 +60,23 @@ def _apply_turnover_limit(
                 .max()
             )
             current_feasible &= maximum_exposure <= float(limits.get(key, 1.0)) + 1.0e-10
+    minimum_rebalance = float(limits.get('minimum_rebalance_turnover', 0.0))
     applied = False
+    no_trade_band_applied = False
+    if (
+        fully_invested_current
+        and current_feasible
+        and not hard_exit_required
+        and unconstrained_turnover <= minimum_rebalance
+    ):
+        target = current.copy()
+        no_trade_band_applied = True
     if (
         fully_invested_current
         and current_feasible
         and not hard_exit_required
         and 0.0 <= maximum_turnover < unconstrained_turnover
+        and not no_trade_band_applied
     ):
         scale = maximum_turnover / unconstrained_turnover
         target = current + scale * (target - current)
@@ -68,6 +87,7 @@ def _apply_turnover_limit(
         {
             'unconstrained_turnover': unconstrained_turnover,
             'turnover_constraint_applied': applied,
+            'no_trade_band_applied': no_trade_band_applied,
             'turnover_constraint_skipped_for_hard_exit': hard_exit_required,
             'turnover_constraint_skipped_for_infeasible_current': (
                 fully_invested_current and not current_feasible
@@ -165,6 +185,12 @@ def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: d
     portfolio['turnover_constraint_applied'] = bool(
         weights.attrs.get('turnover_constraint_applied', False)
     )
+    portfolio['no_trade_band_applied'] = bool(
+        weights.attrs.get('no_trade_band_applied', False)
+    )
+    portfolio['retention_eligible'] = build_retention_eligibility_mask(
+        data, limits
+    ).loc[portfolio.index].to_numpy()
     portfolio['turnover_constraint_skipped_for_hard_exit'] = bool(
         weights.attrs.get('turnover_constraint_skipped_for_hard_exit', False)
     )

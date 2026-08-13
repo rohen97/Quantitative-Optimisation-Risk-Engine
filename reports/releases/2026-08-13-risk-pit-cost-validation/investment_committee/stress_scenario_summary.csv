@@ -1,0 +1,13 @@
+scenario_name,portfolio_loss_percentage,portfolio_loss_usd,top_contributors,risk_severity,hedge_required_flag,post_stress_value,post_stress_dividend_impact,required_scenario_available
+crisis_high_chaos,-0.28875,-28875000.0,"LI.PA, ALV.XETRA, 3988.HK, 600036.SHG, CS.PA",Severe,True,71125000.0,-0.0721875,False
+meta_wolf_shock,-0.25,-25000000.0,"000333.SHE, ALV.XETRA, 601816.SHG, 600036.SHG, AD.AS",Severe,True,75000000.0,-0.0625,False
+global_risk_off,-0.2025,-20250000.000000004,"LI.PA, 000333.SHE, 601816.SHG, ALV.XETRA, AD.AS",Severe,True,79750000.0,-0.050625,False
+europe_recession,-0.172,-17200000.0,"AD.AS, HEN3.XETRA, NOVN.SW, ALV.XETRA, ESSITY-B.ST",High,True,82800000.0,-0.043,False
+china_policy_stress,-0.1,-10000000.000000004,"000333.SHE, 601816.SHG, 600036.SHG, 3988.HK, 000538.SHE",High,True,90000000.0,-0.025,False
+correlation_spike,-0.08,-8000000.000000002,"000333.SHE, ALV.XETRA, 601816.SHG, 600036.SHG, AD.AS",Moderate,False,92000000.0,-0.02,False
+liquidity_shock,-0.0625,-6250000.000000001,"LI.PA, 000333.SHE, 601816.SHG, ALV.XETRA, AD.AS",Moderate,False,93750000.0,-0.015625,False
+credit_stress,-0.05,-5000000.000000001,"000333.SHE, ALV.XETRA, 601816.SHG, 600036.SHG, AD.AS",Moderate,False,95000000.0,-0.0125,False
+dividend_cut_shock,-0.05,-5000000.000000001,"000333.SHE, ALV.XETRA, 601816.SHG, 600036.SHG, AD.AS",Moderate,False,95000000.0,-0.0125,False
+fx_shock,-0.0424999999999999,-4250000.0,"ALV.XETRA, AD.AS, CS.PA, HEN3.XETRA, LI.PA",Moderate,False,95750000.0,-0.0106249999999999,False
+inflation_shock,-0.0349999999999999,-3500000.0,"000333.SHE, 601816.SHG, AD.AS, NOVN.SW, PG.US",Moderate,False,96500000.0,-0.0087499999999999,False
+uk_rate_shock,-0.006,-600000.0000000002,"SBRY.LSE, 000333.SHE, 601398.SHG, ALV.XETRA, 600036.SHG",Moderate,False,99400000.0,-0.0015,False

@@ -6,12 +6,11 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from statistics import NormalDist
 from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy.optimize import Bounds, LinearConstraint, milp
+from scipy.optimize import Bounds, LinearConstraint, linprog, milp
 
 from src.data.config import load_data_config
 from src.data.repository.duckdb_repository import DuckDBRepository
@@ -21,8 +20,15 @@ from src.models.forecasting import build_ml_forecast_features
 from src.models.scorecard import build_scorecard
 from src.optimisation.optimiser_inputs import build_optimiser_input_dataset
 from src.optimisation.optimisers import cvar_constrained_portfolio
+from src.optimisation.constraints import build_retention_eligibility_mask
 from src.utils.config import ROOT, load_yaml
 from src.validation.transaction_cost_validation import estimate_transaction_cost
+from src.validation.risk_models import (
+    RiskModelSettings,
+    forecast_risk,
+    select_risk_model,
+    serialise_scores,
+)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -65,6 +71,16 @@ class WalkForwardConfig:
     maximum_rebalance_turnover: float = 0.10
     risk_ewma_decay: float = 0.94
     risk_lookback_rows: int = 252
+    risk_candidate_models: tuple[str, ...] = ('ewma_normal',)
+    risk_calibration_rows: int = 63
+    risk_minimum_training_rows: int = 120
+    risk_student_t_degrees_freedom: float = 7.0
+    risk_dcc_alpha: float = 0.03
+    risk_dcc_beta: float = 0.95
+    risk_correlation_shrinkage: float = 0.10
+    risk_calibration_scale_factors: tuple[float, ...] = (1.0,)
+    risk_exception_response_multiplier: float = 1.10
+    risk_exception_response_days: int = 1
 
 
 @dataclass(frozen=True)
@@ -91,12 +107,18 @@ def load_walk_forward_config(
     risk_ewma_decay = float(risk_forecast.get('ewma_decay', 0.94))
     if not 0 < risk_ewma_decay < 1:
         raise ValueError('Walk-forward risk EWMA decay must be between zero and one.')
+    candidate_models = tuple(
+        risk_forecast.get(
+            'candidate_models',
+            [risk_forecast.get('model', 'ewma_normal')],
+        )
+    )
     maximum_rebalance_turnover = float(
         values.get('maximum_rebalance_turnover', 0.10)
     )
     if not 0 <= maximum_rebalance_turnover <= 1:
         raise ValueError('Walk-forward turnover limit must be between zero and one.')
-    return WalkForwardConfig(
+    config = WalkForwardConfig(
         output_directory=output,
         start_date=pd.Timestamp(values.get('start_date', '2024-06-30')).normalize(),
         forecast_end_date=pd.Timestamp(values.get('forecast_end_date', '2025-07-31')).normalize(),
@@ -113,6 +135,50 @@ def load_walk_forward_config(
         maximum_rebalance_turnover=maximum_rebalance_turnover,
         risk_ewma_decay=risk_ewma_decay,
         risk_lookback_rows=int(risk_forecast.get('lookback_rows', 252)),
+        risk_candidate_models=candidate_models,
+        risk_calibration_rows=int(risk_forecast.get('calibration_rows', 63)),
+        risk_minimum_training_rows=int(
+            risk_forecast.get('minimum_training_rows', 120)
+        ),
+        risk_student_t_degrees_freedom=float(
+            risk_forecast.get('student_t_degrees_freedom', 7.0)
+        ),
+        risk_dcc_alpha=float(risk_forecast.get('dcc_alpha', 0.03)),
+        risk_dcc_beta=float(risk_forecast.get('dcc_beta', 0.95)),
+        risk_correlation_shrinkage=float(
+            risk_forecast.get('correlation_shrinkage', 0.10)
+        ),
+        risk_calibration_scale_factors=tuple(
+            float(value)
+            for value in risk_forecast.get('calibration_scale_factors', [1.0])
+        ),
+        risk_exception_response_multiplier=float(
+            risk_forecast.get('exception_response_multiplier', 1.10)
+        ),
+        risk_exception_response_days=int(
+            risk_forecast.get('exception_response_days', 1)
+        ),
+    )
+    if config.risk_exception_response_multiplier < 1.0:
+        raise ValueError('Risk exception response multiplier cannot be below one.')
+    if config.risk_exception_response_days < 0:
+        raise ValueError('Risk exception response days cannot be negative.')
+    _risk_model_settings(config).validate()
+    return config
+
+
+def _risk_model_settings(config: WalkForwardConfig) -> RiskModelSettings:
+    return RiskModelSettings(
+        ewma_decay=config.risk_ewma_decay,
+        lookback_rows=config.risk_lookback_rows,
+        candidate_models=config.risk_candidate_models,
+        calibration_rows=config.risk_calibration_rows,
+        minimum_training_rows=config.risk_minimum_training_rows,
+        student_t_degrees_freedom=config.risk_student_t_degrees_freedom,
+        dcc_alpha=config.risk_dcc_alpha,
+        dcc_beta=config.risk_dcc_beta,
+        correlation_shrinkage=config.risk_correlation_shrinkage,
+        calibration_scale_factors=config.risk_calibration_scale_factors,
     )
 
 
@@ -121,8 +187,22 @@ def reconstruct_statement_availability(
     filing_lag_days: int,
 ) -> pd.DataFrame:
     result = statements.copy()
-    period_end = pd.to_datetime(result['fiscal_period_end'], errors='coerce')
-    filing_date = pd.to_datetime(result.get('filing_date'), errors='coerce')
+    period_end = pd.to_datetime(
+        result['fiscal_period_end'], errors='coerce', utc=True
+    ).dt.tz_localize(None)
+    filing_date = pd.to_datetime(
+        result.get('filing_date', pd.Series(pd.NaT, index=result.index)),
+        errors='coerce',
+        utc=True,
+    ).dt.tz_localize(None)
+    observed_acceptance = pd.to_datetime(
+        result.get(
+            'observed_acceptance_datetime',
+            pd.Series(pd.NaT, index=result.index),
+        ),
+        errors='coerce',
+        utc=True,
+    ).dt.tz_localize(None)
     proxy_date = period_end + pd.to_timedelta(int(filing_lag_days), unit='D')
     source = result.get('source', pd.Series('', index=result.index)).astype(str)
     trusted_filing_source = ~source.str.contains(
@@ -136,11 +216,19 @@ def reconstruct_statement_availability(
         & filing_date.ge(period_end)
         & trusted_filing_source
     )
-    result['reconstructed_available_from'] = filing_date.where(valid_filing, proxy_date)
-    result['availability_basis'] = np.where(
-        valid_filing,
-        'reported_filing_date',
-        f'fiscal_period_end_plus_{int(filing_lag_days)}d',
+    valid_acceptance = (
+        observed_acceptance.notna()
+        & period_end.notna()
+        & observed_acceptance.ge(period_end)
+    )
+    result['reconstructed_available_from'] = observed_acceptance.where(
+        valid_acceptance,
+        filing_date.where(valid_filing, proxy_date),
+    )
+    result['availability_basis'] = np.select(
+        [valid_acceptance, valid_filing],
+        ['observed_sec_acceptance_datetime', 'reported_filing_date'],
+        default=f'fiscal_period_end_plus_{int(filing_lag_days)}d',
     )
     return result
 
@@ -344,8 +432,7 @@ def _load_source_data(
     placeholder = chr(63)
     statements = repository.query(
         f'''
-        SELECT * EXCLUDE (source_row)
-        FROM (
+        WITH selected AS (
             SELECT *, ROW_NUMBER() OVER (
                 PARTITION BY security_id, fiscal_period_end, fiscal_period_type
                 ORDER BY
@@ -367,8 +454,25 @@ def _load_source_data(
               AND fiscal_period_type = 'annual'
               AND LOWER(source) NOT LIKE '%mock%'
               AND LOWER(source) NOT LIKE '%synthetic%'
+        ), observed_filings AS (
+            SELECT
+                security_id,
+                report_date,
+                MIN(acceptance_datetime) AS observed_acceptance_datetime,
+                ARG_MIN(source, acceptance_datetime) AS filing_metadata_source
+            FROM filing_metadata
+            WHERE acceptance_datetime IS NOT NULL
+            GROUP BY security_id, report_date
         )
-        WHERE source_row = 1
+        SELECT
+            selected.* EXCLUDE (source_row),
+            observed_filings.observed_acceptance_datetime,
+            observed_filings.filing_metadata_source
+        FROM selected
+        LEFT JOIN observed_filings
+          ON selected.security_id = observed_filings.security_id
+         AND selected.fiscal_period_end = observed_filings.report_date
+        WHERE selected.source_row = 1
         ORDER BY security_id, fiscal_period_end
         ''',
         [security_ids],
@@ -802,8 +906,13 @@ def _build_anchor_inputs(
     candidates['fundamentals_available_from'] = pd.to_datetime(
         candidates['reconstructed_available_from']
     )
+    candidates['fundamentals_availability_basis'] = candidates[
+        'availability_basis'
+    ].astype(str)
     candidates['fundamentals_data_source'] = (
-        candidates['source'].astype(str) + ':reconstructed_availability'
+        candidates['source'].astype(str)
+        + ':'
+        + candidates['fundamentals_availability_basis']
     )
     coverage_columns = [
         'revenue',
@@ -899,6 +1008,7 @@ def _build_anchor_inputs(
         'fundamentals_data_source',
         'fundamentals_as_of_date',
         'fundamentals_available_from',
+        'fundamentals_availability_basis',
         'fundamentals_period_count',
         'fundamentals_observation_count',
         'fundamentals_coverage_ratio',
@@ -989,6 +1099,7 @@ def _forecast_anchor(
         'currency',
         'fundamentals_as_of_date',
         'fundamentals_available_from',
+        'fundamentals_availability_basis',
         'price_feature_end_date',
         'fundamentals_period_count',
     ]
@@ -1186,6 +1297,261 @@ def _cardinality_constrained_portfolio(
     return portfolio
 
 
+def _weights_satisfy_linear_caps(
+    weights: pd.Series,
+    scorecard: pd.DataFrame,
+    constraints: dict[str, Any],
+) -> bool:
+    if abs(float(weights.sum()) - 1.0) > 1.0e-6 or bool(weights.lt(-1.0e-10).any()):
+        return False
+    cash_weight = float(weights.get(CASH_SECURITY_ID, 0.0))
+    if cash_weight > float(constraints.get('maximum_cash_weight', 0.25)) + 1.0e-8:
+        return False
+    risky = weights.loc[weights.index.astype(str) != CASH_SECURITY_ID]
+    if risky.empty:
+        return False
+    if risky.max() > float(constraints.get('max_single_name_weight', 0.05)) + 1.0e-8:
+        return False
+    metadata = scorecard.drop_duplicates('security_id').set_index('security_id')
+    if not set(risky.index).issubset(metadata.index):
+        return False
+    for column, key in (
+        ('sector', 'max_sector_weight'),
+        ('country', 'max_country_weight'),
+        ('region', 'max_region_weight'),
+        ('currency', 'max_currency_weight'),
+    ):
+        exposure = (
+            metadata.loc[risky.index, [column]]
+            .assign(_weight=risky.to_numpy())
+            .groupby(column, dropna=False)['_weight']
+            .sum()
+        )
+        if not exposure.empty and exposure.max() > float(constraints.get(key, 1.0)) + 1.0e-8:
+            return False
+    return True
+
+
+def _cash_row(columns: pd.Index, weight: float) -> dict[str, Any]:
+    row = {column: pd.NA for column in columns}
+    row.update(
+        {
+            'security_id': CASH_SECURITY_ID,
+            'ticker': CASH_SECURITY_ID,
+            'issuer_id': CASH_SECURITY_ID,
+            'company_name': 'USD Cash',
+            'instrument_type': 'Cash',
+            'listing_status': 'Active',
+            'exchange_code': 'CASH',
+            'country': 'Cash',
+            'region': 'Cash',
+            'sector': 'Cash',
+            'industry': 'Cash',
+            'currency': 'USD',
+            'market_cap_usd': 0.0,
+            'average_daily_value_usd': np.inf,
+            'volatility_1y': 0.0,
+            'passes_hard_filters': True,
+            'target_weight': weight,
+            'optimisation_feasible': True,
+        }
+    )
+    return row
+
+
+def _minimum_turnover_hard_exit_portfolio(
+    current: pd.Series,
+    target: pd.Series,
+    forced: pd.Series,
+    scorecard: pd.DataFrame,
+    constraints: dict[str, Any],
+) -> pd.Series | None:
+    """Find the closest feasible portfolio after non-negotiable exits."""
+
+    index = current.index
+    count = len(index)
+    metadata = scorecard.drop_duplicates('security_id').set_index('security_id')
+    rows: list[np.ndarray] = []
+    bounds: list[float] = []
+
+    # |w - current| <= u linearisation.
+    identity = np.eye(count)
+    rows.extend(
+        np.hstack([identity, -identity])[position]
+        for position in range(count)
+    )
+    bounds.extend(current.to_numpy(dtype=float))
+    rows.extend(
+        np.hstack([-identity, -identity])[position]
+        for position in range(count)
+    )
+    bounds.extend((-current).to_numpy(dtype=float))
+
+    for column, key in (
+        ('sector', 'max_sector_weight'),
+        ('country', 'max_country_weight'),
+        ('region', 'max_region_weight'),
+        ('currency', 'max_currency_weight'),
+    ):
+        cap = float(constraints.get(key, 1.0))
+        if cap >= 1.0:
+            continue
+        labels = pd.Series('Cash', index=index, dtype=object)
+        risky_ids = index[index.astype(str) != CASH_SECURITY_ID]
+        if not set(risky_ids).issubset(metadata.index) or column not in metadata:
+            return None
+        labels.loc[risky_ids] = metadata.loc[risky_ids, column].fillna('Unknown').astype(str)
+        for label in labels.loc[risky_ids].unique():
+            coefficients = np.zeros(count * 2, dtype=float)
+            coefficients[:count] = labels.eq(label).to_numpy(dtype=float)
+            rows.append(coefficients)
+            bounds.append(cap)
+
+    objective = np.concatenate(
+        [
+            -1.0e-6 * target.to_numpy(dtype=float),
+            np.ones(count, dtype=float),
+        ]
+    )
+    variable_bounds: list[tuple[float, float | None]] = []
+    max_single = float(constraints.get('max_single_name_weight', 0.05))
+    max_cash = float(constraints.get('maximum_cash_weight', 0.25))
+    for security_id, must_exit in zip(index, forced.to_numpy(dtype=bool)):
+        if must_exit:
+            variable_bounds.append((0.0, 0.0))
+        elif str(security_id) == CASH_SECURITY_ID:
+            variable_bounds.append((0.0, max_cash))
+        else:
+            variable_bounds.append((0.0, max_single))
+    variable_bounds.extend([(0.0, None)] * count)
+    result = linprog(
+        c=objective,
+        A_ub=np.vstack(rows) if rows else None,
+        b_ub=np.asarray(bounds, dtype=float) if bounds else None,
+        A_eq=np.concatenate([np.ones(count), np.zeros(count)]).reshape(1, -1),
+        b_eq=np.array([1.0]),
+        bounds=variable_bounds,
+        method='highs',
+    )
+    if not result.success or result.x is None:
+        return None
+    weights = pd.Series(result.x[:count], index=index, dtype=float).clip(lower=0.0)
+    weights.loc[weights.abs().lt(1.0e-12)] = 0.0
+    weights /= weights.sum()
+    return weights
+
+
+def _apply_walk_forward_rebalance_control(
+    target_portfolio: pd.DataFrame,
+    previous_weights: pd.Series | None,
+    scorecard: pd.DataFrame,
+    constraints: dict[str, Any],
+) -> pd.DataFrame:
+    target_portfolio = target_portfolio.copy()
+    if previous_weights is None:
+        target_portfolio['rebalance_control_applied'] = False
+        target_portfolio['forced_exit_turnover'] = 0.0
+        target_portfolio['no_trade_band_applied'] = False
+        return target_portfolio
+
+    target = pd.Series(
+        pd.to_numeric(target_portfolio['target_weight'], errors='coerce').fillna(0.0).to_numpy(),
+        index=target_portfolio['security_id'].astype(str),
+        dtype=float,
+    ).groupby(level=0).sum()
+    current = pd.Series(previous_weights, dtype=float).fillna(0.0).clip(lower=0.0)
+    if abs(float(target.sum()) - 1.0) > 1.0e-6 or abs(float(current.sum()) - 1.0) > 1.0e-6:
+        target_portfolio['rebalance_control_applied'] = False
+        target_portfolio['forced_exit_turnover'] = 0.0
+        target_portfolio['no_trade_band_applied'] = False
+        return target_portfolio
+
+    union = target.index.union(current.index)
+    target = target.reindex(union, fill_value=0.0)
+    current = current.reindex(union, fill_value=0.0)
+    retention_data = scorecard.copy()
+    if 'final_recommendation' not in retention_data and 'recommendation' in retention_data:
+        retention_data['final_recommendation'] = retention_data['recommendation']
+    retention_data['current_weight'] = (
+        retention_data['security_id'].astype(str).map(current).fillna(0.0)
+    )
+    retention = build_retention_eligibility_mask(retention_data, constraints)
+    retention_by_id = pd.Series(
+        retention.to_numpy(), index=retention_data['security_id'].astype(str)
+    ).groupby(level=0).max()
+    retention_by_id.loc[CASH_SECURITY_ID] = True
+    forced = current.gt(1.0e-12) & ~current.index.to_series().map(
+        retention_by_id
+    ).fillna(False).to_numpy()
+
+    forced_weight = float(current.loc[forced].sum())
+    if forced_weight > 0:
+        post_exit = _minimum_turnover_hard_exit_portfolio(
+            current,
+            target,
+            forced,
+            retention_data,
+            constraints,
+        )
+    else:
+        post_exit = current.copy()
+    feasibility_override = post_exit is None
+    if post_exit is None:
+        post_exit = target.copy()
+    forced_exit_turnover = float(0.5 * (post_exit - current).abs().sum())
+    desired_turnover = float(0.5 * (target - current).abs().sum())
+    remaining_turnover = float(0.5 * (target - post_exit).abs().sum())
+    maximum_turnover = float(constraints.get('maximum_turnover', 1.0))
+    no_trade_band = float(constraints.get('minimum_rebalance_turnover', 0.0))
+    no_trade = forced_weight <= 1.0e-12 and desired_turnover <= no_trade_band
+    if no_trade:
+        controlled = current.copy()
+    elif remaining_turnover > 1.0e-12:
+        budget = max(maximum_turnover - forced_exit_turnover, 0.0)
+        scale = min(budget / remaining_turnover, 1.0)
+        controlled = post_exit + scale * (target - post_exit)
+    else:
+        controlled = post_exit
+    controlled = controlled.clip(lower=0.0)
+    controlled /= controlled.sum()
+
+    feasibility_override |= not _weights_satisfy_linear_caps(
+        controlled, scorecard, constraints
+    )
+    if feasibility_override:
+        controlled = target
+
+    metadata = target_portfolio.drop_duplicates('security_id').set_index('security_id')
+    missing_ids = [
+        security_id
+        for security_id in controlled.index[controlled.gt(1.0e-10)]
+        if security_id not in metadata.index and security_id != CASH_SECURITY_ID
+    ]
+    if missing_ids:
+        additions = scorecard.loc[
+            scorecard['security_id'].astype(str).isin(missing_ids)
+        ].drop_duplicates('security_id').set_index('security_id')
+        metadata = pd.concat([metadata, additions], axis=0, sort=False)
+    if controlled.get(CASH_SECURITY_ID, 0.0) > 1.0e-10 and CASH_SECURITY_ID not in metadata.index:
+        cash = pd.DataFrame(
+            [_cash_row(metadata.columns.append(pd.Index(['security_id'])), 0.0)]
+        ).set_index('security_id')
+        metadata = pd.concat([metadata, cash], axis=0, sort=False)
+    selected = controlled.index[controlled.gt(1.0e-10)]
+    output = metadata.loc[selected].copy().reset_index()
+    output['target_weight'] = output['security_id'].astype(str).map(controlled)
+    output['unconstrained_turnover'] = desired_turnover
+    output['projected_turnover'] = float(0.5 * (controlled - current).abs().sum())
+    output['turnover_constraint_applied'] = output['projected_turnover'].iloc[0] + 1.0e-12 < desired_turnover
+    output['rebalance_control_applied'] = True
+    output['forced_exit_turnover'] = forced_exit_turnover
+    output['forced_exit_weight'] = forced_weight
+    output['no_trade_band_applied'] = no_trade
+    output['turnover_control_feasibility_override'] = feasibility_override
+    output['optimisation_feasible'] = True
+    return output
+
+
 def _build_anchor_portfolios(
     features: pd.DataFrame,
     forecast_wide: pd.DataFrame,
@@ -1225,6 +1591,12 @@ def _build_anchor_portfolios(
     )
     if not feasible:
         wolf = _cardinality_constrained_portfolio(scorecard, constraints)
+    wolf = _apply_walk_forward_rebalance_control(
+        wolf,
+        previous_wolf_weights,
+        scorecard,
+        constraints,
+    )
     wolf = wolf.copy()
     wolf['strategy'] = 'wolf_cvar'
     wolf['weight'] = pd.to_numeric(wolf['target_weight'], errors='coerce')
@@ -1372,11 +1744,33 @@ def _weighted_daily_returns(
     return (weighted / coverage.replace(0, np.nan)).loc[coverage.ge(minimum_coverage)].dropna()
 
 
+def _asset_return_matrix(
+    prices: pd.DataFrame,
+    weights: pd.Series,
+    minimum_coverage: float = 0.80,
+) -> pd.DataFrame:
+    risky_weights = weights.loc[
+        weights.index.astype(str) != CASH_SECURITY_ID
+    ].astype(float)
+    if prices.empty or risky_weights.empty:
+        return pd.DataFrame()
+    matrix = prices.pivot_table(
+        index='trade_date',
+        columns='security_id',
+        values='return',
+        aggfunc='last',
+    ).reindex(columns=risky_weights.index)
+    cash_weight = float(weights.get(CASH_SECURITY_ID, 0.0))
+    coverage = matrix.notna().mul(risky_weights, axis=1).sum(axis=1) + cash_weight
+    return matrix.loc[coverage.ge(minimum_coverage)].fillna(0.0).sort_index()
+
+
 def _risk_rows(
     portfolio: pd.DataFrame,
     as_of_date: pd.Timestamp,
     price_matcher: _PriceMatcher,
     config: WalkForwardConfig,
+    initial_exception_days: int = 0,
 ) -> pd.DataFrame:
     weights = _series_weights(portfolio)
     security_ids = weights.index.astype(str).tolist()
@@ -1388,29 +1782,60 @@ def _risk_rows(
     historical = _weighted_daily_returns(trailing, weights).tail(
         config.risk_lookback_rows
     )
+    historical_assets = _asset_return_matrix(trailing, weights).tail(
+        config.risk_lookback_rows
+    )
     target_date = as_of_date + pd.DateOffset(months=1)
     realised_prices = price_matcher.between(security_ids, as_of_date, target_date)
     realised = _weighted_daily_returns(realised_prices, weights).sort_index()
-    if len(historical) < 120 or realised.empty:
+    realised_assets = _asset_return_matrix(realised_prices, weights)
+    settings = _risk_model_settings(config)
+    if len(historical) < settings.minimum_training_rows or realised.empty:
         return pd.DataFrame()
-    normal = NormalDist()
     history = historical.astype(float).copy()
+    asset_history = historical_assets.copy()
+    risky_weights = weights.loc[
+        weights.index.astype(str) != CASH_SECURITY_ID
+    ].astype(float)
+    (
+        selected_model,
+        selected_scale_factor,
+        candidate_scores,
+        calibration_rows,
+    ) = select_risk_model(
+        history,
+        settings,
+        asset_returns=asset_history,
+        asset_weights=risky_weights,
+    )
     rows: list[dict[str, Any]] = []
+    exception_days_remaining = max(int(initial_exception_days), 0)
     for date, realised_return in realised.items():
-        sample = history.tail(config.risk_lookback_rows).to_numpy(dtype=float)
-        powers = np.arange(len(sample) - 1, -1, -1, dtype=float)
-        weights_ewma = np.power(config.risk_ewma_decay, powers)
-        volatility = float(
-            np.sqrt(np.average(np.square(sample), weights=weights_ewma))
+        sample = history.tail(config.risk_lookback_rows)
+        forecast = forecast_risk(
+            sample,
+            selected_model,
+            settings,
+            asset_returns=asset_history.tail(config.risk_lookback_rows),
+            asset_weights=risky_weights,
         )
-        forecasts: dict[str, float] = {}
-        for confidence in (0.95, 0.99):
-            alpha = 1.0 - confidence
-            quantile = normal.inv_cdf(alpha)
-            density = normal.pdf(quantile)
-            forecasts[f'var_{int(confidence * 100)}'] = quantile * volatility
-            forecasts[f'expected_shortfall_{int(confidence * 100)}'] = (
-                -volatility * density / alpha
+        exception_response_active = exception_days_remaining > 0
+        effective_scale_factor = selected_scale_factor * (
+            config.risk_exception_response_multiplier
+            if exception_response_active
+            else 1.0
+        )
+        calibrated_values = {
+            name: value * effective_scale_factor
+            for name, value in forecast.values.items()
+        }
+        exception_days_before = exception_days_remaining
+        exception_days_remaining = max(exception_days_remaining - 1, 0)
+        exception_triggered = float(realised_return) < calibrated_values['var_95']
+        if exception_triggered:
+            exception_days_remaining = max(
+                exception_days_remaining,
+                config.risk_exception_response_days,
             )
         rows.append(
             {
@@ -1418,9 +1843,18 @@ def _risk_rows(
                 'as_of_date': as_of_date,
                 'strategy': 'wolf_cvar',
                 'realised_return': float(realised_return),
-                **forecasts,
-                'forecast_volatility': volatility,
-                'risk_model': 'daily_ewma_normal',
+                **calibrated_values,
+                'raw_forecast_volatility': forecast.volatility,
+                'forecast_volatility': forecast.volatility * effective_scale_factor,
+                'risk_model': f'daily_{forecast.model}',
+                'risk_calibration_scale_factor': selected_scale_factor,
+                'risk_effective_scale_factor': effective_scale_factor,
+                'risk_exception_response_active': exception_response_active,
+                'risk_exception_triggered': exception_triggered,
+                'risk_exception_days_before': exception_days_before,
+                'risk_exception_days_after': exception_days_remaining,
+                'risk_model_selection_scores': serialise_scores(candidate_scores),
+                'risk_model_calibration_observations': calibration_rows,
                 'ewma_decay': config.risk_ewma_decay,
                 'training_observations': len(sample),
                 'training_end_date': pd.Timestamp(history.index.max()),
@@ -1428,7 +1862,11 @@ def _risk_rows(
             }
         )
         history.loc[pd.Timestamp(date)] = float(realised_return)
-    return pd.DataFrame(rows)
+        if date in realised_assets.index:
+            asset_history.loc[pd.Timestamp(date)] = realised_assets.loc[date]
+    result = pd.DataFrame(rows)
+    result.attrs['exception_days_remaining'] = exception_days_remaining
+    return result
 
 
 def _constraint_rows(
@@ -1562,6 +2000,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     constraint_frames: list[pd.DataFrame] = []
     anchor_rows: list[dict[str, Any]] = []
     previous_weights: dict[str, pd.Series] = {}
+    risk_exception_days = 0
 
     for position, anchor in enumerate(anchors, start=1):
         features, recent = _build_anchor_inputs(
@@ -1653,8 +2092,12 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             pd.Timestamp(anchor),
             price_matcher,
             config,
+            initial_exception_days=risk_exception_days,
         )
         if not risk.empty:
+            risk_exception_days = int(
+                risk.attrs.get('exception_days_remaining', 0)
+            )
             risk_frames.append(risk)
         constraint_frames.append(_constraint_rows(wolf, pd.Timestamp(anchor)))
         region_counts = (
