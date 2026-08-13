@@ -14,31 +14,41 @@ The LLM benchmark is an explanation and comparison layer only. It cannot bypass 
 
 ## Current Validated Run
 
-The latest full-universe evidence package is dated 2026-08-07.
+The latest full-universe evidence package was regenerated on 2026-08-13.
 
 | Measure | Result |
 |---|---:|
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
-| Walk-forward eligible securities | 1,408 |
-| Historical forecasts | 73,524 |
-| Aligned realised outcomes | 73,072 |
-| Portfolio decisions | 25 monthly anchors |
+| Walk-forward eligible securities | 1,409 |
+| Historical forecasts | 156,960 |
+| Aligned realised outcomes | 156,508 |
+| Portfolio decisions | 60 monthly anchors |
 | Governance score | 87.5 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Automated tests | 301 passing |
+| Annual turnover | 1.33x |
+| Annualised cost drag | 1.28% |
+| 95% / 99% VaR backtests | `PASS` / `PASS` |
 
 The complete, checksummed result is in
-[`reports/releases/2026-08-07-full-universe`](reports/releases/2026-08-07-full-universe/README.md).
+[`reports/releases/2026-08-13-risk-pit-cost-validation`](reports/releases/2026-08-13-risk-pit-cost-validation/README.md).
 
-![Validation scorecard](reports/releases/2026-08-07-full-universe/plots/validation_scorecard.png)
+The investment-principal package presents the results in plain language:
+[PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+and [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md).
+It recommends a controlled, human-supervised live pilot, not unattended or
+full-scale deployment.
 
-![Walk-forward portfolio performance](reports/releases/2026-08-07-full-universe/plots/cumulative_returns.png)
+![Validation scorecard](reports/releases/2026-08-13-risk-pit-cost-validation/plots/validation_scorecard.png)
 
-Conditional approval is deliberate. The free-source backtest reconstructs some
-filing availability and lacks immutable historical universe, volume, sentiment,
-narrative and regime vintages. This repository is research software and does not
+![Walk-forward portfolio performance](reports/releases/2026-08-13-risk-pit-cost-validation/plots/cumulative_returns.png)
+
+Conditional approval is deliberate. The evidence store now archives 59,183
+delisting events, but observed filing acceptance, dated membership,
+inactive-security prices, historical volume, sentiment, narrative and regime
+vintages remain incomplete. This repository is research software and does not
 authorize unattended live trading.
 
 ## 1997-Present Portfolio Backtest
@@ -54,15 +64,17 @@ Shanghai, Hang Seng, S&P 500, and global ETF proxies supply benchmark context.
 Lagged interest-rate and market regimes, retrospective NBER recession labels,
 13 source-backed macro-event windows, moving-block resampling, fat-tailed Monte
 Carlo, a 36-month embargo, PSR, MinTRL, Sidak control, and Deflated Sharpe Ratios
-complete the analysis.
+complete the analysis. Newey-West benchmark-alpha tests, a circular-block max-t
+reality check, exact duplicate-trial removal, and CSCV Probability of Backtest
+Overfitting now distinguish measured replay alpha from credible deployable alpha.
 
 > The long history is a retrospective replay of today's holdings. It is useful for
 > exposure, path, liquidity, and benchmark diagnostics, but it contains selection
-> look-ahead and survivorship bias. The dated 25-month model walk-forward remains a
-> separate evidence set.
+> look-ahead and survivorship bias. The dated 60-month model walk-forward remains a
+> separate evidence set. The current evidence does not establish deployable alpha.
 
 Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
-or review the [38-page PDF analysis](reports/backtests/1997_to_latest/portfolio_backtest_analysis.pdf),
+or review the [42-page PDF analysis](reports/backtests/1997_to_latest/portfolio_backtest_analysis_latest.pdf),
 [plain-language interpretation](reports/backtests/1997_to_latest/written_interpretation.md),
 and [methodology and paper mapping](docs/BACKTEST_METHODOLOGY.md).
 
@@ -198,9 +210,30 @@ python scripts/pull_external_data.py --status-only
 python scripts/pull_external_data.py --start 2020-01-01
 ```
 
+Backfill the 2018-2020 annual filings required by the 60-month reconstructed
+walk-forward, or inspect resumable coverage without making network requests:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --coverage-only
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --skip-migrations
+```
+
+The historical adapter uses Finnhub reported filings for US securities and public
+Eastmoney statements for Mainland China and Hong Kong. Observed filing dates are
+retained for US and Mainland statements; Hong Kong availability uses the configured
+120-day conservative lag because the endpoint does not expose a filing timestamp.
+The job writes in small resumable batches and never logs API keys.
+
 `configs/data_sources.yaml` maps providers to the full DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong universe. Add private credentials to `.env` using the placeholders in `.env.example`. With `USE_MOCK_DATA=false`, the price loader queries every enabled provider for which credentials are available, cross-validates overlapping closes and retains the configured highest-priority observation. It does not silently treat a failed provider as valid data.
 
 Configured sources include yfinance, TickDB, Alpaca, EODHD, Finnhub, Alpha Vantage and iTick for market data; Frankfurter for FX; FRED, ECB, ONS, Bank of England, China Data and HKMA for economic and financial-system data. Alpha Vantage also exposes configured fundamental, FX, macro, commodity, news and sentiment capabilities. FRED and ECB requests preserve revision/vintage information where exposed. The supplied Medium articles are retained as non-authoritative engineering references; primary provider documentation controls endpoint and licensing decisions.
+
+[OpenBB Workspace](https://docs.openbb.co/workspace/developers/data-integration)
+can display or integrate the model through a custom backend, but it is not an
+additional data vendor. [OpenBB provider extensions](https://docs.openbb.co/odp/python/extensions/providers)
+route requests to their underlying sources and subscriptions. The ingestion hot
+path therefore uses the source APIs directly, avoiding a large application
+dependency while preserving the same provider provenance in DuckDB.
 
 The legacy single-process pipeline can still use mock mode. The two-phase production
 runner defaults to observed DuckDB inputs and never silently substitutes mock
@@ -357,23 +390,44 @@ full governance validation:
 python scripts/run_walk_forward_validation.py
 ```
 
+Archive free point-in-time evidence before the walk-forward:
+
+```powershell
+$env:SEC_USER_AGENT='The Wolf Quant Model research-contact@example.com'
+python scripts/run_point_in_time_evidence_backfill.py --sources beam sec nasdaq eodhd --start-year 1997
+python scripts/run_point_in_time_evidence_backfill.py --coverage-only --skip-migrations
+```
+
+Credentials stay in environment variables. Beam and the SEC supply observed
+filing acceptance metadata, Nasdaq Mergent supplies entitlement-dependent annual
+fundamentals, and EODHD supplies delistings plus entitlement-dependent symbol and
+membership history. Provider failures do not become passes; measured coverage is
+written to `reports/outputs/validation/pit_evidence_coverage.json`.
+
 Build the compact GitHub release package after validation and IC reporting:
 
 ```bash
-python scripts/build_release_evidence.py --release-id 2026-08-07-full-universe
+python scripts/build_release_evidence.py --release-id 2026-08-13-risk-pit-cost-validation
 ```
 
 The command writes immutable forecast, realised-outcome, monthly portfolio,
-constraint, transaction-cost and daily EWMA VaR/Expected Shortfall evidence to
+constraint, transaction-cost and adaptive VaR/Expected Shortfall evidence to
 `reports/outputs/walk_forward/`. It then writes the approval bundle to
 `reports/outputs/validation/<validation_run_id>/` and refreshes
 `reports/outputs/validation/latest/`.
 
-Free-source history supports conditional use only. Filing availability is
-reconstructed with a conservative lag, the universe does not contain historical
-delisted constituents, historical volume is unavailable, and sentiment,
-narrative and regime vintages were not archived. These limitations are recorded
-in `walk_forward_manifest.json` and cap governance at
+The risk forecaster selects chronologically from EWMA Normal, EWMA Student-t,
+filtered historical simulation and DCC-IGARCH Student-t candidates. Overall and
+separately labelled chronological-holdout Kupiec and Christoffersen tests must
+pass. The optimiser uses retention hysteresis, a no-trade band and a small
+linear-programming rebalance controller to minimise forced-exit turnover while
+preserving hard caps.
+
+Free-source history supports conditional use only. Filing availability is still
+reconstructed when observed timestamps are missing, historical membership and
+inactive-name price coverage are incomplete, historical volume is unavailable,
+and sentiment, narrative and regime vintages were not archived. These
+limitations are recorded in `walk_forward_manifest.json` and cap governance at
 `CONDITIONALLY_APPROVED` until observed historical vintages replace the proxies.
 
 Every run is preserved under `reports/outputs/validation/<validation_run_id>/`; `reports/outputs/validation/latest/` is a copied view. Missing realised history is reported as `INSUFFICIENT_DATA`, never as a pass. Critical leakage, point-in-time, lineage, reproducibility or hard-constraint failures force `REJECTED`.

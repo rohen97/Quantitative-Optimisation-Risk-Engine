@@ -1,0 +1,10 @@
+sector,current_weight,target_weight,weight_change
+Consumer Staples,0.0,0.25,0.25
+Financials,0.0,0.25,0.25
+Real Estate,0.0,0.1,0.1
+Consumer Discretionary,0.0,0.1,0.1
+Healthcare,0.10951080208592004,0.1,-0.009510802085920034
+Industrials,0.0,0.1,0.1
+Energy,0.0,0.05,0.05
+Communication Services,0.0,0.0499999999999997,0.0499999999999997
+,0.89048919791408,0.0,-0.89048919791408

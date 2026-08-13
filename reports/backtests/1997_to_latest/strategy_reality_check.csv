@@ -1,0 +1,14 @@
+strategy,strategy_label,observations,annualised_active_return,information_ratio,active_return_t_statistic,max_t_adjusted_p_value,familywise_significant,cscv_selection_count,cscv_selection_frequency,duplicate_of,evidence_type
+portfolio_aware_overlay,Portfolio-Aware Overlay,155,0.06964940100984045,1.043609418265173,3.7507076640418213,0.0003999200159968006,True,447,0.4837662337662338,,retrospective_holdings_replay
+llm_benchmark,LLM Analyst Benchmark,155,0.051132828449075435,0.8699491707778518,3.126576825635962,0.005398920215956809,True,299,0.3235930735930736,,retrospective_holdings_replay
+optimised_dividend_income,Dividend-Income Optimiser,155,0.06101443854596472,0.844719821435792,3.0359031384500454,0.006798640271945611,True,161,0.17424242424242425,,retrospective_holdings_replay
+current_portfolio,Current Portfolio,155,0.07503607723617339,0.8322595152689742,2.9911210916246342,0.007598480303939212,True,15,0.016233766233766232,,retrospective_holdings_replay
+optimised_regime_aware,Regime-Aware Optimiser,155,0.05422952451618848,0.7104792220297886,2.553445586605941,0.026194761047790442,True,0,0.0,,retrospective_holdings_replay
+optimised_score_weighted,Score-Weighted Optimiser,155,0.05107842920152532,0.7036665518706998,2.528961010546097,0.027394521095780843,True,0,0.0,,retrospective_holdings_replay
+clean_sheet,Clean-Sheet Quant,155,0.039935362537336094,0.5477111501983926,1.9684609709111403,0.10497900419916016,False,2,0.0021645021645021645,,retrospective_holdings_replay
+optimised_cvar_constrained,CVaR-Constrained Optimiser,155,0.03004167001196085,0.3984816683620112,1.4321337287182319,0.27914417116576684,False,0,0.0,,retrospective_holdings_replay
+optimised_mean_variance,Mean-Variance Optimiser,155,0.028431168134330092,0.38136471458157134,1.3706158000701099,0.30813837232553487,False,0,0.0,,retrospective_holdings_replay
+drl_challenger_raw,DRL Raw Challenger,155,0.023790524548105832,0.3347987446882068,1.2032588012678962,0.3919216156768646,False,0,0.0,,research_challenger_replay
+final_portfolio,Final Resolved Portfolio,155,0.02277048534683536,0.3019079579312403,1.0850500884998655,0.45090981803639274,False,0,0.0,,retrospective_holdings_replay
+drl_baseline,DRL Baseline Portfolio,155,0.02277048534683536,0.3019079579312403,1.0850500884998655,0.45090981803639274,False,0,0.0,final_portfolio,retrospective_holdings_replay
+optimised_risk_parity,Risk-Parity Optimiser,155,0.016530001596689266,0.23881394782724727,0.858291702545889,0.5754849030193961,False,0,0.0,,retrospective_holdings_replay

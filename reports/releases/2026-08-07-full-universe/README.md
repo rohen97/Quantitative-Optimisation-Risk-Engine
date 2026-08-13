@@ -1,15 +1,15 @@
 # Full-Universe Model Evidence
 
-Validation run: `validation-20260807T092326-e5e0e476`
+Validation run: `validation-20260812T110002-75367a51`
 
 ## Decision
 
 - Governance status: **CONDITIONALLY_APPROVED**
-- Overall score: **87.5/100**
+- Overall score: **80.0/100**
 - Critical failures: **0**
 - Active universe: **55,504** of **112,570** listed and historical securities
-- Walk-forward evidence: **73,524** forecasts and **73,072** aligned outcomes
-- Portfolio: **25** monthly decisions, **18.9%** annualised net return, **1.75** Sharpe
+- Walk-forward evidence: **156,764** forecasts and **156,312** aligned outcomes
+- Portfolio: **60** monthly decisions, **13.7%** annualised net return, **1.16** Sharpe
 
 The result is capped at conditional approval because the free-source history reconstructs filing availability and does not provide immutable historical universe, volume, sentiment, narrative, or regime vintages.
 
@@ -20,9 +20,9 @@ The result is capped at conditional approval because the free-source history rec
 | data_integrity | 20.0/20 | PASS |
 | point_in_time | 7.5/15 | WARNING |
 | forecast_performance | 15.0/15 | PASS |
-| distribution_calibration | 5.0/10 | WARNING |
-| risk_backtesting | 15.0/15 | PASS |
-| portfolio_net_of_costs | 10.0/10 | PASS |
+| distribution_calibration | 10.0/10 | PASS |
+| risk_backtesting | 7.5/15 | WARNING |
+| portfolio_net_of_costs | 5.0/10 | WARNING |
 | constraint_compliance | 10.0/10 | PASS |
 | stability_sensitivity | 5.0/5 | PASS |
 
@@ -30,7 +30,7 @@ The result is capped at conditional approval because the free-source history rec
 
 ## Forecasts
 
-All point-forecast horizons passed the configured directional-accuracy, rank-IC, and normalized-RMSE gates. Distribution coverage passes at 3M and 6M and remains a warning at 9M and 12M.
+The point-forecast component is **PASS** and the distribution-calibration component is **PASS** under the configured gates.
 
 ![Forecast quality](plots/forecast_quality.png)
 
@@ -38,7 +38,7 @@ All point-forecast horizons passed the configured directional-accuracy, rank-IC,
 
 ## Portfolio And Risk
 
-The constrained Wolf portfolio passes net-of-cost, turnover, drawdown, hard-constraint, and daily EWMA VaR backtests. Equal weight outperformed over this short sample, but the difference was not statistically significant.
+The constrained Wolf portfolio is **WARNING** on the net-of-cost gate: annual turnover is 2.11x and annualised cost drag is 2.35%. It returned -1.18% per year relative to equal weight over this short sample; the paired test p-value is 0.741. Hard-constraint compliance is **PASS** and the daily EWMA VaR backtest is **WARNING**.
 
 ![Cumulative returns](plots/cumulative_returns.png)
 
@@ -53,6 +53,7 @@ The constrained Wolf portfolio passes net-of-cost, turnover, drawdown, hard-cons
 ## Package Contents
 
 - `validation/`: complete governance output, including HTML and Markdown reports.
+- `validation/portfolio_monthly_returns.csv`: all dated Wolf, equal-weight, and cap-weight control returns.
 - `investment_committee/`: complete IC report bundle, PDF, data tables, and charts.
 - `final_portfolio_weights.csv`: resolved 20-name final portfolio.
 - `universe_summary.csv`: compact active and delisted security coverage by region.
@@ -60,3 +61,11 @@ The constrained Wolf portfolio passes net-of-cost, turnover, drawdown, hard-cons
 - `manifest.json`: SHA-256 checksum and byte size for every release artifact.
 
 Research output only. Conditional approval is not authorization for unattended live trading.
+
+## Investment Committee Briefing
+
+The current evidence, target holdings, portfolio comparisons, risks and
+proposed live-pilot gates are published in the
+[PowerPoint briefing](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
+[rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+and [investment principal report](../../presentations/wolf_investment_principal/investment_principal_report.md).

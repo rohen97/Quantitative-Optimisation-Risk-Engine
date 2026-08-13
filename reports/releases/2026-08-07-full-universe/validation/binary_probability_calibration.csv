@@ -1,2 +1,2 @@
 event,observation_count,status,brier_score,expected_calibration_error,event_rate
-realised_12m_drawdown_below_20pct,17929,WARNING,0.130768857015211,0.21482736917284684,0.09091416141446818
+realised_12m_drawdown_below_20pct,38739,WARNING,0.14301114473823107,0.19403750121253296,0.12320916905444126

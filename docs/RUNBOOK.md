@@ -47,6 +47,37 @@ python scripts/compare_legacy_vs_duckdb.py
 python scripts/export_duckdb_to_parquet.py
 ```
 
+Extend annual filing history for the 60-month reconstructed walk-forward:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --coverage-only
+.\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --skip-migrations
+.\.venv\Scripts\python.exe scripts\run_point_in_time_evidence_backfill.py --coverage-only --skip-migrations
+.\.venv\Scripts\python.exe scripts\run_walk_forward_validation.py --validation-mode full
+```
+
+Before a live point-in-time evidence pull, set `BEAM_API_KEY`,
+`NASDAQ_DATA_LINK_API_KEY`, `EODHD_API_TOKEN`, and a declared
+`SEC_USER_AGENT` in the process environment or untracked `.env`. Then run:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_point_in_time_evidence_backfill.py --sources beam sec nasdaq eodhd --start-year 1997
+```
+
+The command archives regulator acceptance timestamps, entitlement-dependent
+Mergent fundamentals, delistings, symbol changes, and historical memberships.
+It is resumable through database upserts and uses bounded retries plus a default
+SEC request delay. Review
+`reports/outputs/validation/pit_evidence_coverage.json`; a successful HTTP call
+does not satisfy governance unless the configured coverage thresholds pass.
+
+The backfill is resumable. US and Mainland rows preserve observed filing dates;
+Hong Kong rows use fiscal period end plus 120 days and remain explicitly labelled
+as reconstructed evidence. Review
+`reports/outputs/walk_forward/historical_fundamentals_status.json` locally before
+running validation. The database and status artifact are intentionally ignored by
+Git.
+
 Default backend is `legacy_csv`. Change `configs/data.yaml` only after shadow comparisons pass. The configured DuckDB file is `data/database/wolf.duckdb`; large raw payloads are archived under `data/raw_archive/` with metadata registered separately. Local `.duckdb`, `.sqlite`, raw archive/cache and Parquet files are ignored and should not be committed.
 
 Build feature and scorecard outputs:
@@ -400,6 +431,18 @@ Full monthly or release-candidate validation:
 python scripts/run_model_validation.py --mode full
 python scripts/run_model_validation.py --mode release_candidate --strict
 ```
+
+The walk-forward risk layer selects among EWMA Normal, EWMA Student-t, filtered
+historical simulation, and vectorised DCC-IGARCH Student-t models using only a
+trailing calibration slice. Governance reports both overall and chronological
+holdout Kupiec and Christoffersen results. A one-day post-exception response is
+stateful across monthly anchors.
+
+Turnover control is applied after every optimiser fallback. Existing holdings
+receive retention hysteresis, small desired trades fall inside a no-trade band,
+and a compact linear program finds the minimum-turnover feasible portfolio when
+non-negotiable exits occur. Never raise the turnover limit to conceal a hard
+constraint breach.
 
 Do not delete historical folders under `reports/outputs/validation/`. Review `validation_manifest.json`, `model_validation_scorecard.csv`, `model_component_approval.csv` and `model_approval_report.html`. `REJECTED` and `INSUFFICIENT_DATA` are valid engine outcomes; they block production but do not mean the validation process crashed.
 

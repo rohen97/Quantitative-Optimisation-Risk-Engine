@@ -29,6 +29,23 @@ def test_yahoo_retrieval_date_is_reconstructed_with_reporting_lag():
     assert result.loc[0, 'availability_basis'] == 'fiscal_period_end_plus_120d'
 
 
+def test_observed_sec_acceptance_takes_precedence_over_proxy_dates():
+    statements = pd.DataFrame(
+        {
+            'security_id': ['A'],
+            'fiscal_period_end': ['2021-12-31'],
+            'filing_date': ['2022-03-10'],
+            'observed_acceptance_datetime': ['2022-02-28T18:30:00Z'],
+            'source': ['nasdaq_mergent_f1'],
+        }
+    )
+    result = reconstruct_statement_availability(statements, 120)
+    assert result.loc[0, 'reconstructed_available_from'] == pd.Timestamp(
+        '2022-02-28 18:30:00'
+    )
+    assert result.loc[0, 'availability_basis'] == 'observed_sec_acceptance_datetime'
+
+
 def test_realised_outcome_uses_next_trading_day_after_target():
     prices = pd.DataFrame(
         {
@@ -56,6 +73,35 @@ def test_realised_outcome_uses_next_trading_day_after_target():
     assert outcome.loc[0, 'target_date'] == pd.Timestamp('2024-04-30')
     assert outcome.loc[0, 'end_trade_date'] == pd.Timestamp('2024-05-01')
     assert outcome.loc[0, 'realised_return'] == pytest.approx(0.10)
+
+
+def test_realised_outcome_allows_extended_exchange_holiday_gap():
+    prices = pd.DataFrame(
+        {
+            'security_id': ['A', 'A'],
+            'ticker': ['A', 'A'],
+            'trade_date': pd.to_datetime(['2023-08-31', '2023-10-09']),
+            'adjusted_close': [100.0, 105.0],
+            'close_price': [100.0, 105.0],
+            'return': [0.0, 0.05],
+            'return_outlier_flag': [False, False],
+        }
+    )
+    forecasts = pd.DataFrame(
+        {
+            'security_id': ['A'],
+            'ticker': ['A'],
+            'as_of_date': [pd.Timestamp('2023-08-31')],
+            'horizon': ['1M'],
+            'horizon_months': [1],
+        }
+    )
+
+    outcome = build_realised_outcomes(forecasts, _PriceMatcher(prices), 14)
+
+    assert outcome.loc[0, 'target_date'] == pd.Timestamp('2023-09-30')
+    assert outcome.loc[0, 'end_trade_date'] == pd.Timestamp('2023-10-09')
+    assert outcome.loc[0, 'realised_return'] == pytest.approx(0.05)
 
 
 def test_validation_loader_prefers_walk_forward_artifacts(tmp_path):
@@ -129,6 +175,7 @@ def test_daily_ewma_risk_forecast_uses_only_prior_returns():
         load_walk_forward_config(),
         risk_lookback_rows=150,
         risk_ewma_decay=0.94,
+        risk_candidate_models=('ewma_normal',),
     )
     result = _risk_rows(portfolio, anchor, _PriceMatcher(prices), config)
 
@@ -136,3 +183,6 @@ def test_daily_ewma_risk_forecast_uses_only_prior_returns():
     assert result.loc[1, 'training_end_date'] == result.loc[0, 'date']
     assert result.loc[1, 'forecast_volatility'] > result.loc[0, 'forecast_volatility']
     assert result['risk_model'].eq('daily_ewma_normal').all()
+    assert bool(result.loc[0, 'risk_exception_triggered'])
+    assert bool(result.loc[1, 'risk_exception_response_active'])
+    assert result.loc[1, 'risk_effective_scale_factor'] == pytest.approx(1.10)

@@ -163,7 +163,17 @@ def _plot_distribution_coverage(distribution: pd.DataFrame, path: Path) -> None:
 
 def _plot_risk_backtest(risk: pd.DataFrame, path: Path) -> None:
     data = risk.copy()
-    labels = [f'{int(float(value) * 100)}%' for value in data['confidence_level']]
+    segments = data.get(
+        'evaluation_segment',
+        pd.Series('overall', index=data.index),
+    ).astype(str)
+    labels = [
+        (
+            f'{segment.replace("_", " ").title()}\n'
+            f'{int(float(confidence) * 100)}%'
+        )
+        for segment, confidence in zip(segments, data['confidence_level'])
+    ]
     x = np.arange(len(data))
     width = 0.34
     figure, axis = plt.subplots(figsize=(8.8, 4.8))
@@ -184,7 +194,7 @@ def _plot_risk_backtest(risk: pd.DataFrame, path: Path) -> None:
     axis.set_xticks(x, labels)
     axis.set_ylabel('Daily VaR violation rate')
     axis.legend(frameon=False)
-    _style_axis(axis, 'EWMA VaR backtest')
+    _style_axis(axis, 'Adaptive VaR coverage and independence')
     for index, row in enumerate(data.itertuples(index=False)):
         axis.text(
             index,
@@ -303,8 +313,8 @@ def _portable_value(value: object) -> object:
 def _normalise_json_paths(directory: Path) -> None:
     for path in sorted(directory.rglob('*.json')):
         try:
-            payload = json.loads(path.read_text(encoding='utf-8'))
-        except json.JSONDecodeError:
+            payload = json.loads(path.read_text(encoding='utf-8-sig'))
+        except (json.JSONDecodeError, UnicodeDecodeError):
             continue
         path.write_text(
             json.dumps(_portable_value(payload), indent=2, sort_keys=True) + '\n',
@@ -349,8 +359,20 @@ def _write_release_notes(
     universe_summary: pd.DataFrame,
     scorecard: pd.DataFrame,
     strategies: pd.DataFrame,
+    significance: pd.DataFrame,
+    final_portfolio_count: int,
+    pit_coverage: dict[str, object],
 ) -> None:
     wolf = strategies.loc[strategies['strategy'].eq('wolf_cvar')].iloc[0]
+    equal_weight = strategies.loc[
+        strategies['strategy'].eq('equal_weight_eligible')
+    ].iloc[0]
+    paired = significance.loc[
+        significance.get('strategy', pd.Series(dtype=str)).eq('wolf_cvar')
+    ]
+    paired_p_value = (
+        float(paired.iloc[0]['p_value']) if not paired.empty else float('nan')
+    )
     profile = walk_manifest['artifact_profile']
     overall = universe_summary.loc[universe_summary['region'].eq('ALL')].iloc[0]
     validation_run_id = str(validation_manifest['validation_run_id'])
@@ -365,6 +387,15 @@ def _write_release_notes(
         lambda row: f'{float(row.score):.1f}/{float(row.maximum_score):.0f}',
         axis=1,
     )
+    component_status = component_table.set_index('component')['status'].astype(str)
+    forecast_status = component_status.get('forecast_performance', 'NOT_EVALUATED')
+    distribution_status = component_status.get(
+        'distribution_calibration', 'NOT_EVALUATED'
+    )
+    constraint_status = component_status.get(
+        'constraint_compliance', 'NOT_EVALUATED'
+    )
+    risk_status = component_status.get('risk_backtesting', 'NOT_EVALUATED')
     lines = [
         '# Full-Universe Model Evidence',
         '',
@@ -379,7 +410,12 @@ def _write_release_notes(
         f'- Walk-forward evidence: **{forecast_rows:,}** forecasts and **{outcome_rows:,}** aligned outcomes',
         f'- Portfolio: **{portfolio_months}** monthly decisions, **{float(wolf.annualised_return):.1%}** annualised net return, **{float(wolf.sharpe):.2f}** Sharpe',
         '',
-        'The result is capped at conditional approval because the free-source history reconstructs filing availability and does not provide immutable historical universe, volume, sentiment, narrative, or regime vintages.',
+        (
+            'The result is capped at conditional approval because filing availability '
+            'is still reconstructed where observed timestamps are unavailable. '
+            'Delisting reference events are archived, but dated membership, inactive-name '
+            'prices, historical volume, sentiment, narrative, and regime vintages remain incomplete.'
+        ),
         '',
         '## Scorecard',
         '',
@@ -389,7 +425,11 @@ def _write_release_notes(
         '',
         '## Forecasts',
         '',
-        'All point-forecast horizons passed the configured directional-accuracy, rank-IC, and normalized-RMSE gates. Distribution coverage passes at 3M and 6M and remains a warning at 9M and 12M.',
+        (
+            f'The point-forecast component is **{forecast_status}** and the '
+            f'distribution-calibration component is **{distribution_status}** '
+            'under the configured gates.'
+        ),
         '',
         '![Forecast quality](plots/forecast_quality.png)',
         '',
@@ -397,7 +437,25 @@ def _write_release_notes(
         '',
         '## Portfolio And Risk',
         '',
-        'The constrained Wolf portfolio passes net-of-cost, turnover, drawdown, hard-constraint, and daily EWMA VaR backtests. Equal weight outperformed over this short sample, but the difference was not statistically significant.',
+        (
+            f'The constrained Wolf portfolio is **{str(wolf.status)}** on the '
+            f'net-of-cost gate: annual turnover is {float(wolf.annualised_turnover):.2f}x '
+            f'and annualised cost drag is {float(wolf.annualised_cost_drag):.2%}. '
+            f'It returned {float(wolf.annualised_return - equal_weight.annualised_return):+.2%} '
+            f'per year relative to equal weight over this short sample; the paired '
+            f'test p-value is {paired_p_value:.3f}. Hard-constraint compliance is '
+            f'**{constraint_status}** and the adaptive multi-model VaR backtest is '
+            f'**{risk_status}**.'
+        ),
+        '',
+        '## Point-In-Time Evidence',
+        '',
+        (
+            f'The evidence store contains **{int(pit_coverage.get("delisting_events", 0) or 0):,}** '
+            'delisting events. Observed filing acceptance, dated index membership, '
+            'inactive-security prices, and historical-volume coverage remain below '
+            'their governance thresholds and therefore retain a warning.'
+        ),
         '',
         '![Cumulative returns](plots/cumulative_returns.png)',
         '',
@@ -412,8 +470,12 @@ def _write_release_notes(
         '## Package Contents',
         '',
         '- `validation/`: complete governance output, including HTML and Markdown reports.',
+        '- `validation/portfolio_monthly_returns.csv`: all dated Wolf, equal-weight, and cap-weight control returns.',
         '- `investment_committee/`: complete IC report bundle, PDF, data tables, and charts.',
-        '- `final_portfolio_weights.csv`: resolved 20-name final portfolio.',
+        (
+            f'- `final_portfolio_weights.csv`: resolved {final_portfolio_count}-name '
+            'final portfolio.'
+        ),
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
         '- `walk_forward_manifest.json`: source profile, chronology checks, limitations, and evidence counts.',
         '- `manifest.json`: SHA-256 checksum and byte size for every release artifact.',
@@ -437,10 +499,10 @@ def build_release_evidence(
     ic_source = outputs / 'ic' / 'latest'
     walk_source = outputs / 'walk_forward'
     validation_manifest = json.loads(
-        (validation_source / 'validation_manifest.json').read_text(encoding='utf-8')
+        (validation_source / 'validation_manifest.json').read_text(encoding='utf-8-sig')
     )
     walk_manifest = json.loads(
-        (walk_source / 'walk_forward_manifest.json').read_text(encoding='utf-8')
+        (walk_source / 'walk_forward_manifest.json').read_text(encoding='utf-8-sig')
     )
     _copy_directory(validation_source, output / 'validation')
     _copy_directory(ic_source, output / 'investment_committee')
@@ -449,6 +511,13 @@ def build_release_evidence(
     enrichment = outputs / 'free_data_enrichment_status.json'
     if enrichment.exists():
         _copy_file(enrichment, output / 'free_data_enrichment_status.json')
+    pit_evidence_path = outputs / 'validation' / 'pit_evidence_coverage.json'
+    pit_evidence: dict[str, object] = {}
+    if pit_evidence_path.exists():
+        _copy_file(pit_evidence_path, output / 'pit_evidence_coverage.json')
+        pit_payload = json.loads(pit_evidence_path.read_text(encoding='utf-8-sig'))
+        if isinstance(pit_payload, dict) and isinstance(pit_payload.get('coverage'), dict):
+            pit_evidence = dict(pit_payload['coverage'])
 
     universe = _read_csv(outputs / 'equity_universe.csv')
     universe_summary = build_universe_summary(universe)
@@ -459,6 +528,9 @@ def build_release_evidence(
     distribution = _read_csv(validation_source / 'distribution_coverage_report.csv')
     risk = _read_csv(validation_source / 'risk_backtesting_report.csv')
     strategies = _read_csv(validation_source / 'portfolio_strategy_comparison.csv')
+    significance = _read_csv(
+        validation_source / 'benchmark_significance_report.csv'
+    )
     regional = _read_csv(validation_source / 'regional_performance_report.csv')
     returns = pd.read_parquet(walk_source / 'historical_portfolio_returns.parquet')
     portfolio = _read_csv(outputs / 'final_portfolio_weights.csv')
@@ -479,6 +551,9 @@ def build_release_evidence(
         universe_summary,
         scorecard,
         strategies,
+        significance,
+        int(len(portfolio)),
+        pit_evidence,
     )
     _normalise_text_whitespace(output)
     _normalise_json_paths(output)

@@ -1,0 +1,102 @@
+{
+  "artifact_profile": {
+    "aligned_outcome_fraction": 0.9971202854230378,
+    "anchors": 60,
+    "constraint_rows": 420,
+    "first_anchor_region_count": 3,
+    "first_anchor_security_count": 480,
+    "forecast_rows": 156960,
+    "last_anchor_region_count": 6,
+    "last_anchor_security_count": 1278,
+    "outcome_rows": 156508,
+    "portfolio_months": 60,
+    "portfolio_weight_rows": 29106,
+    "risk_observations": 1152
+  },
+  "artifact_version": 3,
+  "chronology_checks": {
+    "future_fundamental_rows": 0,
+    "future_price_feature_rows": 0,
+    "hard_constraint_breaches": 0,
+    "outcomes_before_target_rows": 0
+  },
+  "configuration": {
+    "approval_cap": "CONDITIONALLY_APPROVED",
+    "evidence_mode": "reconstructed_pit_proxy",
+    "filing_lag_days": 120,
+    "forecast_end_date": "2025-07-31 00:00:00",
+    "maximum_rebalance_turnover": 0.06,
+    "minimum_annual_periods": 2,
+    "minimum_training_price_rows": 756,
+    "outcome_date_tolerance_days": 14,
+    "output_directory": ".\\reports\\outputs\\walk_forward",
+    "portfolio_nav_usd": 100000000.0,
+    "price_lookback_rows": 756,
+    "primary_strategy": "wolf_cvar",
+    "risk_calibration_rows": 63,
+    "risk_calibration_scale_factors": [
+      1.0
+    ],
+    "risk_candidate_models": [
+      "ewma_normal",
+      "ewma_student_t",
+      "filtered_historical_simulation",
+      "dcc_igarch_student_t"
+    ],
+    "risk_correlation_shrinkage": 0.1,
+    "risk_dcc_alpha": 0.03,
+    "risk_dcc_beta": 0.95,
+    "risk_ewma_decay": 0.94,
+    "risk_exception_response_days": 1,
+    "risk_exception_response_multiplier": 1.1,
+    "risk_lookback_rows": 252,
+    "risk_minimum_training_rows": 120,
+    "risk_student_t_degrees_freedom": 7.0,
+    "start_date": "2021-07-31 00:00:00",
+    "strategy_end_date": "2026-06-30 00:00:00"
+  },
+  "evidence_mode": "reconstructed_pit_proxy",
+  "generated_at": "2026-08-13T03:32:57.264931+00:00",
+  "limitations": [
+    "Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.",
+    "Early anchors include only regions and securities for which usable historical filings were available; region counts are reported for every anchor.",
+    "When represented countries cannot support full equity investment under hard concentration caps, the reconstruction holds up to 25% in zero-return cash rather than relaxing those caps.",
+    "The current active universe and current sector metadata introduce survivorship and reference-data bias.",
+    "Historical sentiment, narrative, and regime vintages are unavailable and are held neutral in this reconstruction.",
+    "Stored candidate price bars have zero volume, so observed current 3-month ADV is used as a static liquidity proxy.",
+    "Adjusted-close outcomes may include provider-side retrospective corporate-action adjustments.",
+    "This evidence can support conditional model use but cannot support full production approval."
+  ],
+  "primary_strategy": "wolf_cvar",
+  "release_approval_cap": "CONDITIONALLY_APPROVED",
+  "source_database": ".\\data\\database\\wolf.duckdb",
+  "source_profile": {
+    "fundamental_max_period": "2026-06-30 00:00:00",
+    "fundamental_min_period": "2011-09-24 00:00:00",
+    "price_max_date": "2026-07-31 00:00:00",
+    "price_min_date": "2016-07-28 00:00:00",
+    "price_rows": 3310357,
+    "security_count": 1409,
+    "statement_rows": 7637,
+    "statement_rows_by_source": {
+      "eastmoney_china_financials": 747,
+      "eastmoney_hk_financials": 551,
+      "finnhub_reported": 511,
+      "nasdaq_mergent_f1": 5,
+      "yahoo_finance_timeseries": 5823
+    },
+    "statement_securities_by_region_and_source": {
+      "DACH|yahoo_finance_timeseries": 194,
+      "EU ex-DACH|yahoo_finance_timeseries": 250,
+      "Hong Kong|eastmoney_hk_financials": 188,
+      "Hong Kong|yahoo_finance_timeseries": 251,
+      "Mainland China|eastmoney_china_financials": 249,
+      "Mainland China|yahoo_finance_timeseries": 251,
+      "UK|yahoo_finance_timeseries": 210,
+      "US|finnhub_reported": 175,
+      "US|nasdaq_mergent_f1": 1,
+      "US|yahoo_finance_timeseries": 252
+    }
+  },
+  "source_universe_hash": "31518725e11995c389ffbeacf68a75752a17d92adbf909c3c6b75b1ddbf8a890"
+}

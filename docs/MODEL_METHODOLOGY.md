@@ -146,6 +146,13 @@ Implemented constructors:
 
 Hard constraints include long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints include dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration limits. The constraint report records breaches rather than hiding them.
 
+For reconstructed point-in-time validation, the optimiser receives the prior
+month's weights and projects each otherwise feasible target onto a 10% one-way
+monthly turnover budget. The projection is a convex blend, so a feasible prior
+portfolio and feasible target retain their diversification caps. Mandatory hard
+exits override the budget and are disclosed rather than delayed. This control is
+operationally specified before evaluation and is not fitted to realised returns.
+
 The trade list compares current and target weights and assigns Buy, Increase, Reduce, Sell, Hold or Avoid actions. Optimisation cannot override hard exclusions or use high expected return alone to justify high-risk names. Future upgrades can add Hierarchical Risk Parity, Black-Litterman, transaction-cost models, tax constraints, robust covariance estimation, robust optimisation and a DRL allocation overlay.
 
 ## Constrained Regime-Gated DRL Methodology

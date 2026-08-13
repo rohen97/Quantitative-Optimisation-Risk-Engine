@@ -26,7 +26,11 @@ from src.validation.historical_evaluation import (
     HistoricalEvaluation,
     evaluate_historical_evidence,
 )
-from src.validation.leakage import leakage_report, validate_point_in_time
+from src.validation.leakage import (
+    leakage_report,
+    point_in_time_evidence_report,
+    validate_point_in_time,
+)
 from src.validation.models import ValidationPipelineResult
 from src.validation.regime_validation import validate_regime_probabilities
 from src.validation.report_builder import build_validation_reports
@@ -35,12 +39,21 @@ from src.validation.scorecard import build_validation_scorecard
 
 LOGGER = logging.getLogger(__name__)
 
+
+def _read_json(path: Path) -> dict[str, Any]:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (FileNotFoundError, OSError, TypeError, ValueError):
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
 OUTPUT_FILES = (
     "model_validation_scorecard.csv", "data_leakage_report.csv", "point_in_time_validation.csv",
     "data_provenance_validation.csv",
     "forecast_accuracy_report.csv", "forecast_calibration_report.csv", "distribution_coverage_report.csv",
     "binary_probability_calibration.csv", "risk_backtesting_report.csv", "portfolio_strategy_comparison.csv",
-    "portfolio_performance_by_period.csv", "regime_performance_report.csv", "regional_performance_report.csv",
+    "portfolio_performance_by_period.csv", "portfolio_monthly_returns.csv",
+    "regime_performance_report.csv", "regional_performance_report.csv",
     "transaction_cost_validation.csv", "constraint_compliance_report.csv", "drl_governance_validation.csv",
     "drl_seed_stability.csv", "sensitivity_analysis.csv", "ablation_analysis.csv",
     "benchmark_significance_report.csv", "model_component_approval.csv",
@@ -174,6 +187,20 @@ def run_validation_pipeline(
     features = pd.read_csv(ROOT / "reports" / "outputs" / "features_monthly.csv")
     leakage = leakage_report(features)
     point_in_time = validate_point_in_time(features)
+    pit_evidence = _read_json(
+        ROOT / "reports" / "outputs" / "validation" / "pit_evidence_coverage.json"
+    )
+    point_in_time = pd.concat(
+        [
+            point_in_time,
+            point_in_time_evidence_report(
+                pit_evidence.get("coverage", {}),
+                config.section("point_in_time_evidence"),
+            ),
+        ],
+        ignore_index=True,
+        sort=False,
+    )
     if historical_evaluation is not None:
         chronology_rows = []
         for check_name, failure_count in package.evidence_manifest.get(
@@ -351,6 +378,7 @@ def run_validation_pipeline(
         "risk_backtesting_report.csv": risk,
         "portfolio_strategy_comparison.csv": benchmark,
         "portfolio_performance_by_period.csv": period_performance,
+        "portfolio_monthly_returns.csv": package.portfolio_returns.copy(),
         "regime_performance_report.csv": regime,
         "regional_performance_report.csv": regional,
         "transaction_cost_validation.csv": transaction,

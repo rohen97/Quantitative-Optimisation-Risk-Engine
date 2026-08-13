@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -286,6 +287,43 @@ def plot_embargo(embargo: pd.DataFrame, labels: dict[str, str], path: Path) -> N
     axis.set_yticks(y, [labels.get(key, key) for key in pivot.index])
     axis.set_title('Development vs Untouched Embargo Sharpe')
     axis.set_xlabel('Annualised Sharpe ratio')
+    axis.legend(loc='lower right')
+    axis.grid(axis='y', visible=False)
+    _save(fig, path)
+
+
+def plot_alpha_significance(
+    alpha: pd.DataFrame,
+    labels: dict[str, str],
+    path: Path,
+) -> None:
+    _style()
+    pivot = alpha.pivot_table(
+        index='strategy',
+        columns='window',
+        values='annualised_alpha',
+    ).sort_values('common_investable_window')
+    y = np.arange(len(pivot))
+    fig, axis = plt.subplots(figsize=(11, max(6, len(pivot) * 0.43 + 2)))
+    axis.barh(
+        y - 0.18,
+        pivot['common_investable_window'],
+        height=0.34,
+        label='Common 155 months',
+        color='#145A64',
+    )
+    axis.barh(
+        y + 0.18,
+        pivot['last_36_months'],
+        height=0.34,
+        label='Latest 36 months',
+        color='#D69E2E',
+    )
+    axis.axvline(0.0, color='#334155', linewidth=0.8)
+    axis.set_yticks(y, [labels.get(key, key) for key in pivot.index])
+    axis.set_title('Matched-Benchmark Newey-West Alpha')
+    axis.set_xlabel('Annualised regression alpha; retrospective replay')
+    axis.xaxis.set_major_formatter(lambda value, _: f'{value:.0%}')
     axis.legend(loc='lower right')
     axis.grid(axis='y', visible=False)
     _save(fig, path)
@@ -610,9 +648,13 @@ def plot_macro_event_returns(
 def _format_value(column: str, value: object) -> str:
     if pd.isna(value):
         return ''
+    if isinstance(value, (str, bool, np.bool_)):
+        return str(value)
     name = column.lower()
     if 'usd' in name:
         return f'${float(value):,.0f}'
+    if 'p_value' in name:
+        return f'{float(value):.4f}'
     if any(token in name for token in ('probabilistic', 'deflated', 'probability')):
         return f'{float(value):.2%}'
     percentage_ratios = {
@@ -620,6 +662,8 @@ def _format_value(column: str, value: object) -> str:
         'environment_share',
         'positive_month_ratio',
         'outperformance_month_ratio',
+        'cscv_selection_frequency',
+        'selected_information_ratio_haircut',
     }
     if name in percentage_ratios or any(
         token in name
@@ -634,6 +678,8 @@ def _format_value(column: str, value: object) -> str:
             'participation',
             'var_5',
             'expected_shortfall',
+            'cost_drag',
+            'tracking_error',
         )
     ):
         return f'{float(value):.2%}'
@@ -674,6 +720,7 @@ def _write_readme(
     path: Path,
     summary: pd.DataFrame,
     manifest: dict,
+    pdf_name: str = 'portfolio_backtest_analysis.pdf',
 ) -> None:
     requested = summary.loc[summary['window'].eq('requested_1997_window')]
     table = _markdown_performance_table(requested)
@@ -700,9 +747,10 @@ This package compares every investable portfolio output currently produced by th
 - 36-month untouched embargo evaluation
 - circular moving-block resampling and correlated fat-tailed Monte Carlo
 - PSR, Minimum Track Record Length, Sidak FWER, and Deflated Sharpe Ratios
+- Newey-West alpha tests, block-bootstrap max-t control, and CSCV PBO diagnostics
 - HTML and PDF reports, source manifest, compact result tables, plots, and SHA-256 checksums
 
-Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis.pdf](portfolio_backtest_analysis.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
+Open [backtest_report.html](backtest_report.html) or [{pdf_name}]({pdf_name}) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
 
 Raw provider histories are intentionally excluded from Git. This is research evidence, not authorization for live trading.
 '''
@@ -789,6 +837,11 @@ def write_backtest_outputs(
         'Correlated Student-t Monte Carlo CAGR Distribution',
     )
     plot_embargo(frames['embargo_comparison'], labels, plot_directory / 'embargo.png')
+    plot_alpha_significance(
+        frames['benchmark_alpha_significance'],
+        labels,
+        plot_directory / 'alpha_significance.png',
+    )
     plot_investable_starts(summary, plot_directory / 'investable_starts.png')
     plot_causal_graph(plot_directory / 'causal_graph.png')
     plot_major_indices(
@@ -975,6 +1028,74 @@ def write_backtest_outputs(
         ['strategy', 'annualised_sharpe', 'probabilistic_sharpe_ratio', 'minimum_track_record_months', 'sidak_significant', 'deflated_sharpe_ratio', 'cluster_adjusted_deflated_sharpe_ratio'],
         {'strategy': 'Portfolio', 'probabilistic_sharpe_ratio': 'PSR', 'minimum_track_record_months': 'MinTRL months', 'deflated_sharpe_ratio': 'DSR'},
     )
+    alpha_table = _html_table(
+        frames['benchmark_alpha_significance'].sort_values(
+            ['window', 'annualised_alpha'],
+            ascending=[True, False],
+        ),
+        [
+            'strategy_label',
+            'window',
+            'observations',
+            'annualised_alpha',
+            'beta',
+            'newey_west_t_statistic',
+            'two_sided_p_value',
+            'alpha_claim_status',
+        ],
+        {
+            'strategy_label': 'Portfolio',
+            'window': 'Sample',
+            'newey_west_t_statistic': 'NW t-stat',
+            'two_sided_p_value': 'NW p-value',
+            'alpha_claim_status': 'Evidence status',
+        },
+    )
+    reality_check_table = _html_table(
+        frames['strategy_reality_check'],
+        [
+            'strategy_label',
+            'annualised_active_return',
+            'information_ratio',
+            'max_t_adjusted_p_value',
+            'familywise_significant',
+            'cscv_selection_frequency',
+            'duplicate_of',
+        ],
+        {
+            'strategy_label': 'Portfolio',
+            'max_t_adjusted_p_value': 'Max-t p-value',
+            'familywise_significant': 'FWER significant',
+            'cscv_selection_frequency': 'Selected in CSCV',
+            'duplicate_of': 'Duplicate path',
+        },
+    )
+    overfitting_table = _html_table(
+        frames['strategy_overfitting_summary'],
+        [
+            'observations',
+            'raw_trial_count',
+            'unique_trial_count',
+            'global_reality_check_p_value',
+            'probability_of_backtest_overfitting',
+            'median_selected_is_information_ratio',
+            'median_selected_oos_information_ratio',
+            'selected_information_ratio_haircut',
+            'selection_overfit_risk',
+            'deployable_alpha_status',
+        ],
+        {
+            'raw_trial_count': 'Raw trials',
+            'unique_trial_count': 'Unique trials',
+            'global_reality_check_p_value': 'Global max-t p-value',
+            'probability_of_backtest_overfitting': 'CSCV PBO',
+            'median_selected_is_information_ratio': 'Median selected IS IR',
+            'median_selected_oos_information_ratio': 'Median selected OOS IR',
+            'selected_information_ratio_haircut': 'Selection IR haircut',
+            'selection_overfit_risk': 'Selection risk',
+            'deployable_alpha_status': 'Deployable alpha',
+        },
+    )
     limitation_table = _html_table(
         frames['bias_and_limitations'],
         ['category', 'severity', 'applies_to', 'status', 'treatment'],
@@ -982,6 +1103,29 @@ def write_backtest_outputs(
     pit_table = _html_table(
         frames.get('point_in_time_summary', pd.DataFrame()),
         ['strategy', 'observations', 'annualised_return', 'annualised_volatility', 'sharpe', 'maximum_drawdown', 'annualised_cost_drag', 'evidence_mode'],
+    )
+    pit_alpha_table = _html_table(
+        frames.get('point_in_time_alpha_significance', pd.DataFrame()),
+        [
+            'strategy',
+            'benchmark',
+            'observations',
+            'annualised_active_return',
+            'annualised_regression_alpha',
+            'newey_west_t_statistic',
+            'two_sided_p_value',
+            'incremental_annualised_cost_drag',
+            'alpha_evidence_verdict',
+            'deployable_alpha_status',
+        ],
+        {
+            'annualised_regression_alpha': 'Regression alpha',
+            'newey_west_t_statistic': 'NW t-stat',
+            'two_sided_p_value': 'NW p-value',
+            'incremental_annualised_cost_drag': 'Extra cost drag',
+            'alpha_evidence_verdict': 'Alpha verdict',
+            'deployable_alpha_status': 'Deployable alpha',
+        },
     )
     execution_table = _html_table(
         frames['cost_liquidity_summary'].sort_values(
@@ -1189,15 +1333,22 @@ def write_backtest_outputs(
         monte_carlo_table=monte_carlo_table,
         embargo_table=embargo_table,
         significance_table=significance_table,
+        alpha_table=alpha_table,
+        reality_check_table=reality_check_table,
+        overfitting_table=overfitting_table,
         limitation_table=limitation_table,
         pit_table=pit_table,
+        pit_alpha_table=pit_alpha_table,
         execution_table=execution_table,
         repair_table=repair_table,
     )
     html_path = output_directory / 'backtest_report.html'
     html_path.write_text(html, encoding='utf-8')
     pdf_path = output_directory / 'portfolio_backtest_analysis.pdf'
+    pdf_candidate_path = output_directory / 'portfolio_backtest_analysis.rendering.pdf'
+    pdf_fallback_path = output_directory / 'portfolio_backtest_analysis_latest.pdf'
     pdf_warning_path = output_directory / 'pdf_render_warning.txt'
+    rendered_pdf_path: Path | None = None
     try:
         font_cache = Path(config['backtest']['cache_directory']) / 'fontconfig'
         font_config = configure_font_environment(font_cache)
@@ -1209,7 +1360,7 @@ def write_backtest_outputs(
                 '-m',
                 'src.backtesting.pdf_renderer',
                 str(html_path),
-                str(pdf_path),
+                str(pdf_candidate_path),
             ],
             cwd=Path(config['_meta']['repository_root']),
             env=environment,
@@ -1221,25 +1372,49 @@ def write_backtest_outputs(
         if completed.returncode != 0:
             detail = completed.stderr.strip() or completed.stdout.strip()
             raise RuntimeError(detail or f'PDF renderer exited with {completed.returncode}.')
+        warning_lines = []
+        try:
+            pdf_candidate_path.replace(pdf_path)
+            shutil.copyfile(pdf_path, pdf_fallback_path)
+            rendered_pdf_path = pdf_path
+        except PermissionError:
+            pdf_candidate_path.replace(pdf_fallback_path)
+            rendered_pdf_path = pdf_fallback_path
+            warning_lines.append(
+                'The canonical PDF was locked by another process; the current report '
+                f'was written to {pdf_fallback_path.name}.'
+            )
         meaningful_stderr = _meaningful_pdf_stderr(completed.stderr)
         if meaningful_stderr:
+            warning_lines.append(meaningful_stderr)
+        if warning_lines:
             pdf_warning_path.write_text(
-                meaningful_stderr + '\n',
+                '\n'.join(warning_lines) + '\n',
                 encoding='utf-8',
             )
         elif pdf_warning_path.exists():
             pdf_warning_path.unlink()
     except Exception as exc:
+        pdf_candidate_path.unlink(missing_ok=True)
         pdf_warning_path.write_text(
             f'PDF rendering failed: {type(exc).__name__}: {exc}\n',
             encoding='utf-8',
         )
-    _write_readme(output_directory / 'README.md', summary, manifest)
+    _write_readme(
+        output_directory / 'README.md',
+        summary,
+        manifest,
+        pdf_name=(
+            rendered_pdf_path.name
+            if rendered_pdf_path is not None
+            else pdf_path.name
+        ),
+    )
     _write_checksums(output_directory)
     return {
         'output_directory': output_directory,
         'html_report': html_path,
-        'pdf_report': pdf_path,
+        'pdf_report': rendered_pdf_path,
         'manifest': manifest_path,
         'written_interpretation': interpretation_path,
     }

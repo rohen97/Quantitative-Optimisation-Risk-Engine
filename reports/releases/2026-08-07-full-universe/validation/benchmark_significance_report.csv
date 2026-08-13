@@ -1,2 +1,2 @@
-strategy,baseline,observations,mean_difference,t_statistic,p_value,difference_ci_lower,difference_ci_upper,status
-wolf_cvar,equal_weight_eligible,25,-0.004256306974368408,-0.7672637999380434,0.4429246868502338,-0.007192629241473082,-0.0014589536163096084,WARNING
+strategy,baseline,observations,mean_difference,t_statistic,p_value,difference_ci_lower,difference_ci_upper,bootstrap_block_size,bootstrap_significant,status
+wolf_cvar,equal_weight_eligible,60,-0.001031674006021391,-0.33205899530238053,0.7410215143331423,-0.006633270588370835,0.00447486455103382,6,False,WARNING

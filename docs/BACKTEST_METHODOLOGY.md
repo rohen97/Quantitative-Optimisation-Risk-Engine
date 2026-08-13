@@ -10,7 +10,13 @@ This suite evaluates every investable portfolio output currently produced by The
 
 The long-history portfolio results are **retrospective holdings replays**. They apply today's selected securities and target weights to the history available for those securities. They therefore contain selection look-ahead and survivorship bias and cannot establish that the model would have selected those names in 1997.
 
-The repository's dated, reconstructed model decisions are retained as a separate 25-month point-in-time evidence set. The report never joins that shorter record to the long holdings replay. A lagged regional-index challenger supplies an additional long-horizon point-in-time strategy because its signals can be reconstructed without historical security-selection snapshots.
+The repository's dated, reconstructed model decisions are retained as a separate 60-month point-in-time evidence set. The report never joins that shorter record to the long holdings replay. A lagged regional-index challenger supplies an additional long-horizon point-in-time strategy because its signals can be reconstructed without historical security-selection snapshots.
+
+The dated evidence exports all three aligned monthly paths: `wolf_cvar`,
+`equal_weight_eligible`, and `cap_weight_eligible`. Paired Newey-West alpha tests
+use those raw paths, apply Sidak control across the two benchmarks, disclose
+incremental cost drag, and require at least 60 months plus native live vintages
+before a result can be labeled deployable alpha.
 
 ## Paper-to-Code Mapping
 
@@ -19,7 +25,7 @@ The repository's dated, reconstructed model decisions are retained as a separate
 | Historical and walk-forward evidence | Monthly portfolio replay plus a one-period-lagged index challenger |
 | Data quality and point-in-time discipline | Coverage audit, explicit price repairs, source hashes, and separate dated model evidence |
 | Representativeness and sample length | 1997 start, common investable window, subperiod returns, PSR, and Minimum Track Record Length |
-| Selection and multiple-testing bias | Sidak family-wise error control and Deflated Sharpe Ratios |
+| Selection and multiple-testing bias | Sidak, Deflated Sharpe, block-bootstrap max-t, duplicate-path removal, and CSCV PBO |
 | Look-ahead controls | One-month signal lag for the index challenger and a final 36-month untouched embargo |
 | Trading frictions | Commission, half-spread, slippage, square-root impact, missing-liquidity penalty, and ADV caps |
 | Recurring AUM charge | 25 bp bank custody/AUM fee deducted once each December from then-current simulated AUM |
@@ -190,7 +196,16 @@ Monthly risk-free excess returns drive Sharpe statistics. The suite reports:
 - Probabilistic Sharpe Ratio;
 - Minimum Track Record Length at 95% confidence;
 - Sidak-adjusted one-sided significance across all strategy trials; and
-- Deflated Sharpe Ratios using both the actual trial count and a correlation-clustered effective trial count.
+- Deflated Sharpe Ratios using both the actual trial count and a correlation-clustered effective trial count;
+- Newey-West alpha regressions against each portfolio's regional index blend;
+- a circular-block max-t reality check that preserves serial and cross-strategy dependence; and
+- Combinatorially Symmetric Cross-Validation, including Probability of Backtest Overfitting and the selected strategy's in-sample to out-of-sample information-ratio haircut.
+
+Exact duplicate active-return paths are counted once in the max-t and CSCV trial
+families. These diagnostics control strategy-family selection effects, but they
+cannot remove a bias shared by every trial. In particular, favorable results from
+today's hindsight-selected holdings remain retrospective diagnostics rather than
+deployable alpha evidence.
 
 The final 36 months are labeled as an untouched embargo and compared with the development period. The static holdings replays remain hindsight-selected even in this embargo; the split measures temporal degradation, not true research-process isolation.
 
@@ -213,7 +228,7 @@ Outputs are written to `reports/backtests/1997_to_latest/`:
 - rendered HTML and `portfolio_backtest_analysis.pdf` reports;
 - a standalone `written_interpretation.md` with plain-language explanations for every rendered table;
 - monthly portfolio and benchmark returns;
-- performance, paper-ratio, fee-impact, relative, embargo, significance, resampling, and simulation summaries;
+- performance, paper-ratio, fee-impact, relative, alpha, overfitting, embargo, significance, resampling, and simulation summaries;
 - standalone major-index, interest-rate, market-regime, recession, and macro-event evidence tables;
 - data coverage, repair, execution, and liquidity diagnostics;
 - publication-ready wealth, index, regime, event, risk, and robustness plots;

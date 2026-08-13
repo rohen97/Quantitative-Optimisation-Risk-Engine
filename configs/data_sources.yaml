@@ -55,6 +55,40 @@ data_sources:
       asset_classes: [equities, fundamentals, dividends, fx, macro, news, sentiment]
       regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
 
+    beam_sec_metadata:
+      enabled: true
+      base_url: https://api.beamapi.com/data/fundamentals/us/sec/metadata/v1/
+      credential_env: BEAM_API_KEY
+      asset_classes: [filing_metadata]
+      regions: [US]
+      preserve_acceptance_timestamps: true
+      notes: Observed SEC acceptance timestamps override conservative filing-lag proxies only when security and report date match.
+
+    sec_edgar_submissions:
+      enabled: true
+      base_url: https://data.sec.gov/submissions
+      credential_env: SEC_USER_AGENT
+      asset_classes: [filing_metadata]
+      regions: [US]
+      requests_per_second: 8
+      notes: Free first-party fallback for observed SEC acceptance timestamps; the user agent must identify the application and a contact.
+
+    nasdaq_mergent:
+      enabled: true
+      base_url: https://data.nasdaq.com/api/v3/datatables/MER/F1.json
+      credential_env: NASDAQ_DATA_LINK_API_KEY
+      asset_classes: [fundamentals]
+      regions: [US, DACH, EU ex-DACH, UK]
+      reporting_lag_days: 120
+      notes: Entitlement-dependent historical fundamentals; report dates receive a conservative lag unless observed filing metadata is available.
+
+    eastmoney:
+      enabled: true
+      credential_env: null
+      asset_classes: [fundamentals]
+      regions: [Mainland China, Hong Kong]
+      notes: Historical annual statements for reconstructed research evidence; validate terms and licensing before production use.
+
     alpha_vantage:
       enabled: true
       symbol_column: alpha_vantage_ticker

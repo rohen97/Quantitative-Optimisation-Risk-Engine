@@ -13,11 +13,12 @@
   "command": "python scripts/run_portfolio_backtest_1997.py",
   "common_investable_start": "2013-09-30",
   "current_portfolio_nav_usd": 186060522.0,
+  "deployable_alpha_status": "NOT_ESTABLISHED",
   "end_date": "2026-07-31",
   "evidence_boundary": "Long-history outputs are retrospective holdings replays; dated model evidence is separate.",
   "fixed_research_capital_usd": 100000.0,
-  "generated_at_utc": "2026-08-12T07:14:11.063857+00:00",
-  "git_commit": "7aaac228a34dbeb0b3e37e88498d317ed84ca6ae",
+  "generated_at_utc": "2026-08-12T11:16:58.501185+00:00",
+  "git_commit": "b45211ba8910d59b426919b06777ea049432a83b",
   "macro_event_count": 13,
   "macro_event_method": "Monthly returns are selected when their period overlaps the configured event window; windows are descriptive and not causal estimates.",
   "macro_regimes": {
@@ -68,11 +69,18 @@
     "minimum_degrees_of_freedom": 5.0,
     "paths": 5000
   },
+  "overfitting": {
+    "block_months": 12,
+    "bootstrap_samples": 5000,
+    "cscv_slices": 12,
+    "minimum_point_in_time_months": 60,
+    "random_seed": 1997
+  },
   "paper": {
     "sha256": "07003e270e6f1e106d8e4bdb0f34e33e5e3f3dea3b92f117568badf05d18ceeb",
     "title": "The Three Types of Backtests"
   },
-  "point_in_time_months": 25,
+  "point_in_time_months": 60,
   "portfolio_output_count": 13,
   "requested_years": 29.57700205338809,
   "resampling": {
@@ -85,7 +93,7 @@
   "source_artifacts": [
     {
       "path": "configs/backtest.yaml",
-      "sha256": "e7b71d80d8d97f6e4e995c2a1c265d80bdefa2076c40880571615205b980714c"
+      "sha256": "8dabfb7885dbab544134dcbe50f049dec88d702f419c88eee43f8a6af5a61b3a"
     },
     {
       "path": "reports/outputs/current_portfolio_enriched.csv",
