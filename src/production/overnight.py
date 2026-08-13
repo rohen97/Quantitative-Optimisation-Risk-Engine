@@ -306,12 +306,17 @@ def _last_log_line(*paths: Path) -> str:
     for path in paths:
         try:
             raw = path.read_bytes()
-            try:
-                text = raw.decode('utf-8')
-            except UnicodeDecodeError:
-                text = raw.decode(
-                    locale.getpreferredencoding(False), errors='replace'
-                )
+            encodings = dict.fromkeys(
+                ('utf-8', locale.getpreferredencoding(False), 'cp1252')
+            )
+            for encoding in encodings:
+                try:
+                    text = raw.decode(encoding)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                text = raw.decode('utf-8', errors='replace')
             lines = [line.strip() for line in text.splitlines()]
         except OSError:
             continue
