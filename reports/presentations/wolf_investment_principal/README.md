@@ -14,8 +14,8 @@ validation evidence into a non-technical investment-principal briefing.
 
 The recommendation remains a controlled, human-supervised live pilot.
 Governance improved from 80/100 to 87.5/100. Adaptive VaR risk backtesting
-now scores 15/15, annual turnover fell from 2.11x to 1.33x, and modeled annual
-cost drag fell from 2.35% to 1.28%. All four overall and chronological-holdout
+now scores 15/15, annual turnover fell from 2.11x to 1.10x, and modeled annual
+cost drag fell from 2.35% to 0.82%. All four overall and chronological-holdout
 VaR coverage/independence checks pass, and hard portfolio breaches remain zero.
 
 Full-scale or unattended deployment is not approved. Point-in-time evidence

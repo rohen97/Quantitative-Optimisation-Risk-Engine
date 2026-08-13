@@ -1,11 +1,11 @@
 {
-  "aligned_realised_observations": 156508,
+  "aligned_realised_observations": 181213,
   "approval_status": "CONDITIONALLY_APPROVED",
-  "as_of_date": "2026-08-13T03:49:08.576932",
+  "as_of_date": "2026-08-13T18:41:33.617250",
   "backend": "duckdb",
   "bootstrap_samples": 1000,
-  "completed_at": "2026-08-13T03:49:10.864010+00:00",
-  "config_hash": "4384505cc4689e69c11c576485f274e4c20a2617243889e70825261175fbde53",
+  "completed_at": "2026-08-13T18:41:36.176566+00:00",
+  "config_hash": "ee08734c5149cc90749fc7596c21d6440a84d3d8a55ffcb55a99ec4546e12027",
   "critical_failures": [],
   "evidence_approval_cap": "CONDITIONALLY_APPROVED",
   "evidence_mode": "reconstructed_pit_proxy",
@@ -36,10 +36,10 @@
     "sensitivity_analysis.csv",
     "transaction_cost_validation.csv"
   ],
-  "input_snapshot_hash": "8e0912031a4bc17c7cd5b47df7615d1d6c09055d209abe2a4fc75790ee8f79d6",
+  "input_snapshot_hash": "8e070448ff3aada7d5c4d6b44a96f8cb65b6c685783fdf65d9527d561e509962",
   "overall_score": 87.5,
   "source_model_run_id": null,
-  "validation_run_id": "validation-20260813T034908-d60c1634",
+  "validation_run_id": "validation-20260813T184133-dccaac94",
   "walk_forward_artifact_version": 3,
   "warnings": [
     "Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.",

@@ -15,6 +15,9 @@ backtest:
 
 market_data:
   provider: yfinance
+  duckdb_fallback: true
+  duckdb_threads: 2
+  duckdb_memory_limit: 1GB
   batch_size: 40
   retries: 3
   retry_wait_seconds: 2.0

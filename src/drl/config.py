@@ -142,6 +142,13 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             "step_years": int(_coalesce(training.get("step_years"), raw.get("step_years"), default=1)),
             "embargo_periods": int(_coalesce(training.get("embargo_rebalance_periods"), raw.get("embargo_periods"), default=1)),
             "use_random_split": bool(_coalesce(training.get("use_random_split"), default=False)),
+            "parallel_seed_workers": int(
+                _coalesce(
+                    training.get("parallel_seed_workers"),
+                    raw.get("parallel_seed_workers"),
+                    default=1,
+                )
+            ),
             "minimum_oos_observations": int(
                 _coalesce(acceptance.get("minimum_oos_observations"), default=12)
             ),

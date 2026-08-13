@@ -33,17 +33,38 @@ class DuckDBUnavailableError(RuntimeError):
 class DuckDBRepository:
     """DuckDB-backed repository with deterministic upserts and PIT reads."""
 
-    def __init__(self, database_path: str | Path, read_only: bool = False) -> None:
+    def __init__(
+        self,
+        database_path: str | Path,
+        read_only: bool = False,
+        *,
+        threads: int | None = None,
+        memory_limit: str | None = None,
+    ) -> None:
         if not DUCKDB_AVAILABLE:
             raise DuckDBUnavailableError("DuckDB backend selected but duckdb is not installed.")
+        if threads is None or memory_limit is None:
+            from src.data.config import load_data_config
+
+            data_config = load_data_config()
+            threads = data_config.duckdb_threads if threads is None else threads
+            memory_limit = (
+                data_config.duckdb_memory_limit
+                if memory_limit is None
+                else memory_limit
+            )
         self.database_path = Path(database_path)
         self.read_only = read_only
+        self.threads = max(int(threads), 1)
+        self.memory_limit = str(memory_limit)
         self.database_path.parent.mkdir(parents=True, exist_ok=True)
 
     @contextmanager
     def connection(self) -> Iterator:
         connection = duckdb.connect(str(self.database_path), read_only=self.read_only)
         try:
+            connection.execute("SET threads = ?", [self.threads])
+            connection.execute("SET memory_limit = ?", [self.memory_limit])
             yield connection
         finally:
             connection.close()

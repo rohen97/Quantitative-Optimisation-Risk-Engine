@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 import json
+import logging
+import multiprocessing as mp
 from pathlib import Path
 import time
 from typing import Any, Mapping
@@ -45,6 +48,9 @@ REGIONAL_FEATURES = (
     "liquidity_score",
     "regime_suitability_score",
 )
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -513,6 +519,102 @@ def map_regional_overlay_to_assets(
     return actions
 
 
+def _train_regional_seed(
+    seed: int,
+    scaled: pd.DataFrame,
+    current: pd.DataFrame,
+    split: RegionalSplit,
+    asset_data: pd.DataFrame,
+    baseline_weights: np.ndarray,
+    constraints: Mapping[str, Any],
+    environment_config: Mapping[str, Any],
+    current_config: Mapping[str, Any],
+    ppo_config: Any,
+) -> dict[str, object]:
+    """Train and evaluate one isolated seed; safe for a spawned worker process."""
+    started = time.perf_counter()
+    train_panel = scaled.loc[scaled["date"].isin(split.train_dates)].copy()
+    validation_panel = scaled.loc[scaled["date"].isin(split.validation_dates)].copy()
+    test_panel = scaled.loc[scaled["date"].isin(split.test_dates)].copy()
+    train_env = RegionalResidualEnv(train_panel, constraints, environment_config)
+    agent = StableBaselinesPPOAgent(train_env, int(seed), ppo_config).train()
+    train_path = evaluate_regional_policy(
+        agent,
+        RegionalResidualEnv(train_panel, constraints, environment_config),
+    )
+    validation_path = evaluate_regional_policy(
+        agent,
+        RegionalResidualEnv(validation_panel, constraints, environment_config),
+    )
+    test_path = evaluate_regional_policy(
+        agent,
+        RegionalResidualEnv(test_panel, constraints, environment_config),
+    )
+    train_metrics = summarise_regional_path(train_path)
+    validation_metrics = summarise_regional_path(validation_path)
+    test_metrics = summarise_regional_path(test_path)
+
+    inference_env = RegionalResidualEnv(current, constraints, current_config)
+    observation, _ = inference_env.reset(seed=int(seed))
+    regional_action = agent.predict(observation)
+    _, overlay, _ = inference_env.project_action(regional_action)
+    action = map_regional_overlay_to_assets(asset_data, baseline_weights, overlay)
+    row = {
+        "seed": int(seed),
+        "training_reward": train_metrics.get("information_ratio", 0.0),
+        "validation_reward": validation_metrics.get("information_ratio", 0.0),
+        "test_reward": test_metrics.get("total_net_return", 0.0)
+        - test_metrics.get("baseline_total_return", 0.0),
+        "train_start": min(split.train_dates).date().isoformat(),
+        "train_end": max(split.train_dates).date().isoformat(),
+        "validation_start": min(split.validation_dates).date().isoformat(),
+        "validation_end": max(split.validation_dates).date().isoformat(),
+        "test_start": min(split.test_dates).date().isoformat(),
+        "test_end": max(split.test_dates).date().isoformat(),
+        "embargo_periods": int(environment_config.get("embargo_periods", 1)),
+        "scaling_mode": "training_only_regional_panel",
+        "hyperparameters": ppo_config.__dict__,
+        "test_metrics": test_metrics,
+        "constraint_violations": int(test_metrics.get("constraint_violations", 0.0)),
+        "model_mode": "real",
+        "dependency_mode": "stable_baselines3",
+        "runtime_seconds": time.perf_counter() - started,
+        "random_split_used": False,
+        "test_period_model_selection_used": False,
+        "validation_information_ratio": validation_metrics.get("information_ratio", 0.0),
+        "test_information_ratio": test_metrics.get("information_ratio", 0.0),
+        "test_total_net_return": test_metrics.get("total_net_return", 0.0),
+        "baseline_test_total_return": test_metrics.get("baseline_total_return", 0.0),
+        "test_net_sharpe": test_metrics.get("net_sharpe", 0.0),
+        "baseline_test_sharpe": test_metrics.get("baseline_sharpe", 0.0),
+        "test_maximum_drawdown": test_metrics.get("maximum_drawdown", 0.0),
+        "baseline_test_maximum_drawdown": test_metrics.get("baseline_maximum_drawdown", 0.0),
+        "test_cvar": test_metrics.get("cvar", 0.0),
+        "baseline_test_cvar": test_metrics.get("baseline_cvar", 0.0),
+        "test_expected_shortfall": test_metrics.get("cvar", 0.0),
+        "test_observations": int(test_metrics.get("observations", 0.0)),
+        "active_return_ci_lower_95": test_metrics.get("active_return_ci_lower_95", 0.0),
+        "annualised_incremental_turnover": test_metrics.get(
+            "annualised_incremental_turnover", 0.0
+        ),
+        "transaction_costs": test_metrics.get("transaction_costs", 0.0),
+        "regional_overlay": json.dumps(
+            dict(zip(REGIONAL_SLEEVES, map(float, overlay)))
+        ),
+    }
+    reward_row = {
+        "seed": int(seed),
+        "net_total_return_component": test_metrics.get("total_net_return", 0.0),
+        "transaction_cost_penalty": test_metrics.get("transaction_costs", 0.0),
+        "turnover_penalty": test_metrics.get("annualised_incremental_turnover", 0.0),
+        "information_ratio": test_metrics.get("information_ratio", 0.0),
+    }
+    test_path = test_path.copy()
+    test_path["seed"] = int(seed)
+    test_path["split"] = "test"
+    return {"row": row, "action": action, "reward": reward_row, "path": test_path}
+
+
 def train_historical_regional_ppo(
     panel: pd.DataFrame,
     asset_data: pd.DataFrame,
@@ -547,97 +649,60 @@ def train_historical_regional_ppo(
     environment_config["action_scale"] = 1.0
     current_config = dict(config)
     current_config["action_scale"] = float(action_scale)
-    rows = []
-    actions: dict[int, np.ndarray] = {}
-    reward_rows: list[dict[str, float]] = []
-    path_frames = []
-    for seed in seeds:
-        started = time.perf_counter()
-        train_panel = scaled.loc[scaled["date"].isin(split.train_dates)].copy()
-        validation_panel = scaled.loc[scaled["date"].isin(split.validation_dates)].copy()
-        test_panel = scaled.loc[scaled["date"].isin(split.test_dates)].copy()
-        train_env = RegionalResidualEnv(train_panel, constraints, environment_config)
-        agent = StableBaselinesPPOAgent(train_env, int(seed), ppo_config).train()
-        train_path = evaluate_regional_policy(
-            agent,
-            RegionalResidualEnv(train_panel, constraints, environment_config),
-        )
-        validation_path = evaluate_regional_policy(
-            agent,
-            RegionalResidualEnv(validation_panel, constraints, environment_config),
-        )
-        test_path = evaluate_regional_policy(
-            agent,
-            RegionalResidualEnv(test_panel, constraints, environment_config),
-        )
-        train_metrics = summarise_regional_path(train_path)
-        validation_metrics = summarise_regional_path(validation_path)
-        test_metrics = summarise_regional_path(test_path)
-
-        inference_env = RegionalResidualEnv(current, constraints, current_config)
-        observation, _ = inference_env.reset(seed=int(seed))
-        regional_action = agent.predict(observation)
-        _, overlay, _ = inference_env.project_action(regional_action)
-        actions[int(seed)] = map_regional_overlay_to_assets(
+    requested_workers = max(int(config.get("parallel_seed_workers", 1)), 1)
+    worker_count = min(requested_workers, len(seeds))
+    worker_args = [
+        (
+            int(seed),
+            scaled,
+            current,
+            split,
             asset_data,
-            baseline_weights,
-            overlay,
+            np.asarray(baseline_weights, dtype=float),
+            dict(constraints),
+            environment_config,
+            current_config,
+            ppo_config,
         )
-        runtime = time.perf_counter() - started
-        rows.append(
-            {
-                "seed": int(seed),
-                "training_reward": train_metrics.get("information_ratio", 0.0),
-                "validation_reward": validation_metrics.get("information_ratio", 0.0),
-                "test_reward": test_metrics.get("total_net_return", 0.0)
-                - test_metrics.get("baseline_total_return", 0.0),
-                "train_start": min(split.train_dates).date().isoformat(),
-                "train_end": max(split.train_dates).date().isoformat(),
-                "validation_start": min(split.validation_dates).date().isoformat(),
-                "validation_end": max(split.validation_dates).date().isoformat(),
-                "test_start": min(split.test_dates).date().isoformat(),
-                "test_end": max(split.test_dates).date().isoformat(),
-                "embargo_periods": int(config.get("embargo_periods", 1)),
-                "scaling_mode": "training_only_regional_panel",
-                "hyperparameters": ppo_config.__dict__,
-                "test_metrics": test_metrics,
-                "constraint_violations": int(test_metrics.get("constraint_violations", 0.0)),
-                "model_mode": "real",
-                "dependency_mode": "stable_baselines3",
-                "runtime_seconds": runtime,
-                "random_split_used": False,
-                "test_period_model_selection_used": False,
-                "validation_information_ratio": validation_metrics.get("information_ratio", 0.0),
-                "test_information_ratio": test_metrics.get("information_ratio", 0.0),
-                "test_total_net_return": test_metrics.get("total_net_return", 0.0),
-                "baseline_test_total_return": test_metrics.get("baseline_total_return", 0.0),
-                "test_net_sharpe": test_metrics.get("net_sharpe", 0.0),
-                "baseline_test_sharpe": test_metrics.get("baseline_sharpe", 0.0),
-                "test_maximum_drawdown": test_metrics.get("maximum_drawdown", 0.0),
-                "baseline_test_maximum_drawdown": test_metrics.get("baseline_maximum_drawdown", 0.0),
-                "test_cvar": test_metrics.get("cvar", 0.0),
-                "baseline_test_cvar": test_metrics.get("baseline_cvar", 0.0),
-                "test_expected_shortfall": test_metrics.get("cvar", 0.0),
-                "test_observations": int(test_metrics.get("observations", 0.0)),
-                "active_return_ci_lower_95": test_metrics.get("active_return_ci_lower_95", 0.0),
-                "annualised_incremental_turnover": test_metrics.get("annualised_incremental_turnover", 0.0),
-                "transaction_costs": test_metrics.get("transaction_costs", 0.0),
-                "regional_overlay": json.dumps(dict(zip(REGIONAL_SLEEVES, map(float, overlay)))),
-            }
+        for seed in seeds
+    ]
+
+    def sequential() -> list[dict[str, object]]:
+        return [_train_regional_seed(*arguments) for arguments in worker_args]
+
+    results: list[dict[str, object]]
+    if worker_count == 1:
+        results = sequential()
+    else:
+        LOGGER.info(
+            "Training %s PPO seeds with %s isolated worker processes.",
+            len(seeds),
+            worker_count,
         )
-        reward_rows.append(
-            {
-                "seed": int(seed),
-                "net_total_return_component": test_metrics.get("total_net_return", 0.0),
-                "transaction_cost_penalty": test_metrics.get("transaction_costs", 0.0),
-                "turnover_penalty": test_metrics.get("annualised_incremental_turnover", 0.0),
-                "information_ratio": test_metrics.get("information_ratio", 0.0),
-            }
-        )
-        test_path = test_path.copy()
-        test_path["seed"] = int(seed)
-        test_path["split"] = "test"
-        path_frames.append(test_path)
+        try:
+            context = mp.get_context("spawn")
+            with ProcessPoolExecutor(
+                max_workers=worker_count,
+                mp_context=context,
+                max_tasks_per_child=1,
+            ) as executor:
+                futures = [executor.submit(_train_regional_seed, *arguments) for arguments in worker_args]
+                results = [future.result() for future in as_completed(futures)]
+        except Exception as exc:
+            LOGGER.warning(
+                "Isolated PPO workers failed (%s); retrying deterministically in one process.",
+                exc,
+            )
+            results = sequential()
+
+    results.sort(key=lambda item: int(item["row"]["seed"]))
+    rows = [dict(item["row"], parallel_seed_workers=worker_count) for item in results]
+    actions = {
+        int(item["row"]["seed"]): np.asarray(item["action"], dtype=float)
+        for item in results
+    }
+    reward_rows = [item["reward"] for item in results]
+    path_frames = [item["path"] for item in results]
 
     summary = pd.DataFrame(rows)
     best_seed = int(summary.loc[summary["validation_reward"].idxmax(), "seed"])

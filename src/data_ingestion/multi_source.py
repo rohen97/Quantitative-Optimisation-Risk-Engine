@@ -82,9 +82,18 @@ def pull_configured_macro_and_fx(
     fred = registry.providers["fred"]
     if fred.available:
         adapter = FredAdapter(fred, client)
+        non_revising = {
+            str(value)
+            for value in fred.settings.get("non_revising_series", [])
+        }
         for label, series_id in dict(fred.settings.get("series", {})).items():
             try:
-                frame = adapter.load_series(str(series_id), start, end, preserve_vintages=True)
+                frame = adapter.load_series(
+                    str(series_id),
+                    start,
+                    end,
+                    preserve_vintages=str(series_id) not in non_revising,
+                )
                 macro_frames.append(frame)
                 record("fred", str(label), "completed", len(frame))
             except (DataSourceRequestError, ValueError, KeyError) as exc:

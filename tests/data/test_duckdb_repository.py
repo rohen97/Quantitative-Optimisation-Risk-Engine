@@ -16,3 +16,17 @@ def test_duckdb_repository_migrates_and_upserts(tmp_path):
     repo.close()
     assert len(stored) == 1
     assert stored.loc[0, "ticker"] == "AAA"
+
+
+def test_duckdb_repository_applies_resource_limits(tmp_path):
+    repo = DuckDBRepository(
+        tmp_path / "bounded.duckdb",
+        threads=2,
+        memory_limit="512MB",
+    )
+    settings = repo.query(
+        "SELECT current_setting('threads') AS threads, "
+        "current_setting('memory_limit') AS memory_limit"
+    ).iloc[0]
+    assert int(settings["threads"]) == 2
+    assert "MiB" in str(settings["memory_limit"])

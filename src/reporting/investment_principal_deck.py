@@ -76,8 +76,10 @@ class DeckEvidence:
     scorecard: pd.DataFrame
     prior_pit_summary: pd.DataFrame
     pit_summary: pd.DataFrame
+    benchmark_significance: pd.DataFrame
     pit_returns: pd.DataFrame
     pit_coverage: dict
+    production_pit: pd.DataFrame
     alpha: pd.DataFrame
     overfitting: pd.Series
     performance: pd.DataFrame
@@ -138,10 +140,12 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
 
         validation_root / 'model_validation_scorecard.csv',
         validation_root / 'portfolio_strategy_comparison.csv',
+        validation_root / 'benchmark_significance_report.csv',
         validation_root / 'portfolio_monthly_returns.csv',
         validation_root / 'risk_backtesting_report.csv',
         validation_root / 'constraint_compliance_report.csv',
         release_root / 'pit_evidence_coverage.json',
+        release_root / 'bloomberg_pit_coverage.csv',
         prior_release_root / 'validation/validation_manifest.json',
         prior_release_root
         / 'validation/portfolio_strategy_comparison.csv',
@@ -217,11 +221,17 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         pit_summary=pd.read_csv(
             validation_root / 'portfolio_strategy_comparison.csv'
         ),
+        benchmark_significance=pd.read_csv(
+            validation_root / 'benchmark_significance_report.csv'
+        ),
         pit_returns=pd.read_csv(
             validation_root / 'portfolio_monthly_returns.csv'
         ),
         pit_coverage=_read_json(
             release_root / 'pit_evidence_coverage.json'
+        ),
+        production_pit=pd.read_csv(
+            release_root / 'bloomberg_pit_coverage.csv'
         ),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
@@ -277,6 +287,35 @@ def _usd(value: float, digits: int = 1) -> str:
     if magnitude >= 1_000:
         return '$' + f'{amount / 1_000:.{digits}f}k'
     return '$' + f'{amount:,.0f}'
+
+
+def _equal_weight_comparison(
+    evidence: DeckEvidence,
+) -> tuple[float, float]:
+    summary = evidence.pit_summary.set_index('strategy')
+    difference = float(
+        summary.loc['wolf_cvar', 'annualised_return']
+        - summary.loc['equal_weight_eligible', 'annualised_return']
+    )
+    row = evidence.benchmark_significance.loc[
+        (evidence.benchmark_significance['strategy'] == 'wolf_cvar')
+        & (
+            evidence.benchmark_significance['baseline']
+            == 'equal_weight_eligible'
+        )
+    ]
+    if row.empty:
+        raise ValueError('Missing Wolf/equal-weight significance evidence.')
+    return difference, float(row.iloc[0]['p_value'])
+
+
+def _equal_weight_sentence(evidence: DeckEvidence) -> str:
+    difference, p_value = _equal_weight_comparison(evidence)
+    relation = 'outperformed' if difference >= 0 else 'trailed'
+    return (
+        f'Wolf {relation} equal weight by {_pct(abs(difference), 2)} '
+        f'per year in this 60-month sample (p={p_value:.3f}).'
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -982,7 +1021,7 @@ def _slide_cover(
         )
 
         _add_text(
-            slide, value, x + 0.16, 5.42, 2.35, 0.3,
+            slide, value, x + 0.16, 5.42, 2.35, 0.36,
             size=21, color=WHITE, bold=True, font=FONT_HEAD,
         )
         _add_text(
@@ -1035,8 +1074,8 @@ def _slide_decision(
     _add_callout(
         slide,
         'What still blocks full deployment',
-        'Observed PIT evidence is incomplete, and Wolf lagged equal '
-        'weight by 1.06% per year in this 60-month sample (p=0.734).',
+        'Observed PIT evidence is incomplete, and '
+        + _equal_weight_sentence(evidence),
         6.82, 1.43, 5.95, 1.18,
         fill=PALE_RED, accent=RED,
     )
@@ -1140,21 +1179,31 @@ def _slide_evidence(
     profile = evidence.walk_forward_manifest['source_profile']
     artifact = evidence.walk_forward_manifest['artifact_profile']
     coverage = evidence.pit_coverage['coverage']
+    production = evidence.production_pit.set_index('dataset')
+    fundamental_vintages = int(
+        production.loc['fundamental_vintages', 'rows']
+    )
+    corporate_action_vintages = int(
+        production.loc['corporate_action_vintages', 'rows']
+    )
+    market_cap_vintages = int(
+        production.loc['market_cap_vintages', 'rows']
+    )
     all_row = evidence.universe.loc[
         evidence.universe['region'] == 'ALL'
     ].iloc[0]
     slide = _new_slide(
         presentation,
         'Evidence breadth and point-in-time progress',
-        'Delistings improved; observed historical availability remains the main gap.',
+        'Bloomberg vintages expanded; survivorship-clean membership remains the main gap.',
         4,
-        'Universe, walk-forward manifest and PIT evidence coverage',
+        'Universe, walk-forward manifest and aggregate PIT coverage',
     )
     kpis = [
         (f'{int(all_row.active):,}', 'active equities'),
         ('{:,}'.format(int(profile['security_count'])), 'walk-forward eligible'),
         ('{:,}'.format(int(artifact['forecast_rows'])), 'historical forecasts'),
-        (f"{int(coverage['delisting_events']):,}", 'delistings archived'),
+        (f'{fundamental_vintages:,}', 'Bloomberg fundamental vintages'),
     ]
     for index, (value, label) in enumerate(kpis):
         _add_kpi(
@@ -1223,10 +1272,11 @@ def _slide_evidence(
 
     _add_callout(
         slide,
-        'Provider outcome',
-        'EODHD added 59,183 delistings; Nasdaq entitlement yielded five '
-        'usable rows; Beam was unavailable; SEC blocked this runner. '
-        'Unavailable history is never treated as observed.',
+        'Bloomberg checkpoint and publication boundary',
+        f'{fundamental_vintages:,} fundamental, {market_cap_vintages:,} market-cap '
+        f'and {corporate_action_vintages:,} corporate-action vintages are stored '
+        'locally. Daily capacity paused the remaining snapshots at a durable '
+        'checkpoint; only aggregate counts are published.',
         0.55, 6.18, 12.22, 0.65,
         fill=PALE_GOLD, accent=GOLD,
     )
@@ -1239,6 +1289,13 @@ def _slide_trades(
     reduces = int(
         (evidence.trades['trade_action'] == 'Reduce').sum()
     )
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    equity_count = len(equities)
+    equity_regions = int(equities['region'].nunique())
+    max_name_weight = float(equities['final_weight'].max())
     slide = _new_slide(
         presentation,
         'Equities to establish in the target portfolio',
@@ -1256,15 +1313,15 @@ def _slide_trades(
         3.02, 1.39, 2.3, fill=PALE_GOLD, accent=GOLD,
     )
     _add_kpi(
-        slide, '5.0%', 'target per name',
+        slide, _pct(max_name_weight, 1), 'maximum name',
         5.49, 1.39, 2.3, fill=WHITE, accent=BLUE,
     )
     _add_kpi(
-        slide, '20', 'target holdings',
+        slide, str(equity_count), 'equity holdings',
         7.96, 1.39, 2.3, fill=WHITE, accent=TEAL,
     )
     _add_kpi(
-        slide, '6', 'equity regions',
+        slide, str(equity_regions), 'equity regions',
         10.43, 1.39, 2.34, fill=WHITE, accent=GREEN,
     )
 
@@ -1307,6 +1364,18 @@ def _slide_trades(
 def _slide_exposure(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    cash_weight = float(
+        evidence.holdings.loc[cash_mask, 'final_weight'].sum()
+    )
+    max_name_weight = float(equities['final_weight'].max())
+    region_weights = equities.groupby('region')['final_weight'].sum()
+    sector_weights = equities.groupby('sector')['final_weight'].sum()
+    largest_region = str(region_weights.idxmax())
+    largest_sector = str(sector_weights.idxmax())
     chart = (
         evidence.release_root
         / 'plots/final_portfolio_exposures.png'
@@ -1327,12 +1396,13 @@ def _slide_exposure(
     _add_bullets(
         slide,
         [
-            '20 holdings at 5% each',
+            f'{len(equities)} equities at no more than '
+            f'{_pct(max_name_weight, 1)} each',
+            f'{_pct(cash_weight, 0)} cash reserve',
             'No sector above 25%',
             'No country above 30%',
             'No region or currency above 40%',
             'One listing per issuer',
-            'No quarantined price history',
         ],
         8.94, 2.03, 3.65, 2.64,
         size=14,
@@ -1340,8 +1410,9 @@ def _slide_exposure(
     _add_callout(
         slide,
         'Largest allocations',
-        'Mainland China 30%; EU ex-DACH 25%; Financials and '
-        'Consumer Staples 25% each.',
+        f'{largest_region} {_pct(region_weights.max(), 0)}; '
+        f'{largest_sector} {_pct(sector_weights.max(), 0)}. '
+        'Cash is excluded from equity exposure caps.',
         8.94, 5.02, 3.72, 1.18,
         fill=PALE_BLUE, accent=BLUE,
     )
@@ -1479,7 +1550,7 @@ def _slide_pit_growth(
         'Not a forecast',
         'This scales the realised proxy path to current AUM. The 25 bp '
         'annual bank fee is modeled separately in the long replay.',
-        9.12, 5.42, 3.65, 1.05,
+        9.12, 5.42, 3.65, 1.30,
         fill=PALE_GOLD, accent=GOLD,
     )
 
@@ -1505,7 +1576,7 @@ def _slide_pit_comparison(
         f'Wolf Sharpe was {float(wolf.sharpe):.2f} and drawdown was '
         f'{_pct(abs(float(wolf.maximum_drawdown)))}, better than both '
         'simple controls on these risk measures.',
-        9.08, 1.56, 3.69, 1.25,
+        9.08, 1.56, 3.69, 1.31,
         fill=PALE_GREEN, accent=GREEN,
     )
     _add_callout(
@@ -1514,7 +1585,7 @@ def _slide_pit_comparison(
         f'Equal weight returned {_pct(equal.annualised_return, 2)} versus '
         f'Wolf at {_pct(wolf.annualised_return, 2)}. The model did not '
         'beat the simplest control on net return.',
-        9.08, 3.16, 3.69, 1.25,
+        9.08, 3.16, 3.69, 1.31,
         fill=PALE_GOLD, accent=GOLD,
     )
     _add_callout(
@@ -1522,7 +1593,7 @@ def _slide_pit_comparison(
         'Investment interpretation',
         'The current case is risk control and decision discipline. '
         'Incremental stock-selection alpha remains unproven.',
-        9.08, 4.76, 3.69, 1.25,
+        9.08, 4.76, 3.69, 1.31,
         fill=PALE_BLUE, accent=BLUE,
     )
     _add_text(
@@ -1656,7 +1727,7 @@ def _slide_long_history(
         'The securities were chosen with current information and then '
         'replayed backward. Survivorship and selection look-ahead '
         'make the long PnL unsuitable as a live promise.',
-        6.82, 5.24, 5.95, 1.25,
+        6.82, 5.24, 5.95, 1.31,
         fill=PALE_GOLD, accent=GOLD,
     )
 
@@ -1732,6 +1803,9 @@ def _slide_regimes(
 def _slide_governance(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    locked = evidence.walk_forward_manifest['locked_risk_calibration']
+    pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
+    warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
     slide = _new_slide(
         presentation,
         'Risk calibration now passes; approval stays conditional',
@@ -1773,18 +1847,21 @@ def _slide_governance(
     )
     _add_callout(
         slide,
-        'Adaptive risk stack: 15 / 15',
+        'Development-locked risk stack: 15 / 15',
         'DCC-IGARCH Student-t, filtered historical simulation, EWMA '
         'Normal and EWMA Student-t are selected using trailing data. '
+        f'Development data selected a {float(locked["selected_scale_factor"]):.3f}x '
+        f'scale and {float(locked["selected_exception_multiplier"]):.2f}x '
+        f'buffer for {int(locked["selected_exception_days"])} day after a breach. '
         'The holdout is chronological reconstructed evidence, not a '
         'pristine future shadow period.',
-        6.93, 4.65, 5.84, 1.45,
+        6.93, 4.65, 5.84, 1.50,
         fill=PALE_GREEN, accent=GREEN,
     )
     _add_text(
         slide,
-        f'Overall {evidence.governance_score:g}/100  |  6 pass  |  PIT and '
-        'portfolio warnings  |  0 critical failures  |  full local suite passed',
+        f'Overall {evidence.governance_score:g}/100  |  {pass_count} pass  |  '
+        f'{warning_count} warnings  |  0 critical failures  |  full local suite passed',
         0.58, 6.5, 12.05, 0.28,
         size=12.3, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
@@ -1826,9 +1903,9 @@ def _slide_costs(
     _add_callout(
         slide,
         'Why portfolio remains a warning',
-        'Both cost gates pass, but Wolf trailed equal weight by 1.06% '
-        'per year and the difference was not significant (p=0.734).',
-        8.32, 5.35, 4.45, 1.03,
+        'Both cost gates pass, but '
+        + _equal_weight_sentence(evidence),
+        8.32, 5.35, 4.45, 1.12,
         fill=PALE_GOLD, accent=GOLD,
     )
     _add_text(
@@ -2126,6 +2203,19 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     cap = summary.loc['cap_weight_eligible']
     wolf_end = _ending_value(evidence, 'wolf_cvar')
     coverage = evidence.pit_coverage['coverage']
+    production = evidence.production_pit.set_index('dataset')
+    fundamental_vintages = int(
+        production.loc['fundamental_vintages', 'rows']
+    )
+    corporate_action_vintages = int(
+        production.loc['corporate_action_vintages', 'rows']
+    )
+    market_cap_vintages = int(
+        production.loc['market_cap_vintages', 'rows']
+    )
+    locked = evidence.walk_forward_manifest['locked_risk_calibration']
+    pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
+    warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
     fee = evidence.backtest_manifest['annual_bank_fee']
     risk = evidence.risk_backtest.set_index(
         ['evaluation_segment', 'confidence_level']
@@ -2209,20 +2299,31 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     relative_return_text = _pct(
         float(wolf.annualised_return - equal.annualised_return), 2
     )
+    _, paired_p_value = _equal_weight_comparison(evidence)
     buys = sorted(
         evidence.trades.loc[
             evidence.trades['trade_action'] == 'Buy', 'ticker'
         ].tolist()
     )
-    reduce_names = sorted(
-        evidence.trades.loc[
-            evidence.trades['trade_action'] == 'Reduce', 'ticker'
-        ].tolist()
+    reductions = evidence.trades.loc[
+        evidence.trades['trade_action'] == 'Reduce',
+        ['ticker', 'target_weight'],
+    ].sort_values('ticker')
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    cash_weight = float(
+        evidence.holdings.loc[cash_mask, 'final_weight'].sum()
     )
 
-    buy_text = ', '.join(f'`{ticker}`' for ticker in buys)
+    buy_text = ', '.join(
+        f'{chr(96)}{ticker}{chr(96)}' for ticker in buys
+    )
     reduce_text = ', '.join(
-        f'`{ticker}`' for ticker in reduce_names
+        f'{chr(96)}{row.ticker}{chr(96)} to '
+        f'{_pct(float(row.target_weight), 1)}'
+        for row in reductions.itertuples()
     )
     return f'''# Wolf Quant Model Investment Principal Report
 
@@ -2231,8 +2332,8 @@ As of {evidence.as_of_date}
 ## Decision
 
 **Approve a controlled, human-supervised live pilot.** Governance improved
-from {prior_score:g}/100 to {evidence.governance_score:g}/100. Six components pass,
-two remain warnings, and there are zero critical failures. Adaptive risk
+from {prior_score:g}/100 to {evidence.governance_score:g}/100. {pass_count} components pass,
+{warning_count} remain warnings, and there are zero critical failures. Adaptive risk
 backtesting and the turnover/cost targets now pass. Full-scale or unattended
 deployment remains unapproved because observed point-in-time evidence is
 incomplete and
@@ -2254,7 +2355,11 @@ observed result.
 The trailing model-selection stack contains DCC-IGARCH Student-t, filtered
 historical simulation, EWMA Normal, and EWMA Student-t forecasts. Kupiec
 coverage and Christoffersen independence tests pass overall and on the 40%
-chronological holdout.
+chronological holdout. Development data selected a
+{float(locked['selected_scale_factor']):.3f}x global scale and a
+{float(locked['selected_exception_multiplier']):.2f}x buffer for
+{int(locked['selected_exception_days'])} day after an observed exception; those
+parameters were locked before holdout scoring.
 
 | Sample | VaR | Exceptions | Kupiec p | Independence p | Result |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -2267,6 +2372,11 @@ shadow period. Live monitoring is still required.
 
 The evidence store now contains **{int(coverage['delisting_events']):,}** delisting events and
 **{int(coverage['fundamental_rows_with_filing_date']):,}** fundamental rows with filing dates.
+Bloomberg aggregate coverage adds **{fundamental_vintages:,}** database-as-of
+fundamental vintages, **{market_cap_vintages:,}** historical market-cap vintages,
+and **{corporate_action_vintages:,}** corporate-action vintages. The remaining
+snapshot pull is resumable from its daily-capacity checkpoint; licensed rows stay
+in the ignored local warehouse and are not published.
 Observed acceptance timestamps, dated
 index membership, inactive-name prices, and historical volume remain below
 their governance thresholds. EODHD populated delistings; the Nasdaq
@@ -2276,13 +2386,15 @@ The point-in-time component therefore remains **7.5/15, warning**.
 
 ## Current Target Portfolio
 
-The resolved baseline contains 20 equal-weight positions at 5% each. The
-current trade comparison produces 19 buys and one reduction. These are model
-targets, not executable orders; live NAV, FX, liquidity, prices and compliance
+The resolved baseline contains {len(equities)} equities capped at
+{_pct(float(equities['final_weight'].max()), 1)} each and
+{_pct(cash_weight, 1)} cash. The current trade comparison produces
+{len(buys)} buys and {len(reductions)} reductions. These are model targets,
+not executable orders; live NAV, FX, liquidity, prices and compliance
 approval must be refreshed first.
 
 - Buy: {buy_text}
-- Reduce to 5%: {reduce_text}
+- Reduce: {reduce_text}
 
 ## Point-In-Time Performance
 
@@ -2298,7 +2410,8 @@ forecast or a live-capacity result.
 
 The portfolio component remains **5/10, warning** even though both cost gates
 pass. Wolf returned {relative_return_text} per year relative to equal weight.
-The paired difference was not statistically significant (p=0.734).
+The paired difference was not statistically significant
+(p={paired_p_value:.3f}).
 
 ## Alpha And Overfitting
 
@@ -2385,6 +2498,8 @@ def build_investment_principal_deck(
     input_paths = [
         evidence.release_root / 'validation/validation_manifest.json',
         evidence.release_root / 'validation/risk_backtesting_report.csv',
+        evidence.release_root
+        / 'validation/benchmark_significance_report.csv',
         evidence.release_root / 'validation/transaction_cost_validation.csv',
         evidence.release_root / 'walk_forward_manifest.json',
         evidence.release_root / 'universe_summary.csv',

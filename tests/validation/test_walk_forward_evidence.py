@@ -83,6 +83,31 @@ def test_fundamental_snapshot_uses_latest_vintage_available_at_anchor():
     assert after_revision.loc[0, 'revenue_usd'] == 120.0
 
 
+def test_future_high_priority_vendor_does_not_erase_available_filing():
+    statements = pd.DataFrame(
+        {
+            'security_id': ['A', 'A'],
+            'fiscal_period_end': pd.to_datetime(['2020-12-31', '2020-12-31']),
+            'fiscal_period_type': ['annual', 'annual'],
+            'reconstructed_available_from': pd.to_datetime(
+                ['2021-04-30', '2021-08-31']
+            ),
+            'retrieved_at': pd.to_datetime(['2026-08-13', '2026-08-13']),
+            'source': ['eastmoney_china_financials', 'bloomberg_database_as_of'],
+            'source_priority': [3, 1],
+            'revenue_usd': [100.0, 110.0],
+            'free_cash_flow_usd': [10.0, 11.0],
+            'dps': [1.0, 1.1],
+        }
+    )
+
+    july = _fundamental_snapshot(statements, pd.Timestamp('2021-07-31'), 1)
+    september = _fundamental_snapshot(statements, pd.Timestamp('2021-09-30'), 1)
+
+    assert july.loc[0, 'revenue_usd'] == 100.0
+    assert september.loc[0, 'revenue_usd'] == 110.0
+
+
 def test_market_cap_matcher_never_uses_future_snapshot():
     snapshots = pd.DataFrame(
         {

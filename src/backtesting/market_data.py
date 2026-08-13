@@ -11,6 +11,11 @@ import pandas as pd
 import yfinance as yf
 
 from src.backtesting.models import MarketDataBundle, PortfolioSpec
+from src.data.config import load_data_config
+from src.data.repository.duckdb_repository import (
+    DUCKDB_AVAILABLE,
+    DuckDBRepository,
+)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -87,6 +92,139 @@ def _normalise_yfinance(raw: pd.DataFrame, symbols: list[str]) -> pd.DataFrame:
     ).reset_index(drop=True)
 
 
+def _cached_yfinance_history(
+    cache_directory: Path,
+    symbols: list[str],
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    target_path: Path,
+) -> pd.DataFrame:
+    frames: list[pd.DataFrame] = []
+    requested = set(symbols)
+    for path in sorted(cache_directory.glob('yfinance_*.parquet')):
+        if path == target_path:
+            continue
+        try:
+            frame = pd.read_parquet(path)
+        except (OSError, ValueError) as exc:
+            LOGGER.warning('Ignoring unreadable yfinance cache %s: %s', path, exc)
+            continue
+        required = {'date', 'symbol', 'adjusted_close', 'volume'}
+        if frame.empty or not required.issubset(frame.columns):
+            continue
+        frame = frame.copy()
+        frame['date'] = pd.to_datetime(frame['date'], errors='coerce')
+        frame = frame.loc[
+            frame['symbol'].astype(str).isin(requested)
+            & frame['date'].between(start, end)
+        ]
+        if not frame.empty:
+            frames.append(frame)
+    if not frames:
+        return pd.DataFrame(
+            columns=['date', 'symbol', 'adjusted_close', 'volume']
+        )
+    return (
+        pd.concat(frames, ignore_index=True)
+        .sort_values(['symbol', 'date'])
+        .drop_duplicates(['symbol', 'date'], keep='last')
+        .reset_index(drop=True)
+    )
+
+
+def _duckdb_price_history(
+    symbols: list[str],
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    config: dict,
+) -> pd.DataFrame:
+    columns = ['date', 'symbol', 'adjusted_close', 'volume']
+    if (
+        not symbols
+        or not bool(config.get('duckdb_fallback', False))
+        or not DUCKDB_AVAILABLE
+    ):
+        return pd.DataFrame(columns=columns)
+    data_config = load_data_config()
+    database_path = Path(config.get('duckdb_path', data_config.duckdb_path))
+    if not database_path.exists():
+        return pd.DataFrame(columns=columns)
+    repository = DuckDBRepository(
+        database_path,
+        read_only=True,
+        threads=max(int(config.get('duckdb_threads', 2)), 1),
+        memory_limit=str(config.get('duckdb_memory_limit', '1GB')),
+    )
+    query = """
+        WITH requested AS (
+            SELECT unnest(?)::VARCHAR AS symbol
+        ),
+        mapped AS (
+            SELECT
+                requested.symbol,
+                COALESCE(identifiers.security_id, requested.symbol) AS security_id
+            FROM requested
+            LEFT JOIN security_identifiers AS identifiers
+              ON identifiers.identifier_type = 'yfinance_ticker'
+             AND upper(identifiers.identifier_value) = upper(requested.symbol)
+            QUALIFY row_number() OVER (
+                PARTITION BY requested.symbol
+                ORDER BY
+                    identifiers.valid_to NULLS FIRST,
+                    identifiers.retrieved_at DESC
+            ) = 1
+        ),
+        ranked AS (
+            SELECT
+                mapped.symbol,
+                prices.trade_date AS date,
+                COALESCE(
+                    prices.adjusted_close, prices.close_price
+                ) AS adjusted_close,
+                prices.volume,
+                row_number() OVER (
+                    PARTITION BY mapped.symbol, prices.trade_date
+                    ORDER BY
+                        CASE prices.source
+                            WHEN 'yfinance' THEN 1
+                            WHEN 'bloomberg' THEN 2
+                            WHEN 'eodhd' THEN 3
+                            ELSE 9
+                        END,
+                        prices.retrieved_at DESC
+                ) AS source_rank
+            FROM mapped
+            JOIN prices_daily AS prices
+              ON prices.security_id = mapped.security_id
+            WHERE prices.trade_date BETWEEN ? AND ?
+              AND COALESCE(
+                  prices.adjusted_close, prices.close_price
+              ) > 0
+        )
+        SELECT date, symbol, adjusted_close, volume
+        FROM ranked
+        WHERE source_rank = 1
+        ORDER BY symbol, date
+    """
+    try:
+        frame = repository.query(
+            query,
+            [symbols, start.date().isoformat(), end.date().isoformat()],
+        )
+    except Exception as exc:
+        LOGGER.warning('DuckDB market-data fallback failed: %s', exc)
+        return pd.DataFrame(columns=columns)
+    if frame.empty:
+        return pd.DataFrame(columns=columns)
+    frame['date'] = pd.to_datetime(frame['date']).dt.normalize()
+    LOGGER.info(
+        'Loaded %s rows for %s symbols from the local DuckDB price warehouse.',
+        len(frame),
+        frame['symbol'].nunique(),
+    )
+    return frame[columns]
+
+
 def download_yfinance_history(
     symbols: list[str],
     start: pd.Timestamp,
@@ -98,20 +236,53 @@ def download_yfinance_history(
     if not clean:
         raise ValueError('No market-data symbols were requested.')
     cache_directory.mkdir(parents=True, exist_ok=True)
+    yfinance_internal_cache = cache_directory / 'yfinance_internal'
+    yfinance_internal_cache.mkdir(parents=True, exist_ok=True)
+    yf.set_tz_cache_location(str(yfinance_internal_cache))
     key = _cache_key(clean, start, end)
     cache_path = cache_directory / f'yfinance_{key}.parquet'
     refresh = bool(config.get('refresh_cache', False))
-    if cache_path.exists() and not refresh:
-        return pd.read_parquet(cache_path), cache_path
+    exact = (
+        pd.read_parquet(cache_path)
+        if cache_path.exists() and not refresh
+        else pd.DataFrame(columns=['date', 'symbol', 'adjusted_close', 'volume'])
+    )
+    exact_symbols = set(exact.get('symbol', pd.Series(dtype=str)).astype(str))
+    if exact_symbols.issuperset(clean):
+        return exact, cache_path
 
+    cached = pd.concat(
+        [
+            exact,
+            _cached_yfinance_history(
+                cache_directory, clean, start, end, cache_path
+            ),
+        ],
+        ignore_index=True,
+    )
+    cached = (
+        cached.sort_values(['symbol', 'date'])
+        .drop_duplicates(['symbol', 'date'], keep='last')
+        .reset_index(drop=True)
+    )
+    cached_symbols = set(cached['symbol'].astype(str))
+    frames: list[pd.DataFrame] = [cached] if not cached.empty else []
+    warehouse = _duckdb_price_history(
+        sorted(set(clean) - cached_symbols),
+        start,
+        end,
+        config,
+    )
+    if not warehouse.empty:
+        frames.append(warehouse)
+        cached_symbols.update(warehouse['symbol'].astype(str))
     batch_size = max(1, int(config.get('batch_size', 40)))
     retries = max(1, int(config.get('retries', 3)))
     wait_seconds = float(config.get('retry_wait_seconds', 2.0))
-    frames: list[pd.DataFrame] = []
     requested_end = end + pd.Timedelta(days=1)
     for offset in range(0, len(clean), batch_size):
         batch = clean[offset : offset + batch_size]
-        pending = list(batch)
+        pending = [symbol for symbol in batch if symbol not in cached_symbols]
         for attempt in range(retries):
             if not pending:
                 break
@@ -507,6 +678,9 @@ def load_market_data(
         cache_paths.append(fred_cache)
     manifest = {
         'provider': config['market_data']['provider'],
+        'duckdb_fallback_enabled': bool(
+            config['market_data'].get('duckdb_fallback', False)
+        ),
         'requested_symbol_count': len(symbols),
         'returned_symbol_count': int(bars['symbol'].nunique()),
         'fred_series': sorted(series_ids),

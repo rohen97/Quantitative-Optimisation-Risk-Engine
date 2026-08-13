@@ -1,0 +1,210 @@
+overnight:
+  max_hours: 12
+  checkpoint_path: data/locks/overnight_checkpoint.json
+  output_directory: reports/outputs/overnight
+  log_directory: reports/logs/overnight
+
+  memory:
+    minimum_available_gb: 3
+    minimum_available_percent: 12
+    consecutive_low_samples: 3
+    poll_seconds: 2
+
+  environment:
+    PIPELINE_INPUT_SOURCE: duckdb
+    PIPELINE_MAX_SECURITIES: "0"
+    PIPELINE_MIN_PRICE_ROWS: "120"
+    LOKY_MAX_CPU_COUNT: "8"
+    OMP_NUM_THREADS: "1"
+    MKL_NUM_THREADS: "1"
+    OPENBLAS_NUM_THREADS: "1"
+    NUMEXPR_NUM_THREADS: "1"
+    TOKENIZERS_PARALLELISM: "false"
+    MPLBACKEND: Agg
+  unset_environment:
+    - PIPELINE_REGIONS
+
+  steps:
+    - name: refresh_price_summaries
+      command: ["{python}", scripts/refresh_model_input_summaries.py]
+      required: true
+      timeout_minutes: 30
+      max_attempts: 2
+
+    - name: bloomberg_priority_pit
+      command:
+        - "{python}"
+        - scripts/run_bloomberg_pit_backfill.py
+        - --universe-file
+        - reports/outputs/walk_forward/historical_portfolio_weights.parquet
+        - --regions
+        - US
+        - UK
+        - DACH
+        - EU ex-DACH
+        - Mainland China
+        - Hong Kong
+        - --start
+        - "2018-07-31"
+        - --end
+        - "2026-08-13"
+        - --request-size
+        - "25"
+        - --period-types
+        - Y
+        - Q
+        - --sleep-seconds
+        - "0.05"
+        - --skip-migrations
+      required: false
+      external: true
+      resource_group: bloomberg
+      timeout_minutes: 360
+      max_attempts: 2
+      defer_minutes: 240
+      retry_exit_codes: [75, 111, 124]
+
+    - name: bloomberg_full_china_pit
+      command:
+        - "{python}"
+        - scripts/run_bloomberg_pit_backfill.py
+        - --regions
+        - Mainland China
+        - Hong Kong
+        - --start
+        - "2018-07-31"
+        - --end
+        - "2026-08-13"
+        - --request-size
+        - "25"
+        - --sleep-seconds
+        - "0.05"
+        - --skip-migrations
+      required: false
+      external: true
+      resource_group: bloomberg
+      timeout_minutes: 360
+      max_attempts: 2
+      defer_minutes: 240
+      retry_exit_codes: [75, 111, 124]
+
+    - name: bloomberg_pit_coverage
+      command:
+        - "{python}"
+        - scripts/run_bloomberg_pit_backfill.py
+        - --coverage-only
+        - --skip-migrations
+      required: true
+      timeout_minutes: 10
+      max_attempts: 2
+
+    - name: point_in_time_evidence_coverage
+      command:
+        - "{python}"
+        - scripts/run_point_in_time_evidence_backfill.py
+        - --coverage-only
+        - --skip-migrations
+      required: true
+      timeout_minutes: 10
+      max_attempts: 2
+
+    - name: production_pit_coverage
+      command: ["{python}", scripts/build_pit_coverage_report.py]
+      required: true
+      timeout_minutes: 10
+      max_attempts: 2
+
+    - name: two_phase_preprocessing
+      command:
+        - "{python}"
+        - scripts/run_two_phase_pipeline.py
+        - phase1
+        - --force
+        - --workers
+        - "2"
+        - --max-inflight-securities
+        - "5000"
+      required: true
+      timeout_minutes: 240
+      max_attempts: 2
+
+    - name: global_model_and_drl
+      command:
+        - "{python}"
+        - scripts/run_two_phase_pipeline.py
+        - phase2
+      required: true
+      timeout_minutes: 240
+      max_attempts: 2
+
+    - name: standalone_drl_validation
+      command: ["{python}", scripts/run_drl_pipeline.py]
+      required: true
+      timeout_minutes: 120
+      max_attempts: 2
+
+    - name: walk_forward_full
+      command:
+        - "{python}"
+        - scripts/run_walk_forward_validation.py
+        - --validation-mode
+        - full
+      required: true
+      timeout_minutes: 720
+      max_attempts: 2
+
+    - name: full_governance_validation
+      command:
+        - "{python}"
+        - scripts/run_model_validation.py
+        - --mode
+        - full
+        - --backend
+        - duckdb
+      required: true
+      timeout_minutes: 360
+      max_attempts: 2
+
+    - name: risk_backtesting
+      command: ["{python}", scripts/run_risk_backtesting.py]
+      required: true
+      timeout_minutes: 120
+      max_attempts: 2
+
+    - name: portfolio_backtest_1997
+      command: ["{python}", scripts/run_portfolio_backtest_1997.py]
+      required: true
+      timeout_minutes: 360
+      max_attempts: 2
+
+    - name: full_regression_suite
+      command: ["{python}", -m, pytest, -q]
+      environment:
+        PIPELINE_INPUT_SOURCE: ""
+        USE_MOCK_DATA: "true"
+        PIPELINE_MAX_SECURITIES: "24"
+      required: true
+      timeout_minutes: 240
+      max_attempts: 1
+
+    - name: release_evidence
+      command:
+        - "{python}"
+        - scripts/build_release_evidence.py
+        - --release-id
+        - 2026-08-13-risk-pit-cost-validation
+      required: true
+      timeout_minutes: 30
+      max_attempts: 2
+
+    - name: investment_principal_deck
+      command:
+        - powershell.exe
+        - -NoProfile
+        - -ExecutionPolicy
+        - Bypass
+        - -File
+        - scripts/render_investment_principal_deck.ps1
+      required: true
+      timeout_minutes: 30
+      max_attempts: 2

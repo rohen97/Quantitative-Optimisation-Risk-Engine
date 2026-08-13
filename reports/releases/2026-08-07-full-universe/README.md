@@ -67,5 +67,5 @@ Research output only. Conditional approval is not authorization for unattended l
 The current evidence, target holdings, portfolio comparisons, risks and
 proposed live-pilot gates are published in the
 [PowerPoint briefing](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
-[rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+[rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-13.pdf),
 and [investment principal report](../../presentations/wolf_investment_principal/investment_principal_report.md).

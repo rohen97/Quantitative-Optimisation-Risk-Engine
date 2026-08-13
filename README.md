@@ -21,14 +21,14 @@ The latest full-universe evidence package was regenerated on 2026-08-13.
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
 | Walk-forward eligible securities | 1,409 |
-| Historical forecasts | 156,960 |
-| Aligned realised outcomes | 156,508 |
+| Historical forecasts | 181,664 |
+| Aligned realised outcomes | 181,213 |
 | Portfolio decisions | 60 monthly anchors |
 | Governance score | 87.5 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Annual turnover | 1.33x |
-| Annualised cost drag | 1.28% |
+| Annual turnover | 1.10x |
+| Annualised cost drag | 0.82% |
 | 95% / 99% VaR backtests | `PASS` / `PASS` |
 
 The complete, checksummed result is in
@@ -36,7 +36,7 @@ The complete, checksummed result is in
 
 The investment-principal package presents the results in plain language:
 [PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
-[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-13.pdf),
 and [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md).
 It recommends a controlled, human-supervised live pilot, not unattended or
 full-scale deployment.
@@ -46,10 +46,13 @@ full-scale deployment.
 ![Walk-forward portfolio performance](reports/releases/2026-08-13-risk-pit-cost-validation/plots/cumulative_returns.png)
 
 Conditional approval is deliberate. The evidence store now archives 59,183
-delisting events, but observed filing acceptance, dated membership,
-inactive-security prices, historical volume, sentiment, narrative and regime
-vintages remain incomplete. This repository is research software and does not
-authorize unattended live trading.
+delisting events plus aggregate local Bloomberg coverage of 25,240
+database-as-of fundamental vintages, 151,659 corporate-action vintages and
+694,246 historical market-cap observations. Observed filing acceptance, dated
+membership, inactive-security prices, broad historical volume, sentiment,
+narrative and regime vintages remain incomplete. Licensed Bloomberg rows stay
+in the ignored local warehouse and are not redistributed. This repository is
+research software and does not authorize unattended live trading.
 
 ## 1997-Present Portfolio Backtest
 
@@ -141,18 +144,35 @@ for a paced retry after a provider rate limit.
 Run the observed DuckDB universe with resumable regional model batches:
 
 ~~~powershell
-python scripts/run_two_phase_pipeline.py phase1 --batch-size 2500
+python scripts/refresh_model_input_summaries.py
+python scripts/run_two_phase_pipeline.py phase1 --batch-size 2500 --workers 2 --max-inflight-securities 5000
 python scripts/run_two_phase_pipeline.py status
 python scripts/run_two_phase_pipeline.py phase2 --with-governance
 ~~~
 
-Phase 1 uses observed metadata and reported annual statements by default. It partitions
+The exact price-summary cache replaces a repeated full scan of the 100M+ row price
+table; it is automatically ignored when stale. Phase 1 uses observed metadata and
+reported annual statements by default. It partitions
 DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong under
 data/interim/observed_full_universe_pipeline/. Completed batches are skipped on
-restart. Phase 2 merges every region before cross-sectional ranks, portfolio
+restart, and bounded workers cap the number of securities in flight. Phase 2 merges every region before cross-sectional ranks, portfolio
 optimisation, risk and DRL, so batch boundaries do not become investment boundaries.
 Use all for one foreground command. Synthetic test data requires the explicit
 --input-mode synthetic_test option.
+
+Run the complete research chain unattended with one process lock, durable stage
+checkpoints, Windows sleep prevention and free-memory guardrails:
+
+~~~powershell
+.\.venv\Scripts\python.exe scripts\run_overnight_research.py --max-hours 12
+~~~
+
+The runner continues local model work when Bloomberg reaches its external daily
+capacity, shares a cooldown across Bloomberg stages, and revisits deferred pulls
+without redoing completed chunks. Status and evidence are written under
+`reports/outputs/overnight/`; detailed child logs remain under
+`reports/logs/overnight/`. Press `Ctrl+C` once for a controlled interruption and
+rerun the same command to resume.
 
 Build the feature store and scorecard outputs:
 

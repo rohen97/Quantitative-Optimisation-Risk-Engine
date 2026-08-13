@@ -114,6 +114,7 @@ drl:
 
   training:
     walk_forward: true
+    parallel_seed_workers: 2
     train_fraction: 0.58
     validation_fraction: 0.19
     train_years: 5

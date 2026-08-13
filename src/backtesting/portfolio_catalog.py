@@ -140,6 +140,8 @@ def _build_holdings(
     frame = frame.dropna(subset=['ticker', 'weight'])
     frame = frame.loc[frame['weight'].gt(1e-12)]
     frame = frame.groupby('ticker', as_index=False, sort=False)['weight'].sum()
+    explicit_cash = frame['ticker'].str.upper().isin({'CASH', 'CASH.USD'})
+    frame = frame.loc[~explicit_cash].copy()
     total = float(frame['weight'].sum())
     if frame.empty or total <= 0 or total > 1.00001:
         raise ValueError(f'Portfolio has invalid invested weight {total:.8f}.')

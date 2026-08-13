@@ -1,10 +1,20 @@
 from __future__ import annotations
 
 from pathlib import Path
+from types import SimpleNamespace
 
 import pandas as pd
+import pytest
 
-from scripts.run_bloomberg_pit_backfill import _load_universe_ids
+from scripts.run_bloomberg_pit_backfill import (
+    Checkpoint,
+    _candidate_chunks,
+    _chunk_key,
+    _is_retryable_bloomberg_error,
+    _load_universe_ids,
+    _raise_request_error,
+)
+from src.data_ingestion.bloomberg_adapter import BloombergRequestError
 from src.data_ingestion.bloomberg_pit import (
     fiscal_period_end,
     normalise_corporate_actions,
@@ -146,3 +156,32 @@ def test_universe_file_deduplicates_security_ids(tmp_path: Path):
     path = tmp_path / "universe.parquet"
     pd.DataFrame({"security_id": ["SEC-2", "SEC-1", "SEC-2", None]}).to_parquet(path)
     assert _load_universe_ids(path) == ["SEC-1", "SEC-2"]
+
+
+def test_bloomberg_checkpoint_uses_stable_atomic_chunks(tmp_path: Path):
+    candidates = pd.DataFrame(
+        {
+            "security_id": ["SEC-1", "SEC-2", "SEC-3"],
+            "provider_symbol": ["1 HK Equity", "2 HK Equity", "3 HK Equity"],
+        }
+    )
+    chunks = _candidate_chunks(candidates, 2)
+    assert [len(chunk) for chunk in chunks] == [2, 1]
+    key = _chunk_key("fundamentals:test:Q:2020-01-31", chunks[0])
+
+    checkpoint_path = tmp_path / "checkpoint.json"
+    checkpoint = Checkpoint(checkpoint_path, enabled=True)
+    checkpoint.mark(key)
+
+    assert Checkpoint(checkpoint_path, enabled=True).contains(key)
+    assert not checkpoint_path.with_suffix(".json.tmp").exists()
+
+
+def test_request_level_errors_are_not_checkpointable():
+    adapter = SimpleNamespace(last_errors={"request": "Daily capacity reached [nid:19562]"})
+    with pytest.raises(BloombergRequestError, match="Daily capacity reached"):
+        _raise_request_error(adapter, "snapshot chunk")
+
+    error = BloombergRequestError("Daily capacity reached [nid:19562]")
+    assert _is_retryable_bloomberg_error(error)
+    assert not _is_retryable_bloomberg_error(BloombergRequestError("Invalid field"))

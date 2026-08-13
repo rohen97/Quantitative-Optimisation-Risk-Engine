@@ -19,7 +19,11 @@ from scripts.run_bloomberg_backfill import load_candidates
 from src.data.config import load_data_config
 from src.data.repository.duckdb_repository import DuckDBRepository
 from src.data.schemas import SCHEMAS
-from src.data_ingestion.bloomberg_adapter import BloombergConfig, BloombergDesktopAdapter
+from src.data_ingestion.bloomberg_adapter import (
+    BloombergConfig,
+    BloombergDesktopAdapter,
+    BloombergRequestError,
+)
 from src.data_ingestion.bloomberg_pit import (
     CORPORATE_ACTION_FIELDS,
     CURRENCY_FIELDS,
@@ -38,6 +42,7 @@ from src.data_ingestion.bloomberg_pit import (
 LOGGER = logging.getLogger(__name__)
 DEFAULT_REGIONS = ("Mainland China", "Hong Kong")
 ALL_DATASETS = ("identifiers", "corporate-actions", "market-cap", "fundamentals")
+RETRYABLE_EXIT_CODE = 75
 
 
 def parse_args() -> argparse.Namespace:
@@ -110,6 +115,41 @@ class Checkpoint:
 def _candidate_hash(candidates: pd.DataFrame) -> str:
     values = candidates[["security_id", "provider_symbol"]].astype(str).agg("|".join, axis=1)
     return hashlib.sha256("\n".join(values).encode("utf-8")).hexdigest()[:16]
+
+
+def _candidate_chunks(candidates: pd.DataFrame, size: int) -> list[pd.DataFrame]:
+    chunk_size = max(int(size), 1)
+    return [
+        candidates.iloc[offset : offset + chunk_size].reset_index(drop=True)
+        for offset in range(0, len(candidates), chunk_size)
+    ]
+
+
+def _chunk_key(base_key: str, candidates: pd.DataFrame) -> str:
+    return f"{base_key}:chunk:{_candidate_hash(candidates)}"
+
+
+def _raise_request_error(adapter: BloombergDesktopAdapter, context: str) -> None:
+    request_error = adapter.last_errors.get("request")
+    if request_error:
+        raise BloombergRequestError(f"{context}: {request_error}")
+
+
+def _is_retryable_bloomberg_error(error: Exception) -> bool:
+    message = str(error).lower()
+    retryable_markers = (
+        "daily capacity reached",
+        "request timed out",
+        "session startup timed out",
+        "connection reset",
+        "connection aborted",
+        "connection refused",
+        "temporarily unavailable",
+        "service unavailable",
+    )
+    return isinstance(error, BloombergRequestError) and any(
+        marker in message for marker in retryable_markers
+    )
 
 
 def _snapshot_dates(args: argparse.Namespace) -> list[pd.Timestamp]:
@@ -263,9 +303,9 @@ def main() -> int:
     candidates = _resolve_candidates(repository, args)
     if candidates.empty:
         raise RuntimeError("No Bloomberg-mappable securities matched the requested universe.")
-    symbols = candidates["provider_symbol"].astype(str).tolist()
     symbol_to_security = dict(zip(candidates["provider_symbol"], candidates["security_id"]))
     universe_hash = _candidate_hash(candidates)
+    candidate_chunks = _candidate_chunks(candidates, args.request_size)
     checkpoint = Checkpoint(args.checkpoint, args.resume)
     run_id = str(uuid4())
     started_at = pd.Timestamp.now("UTC").tz_localize(None)
@@ -286,59 +326,106 @@ def main() -> int:
                 candidates["trading_currency"].fillna("").astype(str),
             )
         )
-        reference_payload: dict[str, object] = {}
-        if {"identifiers", "corporate-actions"}.intersection(args.datasets):
-            reference_fields = list(CURRENCY_FIELDS)
-            if "identifiers" in args.datasets:
-                reference_fields.extend(IDENTIFIER_FIELDS)
-            if "corporate-actions" in args.datasets:
-                reference_fields.extend(CORPORATE_ACTION_FIELDS)
-            reference_payload = adapter.load_reference_data(symbols, reference_fields)
-            currency_by_symbol.update(reference_currency_map(reference_payload))
-
         identifier_key = f"identifiers:{universe_hash}"
-        if "identifiers" in args.datasets and not checkpoint.contains(identifier_key):
-            identifiers = normalise_identifier_snapshot(
-                reference_payload,
-                symbol_to_security,
-                started_at,
-                run_id,
-            )
-            total_rows += _write(repository, "identifier_vintages", identifiers)
-            LOGGER.info("Stored %s Bloomberg identifier vintages.", len(identifiers))
-            checkpoint.mark(identifier_key)
-
         actions_key = f"corporate-actions:{universe_hash}"
-        if "corporate-actions" in args.datasets and not checkpoint.contains(actions_key):
-            actions = normalise_corporate_actions(
-                reference_payload,
-                symbol_to_security,
-                currency_by_symbol,
-                started_at,
-                run_id,
-            )
-            total_rows += _write(repository, "corporate_action_vintages", actions)
-            LOGGER.info("Stored %s Bloomberg corporate-action vintages.", len(actions))
-            checkpoint.mark(actions_key)
+        identifier_pending = (
+            "identifiers" in args.datasets and not checkpoint.contains(identifier_key)
+        )
+        actions_pending = (
+            "corporate-actions" in args.datasets and not checkpoint.contains(actions_key)
+        )
+        if identifier_pending or actions_pending:
+            for position, chunk in enumerate(candidate_chunks, start=1):
+                identifier_chunk_key = _chunk_key(identifier_key, chunk)
+                actions_chunk_key = _chunk_key(actions_key, chunk)
+                load_identifiers = identifier_pending and not checkpoint.contains(
+                    identifier_chunk_key
+                )
+                load_actions = actions_pending and not checkpoint.contains(actions_chunk_key)
+                if not load_identifiers and not load_actions:
+                    continue
+                reference_fields = list(CURRENCY_FIELDS)
+                if load_identifiers:
+                    reference_fields.extend(IDENTIFIER_FIELDS)
+                if load_actions:
+                    reference_fields.extend(CORPORATE_ACTION_FIELDS)
+                reference_payload = adapter.load_reference_data(
+                    chunk["provider_symbol"].astype(str).tolist(),
+                    reference_fields,
+                )
+                _raise_request_error(
+                    adapter,
+                    f"Bloomberg reference chunk {position}/{len(candidate_chunks)}",
+                )
+                currency_by_symbol.update(reference_currency_map(reference_payload))
+                if load_identifiers:
+                    identifiers = normalise_identifier_snapshot(
+                        reference_payload,
+                        symbol_to_security,
+                        started_at,
+                        run_id,
+                    )
+                    total_rows += _write(repository, "identifier_vintages", identifiers)
+                    checkpoint.mark(identifier_chunk_key)
+                    LOGGER.info(
+                        "Identifier chunk %s/%s stored=%s.",
+                        position,
+                        len(candidate_chunks),
+                        len(identifiers),
+                    )
+                if load_actions:
+                    actions = normalise_corporate_actions(
+                        reference_payload,
+                        symbol_to_security,
+                        currency_by_symbol,
+                        started_at,
+                        run_id,
+                    )
+                    total_rows += _write(repository, "corporate_action_vintages", actions)
+                    checkpoint.mark(actions_chunk_key)
+                    LOGGER.info(
+                        "Corporate-action chunk %s/%s stored=%s.",
+                        position,
+                        len(candidate_chunks),
+                        len(actions),
+                    )
+            if identifier_pending:
+                checkpoint.mark(identifier_key)
+            if actions_pending:
+                checkpoint.mark(actions_key)
 
         market_key = f"market-cap:{universe_hash}:{args.start}:{args.end}"
         if "market-cap" in args.datasets and not checkpoint.contains(market_key):
-            market_history = adapter.load_historical_fields(
-                symbols,
-                MARKET_CAP_FIELDS,
-                args.start,
-                args.end,
-                periodicity="MONTHLY",
-            )
-            market_cap = normalise_market_cap_history(
-                market_history,
-                symbol_to_security,
-                currency_by_symbol,
-                started_at,
-                run_id,
-            )
-            total_rows += _write(repository, "market_cap_vintages", market_cap)
-            LOGGER.info("Stored %s monthly Bloomberg market-cap vintages.", len(market_cap))
+            for position, chunk in enumerate(candidate_chunks, start=1):
+                chunk_key = _chunk_key(market_key, chunk)
+                if checkpoint.contains(chunk_key):
+                    continue
+                market_history = adapter.load_historical_fields(
+                    chunk["provider_symbol"].astype(str).tolist(),
+                    MARKET_CAP_FIELDS,
+                    args.start,
+                    args.end,
+                    periodicity="MONTHLY",
+                )
+                _raise_request_error(
+                    adapter,
+                    f"Bloomberg market-cap chunk {position}/{len(candidate_chunks)}",
+                )
+                market_cap = normalise_market_cap_history(
+                    market_history,
+                    symbol_to_security,
+                    currency_by_symbol,
+                    started_at,
+                    run_id,
+                )
+                total_rows += _write(repository, "market_cap_vintages", market_cap)
+                checkpoint.mark(chunk_key)
+                LOGGER.info(
+                    "Market-cap chunk %s/%s stored=%s.",
+                    position,
+                    len(candidate_chunks),
+                    len(market_cap),
+                )
             checkpoint.mark(market_key)
 
         if "fundamentals" in args.datasets:
@@ -349,38 +436,45 @@ def main() -> int:
                     key = f"fundamentals:{universe_hash}:{period_code}:{snapshot_date.date()}"
                     if checkpoint.contains(key):
                         continue
-                    payload = adapter.load_reference_data(
-                        symbols,
-                        FUNDAMENTAL_FIELDS,
-                        overrides={
-                            "FUND_PER": period_code,
-                            "FUNDAMENTAL_DATABASE_DATE": snapshot_date.strftime("%Y%m%d"),
-                        },
-                    )
-                    if not payload:
-                        error_sample = "; ".join(
-                            f"{key}: {value}"
-                            for key, value in list(adapter.last_errors.items())[:5]
+                    snapshot_rows = 0
+                    for chunk_position, chunk in enumerate(candidate_chunks, start=1):
+                        chunk_key = _chunk_key(key, chunk)
+                        if checkpoint.contains(chunk_key):
+                            continue
+                        payload = adapter.load_reference_data(
+                            chunk["provider_symbol"].astype(str).tolist(),
+                            FUNDAMENTAL_FIELDS,
+                            overrides={
+                                "FUND_PER": period_code,
+                                "FUNDAMENTAL_DATABASE_DATE": snapshot_date.strftime("%Y%m%d"),
+                            },
                         )
-                        raise RuntimeError(
-                            f"Bloomberg returned no fundamental payload for {period_code} "
-                            f"{snapshot_date.date()}. {error_sample}"
+                        _raise_request_error(
+                            adapter,
+                            (
+                                f"Bloomberg fundamental {period_code} {snapshot_date.date()} "
+                                f"chunk {chunk_position}/{len(candidate_chunks)}"
+                            ),
                         )
-                    vintages = normalise_fundamental_snapshot(
-                        payload,
-                        symbol_to_security,
-                        currency_by_symbol,
-                        snapshot_date,
-                        period_type,
-                        started_at,
-                        run_id,
-                    )
-                    total_rows += _write(repository, "fundamental_vintages", vintages)
-                    total_rows += _write(
-                        repository,
-                        "fundamentals_reported",
-                        to_model_fundamentals(vintages),
-                    )
+                        vintages = normalise_fundamental_snapshot(
+                            payload,
+                            symbol_to_security,
+                            currency_by_symbol,
+                            snapshot_date,
+                            period_type,
+                            started_at,
+                            run_id,
+                        )
+                        total_rows += _write(repository, "fundamental_vintages", vintages)
+                        total_rows += _write(
+                            repository,
+                            "fundamentals_reported",
+                            to_model_fundamentals(vintages),
+                        )
+                        snapshot_rows += len(vintages)
+                        checkpoint.mark(chunk_key)
+                        if args.sleep_seconds > 0:
+                            time.sleep(args.sleep_seconds)
                     checkpoint.mark(key)
                     LOGGER.info(
                         "Fundamental snapshot %s/%s period=%s date=%s stored=%s.",
@@ -388,14 +482,18 @@ def main() -> int:
                         len(dates),
                         period_code,
                         snapshot_date.date(),
-                        len(vintages),
+                        snapshot_rows,
                     )
-                    if args.sleep_seconds > 0:
-                        time.sleep(args.sleep_seconds)
 
         _write_run(repository, _run_frame(run_id, started_at, "completed", args, total_rows))
     except Exception as exc:
         _write_run(repository, _run_frame(run_id, started_at, "failed", args, total_rows, str(exc)))
+        if _is_retryable_bloomberg_error(exc):
+            LOGGER.error(
+                "Bloomberg PIT run paused at a durable chunk checkpoint: %s",
+                exc,
+            )
+            return RETRYABLE_EXIT_CODE
         raise
 
     report = coverage(repository)

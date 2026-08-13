@@ -362,6 +362,7 @@ def _write_release_notes(
     significance: pd.DataFrame,
     final_portfolio_count: int,
     pit_coverage: dict[str, object],
+    production_pit: pd.DataFrame,
 ) -> None:
     wolf = strategies.loc[strategies['strategy'].eq('wolf_cvar')].iloc[0]
     equal_weight = strategies.loc[
@@ -396,6 +397,21 @@ def _write_release_notes(
         'constraint_compliance', 'NOT_EVALUATED'
     )
     risk_status = component_status.get('risk_backtesting', 'NOT_EVALUATED')
+    production_lookup = (
+        production_pit.set_index('dataset')
+        if not production_pit.empty and 'dataset' in production_pit
+        else pd.DataFrame()
+    )
+    fundamental_vintages = (
+        int(production_lookup.loc['fundamental_vintages', 'rows'])
+        if 'fundamental_vintages' in production_lookup.index
+        else 0
+    )
+    market_cap_vintages = (
+        int(production_lookup.loc['market_cap_vintages', 'rows'])
+        if 'market_cap_vintages' in production_lookup.index
+        else 0
+    )
     lines = [
         '# Full-Universe Model Evidence',
         '',
@@ -456,6 +472,12 @@ def _write_release_notes(
             'inactive-security prices, and historical-volume coverage remain below '
             'their governance thresholds and therefore retain a warning.'
         ),
+        (
+            f'Aggregate Bloomberg coverage includes **{fundamental_vintages:,}** '
+            f'database-as-of fundamental vintages and **{market_cap_vintages:,}** '
+            'historical market-cap vintages. Licensed observations are not included '
+            'in this release.'
+        ),
         '',
         '![Cumulative returns](plots/cumulative_returns.png)',
         '',
@@ -478,6 +500,8 @@ def _write_release_notes(
         ),
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
         '- `walk_forward_manifest.json`: source profile, chronology checks, limitations, and evidence counts.',
+        '- `bloomberg_pit_coverage.csv`: aggregate licensed-data coverage only; no Bloomberg observations.',
+        '- `production_pit_coverage.md`: data-vintage semantics and measured production gaps.',
         '- `manifest.json`: SHA-256 checksum and byte size for every release artifact.',
         '',
         'Research output only. Conditional approval is not authorization for unattended live trading.',
@@ -518,6 +542,18 @@ def build_release_evidence(
         pit_payload = json.loads(pit_evidence_path.read_text(encoding='utf-8-sig'))
         if isinstance(pit_payload, dict) and isinstance(pit_payload.get('coverage'), dict):
             pit_evidence = dict(pit_payload['coverage'])
+    production_pit_path = outputs / 'bloomberg_pit_coverage.csv'
+    production_pit = pd.DataFrame()
+    for name in (
+        'bloomberg_pit_coverage.csv',
+        'production_pit_coverage.csv',
+        'production_pit_coverage.md',
+    ):
+        source = outputs / name
+        if source.exists():
+            _copy_file(source, output / name)
+    if production_pit_path.exists():
+        production_pit = _read_csv(production_pit_path)
 
     universe = _read_csv(outputs / 'equity_universe.csv')
     universe_summary = build_universe_summary(universe)
@@ -554,6 +590,7 @@ def build_release_evidence(
         significance,
         int(len(portfolio)),
         pit_evidence,
+        production_pit,
     )
     _normalise_text_whitespace(output)
     _normalise_json_paths(output)

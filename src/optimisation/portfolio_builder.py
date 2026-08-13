@@ -19,6 +19,22 @@ OUTPUT_NAME_MAP = {
 }
 
 
+class PortfolioFeasibilityError(RuntimeError):
+    """Carries the exact failed optimiser evidence for durable diagnostics."""
+
+    def __init__(
+        self,
+        message: str,
+        optimiser_inputs: pd.DataFrame,
+        summary: pd.DataFrame,
+        constraint_report: pd.DataFrame,
+    ) -> None:
+        super().__init__(message)
+        self.optimiser_inputs = optimiser_inputs
+        self.summary = summary
+        self.constraint_report = constraint_report
+
+
 def build_final_portfolio_weights(
     final_recommendations: pd.DataFrame,
     optimiser_inputs: pd.DataFrame,
@@ -151,10 +167,13 @@ def run_portfolio_optimisation(
     inputs = build_optimiser_input_dataset(scorecard, current_portfolio, final_recommendations)
     portfolios = run_all_optimisers(inputs, config, dominant_regime)
     summary_rows = []
+    constraint_reports = []
     for key, frame in portfolios.items():
         method = frame["portfolio_method"].iloc[0] if not frame.empty else key.replace("optimised_portfolio_", "")
         metrics = summarise_portfolio_metrics(frame, nav_usd, method)
         report = build_constraint_report(frame, constraints)
+        report.insert(0, "portfolio_method", method)
+        constraint_reports.append(report)
         hard_breaches = int(report.loc[(report["constraint_type"].eq("hard")) & (report["breach_flag"]), "breach_flag"].sum())
         soft_breaches = int(report.loc[(report["constraint_type"].eq("soft")) & (report["breach_flag"]), "breach_flag"].sum())
         metrics["constraint_breaches"] = f"hard={hard_breaches};soft={soft_breaches}"
@@ -182,7 +201,20 @@ def run_portfolio_optimisation(
         metrics["selected_recommended_portfolio"] = False
         summary_rows.append(metrics)
     summary = pd.DataFrame(summary_rows)
-    selected = _selected_method(summary) if not summary.empty else "equal_weight"
+    combined_constraints = (
+        pd.concat(constraint_reports, ignore_index=True)
+        if constraint_reports
+        else pd.DataFrame()
+    )
+    try:
+        selected = _selected_method(summary) if not summary.empty else "equal_weight"
+    except RuntimeError as exc:
+        raise PortfolioFeasibilityError(
+            str(exc),
+            inputs,
+            summary,
+            combined_constraints,
+        ) from exc
     summary.loc[summary["portfolio_method"].eq(selected), "selected_recommended_portfolio"] = True
     selected_key = next((key for key, frame in portfolios.items() if not frame.empty and frame["portfolio_method"].iloc[0] == selected), None)
     if selected_key is None:

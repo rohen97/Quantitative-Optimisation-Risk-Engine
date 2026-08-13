@@ -2,7 +2,10 @@ provider,enabled,credential_required,credential_available,available,asset_classe
 alpaca,True,True,True,True,equities,US,
 alpha_vantage,True,True,True,True,"equities,fundamentals,dividends,fx,macro,commodities,news,sentiment","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",https://www.alphavantage.co
 bank_of_england,True,False,True,True,"rates,fx,credit,money",UK,https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp
+beam_sec_metadata,True,True,False,False,filing_metadata,US,https://api.beamapi.com/data/fundamentals/us/sec/metadata/v1
+bloomberg,True,False,True,False,"equities,indices","Mainland China,Hong Kong",
 china_data,True,False,True,True,"macro,trade,inflation,demographics",Mainland China,https://chinadata.live/api/v2
+eastmoney,True,False,True,True,fundamentals,"Mainland China,Hong Kong",
 ecb,True,False,True,True,"macro,rates,fx,credit","DACH,EU ex-DACH",https://data-api.ecb.europa.eu/service
 eodhd,True,True,True,True,"equities,fundamentals,dividends,fx,indices,macro,news","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",https://eodhd.com/api
 finnhub,True,True,True,True,"equities,fundamentals,dividends,fx,macro,news,sentiment","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",https://finnhub.io/api/v1
@@ -10,5 +13,8 @@ frankfurter,True,False,True,True,fx,"DACH,EU ex-DACH,UK,US,Mainland China,Hong K
 fred,True,True,True,True,"macro,rates,credit,volatility","US,DACH,EU ex-DACH,UK,Mainland China,Hong Kong",https://api.stlouisfed.org/fred
 hkma,True,False,True,True,"macro,rates,fx,banking",Hong Kong,https://api.hkma.gov.hk/public
 itick,True,True,True,True,"equities,fx","US,Mainland China,Hong Kong",https://api.itick.org
+nasdaq_mergent,True,True,False,False,fundamentals,"US,DACH,EU ex-DACH,UK",https://data.nasdaq.com/api/v3/datatables/MER/F1.json
 ons,True,False,True,True,"macro,labour,inflation,demographics",UK,https://api.beta.ons.gov.uk/v1
+sec_edgar_submissions,True,True,False,False,filing_metadata,US,https://data.sec.gov/submissions
+tickdb,True,True,True,True,"equities,indices,fx,crypto","US,Mainland China,Hong Kong",https://api.tickdb.ai
 yfinance,True,False,True,True,"equities,indices,fx","DACH,EU ex-DACH,UK,US,Mainland China,Hong Kong",

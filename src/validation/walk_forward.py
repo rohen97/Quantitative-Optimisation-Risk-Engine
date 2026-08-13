@@ -23,6 +23,7 @@ from src.optimisation.optimisers import cvar_constrained_portfolio
 from src.optimisation.constraints import build_retention_eligibility_mask
 from src.utils.config import ROOT, load_yaml
 from src.validation.transaction_cost_validation import estimate_transaction_cost
+from src.validation.risk_calibration import apply_locked_risk_calibration
 from src.validation.risk_models import (
     RiskModelSettings,
     forecast_risk,
@@ -34,7 +35,7 @@ from src.validation.risk_models import (
 LOGGER = logging.getLogger(__name__)
 ARTIFACT_VERSION = 3
 FORECAST_HORIZONS = (3, 6, 9, 12)
-CASH_SECURITY_ID = 'CASH.USD'
+CASH_SECURITY_ID = 'CASH'
 MONETARY_COLUMNS = (
     'revenue',
     'operating_income',
@@ -513,12 +514,6 @@ def _load_source_data(
               AND fiscal_period_type = 'annual'
               AND LOWER(source) NOT LIKE '%mock%'
               AND LOWER(source) NOT LIKE '%synthetic%'
-        ), selected AS (
-            SELECT * EXCLUDE (source_priority)
-            FROM ranked
-            QUALIFY source_priority = MIN(source_priority) OVER (
-                PARTITION BY security_id, fiscal_period_end, fiscal_period_type
-            )
         ), observed_filings AS (
             SELECT
                 security_id,
@@ -530,13 +525,13 @@ def _load_source_data(
             GROUP BY security_id, report_date
         )
         SELECT
-            selected.*,
+            ranked.*,
             observed_filings.observed_acceptance_datetime,
             observed_filings.filing_metadata_source
-        FROM selected
+        FROM ranked
         LEFT JOIN observed_filings
-          ON selected.security_id = observed_filings.security_id
-         AND selected.fiscal_period_end = observed_filings.report_date
+          ON ranked.security_id = observed_filings.security_id
+         AND ranked.fiscal_period_end = observed_filings.report_date
         ORDER BY security_id, fiscal_period_end
         ''',
         [security_ids],
@@ -679,16 +674,47 @@ def _fundamental_snapshot(
     ].copy()
     if available.empty:
         return pd.DataFrame()
+    if 'source_priority' in available:
+        source_priority = pd.to_numeric(
+            available['source_priority'], errors='coerce'
+        ).fillna(99)
+    else:
+        source = available.get(
+            'source', pd.Series('', index=available.index)
+        ).fillna('').astype(str)
+        source_priority = pd.Series(6, index=available.index, dtype=int)
+        source_priority.loc[source.eq('bloomberg_database_as_of')] = 1
+        source_priority.loc[source.eq('sec_companyfacts')] = 2
+        source_priority.loc[
+            source.isin(
+                {
+                    'finnhub_reported',
+                    'eastmoney_china_financials',
+                    'eastmoney_hk_financials',
+                }
+            )
+        ] = 3
+        source_priority.loc[source.str.startswith('akshare', na=False)] = 4
+        source_priority.loc[source.eq('yahoo_finance_timeseries')] = 5
+    available['_source_priority'] = source_priority
+    period_keys = ['security_id', 'fiscal_period_end', 'fiscal_period_type']
+    best_available_priority = available.groupby(period_keys)[
+        '_source_priority'
+    ].transform('min')
+    available = available.loc[
+        available['_source_priority'].eq(best_available_priority)
+    ]
     available = available.sort_values(
         [
             'security_id',
             'fiscal_period_end',
+            '_source_priority',
             'reconstructed_available_from',
             'retrieved_at',
         ]
     )
     available = available.groupby(
-        ['security_id', 'fiscal_period_end', 'fiscal_period_type'],
+        period_keys,
         as_index=False,
         sort=False,
     ).tail(1)
@@ -1706,6 +1732,14 @@ def _build_anchor_portfolios(
     )
     risk_limits = load_yaml('configs/risk_limits.yaml')
     scorecard = build_scorecard(model_features, risk_limits)
+    LOGGER.info(
+        "Historical anchor scorecard: securities=%s hard_filter_pass=%s regions=%s.",
+        len(scorecard),
+        int(scorecard['passes_hard_filters'].fillna(False).sum()),
+        scorecard.loc[
+            scorecard['passes_hard_filters'].fillna(False), 'region'
+        ].value_counts().to_dict(),
+    )
     optimisation = load_yaml('configs/optimisation.yaml').get('optimisation', {})
     constraints = dict(optimisation.get('constraints', {}))
     constraints['maximum_candidates'] = int(optimisation.get('maximum_candidates', 2000))
@@ -2168,12 +2202,17 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             forecast_frames.append(forecasts)
             outcome_frames.append(realised)
 
-        portfolios, scorecard = _build_anchor_portfolios(
-            features,
-            forecast_wide,
-            previous_weights.get(config.primary_strategy),
-            config.maximum_rebalance_turnover,
-        )
+        try:
+            portfolios, scorecard = _build_anchor_portfolios(
+                features,
+                forecast_wide,
+                previous_weights.get(config.primary_strategy),
+                config.maximum_rebalance_turnover,
+            )
+        except RuntimeError as exc:
+            raise RuntimeError(
+                f'Historical portfolio construction failed at {anchor.date()}: {exc}'
+            ) from exc
         regime = (
             'high_volatility'
             if float(features['volatility_1y'].median()) > 0.30
@@ -2296,6 +2335,44 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     portfolio_weights = pd.concat(weight_frames, ignore_index=True, sort=False)
     portfolio_returns = pd.DataFrame(portfolio_rows)
     risk_forecasts = pd.concat(risk_frames, ignore_index=True)
+    risk_config = (
+        load_yaml('configs/validation.yaml')
+        .get('validation', {})
+        .get('walk_forward', {})
+        .get('risk_forecast', {})
+    )
+    locked_risk_calibration: dict[str, object]
+    minimum_locked_rows = int(
+        risk_config.get('locked_minimum_training_rows', 504)
+    ) + int(risk_config.get('locked_minimum_holdout_rows', 252))
+    if len(risk_forecasts) >= minimum_locked_rows:
+        risk_forecasts, locked_risk_calibration = apply_locked_risk_calibration(
+            risk_forecasts,
+            scale_factors=risk_config.get(
+                'locked_scale_factors', [1.0, 1.025, 1.05, 1.075, 1.10]
+            ),
+            exception_multipliers=risk_config.get(
+                'locked_exception_multipliers', [1.0]
+            ),
+            exception_days=risk_config.get(
+                'locked_exception_days', [0]
+            ),
+            holdout_fraction=float(
+                risk_config.get('locked_holdout_fraction', 0.40)
+            ),
+            minimum_training_rows=int(
+                risk_config.get('locked_minimum_training_rows', 504)
+            ),
+            minimum_holdout_rows=int(
+                risk_config.get('locked_minimum_holdout_rows', 252)
+            ),
+        )
+    else:
+        locked_risk_calibration = {
+            'status': 'not_applied_insufficient_history',
+            'observations': len(risk_forecasts),
+            'minimum_required': minimum_locked_rows,
+        }
     constraints = pd.concat(constraint_frames, ignore_index=True)
     anchor_summary = pd.DataFrame(anchor_rows)
 
@@ -2356,6 +2433,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         'primary_strategy': config.primary_strategy,
         'configuration': asdict(config),
         'source_database': str(data_config.duckdb_path),
+        'locked_risk_calibration': locked_risk_calibration,
         'source_universe_hash': _frame_hash(universe, ['security_id', 'region']),
         'source_profile': {
             'security_count': int(universe['security_id'].nunique()),

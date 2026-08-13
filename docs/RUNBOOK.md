@@ -12,6 +12,20 @@ Run the MVP pipeline:
 python scripts/run_full_pipeline.py
 ```
 
+Run the full measured, resumable research workflow without interactive prompts:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_overnight_research.py --max-hours 12
+```
+
+This foreground supervisor prevents system sleep while active, owns a single-run
+lock, bounds nested numerical-library threads, monitors free memory, terminates
+only its own child tree on a guardrail breach, and resumes successful stages from
+`data/locks/overnight_checkpoint.json`. Bloomberg exit code `75` is treated as an
+external quota interruption; local modelling continues and the provider group is
+retried after its cooldown. Review
+`reports/outputs/overnight/overnight_execution_report.md` for exact step evidence.
+
 Run the complete 1997-present portfolio-output backtest:
 
 ```powershell
@@ -435,8 +449,10 @@ python scripts/run_model_validation.py --mode release_candidate --strict
 The walk-forward risk layer selects among EWMA Normal, EWMA Student-t, filtered
 historical simulation, and vectorised DCC-IGARCH Student-t models using only a
 trailing calibration slice. Governance reports both overall and chronological
-holdout Kupiec and Christoffersen results. A one-day post-exception response is
-stateful across monthly anchors.
+holdout Kupiec and Christoffersen results. A development segment jointly selects
+the global VaR scale and causal post-exception multiplier/duration; those values
+are locked before the chronological holdout. Exception state remains continuous
+across monthly anchors.
 
 Turnover control is applied after every optimiser fallback. Existing holdings
 receive retention hysteresis, small desired trades fall inside a no-trade band,

@@ -21,12 +21,31 @@ from src.data.schemas import SCHEMAS
 from src.data_ingestion.bloomberg_adapter import (
     BloombergConfig,
     BloombergDesktopAdapter,
+    BloombergRequestError,
     bloomberg_symbol_for_row,
 )
 
 
 LOGGER = logging.getLogger(__name__)
 DEFAULT_REGIONS = ("Mainland China", "Hong Kong")
+RETRYABLE_EXIT_CODE = 75
+
+
+def _is_retryable_bloomberg_error(error: Exception) -> bool:
+    message = str(error).lower()
+    retryable_markers = (
+        "daily capacity reached",
+        "request timed out",
+        "session startup timed out",
+        "connection reset",
+        "connection aborted",
+        "connection refused",
+        "temporarily unavailable",
+        "service unavailable",
+    )
+    return isinstance(error, BloombergRequestError) and any(
+        marker in message for marker in retryable_markers
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -427,6 +446,7 @@ def main() -> int:
                     start=start_date.date().isoformat(),
                     end=end_date.date().isoformat(),
                 )
+                request_error = adapter.last_errors.get("request")
                 bars["ticker"] = bars["ticker"].map(symbol_map)
                 bars = bars.dropna(subset=["ticker"])
                 bars["currency"] = bars["ticker"].map(currency_map)
@@ -440,6 +460,8 @@ def main() -> int:
                 total_rows += len(clean)
                 returned = set(clean["security_id"].astype(str))
                 for provider_symbol, message in adapter.last_errors.items():
+                    if provider_symbol == "request":
+                        continue
                     failures.append(
                         {
                             "security_id": symbol_map.get(provider_symbol, ""),
@@ -463,6 +485,28 @@ def main() -> int:
                     len(clean),
                     len(returned),
                 )
+                if request_error:
+                    raise BloombergRequestError(
+                        f"Bloomberg price batch {offset + 1}-{offset + len(batch)}: "
+                        f"{request_error}"
+                    )
+            except BloombergRequestError as exc:
+                if _is_retryable_bloomberg_error(exc):
+                    raise
+                LOGGER.warning(
+                    "Bloomberg batch %s-%s failed: %s",
+                    offset + 1,
+                    offset + len(batch),
+                    exc,
+                )
+                for row in batch.itertuples(index=False):
+                    failures.append(
+                        {
+                            "security_id": str(row.security_id),
+                            "provider_symbol": str(row.provider_symbol),
+                            "error": str(exc),
+                        }
+                    )
             except Exception as exc:
                 LOGGER.warning(
                     "Bloomberg batch %s-%s failed: %s",
@@ -509,6 +553,12 @@ def main() -> int:
                 str(exc),
             ),
         )
+        if _is_retryable_bloomberg_error(exc):
+            LOGGER.error(
+                "Bloomberg price run paused after durable database writes: %s",
+                exc,
+            )
+            return RETRYABLE_EXIT_CODE
         raise
     finally:
         _write_failure_report(args.failure_report, failures, attempted_ids)

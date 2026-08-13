@@ -82,7 +82,7 @@ database snapshots, corporate actions, historical market capitalisation/free
 float, identifier observations, macro releases, sentiment and decision
 manifests. Model reads always filter `available_from <= decision timestamp`.
 
-Prioritise the 601 securities actually touched by the current 60-month
+Prioritise the 603 securities actually touched by the current 60-month
 walk-forward. Annual statements are first because the current feature pipeline
 consumes annual fundamentals:
 
@@ -91,7 +91,7 @@ consumes annual fundamentals:
   --regions US UK DACH 'EU ex-DACH' 'Mainland China' 'Hong Kong' `
   --universe-file reports\outputs\walk_forward\historical_portfolio_weights.parquet `
   --datasets fundamentals --period-types Y `
-  --start 2018-07-01 --request-size 600 --skip-migrations
+  --start 2018-07-31 --request-size 25 --skip-migrations
 ```
 
 Then add quarterly vintages for future quarterly-feature work:
@@ -101,7 +101,7 @@ Then add quarterly vintages for future quarterly-feature work:
   --regions US UK DACH 'EU ex-DACH' 'Mainland China' 'Hong Kong' `
   --universe-file reports\outputs\walk_forward\historical_portfolio_weights.parquet `
   --datasets fundamentals --period-types Q `
-  --start 2018-07-01 --request-size 600 --skip-migrations
+  --start 2018-07-31 --request-size 25 --skip-migrations
 ```
 
 Finally, fill the complete mapped Chinese universe:
@@ -110,14 +110,21 @@ Finally, fill the complete mapped Chinese universe:
 .\.venv\Scripts\python.exe scripts\run_bloomberg_pit_backfill.py `
   --regions 'Mainland China' 'Hong Kong' `
   --datasets fundamentals --period-types Y Q `
-  --start 2018-07-01 --request-size 1000 --skip-migrations
+  --start 2018-07-31 --request-size 25 --skip-migrations
 ```
 
-All commands are checkpointed at dataset/snapshot/universe granularity. If
-Bloomberg reports `Daily capacity reached`, stop and rerun the identical command
-after the entitlement resets; completed snapshots are skipped. Fundamentals-
-only runs reuse local currencies and stop immediately on request-level errors,
-avoiding unnecessary Bloomberg calls.
+All commands are checkpointed at atomic symbol-chunk granularity inside each
+dataset, snapshot and universe. A request-level failure is checked before the
+chunk is committed, so a partial Bloomberg response cannot mark an incomplete
+snapshot as complete. `Daily capacity reached`, timeouts and transient connection
+failures return exit code `75`; rerunning the identical command resumes at the
+first incomplete chunk. Per-symbol field or entitlement failures remain visible
+without discarding valid rows from the same chunk.
+
+For unattended execution, `scripts/run_overnight_research.py` shares one Bloomberg
+cooldown across the validation-priority universe and the full Chinese universe.
+It continues local model stages while the external quota is unavailable and
+records the unresolved provider limit separately from code or model failures.
 
 ### Evidence Semantics
 

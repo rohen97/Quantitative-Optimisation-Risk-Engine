@@ -54,6 +54,12 @@ validation:
       dcc_beta: 0.95
       correlation_shrinkage: 0.10
       calibration_scale_factors: [1.00]
+      locked_scale_factors: [1.00, 1.025, 1.05, 1.075, 1.10]
+      locked_exception_multipliers: [1.00, 1.10, 1.20, 1.30, 1.40]
+      locked_exception_days: [0, 1, 3, 5, 10]
+      locked_holdout_fraction: 0.40
+      locked_minimum_training_rows: 504
+      locked_minimum_holdout_rows: 252
       exception_response_multiplier: 1.10
       exception_response_days: 1
 

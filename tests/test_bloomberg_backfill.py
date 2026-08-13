@@ -3,10 +3,12 @@ from __future__ import annotations
 import pandas as pd
 
 from scripts.run_bloomberg_backfill import (
+    _is_retryable_bloomberg_error,
     _read_failure_report,
     _write_failure_report,
     write_bloomberg_identifiers,
 )
+from src.data_ingestion.bloomberg_adapter import BloombergRequestError
 
 
 class _Repository:
@@ -60,3 +62,10 @@ def test_bloomberg_identifier_rows_match_repository_schema():
     )
     assert frame["identifier_type"].eq("bloomberg_ticker").all()
     assert frame["source"].eq("bloomberg_mapping").all()
+
+
+def test_daily_backfill_retries_capacity_but_not_bad_fields():
+    assert _is_retryable_bloomberg_error(
+        BloombergRequestError("Daily capacity reached [nid:19562]")
+    )
+    assert not _is_retryable_bloomberg_error(BloombergRequestError("Invalid field"))

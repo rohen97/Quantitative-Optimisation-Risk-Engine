@@ -101,17 +101,26 @@ def _input_hash(paths: list[Path]) -> str:
 
 
 def _weight_column(frame: pd.DataFrame) -> str | None:
-    for candidate in (
+    candidates = (
         "final_selected_weight",
         "final_weight",
         "accepted_target_weight",
         "target_weight",
         "projected_drl_weight",
         "weight",
-    ):
-        if candidate in frame:
+    )
+    available = [candidate for candidate in candidates if candidate in frame]
+    for candidate in available:
+        if pd.to_numeric(frame[candidate], errors="coerce").notna().all():
             return candidate
-    return None
+    if not available:
+        return None
+    return max(
+        available,
+        key=lambda candidate: int(
+            pd.to_numeric(frame[candidate], errors="coerce").notna().sum()
+        ),
+    )
 
 
 def _register_validation_run(

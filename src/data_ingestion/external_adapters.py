@@ -432,10 +432,22 @@ class FredAdapter:
                 params["realtime_start"] = "1776-07-04"
                 params["realtime_end"] = "9999-12-31"
             request_params.append(params)
-        payloads = [
-            self.client.get(f"{self.provider.base_url}/series/observations", params=item).json()
-            for item in request_params
-        ]
+        payloads = []
+        for item in request_params:
+            try:
+                payloads.append(
+                    self.client.get(
+                        f"{self.provider.base_url}/series/observations",
+                        params=item,
+                    ).json()
+                )
+            except DataSourceRequestError as exc:
+                if (
+                    preserve_vintages
+                    and "no vintage dates exist" in str(exc).lower()
+                ):
+                    continue
+                raise
         metadata_payload = self.client.get(
             f"{self.provider.base_url}/series",
             params={"series_id": series_id, "api_key": api_key, "file_type": "json"},

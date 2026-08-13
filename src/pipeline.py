@@ -21,6 +21,7 @@ from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.narrative.pipeline import run_narrative_pipeline
 from src.optimisation.portfolio_builder import (
+    PortfolioFeasibilityError,
     build_final_portfolio_weights,
     build_proposed_portfolio,
     run_portfolio_optimisation,
@@ -279,13 +280,22 @@ def run_pipeline_from_inputs(
     llm_benchmark = run_llm_benchmark_branch(scorecard, mode=llm_mode)
     branch_comparison = compare_branches(portfolio_aware, clean_sheet, llm_benchmark)
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
-    optimisation_outputs = run_portfolio_optimisation(
-        scorecard,
-        portfolio,
-        optimisation_config,
-        final_recommendations,
-        regime_outputs["regime_dashboard_summary"],
-    )
+    try:
+        optimisation_outputs = run_portfolio_optimisation(
+            scorecard,
+            portfolio,
+            optimisation_config,
+            final_recommendations,
+            regime_outputs["regime_dashboard_summary"],
+        )
+    except PortfolioFeasibilityError as exc:
+        write_csv(scorecard, out, "stock_scorecard.csv")
+        write_csv(branch_comparison, out, "branch_comparison_report.csv")
+        write_csv(final_recommendations, out, "final_recommendations.csv")
+        write_csv(exc.optimiser_inputs, out, "optimiser_input_dataset.csv")
+        write_csv(exc.summary, out, "portfolio_optimisation_summary.csv")
+        write_csv(exc.constraint_report, out, "portfolio_constraint_report.csv")
+        raise
     proposed = build_proposed_portfolio(portfolio, scorecard)
     risk_portfolio = optimisation_outputs["recommended_optimised_portfolio"]
     risk_report = build_risk_report(prices, risk_portfolio)

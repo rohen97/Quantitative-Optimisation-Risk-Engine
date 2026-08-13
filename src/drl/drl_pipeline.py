@@ -356,6 +356,31 @@ def run_drl_pipeline(
     baseline = choose_baseline_portfolio(frames, out)
     if baseline.empty:
         raise ValueError("DRL pipeline requires optimiser outputs or a stock_scorecard fallback.")
+    cash_mask = (
+        baseline.get("ticker", pd.Series("", index=baseline.index))
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .eq("CASH")
+        | baseline.get("instrument_type", pd.Series("", index=baseline.index))
+        .fillna("")
+        .astype(str)
+        .str.lower()
+        .eq("cash")
+    )
+    raw_weights = pd.to_numeric(
+        baseline.get("target_weight", pd.Series(0.0, index=baseline.index)),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+    explicit_cash = float(raw_weights.loc[cash_mask].sum())
+    equity_weight = float(raw_weights.loc[~cash_mask].sum())
+    baseline_cash = min(
+        max(explicit_cash + max(1.0 - explicit_cash - equity_weight, 0.0), 0.0),
+        1.0,
+    )
+    baseline = baseline.loc[~cash_mask].copy()
+    if baseline.empty:
+        raise ValueError("DRL pipeline requires at least one non-cash baseline asset.")
     baseline = _limit_drl_universe(
         baseline,
         int(config.get("maximum_assets", 100)),
@@ -366,16 +391,27 @@ def run_drl_pipeline(
     if eligibility is None:
         eligibility = build_eligibility_mask(baseline, constraints)
     eligibility_mask = eligibility.fillna(False).astype(bool).to_numpy()
-    baseline_weights = baseline_weight_vector(baseline)
-    current_weights = pd.to_numeric(baseline.get("current_weight", 0.0), errors="coerce").fillna(0.0).to_numpy(dtype=float)
     temporal = build_temporal_mock_features(baseline, int(config.get("lookback_days", 60)))
     gate_weights = calculate_regime_agent_weights(frames.get("regime_dashboard_summary", pd.DataFrame()))
     throttle = calculate_risk_throttle_from_dashboard(frames.get("regime_dashboard_summary", pd.DataFrame()))
     effective_config = config.copy()
     effective_config["max_adjustment"] = constraints["max_delta_weight"]
-    effective_config["cash_weight"] = max(float(config.get("cash_weight", 0.02)), throttle.minimum_cash_weight)
+    effective_config["cash_weight"] = max(
+        float(config.get("cash_weight", 0.02)),
+        throttle.minimum_cash_weight,
+        baseline_cash,
+    )
     effective_config["risk_throttle_reason"] = throttle.reason
-    constraints["cash_floor"] = max(float(constraints.get("cash_floor", 0.0)), throttle.minimum_cash_weight)
+    constraints["cash_floor"] = max(
+        float(constraints.get("cash_floor", 0.0)),
+        throttle.minimum_cash_weight,
+        baseline_cash,
+    )
+    baseline_weights = baseline_weight_vector(baseline) * (1.0 - baseline_cash)
+    current_weights = pd.to_numeric(
+        baseline.get("current_weight", 0.0), errors="coerce"
+    ).fillna(0.0).to_numpy(dtype=float)
+    baseline_state_config = {**effective_config, "cash_weight": baseline_cash}
     state = build_drl_state(
         pd.Timestamp.today().normalize(),
         baseline["ticker"].astype(str).tolist(),
@@ -383,7 +419,7 @@ def run_drl_pipeline(
         baseline_weights,
         temporal,
         baseline,
-        _portfolio_features(baseline, baseline_weights, effective_config),
+        _portfolio_features(baseline, baseline_weights, baseline_state_config),
         eligibility_mask,
     )
     state_schema = build_state_schema(state.feature_names)
@@ -466,6 +502,13 @@ def run_drl_pipeline(
     baseline_portfolio["baseline_weight"] = baseline_weights
     baseline_portfolio["selected_weight"] = baseline_weights
     baseline_portfolio["selected_weights_source"] = "baseline_optimiser"
+    baseline_portfolio = _append_cash_allocation(
+        baseline_portfolio,
+        baseline_cash=baseline_cash,
+        target_cash=baseline_cash,
+        accepted_cash=baseline_cash,
+        selected_source="baseline_optimiser",
+    )
     challenger_portfolio = drl_portfolio.copy()
     challenger_portfolio["raw_drl_weight"] = projection_report[
         projection_report["ticker"].astype(str).str.upper().ne("CASH")
