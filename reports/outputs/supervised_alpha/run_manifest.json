@@ -1,0 +1,198 @@
+{
+  "artifact_version": 5,
+  "checksums_file": "checksums.sha256",
+  "generated_at": "2026-08-17T07:20:19.881458+00:00",
+  "model_bundles": [
+    {
+      "component_models": 3,
+      "deployment_blend_weight": 0.0,
+      "deployment_status": "INSUFFICIENT_EVIDENCE",
+      "horizon_months": 3,
+      "model_path": "data/processed/supervised_alpha/supervised_alpha_3m.joblib",
+      "sha256": "ef4ecc7c19ff3e02878b8697de95a4da250aa950e5a53eb366ad8fe0905ab436",
+      "trained_through_outcome_date": "2026-07-31"
+    },
+    {
+      "component_models": 3,
+      "deployment_blend_weight": 0.0,
+      "deployment_status": "INSUFFICIENT_EVIDENCE",
+      "horizon_months": 6,
+      "model_path": "data/processed/supervised_alpha/supervised_alpha_6m.joblib",
+      "sha256": "bb4e63d7f2bce8417ac7a44e014bc7691e78b986d5bfcd0609882fe83a6746a3",
+      "trained_through_outcome_date": "2026-07-31"
+    },
+    {
+      "component_models": 3,
+      "deployment_blend_weight": 0.0,
+      "deployment_status": "INSUFFICIENT_EVIDENCE",
+      "horizon_months": 9,
+      "model_path": "data/processed/supervised_alpha/supervised_alpha_9m.joblib",
+      "sha256": "42189662da978e5418374a7d4b05b8567b2d564369c04ce8085d859bcd3a785f",
+      "trained_through_outcome_date": "2026-07-31"
+    },
+    {
+      "component_models": 3,
+      "deployment_blend_weight": 0.0,
+      "deployment_status": "INSUFFICIENT_EVIDENCE",
+      "horizon_months": 12,
+      "model_path": "data/processed/supervised_alpha/supervised_alpha_12m.joblib",
+      "sha256": "d1cb22edbded6c1da82c1efa68c02a35ab3c74941bfbea91382488d06a67cb28",
+      "trained_through_outcome_date": "2026-07-31"
+    }
+  ],
+  "payload_files": 21,
+  "settings": {
+    "annual_bank_fee_rate": 0.0025,
+    "annual_turnover_budget": 1.5,
+    "assumed_position_weight": 0.03,
+    "base_cost_bps": 17.5,
+    "bootstrap_samples": 1000,
+    "categorical_min_frequency": 10,
+    "checkpoint_directory": "data/interim/supervised_alpha_checkpoints",
+    "currency_conversion_bps": 2.0,
+    "cv_test_periods": 3,
+    "enabled_families": [
+      "ols_screened",
+      "ridge",
+      "elastic_net",
+      "huber",
+      "random_forest",
+      "extra_trees",
+      "hist_gradient_boosting",
+      "xgboost",
+      "xgb_ranker"
+    ],
+    "entry_cost_rank_penalty": 0.03,
+    "frozen_test_end": "2026-05-31T00:00:00",
+    "frozen_test_start": "2025-06-30T00:00:00",
+    "horizons_months": [
+      3,
+      6,
+      9,
+      12
+    ],
+    "impact_coefficient_bps": 10.0,
+    "maximum_annual_turnover": 1.5,
+    "maximum_deployment_blend": 0.25,
+    "maximum_oos_sign_test_p_value": 0.05,
+    "maximum_participation_rate": 0.05,
+    "minimum_oos_periods": 12,
+    "minimum_oos_rank_ic": 0.02,
+    "minimum_outcome_cross_section_coverage": 0.9,
+    "minimum_peer_count": 5,
+    "minimum_test_securities": 30,
+    "minimum_train_periods": 24,
+    "model_directory": "data/processed/supervised_alpha",
+    "model_grids": {
+      "elastic_net": [
+        {
+          "alpha": 0.001,
+          "l1_ratio": 0.5
+        },
+        {
+          "alpha": 0.01,
+          "l1_ratio": 0.1
+        },
+        {
+          "alpha": 0.01,
+          "l1_ratio": 0.5
+        }
+      ],
+      "hist_gradient_boosting": [
+        {
+          "l2_regularization": 5.0,
+          "learning_rate": 0.04,
+          "max_iter": 160,
+          "max_leaf_nodes": 7
+        },
+        {
+          "l2_regularization": 10.0,
+          "learning_rate": 0.04,
+          "max_iter": 160,
+          "max_leaf_nodes": 15
+        }
+      ],
+      "random_forest": [
+        {
+          "max_depth": 6,
+          "max_features": 0.7,
+          "min_samples_leaf": 80,
+          "n_estimators": 120
+        },
+        {
+          "max_depth": 10,
+          "max_features": 0.7,
+          "min_samples_leaf": 80,
+          "n_estimators": 120
+        }
+      ],
+      "ridge": [
+        {
+          "alpha": 1.0
+        },
+        {
+          "alpha": 10.0
+        },
+        {
+          "alpha": 100.0
+        }
+      ],
+      "xgboost": [
+        {
+          "learning_rate": 0.035,
+          "max_depth": 2,
+          "min_child_weight": 50.0,
+          "n_estimators": 400,
+          "reg_lambda": 15.0
+        },
+        {
+          "learning_rate": 0.035,
+          "max_depth": 3,
+          "min_child_weight": 75.0,
+          "n_estimators": 400,
+          "reg_lambda": 25.0
+        }
+      ]
+    },
+    "n_jobs": 4,
+    "no_trade_band_return": 0.002,
+    "ols_maximum_features": 20,
+    "ols_minimum_abs_t_stat": 1.0,
+    "ols_minimum_features": 5,
+    "ols_minimum_sign_consistency": 0.55,
+    "output_directory": "reports/outputs/supervised_alpha",
+    "portfolio_nav_usd": 186060522.0,
+    "primary_horizon_months": 3,
+    "prospective_holdout_start": "2026-08-31T00:00:00",
+    "quantile_calibration_periods": 12,
+    "quantile_calibration_target_coverage": 0.95,
+    "quantile_minimum_calibration_periods": 6,
+    "random_seed": 42,
+    "regional_benchmark_weight": 0.7,
+    "require_positive_active_return_ci": true,
+    "resume_checkpoints": true,
+    "retention_rank_bonus": 0.1,
+    "sector_benchmark_weight": 0.3,
+    "top_fraction": 0.2,
+    "validation_end": "2025-04-30T00:00:00",
+    "validation_start": "2024-03-31T00:00:00"
+  },
+  "source_artifacts": {
+    "config": "configs/ml_forecasting.yaml",
+    "config_sha256": "f8fe500c9975dd2e106822d999852f7a16d32fceba64cde6209a25e79dff873f",
+    "feature_panel": "reports/outputs/walk_forward/historical_features.parquet",
+    "feature_panel_sha256": "36a037f6cf728d4c7bedb41d1eac430360cdfb6e0b81c042996f463e03ef45e3",
+    "git_commit_at_reseal": "1bf8904c70c3fcb436525cafe548d19637b724c4",
+    "git_commit_at_training": "1bf8904c70c3fcb436525cafe548d19637b724c4",
+    "git_dirty_at_reseal": true,
+    "git_dirty_at_training": true,
+    "latest_features": "reports/outputs/optimiser_input_dataset.csv",
+    "latest_features_sha256": "68c2b12f6324ce0b0910f8841417a22568626ea49925580d53a5a77f785ec586",
+    "model_source": "src/models/supervised_alpha.py",
+    "model_source_sha256": "f236e86b5259d600e404999692b83c8fd23adbcedd3170c850483d9c878dd042",
+    "outcomes": "reports/outputs/walk_forward/historical_realised_outcomes_extended.parquet",
+    "outcomes_sha256": "cdd2017fe03fe78e8da381f4a4ef31dcdcec69f618a4459ba40d1d9021dea727",
+    "resealed_existing_artifacts": true
+  },
+  "status": "INSUFFICIENT_EVIDENCE"
+}

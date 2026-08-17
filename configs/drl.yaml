@@ -1,12 +1,12 @@
 drl:
   enabled: true
-  mode: mock
+  mode: historical_walk_forward
 
   role:
     allocation_mode: residual_overlay
     allow_full_replacement: false
-    maximum_drl_blend_weight: 0.25
-    baseline_blend_weight: 0.75
+    maximum_drl_blend_weight: 0.10
+    baseline_blend_weight: 0.90
 
   environment:
     decision_frequency: monthly
@@ -23,6 +23,7 @@ drl:
     maximum_assets: 100
     max_monthly_delta_weight: 0.01
     max_quarterly_delta_weight: 0.02
+    no_trade_band_weight: 0.002
     use_softmax: false
     use_constraint_projection: true
 
@@ -68,6 +69,18 @@ drl:
     narrative_credit_penalty_weight: 0.03
     stress_loss_penalty_weight: 0.02
 
+  regional_reward:
+    active_return_scale: 100.0
+    transaction_cost_scale: 25.0
+    turnover_scale: 0.05
+    drawdown_threshold: 0.10
+    drawdown_penalty_scale: 0.75
+    tail_loss_threshold: 0.05
+    tail_loss_penalty_scale: 2.0
+    expected_cvar_limit: -0.25
+    expected_tail_penalty_scale: 0.25
+    volatility_penalty_scale: 0.10
+
   risk_throttle:
     enabled: true
     low_threshold: 35
@@ -81,22 +94,36 @@ drl:
   algorithms:
     primary: ppo
     challengers:
-      - sac
-      - td3
+      - contextual_bandit
+      - convex_residual
+    contextual_bandit:
+      ridge_penalties: [0.1, 1.0, 10.0]
+    convex_residual:
+      risk_aversion_values: [1.0, 3.0, 10.0]
+      turnover_penalty: 2.0
+      cost_penalty: 0.02
     use_stable_baselines3_if_available: true
     fallback_policy: deterministic_mock
+    allow_mock_fallback: false
 
   ppo:
-    hidden_layers: [64, 64]
+    hidden_layers: [32, 32]
     activation: tanh
     gamma: 0.90
     gae_lambda: 0.90
     clip_range: 0.25
     learning_rate_start: 0.0003
     learning_rate_end: 0.00001
-    n_epochs: 16
+    n_epochs: 4
+    n_steps: 128
+    batch_size: 64
+    ent_coef: 0.001
+    torch_num_threads: 1
     total_timesteps_mock: 5000
-    total_timesteps_full: 500000
+    total_timesteps_full: 50000
+    total_timesteps: 2048
+    use_stable_baselines: true
+    minimum_random_seeds: 5
 
   seeds:
     values: [11, 23, 37, 53, 71]
@@ -105,6 +132,9 @@ drl:
 
   training:
     walk_forward: true
+    parallel_seed_workers: 2
+    train_fraction: 0.58
+    validation_fraction: 0.19
     train_years: 5
     validation_years: 1
     test_years: 1
@@ -112,6 +142,13 @@ drl:
     embargo_rebalance_periods: 1
     use_random_split: false
     retraining_frequency: annual
+    minimum_train_periods: 60
+    minimum_validation_periods: 12
+    minimum_test_periods: 12
+    frozen_test_start: 2025-06-30
+    frozen_test_end: 2026-05-31
+    holdout_label: legacy_locked_oos_seen_once
+    prospective_holdout_start: 2026-08-31
 
   specialist_agents:
     enabled: true
@@ -144,3 +181,8 @@ drl:
     reject_if_cvar_limit_breached: true
     reject_if_es_limit_breached: true
     reject_if_stress_limit_breached: true
+    minimum_oos_observations: 12
+    minimum_oos_sharpe_improvement: 0.0
+    oos_tail_risk_tolerance: 0.0
+    require_positive_active_return_ci: true
+    required_prospective_shadow_cycles: 3

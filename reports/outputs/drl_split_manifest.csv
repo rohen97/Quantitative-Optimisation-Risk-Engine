@@ -1,0 +1,5 @@
+split,start_date,end_date,observations,panel_hash_sha256,holdout_label,prospective_holdout_start,test_period_model_selection_allowed
+train,2019-02-28,2024-01-31,60,17c1ade7cee4da60761569937fb1be92fad74bb903cd28a9468ed68a793b244d,legacy_locked_oos_seen_once,2026-08-31,False
+validation,2024-03-31,2025-04-30,14,17c1ade7cee4da60761569937fb1be92fad74bb903cd28a9468ed68a793b244d,legacy_locked_oos_seen_once,2026-08-31,False
+embargo,2024-02-29,2025-05-31,2,17c1ade7cee4da60761569937fb1be92fad74bb903cd28a9468ed68a793b244d,legacy_locked_oos_seen_once,2026-08-31,False
+legacy_locked_oos,2025-06-30,2026-05-31,12,17c1ade7cee4da60761569937fb1be92fad74bb903cd28a9468ed68a793b244d,legacy_locked_oos_seen_once,2026-08-31,False

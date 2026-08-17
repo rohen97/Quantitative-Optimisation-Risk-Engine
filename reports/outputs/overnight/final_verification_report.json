@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "verified_at_utc": "2026-08-13T19:34:10Z",
+  "status": "completed_with_external_limits",
+  "governance": {
+    "validation_run_id": "validation-20260813T184133-dccaac94",
+    "approval_status": "CONDITIONALLY_APPROVED",
+    "score": 87.5,
+    "critical_failures": 0
+  },
+  "walk_forward": {
+    "forecast_rows": 181664,
+    "aligned_outcome_rows": 181213,
+    "monthly_anchors": 60,
+    "chronology_breaches": 0,
+    "hard_constraint_breaches": 0
+  },
+  "portfolio": {
+    "equity_positions": 20,
+    "cash_weight": 0.0,
+    "annualised_turnover": 1.0966695071489194,
+    "annualised_cost_drag": 0.0081742059454748
+  },
+  "risk": {
+    "overall_95": "PASS",
+    "overall_99": "PASS",
+    "chronological_holdout_95": "PASS",
+    "chronological_holdout_99": "PASS"
+  },
+  "drl": {
+    "real_ppo_seeds": 5,
+    "accepted": false,
+    "selected_source": "baseline_optimiser",
+    "test_information_ratio_min": -1.7437095287030564,
+    "test_information_ratio_max": -1.4660406671916622
+  },
+  "overfitting": {
+    "probability_of_backtest_overfitting": 0.24567099567099568,
+    "selected_information_ratio_haircut": 0.48368761943955996,
+    "deployable_alpha": "NOT_ESTABLISHED"
+  },
+  "bloomberg_aggregate_coverage": {
+    "fundamental_vintages": 25240,
+    "corporate_action_vintages": 151659,
+    "market_cap_vintages": 694246,
+    "identifier_vintages": 34172,
+    "macro_release_vintages": 157155,
+    "decision_snapshot_manifests": 361,
+    "remaining_limit": "daily capacity [nid:19488]"
+  },
+  "regression": {
+    "passed": 403,
+    "warnings": 2,
+    "failed": 0,
+    "duration_seconds": 1392.27
+  },
+  "artifacts": {
+    "release_files": 95,
+    "presentation_slides": 18,
+    "powerpoint_text_bounds": "PASS",
+    "visual_review": "PASS"
+  },
+  "required_processes_left_running": 0
+}

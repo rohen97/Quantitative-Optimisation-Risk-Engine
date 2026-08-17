@@ -18,6 +18,13 @@ def test_required_data_schemas_exist_with_primary_keys():
         "model_metric_snapshots",
         "model_runs",
         "model_outputs",
+        "fundamental_vintages",
+        "corporate_action_vintages",
+        "market_cap_vintages",
+        "identifier_vintages",
+        "macro_release_vintages",
+        "sentiment_vintages",
+        "decision_snapshot_manifests",
     }
     assert required.issubset(set(schema_names()))
     for name in required:

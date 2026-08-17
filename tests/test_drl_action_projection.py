@@ -122,3 +122,22 @@ def test_project_weights_respects_name_group_currency_and_turnover_caps():
     assert weights[[0, 1]].sum() <= 0.40 + 1e-8
     assert weights[[0, 1, 2]].sum() <= 0.60 + 1e-8
     assert np.abs(weights - current).sum() <= 0.50 + 1e-8
+
+
+def test_project_weights_enforces_cash_ceiling():
+    result = project_weights(
+        np.array([0.20, 0.20, 0.40, 0.20]),
+        np.array([-0.20, -0.20, -0.20, 0.20]),
+        np.array([True, True, True, True]),
+        _metadata(),
+        np.array([0.20, 0.20, 0.40, 0.20]),
+        {
+            "max_delta_weight": 0.20,
+            "max_single_name_weight": 0.50,
+            "maximum_turnover": 1.0,
+            "cash_floor": 0.10,
+            "maximum_cash_weight": 0.25,
+        },
+    )
+    assert result.feasible
+    assert result.projected_weights[-1] <= 0.25 + 1e-8

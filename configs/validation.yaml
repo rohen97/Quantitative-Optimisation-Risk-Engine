@@ -27,18 +27,43 @@ validation:
   walk_forward:
     output_directory: reports/outputs/walk_forward
     evidence_mode: reconstructed_pit_proxy
-    start_date: 2021-07-31
+    start_date: 2018-07-31
     forecast_end_date: 2025-07-31
     strategy_end_date: 2026-06-30
     filing_lag_days: 120
     minimum_annual_periods: 2
-    minimum_training_price_rows: 756
+    minimum_anchor_securities: 30
+    # 630 daily rows retain roughly 2.5 years of pre-decision history while
+    # leaving 60 frozen monthly training observations before the locked OOS split.
+    minimum_training_price_rows: 630
     price_lookback_rows: 756
     outcome_date_tolerance_days: 14
     portfolio_nav_usd: 100000000
     primary_strategy: wolf_cvar
     approval_cap: CONDITIONALLY_APPROVED
     maximum_rebalance_turnover: 0.06
+    include_historical_inactive: true
+    classical_alpha:
+      enabled: true
+      signal_weights:
+        benchmark_relative_expected_return_12m: 0.30
+        momentum_6m: 0.15
+        valuation_score: 0.15
+        cash_flow_quality_score: 0.12
+        balance_sheet_strength_score: 0.08
+        dividend_safety_score: 0.08
+        expected_volatility_12m: -0.06
+        cvar_5_12m: 0.06
+      regional_rank_weight: 0.70
+      sector_rank_weight: 0.30
+      minimum_peer_count: 5
+      base_cost_bps: 17.5
+      currency_conversion_bps: 2.0
+      impact_coefficient_bps: 10.0
+      maximum_participation_rate: 0.05
+      assumed_position_weight: 0.05
+      retention_bonus_points: 3.0
+      cost_penalty_points_per_portfolio_bp: 1.5
     risk_forecast:
       candidate_models:
         - ewma_normal
@@ -54,6 +79,12 @@ validation:
       dcc_beta: 0.95
       correlation_shrinkage: 0.10
       calibration_scale_factors: [1.00]
+      locked_scale_factors: [1.00, 1.025, 1.05, 1.075, 1.10]
+      locked_exception_multipliers: [1.00, 1.10, 1.20, 1.30, 1.40]
+      locked_exception_days: [0, 1, 3, 5, 10]
+      locked_holdout_fraction: 0.40
+      locked_minimum_training_rows: 504
+      locked_minimum_holdout_rows: 252
       exception_response_multiplier: 1.10
       exception_response_days: 1
 
@@ -77,6 +108,13 @@ validation:
     calibration_bins: 10
     maximum_brier_score: 0.25
     maximum_expected_calibration_error: 0.10
+    methods: [raw, isotonic, platt, beta]
+    chronological_holdout_fraction: 0.20
+    selection_validation_fraction: 0.25
+    embargo_months: 12
+    minimum_training_dates: 6
+    minimum_validation_dates: 6
+    minimum_holdout_dates: 6
 
   risk:
     var_confidence_levels: [0.95, 0.99]

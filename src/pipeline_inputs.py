@@ -1,12 +1,17 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+import logging
 
 import numpy as np
 import pandas as pd
 
 from src.data.config import load_data_config
+from src.data.model_input_summaries import price_summary_status
 from src.data.repository.duckdb_repository import DuckDBRepository
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def load_duckdb_universe(
@@ -29,9 +34,27 @@ def load_duckdb_universe(
     if max_securities > 0:
         limit_clause = "LIMIT ?"
         parameters.append(int(max_securities))
-    universe = repo.query(
-        f"""
-        WITH source_ranked AS (
+    summary_status = price_summary_status(repo)
+    if summary_status.fresh:
+        price_ctes = """
+        priced AS (
+            SELECT
+                security_id,
+                price_rows,
+                latest_trade_date,
+                avg_daily_traded_value_local,
+                observed_volume_rows
+            FROM security_price_summaries
+            WHERE price_rows >= ?
+        )
+        """
+    else:
+        LOGGER.warning(
+            "Price summary is stale or absent; using the exact full-table fallback. "
+            "Run scripts/refresh_model_input_summaries.py to restore low-latency reads."
+        )
+        price_ctes = """
+        source_ranked AS (
             SELECT
                 security_id,
                 trade_date,
@@ -76,7 +99,11 @@ def load_duckdb_universe(
             FROM ranked_prices
             GROUP BY security_id
             HAVING COUNT(*) >= ?
-        ),
+        )
+        """
+    universe = repo.query(
+        f"""
+        WITH {price_ctes},
         identifiers AS (
             SELECT
                 security_id,
@@ -185,6 +212,7 @@ def load_duckdb_universe(
     if universe.empty:
         raise RuntimeError("DuckDB model input query returned no securities with usable price history.")
     universe["_pipeline_index"] = np.arange(len(universe), dtype=np.int64)
+    universe.attrs["price_summary_mode"] = "materialised" if summary_status.fresh else "fallback"
     return universe
 
 

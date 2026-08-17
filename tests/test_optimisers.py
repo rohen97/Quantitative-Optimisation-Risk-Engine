@@ -1,5 +1,6 @@
 import pandas as pd
 
+from src.optimisation.constraint_report import build_constraint_report
 from src.optimisation.optimisers import cvar_constrained_portfolio, dividend_income_portfolio, risk_parity_portfolio, score_weighted_portfolio
 
 
@@ -132,3 +133,22 @@ def test_no_trade_band_keeps_feasible_current_portfolio():
     )
     assert portfolio['no_trade_band_applied'].all()
     assert portfolio['target_weight'].equals(portfolio['current_weight'])
+
+
+def test_optimizer_holds_cash_when_country_caps_limit_equity_capacity():
+    data = _data()
+    data["country"] = ["US"] * 10 + ["UK"] * 4 + ["HK"] * 3 + ["CH"] * 2 + ["FR"]
+    limits = {
+        "max_single_name_weight": 0.05,
+        "max_country_weight": 0.30,
+        "maximum_cash_weight": 0.25,
+    }
+    portfolio = score_weighted_portfolio(data, limits)
+    cash = portfolio.loc[portfolio["ticker"].eq("CASH"), "target_weight"].iloc[0]
+    equities = portfolio.loc[~portfolio["ticker"].eq("CASH")]
+    report = build_constraint_report(portfolio, limits)
+
+    assert abs(float(portfolio["target_weight"].sum()) - 1.0) < 1e-9
+    assert abs(float(cash) - 0.20) < 1e-9
+    assert equities["target_weight"].max() <= 0.05 + 1e-9
+    assert not report.loc[report["constraint_type"].eq("hard"), "breach_flag"].any()

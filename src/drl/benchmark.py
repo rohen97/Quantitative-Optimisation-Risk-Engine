@@ -145,6 +145,28 @@ def build_seed_evaluation(seed_results: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for _, row in seed_results.iterrows():
         seed = int(row["seed"])
+        if str(row.get("model_mode", "")).lower() == "real":
+            turnover = float(row.get("annualised_incremental_turnover", 0.0))
+            rows.append(
+                {
+                    "row_type": "seed",
+                    "seed": seed,
+                    "total_net_return": float(row.get("test_total_net_return", 0.0)),
+                    "sharpe": float(row.get("test_net_sharpe", 0.0)),
+                    "information_ratio": float(row.get("test_information_ratio", 0.0)),
+                    "cvar": float(row.get("test_cvar", 0.0)),
+                    "expected_shortfall": float(row.get("test_expected_shortfall", row.get("test_cvar", 0.0))),
+                    "maximum_drawdown": float(row.get("test_maximum_drawdown", 0.0)),
+                    "turnover": turnover,
+                    "dividend_yield": 0.0,
+                    "transaction_costs": float(row.get("transaction_costs", 0.0)),
+                    "constraint_violations": int(row.get("constraint_violations", 0)),
+                    "policy_weight_stability": 1.0 / (1.0 + turnover),
+                    "oos_observations": int(row.get("test_observations", 0)),
+                    "active_return_ci_lower_95": float(row.get("active_return_ci_lower_95", 0.0)),
+                }
+            )
+            continue
         total = float(row.get("test_reward", row.get("total_reward", 0.0)))
         cvar = -abs(float(row.get("cvar_penalty", row.get("risk_penalty", 0.0))))
         es = -abs(float(row.get("expected_shortfall_penalty", row.get("risk_penalty", 0.0))))
@@ -181,6 +203,11 @@ def build_seed_evaluation(seed_results: pd.DataFrame) -> pd.DataFrame:
         "constraint_violations",
         "policy_weight_stability",
     ]
+    metrics.extend(
+        column
+        for column in ("information_ratio", "oos_observations", "active_return_ci_lower_95")
+        if column in frame
+    )
     summary_rows = []
     for label in ["mean", "median", "standard_deviation", "interquartile_range"]:
         summary = {"row_type": label, "seed": np.nan}
@@ -235,6 +262,10 @@ def decide_drl_acceptance(
         add_reason("weights_do_not_sum_to_one")
     if baseline.size != w.size or not np.isfinite(baseline).all():
         add_reason("invalid_baseline_weights")
+    elif baseline.size == w.size:
+        incremental_turnover = 0.5 * float(np.abs(w - baseline).sum())
+        if incremental_turnover > float(limits.get("maximum_turnover", 1.0)):
+            add_reason("incremental_overlay_turnover_exceeds_hard_limit")
     if eligibility_mask is None:
         add_reason("missing_required_eligibility_mask")
     else:
@@ -270,8 +301,6 @@ def decide_drl_acceptance(
         stress_limit = float(limits.get("maximum_stress_loss", limits.get("maximum_severe_stress_loss", -1.0)))
         if row["worst_stress_loss"] < stress_limit:
             add_reason("stress_test_loss_exceeds_severe_loss_limit")
-        if row["turnover"] > float(limits.get("maximum_turnover", 1.0)):
-            add_reason("turnover_exceeds_hard_limit")
         if bool(row.get("liquidity_requirement_failed", False)):
             add_reason("liquidity_requirement_fails")
     if float(cfg.get("model_confidence", 1.0)) < float(cfg.get("minimum_model_confidence", 0.50)):
@@ -284,15 +313,65 @@ def decide_drl_acceptance(
             std_score = float(scores.std(ddof=0))
             max_seed_instability = float(cfg.get("maximum_seed_instability_ratio", 0.50))
             minimum_scale = float(cfg.get("minimum_seed_stability_scale", 1e-8))
-            if std_score > max(abs(mean_score) * max_seed_instability, minimum_scale):
+            real_results = bool(
+                "model_mode" in seed_results
+                and seed_results["model_mode"].astype(str).str.lower().eq("real").all()
+            )
+            instability_limit = (
+                max_seed_instability
+                if real_results
+                else max(abs(mean_score) * max_seed_instability, minimum_scale)
+            )
+            if std_score > instability_limit:
                 add_reason("excessive_seed_instability")
             baseline_validation = cfg.get("baseline_validation_score")
             if baseline_validation is not None:
                 tolerance_underperformance = float(cfg.get("validation_underperformance_tolerance", 0.0))
                 if float(scores.max()) < float(baseline_validation) - tolerance_underperformance:
                     add_reason("validation_underperformance_beyond_tolerance")
+        if "model_mode" in seed_results and seed_results["model_mode"].astype(str).str.lower().eq("real").all():
+            selected = seed_results.loc[
+                seed_results.get(
+                    "selected_by_validation",
+                    pd.Series(False, index=seed_results.index),
+                ).fillna(False).astype(bool)
+            ]
+            if selected.empty and "validation_reward" in seed_results:
+                selected = seed_results.loc[[seed_results["validation_reward"].astype(float).idxmax()]]
+            if not selected.empty:
+                selected_row = selected.iloc[0]
+                if int(selected_row.get("test_observations", 0)) < int(
+                    cfg.get("minimum_oos_observations", 12)
+                ):
+                    add_reason("insufficient_independent_oos_observations")
+                if float(selected_row.get("test_net_sharpe", -np.inf)) <= float(
+                    selected_row.get("baseline_test_sharpe", np.inf)
+                ) + float(cfg.get("minimum_oos_sharpe_improvement", 0.0)):
+                    add_reason("drl_did_not_improve_oos_net_sharpe")
+                if float(selected_row.get("test_maximum_drawdown", -np.inf)) < float(
+                    selected_row.get("baseline_test_maximum_drawdown", -np.inf)
+                ) - float(cfg.get("oos_tail_risk_tolerance", 0.0)):
+                    add_reason("drl_worsened_oos_drawdown")
+                if float(selected_row.get("test_cvar", -np.inf)) < float(
+                    selected_row.get("baseline_test_cvar", -np.inf)
+                ) - float(cfg.get("oos_tail_risk_tolerance", 0.0)):
+                    add_reason("drl_worsened_oos_cvar")
+                if bool(cfg.get("require_positive_active_return_ci", True)) and float(
+                    selected_row.get("active_return_ci_lower_95", -np.inf)
+                ) <= 0.0:
+                    add_reason("oos_active_return_not_statistically_positive")
+                if float(selected_row.get("annualised_incremental_turnover", np.inf)) > float(
+                    limits.get("annual_turnover_limit", cfg.get("annual_turnover_limit", 0.35))
+                ):
+                    add_reason("annual_incremental_overlay_turnover_exceeds_limit")
     if bool(cfg.get("test_leakage_detected", False)):
         add_reason("test_leakage_detected")
+    if bool(cfg.get("historical_validation_guard_triggered", False)):
+        add_reason("all_ppo_seeds_failed_validation_guard")
+    required_shadow_cycles = int(cfg.get("required_prospective_shadow_cycles", 0))
+    completed_shadow_cycles = int(cfg.get("prospective_shadow_cycles_completed", 0))
+    if completed_shadow_cycles < required_shadow_cycles:
+        add_reason("insufficient_prospective_shadow_cycles")
     if bool(cfg.get("hard_constraint_violation", False)):
         add_reason("hard_constraint_violation")
     if bool(cfg.get("liquidity_requirement_failed", False)):

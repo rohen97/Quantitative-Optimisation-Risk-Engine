@@ -76,17 +76,25 @@ def _group_cap(weights: np.ndarray, meta: pd.DataFrame, column: str, cap: float,
     return adjusted
 
 
-def _normalise_with_cash(weights: np.ndarray, cash_idx: int | None, cash_floor: float) -> np.ndarray:
+def _normalise_with_cash(
+    weights: np.ndarray,
+    cash_idx: int | None,
+    cash_floor: float,
+    cash_ceiling: float = 1.0,
+) -> np.ndarray:
     adjusted = weights.clip(min=0.0)
     if cash_idx is None:
         return normalise_long_only(adjusted)
     cash_floor = float(np.clip(cash_floor, 0.0, 1.0))
+    cash_ceiling = float(np.clip(cash_ceiling, cash_floor, 1.0))
     non_cash = np.array([i for i in range(len(adjusted)) if i != cash_idx], dtype=int)
     risky_total = float(adjusted[non_cash].sum())
     max_risky = max(0.0, 1.0 - cash_floor)
     if risky_total > max_risky and risky_total > 0:
         adjusted[non_cash] *= max_risky / risky_total
-    adjusted[cash_idx] = max(float(adjusted[cash_idx]), cash_floor)
+    adjusted[cash_idx] = float(
+        np.clip(float(adjusted[cash_idx]), cash_floor, cash_ceiling)
+    )
     total = float(adjusted.sum())
     if total > 1 and risky_total > 0:
         adjusted[non_cash] *= max(0.0, 1.0 - adjusted[cash_idx]) / float(adjusted[non_cash].sum())
@@ -146,6 +154,7 @@ def _iterative_projection(
     cash_idx: int | None,
 ) -> np.ndarray:
     cash_floor = float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0)))
+    cash_ceiling = float(constraints.get("maximum_cash_weight", 1.0))
     adjusted = masked_weights.copy().clip(min=0.0)
     for _ in range(8):
         adjusted = np.where(eligibility_mask, adjusted, 0.0)
@@ -157,7 +166,12 @@ def _iterative_projection(
         adjusted = _apply_liquidity_limits(adjusted, current_weights, meta, constraints, cash_idx)
         adjusted = _apply_turnover_cap(adjusted, current_weights, constraints)
         adjusted = np.where(eligibility_mask, adjusted, 0.0)
-        adjusted = _normalise_with_cash(adjusted, cash_idx, cash_floor)
+        adjusted = _normalise_with_cash(
+            adjusted,
+            cash_idx,
+            cash_floor,
+            cash_ceiling,
+        )
     return adjusted
 
 
@@ -196,6 +210,9 @@ def _is_feasible(
     cash_floor = float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0)))
     if cash_idx is not None and weights[cash_idx] + tol < cash_floor:
         return False
+    cash_ceiling = float(constraints.get("maximum_cash_weight", 1.0))
+    if cash_idx is not None and weights[cash_idx] > cash_ceiling + tol:
+        return False
     return True
 
 
@@ -214,12 +231,13 @@ def _scipy_projection(
     n = len(raw_weights)
     max_weight = float(constraints.get("max_single_name_weight", constraints.get("max_position_weight", 1.0)))
     cash_floor = float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0)))
+    cash_ceiling = float(constraints.get("maximum_cash_weight", 1.0))
     bounds = []
     for i in range(n):
         if not eligibility_mask[i]:
             bounds.append((0.0, 0.0))
         elif cash_idx is not None and i == cash_idx:
-            bounds.append((cash_floor, 1.0))
+            bounds.append((cash_floor, cash_ceiling))
         else:
             bounds.append((0.0, max_weight))
     cons = [{"type": "eq", "fun": lambda w: np.sum(w) - 1.0}]
@@ -272,16 +290,35 @@ def project_weights(
     masked_weights = np.where(mask, raw_weights, 0.0)
     if cash_idx is not None:
         masked_weights[cash_idx] = max(masked_weights[cash_idx], float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0))))
-    masked_weights = _normalise_with_cash(masked_weights, cash_idx, float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0))))
+    cash_floor = float(
+        constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0))
+    )
+    cash_ceiling = float(constraints.get("maximum_cash_weight", 1.0))
+    masked_weights = _normalise_with_cash(
+        masked_weights,
+        cash_idx,
+        cash_floor,
+        cash_ceiling,
+    )
     scipy_projected = _scipy_projection(masked_weights, mask, meta, current, constraints, cash_idx)
     projected = scipy_projected if scipy_projected is not None else _iterative_projection(masked_weights, mask, meta, current, constraints, cash_idx)
     feasible = _is_feasible(projected, mask, meta, current, constraints, cash_idx)
     fallback_used = False
     if not feasible:
         fallback = np.where(mask, baseline, 0.0)
-        fallback = _normalise_with_cash(fallback, cash_idx, float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0))))
+        fallback = _normalise_with_cash(
+            fallback,
+            cash_idx,
+            cash_floor,
+            cash_ceiling,
+        )
         fallback = _apply_turnover_cap(fallback, current, constraints)
-        fallback = _normalise_with_cash(np.where(mask, fallback, 0.0), cash_idx, float(constraints.get("cash_floor", constraints.get("minimum_cash_weight", 0.0))))
+        fallback = _normalise_with_cash(
+            np.where(mask, fallback, 0.0),
+            cash_idx,
+            cash_floor,
+            cash_ceiling,
+        )
         projected = fallback
         feasible = _is_feasible(projected, mask, meta, current, constraints, cash_idx)
         fallback_used = True

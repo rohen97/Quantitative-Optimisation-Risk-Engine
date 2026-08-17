@@ -16,9 +16,18 @@ from src.data_ingestion.external_adapters import (
     ITickAdapter,
     TickDbAdapter,
 )
-from src.data_ingestion.http_client import HttpResponse, redact_url
+from src.data_ingestion.http_client import (
+    DataSourceRequestError,
+    HttpResponse,
+    redact_url,
+)
+from src.data_ingestion.multi_source import pull_configured_macro_and_fx
 from src.data_ingestion.price_ingestion import _combine_provider_prices, _provider_symbols
-from src.data_ingestion.provider_registry import ProviderDefinition, load_data_source_registry
+from src.data_ingestion.provider_registry import (
+    DataSourceRegistry,
+    ProviderDefinition,
+    load_data_source_registry,
+)
 from src.utils.config import load_settings
 
 
@@ -200,10 +209,12 @@ def test_fred_preserves_realtime_vintage_dates(monkeypatch):
     frame = FredAdapter(provider("fred", "https://example.test", "FRED_API_KEY"), client).load_series("GDP")
     assert len(frame) == 2
     assert frame["vintage_date"].nunique() == 2
-    assert client.calls[0][1]["output_type"] == 2
+    assert client.calls[0][1]["output_type"] == 3
+    assert client.calls[0][1]["realtime_start"] == "1776-07-04"
+    assert client.calls[0][1]["realtime_end"] == "9999-12-31"
 
 
-def test_fred_output_type_two_wide_vintages_are_unpivoted(monkeypatch):
+def test_fred_wide_vintages_are_unpivoted(monkeypatch):
     monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
     client = FakeClient(
         {
@@ -223,6 +234,175 @@ def test_fred_output_type_two_wide_vintages_are_unpivoted(monkeypatch):
         pd.Timestamp("2026-01-15"),
         pd.Timestamp("2026-02-15"),
     ]
+
+
+def test_fred_uses_series_metadata_for_units_and_frequency(monkeypatch):
+    monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
+
+    class MetadataClient(FakeClient):
+        def get(self, url, params=None, headers=None):
+            self.calls.append((url, params, headers))
+            payload = (
+                {"seriess": [{"units": "Percent", "frequency_short": "M"}]}
+                if url.endswith("/series")
+                else {"observations": [{"date": "2026-01-01", "realtime_start": "2026-02-01", "value": "2.5"}]}
+            )
+            return HttpResponse(
+                body=json.dumps(payload).encode("utf-8"), status=200, headers={}, url=url
+            )
+
+    frame = FredAdapter(
+        provider("fred", "https://example.test", "FRED_API_KEY"), MetadataClient()
+    ).load_series("CPI")
+    assert frame.loc[0, "unit"] == "Percent"
+    assert frame.loc[0, "frequency"] == "M"
+
+
+def test_fred_chunks_large_realtime_windows(monkeypatch):
+    monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
+
+    class WindowClient(FakeClient):
+        def get(self, url, params=None, headers=None):
+            self.calls.append((url, params, headers))
+            payload = (
+                {"seriess": [{"units": "Percent", "frequency_short": "D"}]}
+                if url.endswith("/series")
+                else {
+                    "observations": [
+                        {
+                            "date": params["realtime_start"],
+                            "realtime_start": params["realtime_start"],
+                            "value": "1.0",
+                        }
+                    ]
+                }
+            )
+            return HttpResponse(
+                body=json.dumps(payload).encode("utf-8"), status=200, headers={}, url=url
+            )
+
+    client = WindowClient()
+    frame = FredAdapter(
+        provider("fred", "https://example.test", "FRED_API_KEY"), client
+    ).load_series("DGS10", "1994-01-01", "2006-01-01")
+    observation_calls = [call for call in client.calls if call[0].endswith("/observations")]
+    assert len(observation_calls) == 3
+    assert observation_calls[0][1]["realtime_start"] == "1994-01-01"
+    assert observation_calls[-1][1]["realtime_end"] == "2006-01-01"
+    assert len(frame) == 3
+
+
+def test_fred_skips_empty_realtime_vintage_window(monkeypatch):
+    monkeypatch.setattr(
+        "src.data_ingestion.external_adapters.get_env",
+        lambda *args: "token",
+    )
+
+    class EmptyLastWindowClient(FakeClient):
+        def get(self, url, params=None, headers=None):
+            self.calls.append((url, params, headers))
+            if url.endswith("/series"):
+                payload = {
+                    "seriess": [
+                        {"units": "Percent", "frequency_short": "Q"}
+                    ]
+                }
+            elif params["realtime_start"] == "2025-01-01":
+                raise DataSourceRequestError(
+                    "HTTP 400: No vintage dates exist for the "
+                    "specified real-time period"
+                )
+            else:
+                payload = {
+                    "observations": [
+                        {
+                            "date": "2024-10-01",
+                            "realtime_start": params["realtime_start"],
+                            "value": "2.5",
+                        }
+                    ]
+                }
+            return HttpResponse(
+                body=json.dumps(payload).encode("utf-8"),
+                status=200,
+                headers={},
+                url=url,
+            )
+
+    frame = FredAdapter(
+        provider("fred", "https://example.test", "FRED_API_KEY"),
+        EmptyLastWindowClient(),
+    ).load_series("GDP", "2020-01-01", "2025-02-01")
+
+    assert len(frame) == 1
+
+
+def test_multi_source_honours_non_revising_fred_registry(monkeypatch):
+    disabled = ProviderDefinition(
+        name="disabled",
+        enabled=False,
+        base_url="https://example.test",
+        credential_env=None,
+        secret_env=None,
+        asset_classes=(),
+        regions=(),
+        settings={},
+    )
+    fred = ProviderDefinition(
+        name="fred",
+        enabled=True,
+        base_url="https://example.test",
+        credential_env=None,
+        secret_env=None,
+        asset_classes=("macro",),
+        regions=("US",),
+        settings={
+            "series": {"revising": "GDP", "daily": "DGS10"},
+            "non_revising_series": ["DGS10"],
+        },
+    )
+    registry = DataSourceRegistry(
+        providers={
+            "frankfurter": disabled,
+            "fred": fred,
+            "ecb": disabled,
+            "china_data": disabled,
+        },
+        price_provider_order=(),
+        policy={},
+        research_references=(),
+    )
+    calls = []
+
+    def fake_load(self, series_id, start, end, preserve_vintages=True):
+        calls.append((series_id, preserve_vintages))
+        return pd.DataFrame()
+
+    monkeypatch.setattr(FredAdapter, "load_series", fake_load)
+    pull_configured_macro_and_fx(registry=registry)
+
+    assert calls == [("GDP", True), ("DGS10", False)]
+
+
+def test_fred_non_revising_series_is_available_on_observation_date(monkeypatch):
+    monkeypatch.setattr("src.data_ingestion.external_adapters.get_env", lambda *args: "token")
+    client = FakeClient(
+        {
+            "observations": [
+                {
+                    "date": "2025-10-01",
+                    "realtime_start": "2026-08-13",
+                    "value": "4.1",
+                }
+            ]
+        }
+    )
+    frame = FredAdapter(
+        provider("fred", "https://example.test", "FRED_API_KEY"), client
+    ).load_series("DGS10", "2025-01-01", "2025-12-31", preserve_vintages=False)
+    assert frame.loc[0, "available_from"] == pd.Timestamp("2025-10-01")
+    assert frame.loc[0, "vintage_date"] == pd.Timestamp("2025-10-01")
+    assert client.calls[0][1]["output_type"] == 1
 
 
 def test_ecb_csv_history_is_normalised():

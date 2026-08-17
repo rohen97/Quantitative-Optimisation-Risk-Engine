@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from src.utils.config import load_yaml
-from src.utils.env import get_env
+from src.utils.env import env_flag, get_env
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,7 @@ class ProviderDefinition:
     asset_classes: tuple[str, ...]
     regions: tuple[str, ...]
     settings: dict[str, Any]
+    availability_env: str | None = None
 
     @property
     def credential_available(self) -> bool:
@@ -29,7 +30,8 @@ class ProviderDefinition:
 
     @property
     def available(self) -> bool:
-        return self.enabled and self.credential_available
+        explicitly_available = not self.availability_env or env_flag(self.availability_env, False)
+        return self.enabled and self.credential_available and explicitly_available
 
 
 @dataclass(frozen=True)
@@ -83,6 +85,9 @@ def load_data_source_registry(path: str | Path = "configs/data_sources.yaml") ->
             asset_classes=tuple(str(value) for value in config.get("asset_classes", [])),
             regions=tuple(str(value) for value in config.get("regions", [])),
             settings=config,
+            availability_env=(
+                str(config["availability_env"]) if config.get("availability_env") else None
+            ),
         )
     return DataSourceRegistry(
         providers=providers,

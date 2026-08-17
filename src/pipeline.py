@@ -21,6 +21,7 @@ from src.models.scorecard import build_scorecard
 from src.models.targets import HORIZONS_MONTHS
 from src.narrative.pipeline import run_narrative_pipeline
 from src.optimisation.portfolio_builder import (
+    PortfolioFeasibilityError,
     build_final_portfolio_weights,
     build_proposed_portfolio,
     run_portfolio_optimisation,
@@ -112,7 +113,12 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
             "acceptance_selected_weights_source",
         ]
         available = [column for column in columns if column in challenger]
-        data = data.merge(challenger[available], on="ticker", how="left")
+        merge_mode = "outer" if challenger_supplies_weights else "left"
+        data = data.merge(
+            challenger[available].drop_duplicates("ticker", keep="last"),
+            on="ticker",
+            how=merge_mode,
+        )
     data["drl_challenger_status"] = "accepted_or_blended" if accepted else "rejected_baseline_fallback"
     data["final_selected_weights_source"] = source
     data["drl_rejection_reasons"] = rejection_reasons
@@ -120,6 +126,8 @@ def attach_drl_challenger_status(final_recommendations: pd.DataFrame, drl_output
         data["final_selected_weight"] = pd.to_numeric(data["accepted_target_weight"], errors="coerce").fillna(0.0)
     else:
         data["final_selected_weight"] = pd.to_numeric(data.get("final_target_weight", 0.0), errors="coerce").fillna(0.0)
+    if "ticker" in data:
+        data = data.loc[data["ticker"].astype(str).str.upper().ne("CASH")].reset_index(drop=True)
     return data
 
 
@@ -272,13 +280,22 @@ def run_pipeline_from_inputs(
     llm_benchmark = run_llm_benchmark_branch(scorecard, mode=llm_mode)
     branch_comparison = compare_branches(portfolio_aware, clean_sheet, llm_benchmark)
     final_recommendations = build_final_recommendations(branch_comparison, scorecard)
-    optimisation_outputs = run_portfolio_optimisation(
-        scorecard,
-        portfolio,
-        optimisation_config,
-        final_recommendations,
-        regime_outputs["regime_dashboard_summary"],
-    )
+    try:
+        optimisation_outputs = run_portfolio_optimisation(
+            scorecard,
+            portfolio,
+            optimisation_config,
+            final_recommendations,
+            regime_outputs["regime_dashboard_summary"],
+        )
+    except PortfolioFeasibilityError as exc:
+        write_csv(scorecard, out, "stock_scorecard.csv")
+        write_csv(branch_comparison, out, "branch_comparison_report.csv")
+        write_csv(final_recommendations, out, "final_recommendations.csv")
+        write_csv(exc.optimiser_inputs, out, "optimiser_input_dataset.csv")
+        write_csv(exc.summary, out, "portfolio_optimisation_summary.csv")
+        write_csv(exc.constraint_report, out, "portfolio_constraint_report.csv")
+        raise
     proposed = build_proposed_portfolio(portfolio, scorecard)
     risk_portfolio = optimisation_outputs["recommended_optimised_portfolio"]
     risk_report = build_risk_report(prices, risk_portfolio)
@@ -380,6 +397,7 @@ def run_pipeline_from_inputs(
         "optimised_portfolio_risk_parity.csv": optimisation_outputs["optimised_portfolio_risk_parity"],
         "optimised_portfolio_mean_variance.csv": optimisation_outputs["optimised_portfolio_mean_variance"],
         "optimised_portfolio_cvar_constrained.csv": optimisation_outputs["optimised_portfolio_cvar_constrained"],
+        "optimised_portfolio_regional_alpha.csv": optimisation_outputs["optimised_portfolio_regional_alpha"],
         "optimised_portfolio_dividend_income.csv": optimisation_outputs["optimised_portfolio_dividend_income"],
         "optimised_portfolio_regime_aware.csv": optimisation_outputs["optimised_portfolio_regime_aware"],
         "portfolio_trade_list.csv": optimisation_outputs["portfolio_trade_list"],

@@ -51,7 +51,10 @@ DRL is rejected for constraint violations, CVaR breaches, Expected Shortfall bre
 
 - `drl_state_schema.csv`
 - `drl_training_summary.csv`
+- `drl_split_manifest.csv`
 - `drl_seed_results.csv`
+- `drl_simple_challenger_comparison.csv`
+- `drl_simple_challenger_oos_paths.csv`
 - `drl_backtest_results.csv`
 - `drl_benchmark_comparison.csv`
 - `drl_acceptance_decision.csv`
@@ -66,13 +69,13 @@ DRL is rejected for constraint violations, CVaR breaches, Expected Shortfall bre
 
 ## Current Limitations
 
-The current implementation is mock/local, dependency-light and designed for reproducibility. It does not execute trades, does not use live point-in-time vendor history and does not claim causal validity of input features.
+Production research evaluation uses Stable-Baselines3 PPO over a frozen chronological regional panel with train-only scaling, embargoes and validation-only selection. The June 2025 through May 2026 window is a legacy locked OOS record that has already been observed once, so it is not described as untouched. Deployment evidence must come from the prospective monthly shadow record beginning after the policy freeze. The current policy is rejected because validation and legacy-OOS active performance do not beat the optimiser.
 
 ## Future Research
 
 - full TCN + GAP PPO policy
 - robust CAM / Grad-CAM attribution
-- SAC and TD3 challengers
+- additional low-variance challengers after prospective evidence exists
 - distributional reinforcement learning
 - constrained policy optimisation
 - Lagrangian risk constraints

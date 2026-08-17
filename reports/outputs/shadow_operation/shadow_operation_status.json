@@ -1,0 +1,33 @@
+{
+  "generated_at": "2026-08-14T10:20:53.598156+00:00",
+  "required_prospective_cycles": 3,
+  "prospective_start_date": "2026-08-31 00:00:00",
+  "completed_prospective_cycles": 0,
+  "remaining_prospective_cycles": 3,
+  "deployment_evidence_ready": false,
+  "cycle_count": 1,
+  "result_count": 0,
+  "latest_cycle": {
+    "cycle_id": "shadow-2026-08-14",
+    "as_of_date": "2026-08-14 00:00:00",
+    "recorded_at": "2026-08-14 09:52:44.724265",
+    "production_run_id": null,
+    "model_version": "1bf8904c70c3fcb436525cafe548d19637b724c4",
+    "selected_source": "baseline_optimiser",
+    "governance_status": "CONDITIONALLY_APPROVED",
+    "selected_portfolio_hash": "391c95552bb44622d2084a6ce987b11e8fb17952517eebd05fe78429f578fdc8",
+    "evaluation_due_date": "2026-09-14 00:00:00",
+    "evaluation_status": "pending",
+    "prospective_eligible": false,
+    "prior_cycle_id": null,
+    "selected_weight_l1_change": 2.0,
+    "selected_name_overlap": 0.0,
+    "estimated_turnover": 1.0,
+    "estimated_cost_fraction": 0.00175,
+    "evaluated_at": "NaT",
+    "active_return_vs_equal_weight": NaN,
+    "realised_slippage_bps": NaN,
+    "notes": "Outcomes remain unavailable until the evaluation due date.",
+    "portfolio_bundle_hash": "c1045ce1aaea8acf3b2a61d7c316e4c2a67e9bbfc0fcadbcac3fe8c4351dc4c6"
+  }
+}

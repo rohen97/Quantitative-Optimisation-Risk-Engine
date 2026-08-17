@@ -48,11 +48,23 @@ def validate_portfolio_frame(
     if portfolio.empty or weight_column not in portfolio:
         return pd.DataFrame([{"check_name": "portfolio_available", "status": "FAIL", "breach_count": 1, "critical": True}])
     weights = pd.to_numeric(portfolio[weight_column], errors="coerce")
+    cash_mask = pd.Series(False, index=portfolio.index)
+    for identifier_column in ("security_id", "ticker"):
+        if identifier_column in portfolio:
+            cash_mask |= (
+                portfolio[identifier_column]
+                .fillna("")
+                .astype(str)
+                .str.strip()
+                .str.upper()
+                .eq("CASH")
+            )
+    equity_weights = weights.loc[~cash_mask]
     rows = [
         {"check_name": "finite_weights", "status": "PASS" if weights.notna().all() else "FAIL", "breach_count": int(weights.isna().sum()), "critical": True},
         {"check_name": "weights_sum_to_one", "status": "PASS" if abs(weights.sum() - 1.0) <= tolerance else "FAIL", "breach_count": int(abs(weights.sum() - 1.0) > tolerance), "critical": True},
         {"check_name": "long_only", "status": "PASS" if (weights >= -tolerance).all() else "FAIL", "breach_count": int((weights < -tolerance).sum()), "critical": True},
-        {"check_name": "single_name_cap", "status": "PASS" if (weights <= maximum_single_name_weight + tolerance).all() else "FAIL", "breach_count": int((weights > maximum_single_name_weight + tolerance).sum()), "critical": True},
+        {"check_name": "single_name_cap", "status": "PASS" if (equity_weights <= maximum_single_name_weight + tolerance).all() else "FAIL", "breach_count": int((equity_weights > maximum_single_name_weight + tolerance).sum()), "critical": True},
     ]
     if eligibility_column and eligibility_column in portfolio:
         excluded = ~portfolio[eligibility_column].fillna(False).astype(bool)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 import hashlib
 import json
@@ -53,6 +54,8 @@ class TwoPhaseConfig:
     resume: bool = True
     force: bool = False
     retain_intermediates: bool = False
+    max_workers: int = 2
+    max_inflight_securities: int = 5000
 
 
 @dataclass(frozen=True)
@@ -132,6 +135,8 @@ def _manifest_payload(config: TwoPhaseConfig, universe: pd.DataFrame, specs: lis
         "max_securities": config.max_securities,
         "price_lookback_rows": config.price_lookback_rows,
         "regime_lookback_rows": config.regime_lookback_rows,
+        "phase1_max_workers": config.max_workers,
+        "phase1_max_inflight_securities": config.max_inflight_securities,
         "batches": [
             {
                 "batch_id": spec.batch_id,
@@ -227,12 +232,73 @@ def _write_batch_frames(
                 _atomic_parquet(frame, detail_dir / f"{name}.parquet")
 
 
+def _run_phase_one_batch(
+    config: TwoPhaseConfig,
+    spec: BatchSpec,
+    universe_by_id: pd.DataFrame,
+    fundamentals_by_id: pd.DataFrame,
+    sentiment_config: dict,
+    alternative_data_config: dict,
+    narrative_config: dict,
+) -> dict[str, object]:
+    batch_started = time.perf_counter()
+    batch_dir = config.artifact_dir / "batches" / spec.batch_id
+    batch_universe = universe_by_id.loc[list(spec.security_ids)].reset_index(drop=True)
+    batch_fundamentals = fundamentals_by_id.loc[list(spec.security_ids)].reset_index(drop=True)
+    prices = load_recent_duckdb_prices(spec.security_ids, config.price_lookback_rows)
+    loaded_tickers = set(prices["ticker"].astype(str))
+    missing = set(spec.security_ids).difference(loaded_tickers)
+    if missing:
+        raise RuntimeError(f"Batch {spec.batch_id} is missing price rows for {len(missing)} securities.")
+    core, alt_outputs, narrative_outputs = build_batch_frames(
+        batch_universe,
+        batch_fundamentals,
+        prices,
+        config.regime_lookback_rows,
+        sentiment_config,
+        alternative_data_config,
+        narrative_config,
+    )
+    _write_batch_frames(
+        batch_dir,
+        core,
+        alt_outputs,
+        narrative_outputs,
+        config.retain_intermediates,
+    )
+    status = {
+        "artifact_version": ARTIFACT_VERSION,
+        "batch_id": spec.batch_id,
+        "region": spec.region,
+        "security_hash": spec.security_hash,
+        "security_count": len(spec.security_ids),
+        "price_rows_loaded": len(prices),
+        "runtime_seconds": time.perf_counter() - batch_started,
+        "completed_at": pd.Timestamp.now(tz="UTC").isoformat(),
+    }
+    _atomic_json(status, batch_dir / "_SUCCESS.json")
+    return status
+
+
+def _bounded_phase_one_workers(config: TwoPhaseConfig, pending: list[BatchSpec]) -> int:
+    if not pending:
+        return 0
+    requested = max(int(config.max_workers), 1)
+    largest_batch = max(len(spec.security_ids) for spec in pending)
+    memory_bound = max(int(config.max_inflight_securities) // max(largest_batch, 1), 1)
+    return min(requested, memory_bound, len(pending))
+
+
 def run_phase_one(config: TwoPhaseConfig) -> dict:
     """Extract and preprocess region-partitioned, resumable security batches."""
     if config.batch_size <= 0:
         raise ValueError("batch_size must be positive.")
     if config.input_mode not in {"observed", "synthetic_test"}:
         raise ValueError("input_mode must be 'observed' or 'synthetic_test'.")
+    if config.max_workers <= 0:
+        raise ValueError("max_workers must be positive.")
+    if config.max_inflight_securities <= 0:
+        raise ValueError("max_inflight_securities must be positive.")
     started = time.perf_counter()
     universe = load_duckdb_universe(
         max_securities=config.max_securities,
@@ -286,6 +352,7 @@ def run_phase_one(config: TwoPhaseConfig) -> dict:
     fundamentals_by_id = fundamentals.set_index("security_id", drop=False)
     completed = 0
     skipped = 0
+    pending: list[tuple[int, BatchSpec]] = []
     for position, spec in enumerate(specs, start=1):
         batch_dir = config.artifact_dir / "batches" / spec.batch_id
         if _batch_complete(batch_dir, spec, config.resume and not config.force):
@@ -297,51 +364,47 @@ def run_phase_one(config: TwoPhaseConfig) -> dict:
                 spec.batch_id,
             )
             continue
-        batch_started = time.perf_counter()
-        batch_universe = universe_by_id.loc[list(spec.security_ids)].reset_index(drop=True)
-        batch_fundamentals = fundamentals_by_id.loc[list(spec.security_ids)].reset_index(drop=True)
-        prices = load_recent_duckdb_prices(spec.security_ids, config.price_lookback_rows)
-        loaded_tickers = set(prices["ticker"].astype(str))
-        missing = set(spec.security_ids).difference(loaded_tickers)
-        if missing:
-            raise RuntimeError(f"Batch {spec.batch_id} is missing price rows for {len(missing)} securities.")
-        core, alt_outputs, narrative_outputs = build_batch_frames(
-            batch_universe,
-            batch_fundamentals,
-            prices,
-            config.regime_lookback_rows,
-            sentiment_config,
-            alternative_data_config,
-            narrative_config,
-        )
-        _write_batch_frames(
-            batch_dir,
-            core,
-            alt_outputs,
-            narrative_outputs,
-            config.retain_intermediates,
-        )
-        status = {
-            "artifact_version": ARTIFACT_VERSION,
-            "batch_id": spec.batch_id,
-            "region": spec.region,
-            "security_hash": spec.security_hash,
-            "security_count": len(spec.security_ids),
-            "price_rows_loaded": len(prices),
-            "runtime_seconds": time.perf_counter() - batch_started,
-            "completed_at": pd.Timestamp.now(tz="UTC").isoformat(),
-        }
-        _atomic_json(status, batch_dir / "_SUCCESS.json")
-        completed += 1
-        LOGGER.info(
-            "Phase 1 batch %s/%s %s completed: securities=%s price_rows=%s runtime=%.1fs.",
-            position,
-            len(specs),
-            spec.batch_id,
-            len(spec.security_ids),
-            len(prices),
-            status["runtime_seconds"],
-        )
+        pending.append((position, spec))
+    worker_count = _bounded_phase_one_workers(config, [spec for _, spec in pending])
+    LOGGER.info(
+        "Phase 1 bounded executor: workers=%s pending_batches=%s max_inflight_securities=%s.",
+        worker_count,
+        len(pending),
+        config.max_inflight_securities,
+    )
+    if pending:
+        with ThreadPoolExecutor(max_workers=worker_count, thread_name_prefix="wolf-phase1") as executor:
+            futures: dict[Future, tuple[int, BatchSpec]] = {
+                executor.submit(
+                    _run_phase_one_batch,
+                    config,
+                    spec,
+                    universe_by_id,
+                    fundamentals_by_id,
+                    sentiment_config,
+                    alternative_data_config,
+                    narrative_config,
+                ): (position, spec)
+                for position, spec in pending
+            }
+            try:
+                for future in as_completed(futures):
+                    position, spec = futures[future]
+                    status = future.result()
+                    completed += 1
+                    LOGGER.info(
+                        "Phase 1 batch %s/%s %s completed: securities=%s price_rows=%s runtime=%.1fs.",
+                        position,
+                        len(specs),
+                        spec.batch_id,
+                        status["security_count"],
+                        status["price_rows_loaded"],
+                        status["runtime_seconds"],
+                    )
+            except Exception:
+                for future in futures:
+                    future.cancel()
+                raise
     summary = {
         "status": "completed",
         "input_data_mode": config.input_mode,
@@ -349,6 +412,8 @@ def run_phase_one(config: TwoPhaseConfig) -> dict:
         "batch_count": len(specs),
         "completed_batches": completed,
         "skipped_batches": skipped,
+        "worker_count": worker_count,
+        "max_inflight_securities": config.max_inflight_securities,
         "runtime_seconds": time.perf_counter() - started,
     }
     _atomic_json(summary, config.artifact_dir / "PHASE1_SUCCESS.json")

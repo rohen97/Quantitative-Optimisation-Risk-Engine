@@ -346,8 +346,9 @@ class FrankfurterAdapter:
         rows: list[dict[str, object]] = []
         window_start = pd.Timestamp(start_date).date()
         final_end = pd.Timestamp(end_date).date()
+        window_days = max(int(self.provider.settings.get("window_days", 730)), 30)
         while window_start <= final_end:
-            window_end = min(window_start + timedelta(days=365 * 4 + 300), final_end)
+            window_end = min(window_start + timedelta(days=window_days - 1), final_end)
             payload = self.client.get(
                 f"{self.provider.base_url}/rates",
                 params={
@@ -395,6 +396,7 @@ class FredAdapter:
         start: str | None = None,
         end: str | None = None,
         preserve_vintages: bool = True,
+        realtime_window_years: int = 5,
     ) -> pd.DataFrame:
         api_key = get_env(self.provider.credential_env or "", "")
         if not api_key:
@@ -405,17 +407,73 @@ class FredAdapter:
             "file_type": "json",
             "observation_start": start,
             "observation_end": end,
-            "output_type": 2 if preserve_vintages else 1,
+            "output_type": 3 if preserve_vintages else 1,
+            "limit": 100000,
         }
-        payload = self.client.get(f"{self.provider.base_url}/series/observations", params=params).json()
-        observations = payload.get("observations", []) if isinstance(payload, dict) else []
+        request_params: list[dict[str, object]] = []
+        if preserve_vintages and start and end:
+            realtime_start = pd.Timestamp(start).date()
+            final_realtime_end = min(pd.Timestamp(end).date(), pd.Timestamp.today().date())
+            while realtime_start <= final_realtime_end:
+                realtime_end = min(
+                    (pd.Timestamp(realtime_start) + pd.DateOffset(years=max(realtime_window_years, 1)) - pd.Timedelta(days=1)).date(),
+                    final_realtime_end,
+                )
+                request_params.append(
+                    {
+                        **params,
+                        "realtime_start": realtime_start.isoformat(),
+                        "realtime_end": realtime_end.isoformat(),
+                    }
+                )
+                realtime_start = realtime_end + timedelta(days=1)
+        else:
+            if preserve_vintages:
+                params["realtime_start"] = "1776-07-04"
+                params["realtime_end"] = "9999-12-31"
+            request_params.append(params)
+        payloads = []
+        for item in request_params:
+            try:
+                payloads.append(
+                    self.client.get(
+                        f"{self.provider.base_url}/series/observations",
+                        params=item,
+                    ).json()
+                )
+            except DataSourceRequestError as exc:
+                if (
+                    preserve_vintages
+                    and "no vintage dates exist" in str(exc).lower()
+                ):
+                    continue
+                raise
+        metadata_payload = self.client.get(
+            f"{self.provider.base_url}/series",
+            params={"series_id": series_id, "api_key": api_key, "file_type": "json"},
+        ).json()
+        metadata_rows = metadata_payload.get("seriess", []) if isinstance(metadata_payload, dict) else []
+        metadata = metadata_rows[0] if metadata_rows and isinstance(metadata_rows[0], dict) else {}
+        unit = str(metadata.get("units") or metadata.get("units_short") or "")
+        frequency = str(metadata.get("frequency_short") or metadata.get("frequency") or "")
+        observations = [
+            observation
+            for payload in payloads
+            if isinstance(payload, dict)
+            for observation in payload.get("observations", [])
+        ]
         retrieved_at = pd.Timestamp.now(tz="UTC").tz_localize(None)
         rows = []
         for item in observations:
             if not isinstance(item, dict):
                 continue
             if "value" in item:
-                vintage_values = [(item.get("realtime_start", retrieved_at.date().isoformat()), item.get("value"))]
+                availability = (
+                    item.get("realtime_start", retrieved_at.date().isoformat())
+                    if preserve_vintages
+                    else item.get("date")
+                )
+                vintage_values = [(availability, item.get("value"))]
             else:
                 prefix = f"{series_id}_"
                 vintage_values = []
@@ -437,8 +495,8 @@ class FredAdapter:
                         "vintage_date": vintage,
                         "available_from": vintage,
                         "value": value,
-                        "unit": "",
-                        "frequency": "",
+                        "unit": unit,
+                        "frequency": frequency,
                     }
                 )
         if not rows:
@@ -447,7 +505,10 @@ class FredAdapter:
                 source="fred",
                 retrieved_at=retrieved_at,
             )
-        return normalise_macro_observations(pd.DataFrame(rows), source="fred", retrieved_at=retrieved_at)
+        frame = pd.DataFrame(rows).drop_duplicates(
+            ["series_id", "observation_date", "vintage_date"], keep="last"
+        )
+        return normalise_macro_observations(frame, source="fred", retrieved_at=retrieved_at)
 
 
 @dataclass

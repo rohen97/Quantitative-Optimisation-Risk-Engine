@@ -76,8 +76,10 @@ class DeckEvidence:
     scorecard: pd.DataFrame
     prior_pit_summary: pd.DataFrame
     pit_summary: pd.DataFrame
+    benchmark_significance: pd.DataFrame
     pit_returns: pd.DataFrame
     pit_coverage: dict
+    production_pit: pd.DataFrame
     alpha: pd.DataFrame
     overfitting: pd.Series
     performance: pd.DataFrame
@@ -85,6 +87,18 @@ class DeckEvidence:
     risk_backtest: pd.DataFrame
     constraints: pd.DataFrame
     regime: pd.DataFrame
+    regional_alpha: pd.DataFrame
+    supervised_dataset: pd.DataFrame
+    supervised_validation: pd.DataFrame
+    supervised_oos: pd.DataFrame
+    supervised_quantiles: pd.DataFrame
+    supervised_acceptance: pd.DataFrame
+    supervised_ensemble: pd.DataFrame
+    supervised_latest: pd.DataFrame
+    supervised_freeze: dict
+    drl_acceptance: pd.Series
+    drl_challengers: pd.DataFrame
+    shadow_status: dict
 
     @property
     def current_aum(self) -> float:
@@ -92,8 +106,21 @@ class DeckEvidence:
 
     @property
     def as_of_date(self) -> str:
-        value = str(self.validation_manifest['as_of_date'])
-        return pd.Timestamp(value).strftime('%d %B %Y')
+        validation_date = pd.Timestamp(self.validation_manifest['as_of_date'])
+        supervised_dates = pd.to_datetime(
+            self.supervised_latest.get('as_of_date'), errors='coerce'
+        ).dropna()
+        latest = max(
+            validation_date,
+            supervised_dates.max() if not supervised_dates.empty else validation_date,
+        )
+        return latest.strftime('%d %B %Y')
+
+    @property
+    def validation_as_of_date(self) -> str:
+        return pd.Timestamp(
+            self.validation_manifest['as_of_date']
+        ).strftime('%d %B %Y')
 
     @property
     def approval_status(self) -> str:
@@ -130,6 +157,13 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
     prior_release_root = repo_root / PRIOR_RELEASE_RELATIVE
     backtest_root = repo_root / BACKTEST_RELATIVE
     outputs_root = repo_root / OUTPUTS_RELATIVE
+    recommendation_snapshot_path = (
+        repo_root / PRESENTATION_RELATIVE / 'recommendation_snapshot.csv'
+    )
+    regional_alpha_path = outputs_root / 'optimised_portfolio_regional_alpha.csv'
+    supervised_latest_path = (
+        outputs_root / 'supervised_alpha/latest_predictions.csv'
+    )
     validation_root = release_root / 'validation'
     required = [
         validation_root / 'validation_manifest.json',
@@ -138,10 +172,12 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
 
         validation_root / 'model_validation_scorecard.csv',
         validation_root / 'portfolio_strategy_comparison.csv',
+        validation_root / 'benchmark_significance_report.csv',
         validation_root / 'portfolio_monthly_returns.csv',
         validation_root / 'risk_backtesting_report.csv',
         validation_root / 'constraint_compliance_report.csv',
         release_root / 'pit_evidence_coverage.json',
+        release_root / 'bloomberg_pit_coverage.csv',
         prior_release_root / 'validation/validation_manifest.json',
         prior_release_root
         / 'validation/portfolio_strategy_comparison.csv',
@@ -153,8 +189,54 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         outputs_root / 'final_portfolio_weights.csv',
         outputs_root / 'portfolio_trade_list.csv',
         outputs_root / 'portfolio_optimisation_summary.csv',
+        outputs_root / 'supervised_alpha/dataset_profile.csv',
+        outputs_root / 'supervised_alpha/validation_summary.csv',
+        outputs_root / 'supervised_alpha/oos_summary.csv',
+        outputs_root / 'supervised_alpha/quantile_metrics.csv',
+        outputs_root / 'supervised_alpha/acceptance_decision.csv',
+        outputs_root / 'supervised_alpha/ensemble_weights.csv',
+        outputs_root / 'supervised_alpha/prospective_freeze_manifest.json',
+        outputs_root / 'drl_acceptance_decision.csv',
+        outputs_root / 'drl_simple_challenger_comparison.csv',
+        outputs_root / 'shadow_operation/shadow_operation_status.json',
     ]
     _require_files(required)
+    if not regional_alpha_path.exists() or not supervised_latest_path.exists():
+        _require_files([recommendation_snapshot_path])
+        recommendation_snapshot = pd.read_csv(recommendation_snapshot_path)
+    else:
+        recommendation_snapshot = pd.DataFrame()
+
+    if regional_alpha_path.exists():
+        regional_alpha = pd.read_csv(regional_alpha_path, low_memory=False)
+    else:
+        regional_alpha = recommendation_snapshot.loc[
+            recommendation_snapshot['recommendation_class'].eq(
+                'regional_alpha_challenger'
+            )
+        ].copy()
+
+    if supervised_latest_path.exists():
+        supervised_latest = pd.read_csv(
+            supervised_latest_path,
+            low_memory=False,
+        )
+    else:
+        supervised_latest = recommendation_snapshot.loc[
+            recommendation_snapshot['recommendation_class'].eq(
+                'supervised_research_watchlist'
+            )
+        ].rename(
+            columns={
+                'model_score': 'supervised_alpha_score',
+                'cost_adjusted_predicted_excess_return_3m': (
+                    'cost_adjusted_predicted_excess_return'
+                ),
+                'q05_excess_return_3m': 'q05_excess_return',
+                'q95_excess_return_3m': 'q95_excess_return',
+            }
+        )
+        supervised_latest['horizon_months'] = 3
 
     holdings = pd.read_csv(
         outputs_root / 'final_portfolio_weights.csv'
@@ -217,11 +299,17 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         pit_summary=pd.read_csv(
             validation_root / 'portfolio_strategy_comparison.csv'
         ),
+        benchmark_significance=pd.read_csv(
+            validation_root / 'benchmark_significance_report.csv'
+        ),
         pit_returns=pd.read_csv(
             validation_root / 'portfolio_monthly_returns.csv'
         ),
         pit_coverage=_read_json(
             release_root / 'pit_evidence_coverage.json'
+        ),
+        production_pit=pd.read_csv(
+            release_root / 'bloomberg_pit_coverage.csv'
         ),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
@@ -243,6 +331,163 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         regime=pd.read_csv(
             validation_root / 'regime_performance_report.csv'
         ),
+        regional_alpha=regional_alpha,
+        supervised_dataset=pd.read_csv(
+            outputs_root / 'supervised_alpha/dataset_profile.csv'
+        ),
+        supervised_validation=pd.read_csv(
+            outputs_root / 'supervised_alpha/validation_summary.csv'
+        ),
+        supervised_oos=pd.read_csv(
+            outputs_root / 'supervised_alpha/oos_summary.csv'
+        ),
+        supervised_quantiles=pd.read_csv(
+            outputs_root / 'supervised_alpha/quantile_metrics.csv'
+        ),
+        supervised_acceptance=pd.read_csv(
+            outputs_root / 'supervised_alpha/acceptance_decision.csv'
+        ),
+        supervised_ensemble=pd.read_csv(
+            outputs_root / 'supervised_alpha/ensemble_weights.csv'
+        ),
+        supervised_latest=supervised_latest,
+        supervised_freeze=_read_json(
+            outputs_root
+            / 'supervised_alpha/prospective_freeze_manifest.json'
+        ),
+        drl_acceptance=pd.read_csv(
+            outputs_root / 'drl_acceptance_decision.csv'
+        ).iloc[0],
+        drl_challengers=pd.read_csv(
+            outputs_root / 'drl_simple_challenger_comparison.csv'
+        ),
+        shadow_status=_read_json(
+            outputs_root / 'shadow_operation/shadow_operation_status.json'
+        ),
+    )
+
+
+def _supervised_ensemble_rows(evidence: DeckEvidence) -> pd.DataFrame:
+    return evidence.supervised_oos.loc[
+        evidence.supervised_oos['candidate'].eq('supervised_alpha_ensemble')
+    ].sort_values('horizon_months')
+
+
+def _supervised_validation_rows(evidence: DeckEvidence) -> pd.DataFrame:
+    return evidence.supervised_validation.loc[
+        evidence.supervised_validation['candidate'].eq(
+            'supervised_alpha_ensemble'
+        )
+    ].sort_values('horizon_months')
+
+
+def _supervised_watchlist(evidence: DeckEvidence) -> pd.DataFrame:
+    latest = evidence.supervised_latest.loc[
+        evidence.supervised_latest['horizon_months'].eq(3)
+    ].copy()
+    latest['cost_adjusted_predicted_excess_return'] = pd.to_numeric(
+        latest['cost_adjusted_predicted_excess_return'], errors='coerce'
+    )
+    return (
+        latest.sort_values(
+            ['region', 'cost_adjusted_predicted_excess_return'],
+            ascending=[True, False],
+        )
+        .groupby('region', as_index=False, sort=True)
+        .head(1)
+        .sort_values('region')
+        .reset_index(drop=True)
+    )
+
+
+def _recommendation_snapshot(evidence: DeckEvidence) -> pd.DataFrame:
+    trades = evidence.trades[
+        ['security_id', 'trade_action']
+    ].drop_duplicates('security_id')
+    target = evidence.holdings.loc[
+        pd.to_numeric(evidence.holdings['final_weight'], errors='coerce').fillna(0.0)
+        > 0.0
+    ].merge(trades, on='security_id', how='left')
+    governed = pd.DataFrame(
+        {
+            'as_of_date': evidence.as_of_date,
+            'recommendation_class': 'governed_target',
+            'governance_status': 'actionable_after_pre_trade_review',
+            'security_id': target['security_id'],
+            'ticker': target['ticker'],
+            'company_name': target['company_name'],
+            'region': target['region'],
+            'sector': target['sector'],
+            'action': target['trade_action'].fillna('Review'),
+            'target_weight': pd.to_numeric(
+                target['final_weight'], errors='coerce'
+            ),
+            'model_score': pd.to_numeric(
+                target['final_recommendation_score'], errors='coerce'
+            ),
+            'cost_adjusted_predicted_excess_return_3m': np.nan,
+            'q05_excess_return_3m': np.nan,
+            'q95_excess_return_3m': np.nan,
+        }
+    )
+    regional_source = evidence.regional_alpha.loc[
+        pd.to_numeric(
+            evidence.regional_alpha['target_weight'], errors='coerce'
+        ).fillna(0.0)
+        > 0.0
+    ].copy()
+    regional = pd.DataFrame(
+        {
+            'as_of_date': evidence.as_of_date,
+            'recommendation_class': 'regional_alpha_challenger',
+            'governance_status': 'research_only_not_an_order',
+            'security_id': regional_source['security_id'],
+            'ticker': regional_source['ticker'],
+            'company_name': regional_source['company_name'],
+            'region': regional_source['region'],
+            'sector': regional_source['sector'],
+            'action': 'Research review',
+            'target_weight': pd.to_numeric(
+                regional_source['target_weight'], errors='coerce'
+            ),
+            'model_score': pd.to_numeric(
+                regional_source.get('regional_alpha_score'), errors='coerce'
+            ),
+            'cost_adjusted_predicted_excess_return_3m': np.nan,
+            'q05_excess_return_3m': np.nan,
+            'q95_excess_return_3m': np.nan,
+        }
+    )
+    watchlist = _supervised_watchlist(evidence)
+    research = pd.DataFrame(
+        {
+            'as_of_date': evidence.as_of_date,
+            'recommendation_class': 'supervised_research_watchlist',
+            'governance_status': 'research_only_not_a_buy_order',
+            'security_id': watchlist['security_id'],
+            'ticker': watchlist['ticker'],
+            'company_name': watchlist['company_name'],
+            'region': watchlist['region'],
+            'sector': watchlist['sector'],
+            'action': 'Research review',
+            'target_weight': np.nan,
+            'model_score': pd.to_numeric(
+                watchlist['supervised_alpha_score'], errors='coerce'
+            ),
+            'cost_adjusted_predicted_excess_return_3m': pd.to_numeric(
+                watchlist['cost_adjusted_predicted_excess_return'], errors='coerce'
+            ),
+            'q05_excess_return_3m': pd.to_numeric(
+                watchlist['q05_excess_return'], errors='coerce'
+            ),
+            'q95_excess_return_3m': pd.to_numeric(
+                watchlist['q95_excess_return'], errors='coerce'
+            ),
+        }
+    )
+    return pd.concat([governed, regional, research], ignore_index=True).sort_values(
+        ['recommendation_class', 'region', 'ticker'],
+        kind='stable',
     )
 
 def _rgb(hex_value: str) -> RGBColor:
@@ -277,6 +522,35 @@ def _usd(value: float, digits: int = 1) -> str:
     if magnitude >= 1_000:
         return '$' + f'{amount / 1_000:.{digits}f}k'
     return '$' + f'{amount:,.0f}'
+
+
+def _equal_weight_comparison(
+    evidence: DeckEvidence,
+) -> tuple[float, float]:
+    summary = evidence.pit_summary.set_index('strategy')
+    difference = float(
+        summary.loc['wolf_cvar', 'annualised_return']
+        - summary.loc['equal_weight_eligible', 'annualised_return']
+    )
+    row = evidence.benchmark_significance.loc[
+        (evidence.benchmark_significance['strategy'] == 'wolf_cvar')
+        & (
+            evidence.benchmark_significance['baseline']
+            == 'equal_weight_eligible'
+        )
+    ]
+    if row.empty:
+        raise ValueError('Missing Wolf/equal-weight significance evidence.')
+    return difference, float(row.iloc[0]['p_value'])
+
+
+def _equal_weight_sentence(evidence: DeckEvidence) -> str:
+    difference, p_value = _equal_weight_comparison(evidence)
+    relation = 'outperformed' if difference >= 0 else 'trailed'
+    return (
+        f'Wolf {relation} equal weight by {_pct(abs(difference), 2)} '
+        f'per year in this 60-month sample (p={p_value:.3f}).'
+    )
 
 
 def _sha256(path: Path) -> str:
@@ -551,6 +825,145 @@ def _plot_cost_drag(
     return _save_figure(fig, output_path)
 
 
+def _plot_supervised_rank_ic(
+    evidence: DeckEvidence, output_path: Path
+) -> Path:
+    validation = _supervised_validation_rows(evidence).set_index(
+        'horizon_months'
+    )
+    legacy = _supervised_ensemble_rows(evidence).set_index(
+        'horizon_months'
+    )
+    horizons = [3, 6, 9, 12]
+    x = np.arange(len(horizons))
+    width = 0.34
+    validation_values = [
+        float(validation.loc[horizon, 'mean_rank_ic'])
+        for horizon in horizons
+    ]
+    legacy_values = [
+        float(legacy.loc[horizon, 'mean_rank_ic'])
+        for horizon in horizons
+    ]
+    fig, ax = plt.subplots(figsize=(8.4, 4.6))
+    bars_validation = ax.bar(
+        x - width / 2,
+        validation_values,
+        width,
+        color='#' + BLUE,
+        label='Expanding validation',
+    )
+    bars_legacy = ax.bar(
+        x + width / 2,
+        legacy_values,
+        width,
+        color='#' + GREEN,
+        label='Legacy OOS diagnostic',
+    )
+    _set_axes_style(ax)
+    ax.set_xticks(x, [f'{horizon}m' for horizon in horizons])
+    ax.set_ylabel('Mean rank information coefficient', color='#536068')
+    ax.set_title(
+        'Ranking signal is positive; independent evidence is still sparse',
+        loc='left',
+        fontsize=14,
+        color='#' + INK,
+        weight='bold',
+    )
+    ax.legend(frameon=False, fontsize=9, loc='upper left')
+    for bars in (bars_validation, bars_legacy):
+        for bar in bars:
+            value = float(bar.get_height())
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                value + 0.006,
+                f'{value:.3f}',
+                ha='center',
+                fontsize=8.5,
+                color='#' + INK,
+                weight='bold',
+            )
+    ax.set_ylim(0.0, max(legacy_values) * 1.28)
+    fig.tight_layout()
+    return _save_figure(fig, output_path)
+
+
+def _plot_supervised_calibration(
+    evidence: DeckEvidence, output_path: Path
+) -> Path:
+    quantiles = evidence.supervised_quantiles.sort_values(
+        'horizon_months'
+    )
+    horizons = quantiles['horizon_months'].astype(int).tolist()
+    coverage = (
+        pd.to_numeric(quantiles['central_90_coverage'], errors='coerce')
+        * 100.0
+    )
+    widths = (
+        pd.to_numeric(quantiles['mean_interval_width'], errors='coerce')
+        * 100.0
+    )
+    fig, axes = plt.subplots(1, 2, figsize=(9.1, 4.5))
+    coverage_bars = axes[0].bar(
+        [f'{horizon}m' for horizon in horizons],
+        coverage,
+        color='#' + GREEN,
+        width=0.6,
+    )
+    _set_axes_style(axes[0])
+    axes[0].axhline(
+        90.0,
+        color='#' + GOLD,
+        linestyle='--',
+        linewidth=1.4,
+        label='90% target',
+    )
+    axes[0].set_ylim(80.0, 100.0)
+    axes[0].set_title('Central interval coverage', fontsize=12, weight='bold')
+    axes[0].legend(frameon=False, fontsize=8, loc='lower left')
+    for bar, value in zip(coverage_bars, coverage):
+        axes[0].text(
+            bar.get_x() + bar.get_width() / 2,
+            float(value) + 0.5,
+            f'{float(value):.1f}%',
+            ha='center',
+            fontsize=8.5,
+            weight='bold',
+            color='#' + INK,
+        )
+
+    width_bars = axes[1].bar(
+        [f'{horizon}m' for horizon in horizons],
+        widths,
+        color='#' + TEAL,
+        width=0.6,
+    )
+    _set_axes_style(axes[1])
+    axes[1].set_title('Average interval width', fontsize=12, weight='bold')
+    axes[1].set_ylabel('Benchmark-relative return', color='#536068')
+    for bar, value in zip(width_bars, widths):
+        axes[1].text(
+            bar.get_x() + bar.get_width() / 2,
+            float(value) + 2.0,
+            f'{float(value):.0f}%',
+            ha='center',
+            fontsize=8.5,
+            weight='bold',
+            color='#' + INK,
+        )
+    axes[1].set_ylim(0.0, max(widths) * 1.2)
+    fig.suptitle(
+        'Coverage now clears target, but long-horizon forecasts remain wide',
+        x=0.02,
+        ha='left',
+        fontsize=14,
+        color='#' + INK,
+        weight='bold',
+    )
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    return _save_figure(fig, output_path)
+
+
 def _build_plot_assets(
     evidence: DeckEvidence, plot_dir: Path
 ) -> tuple[Path, ...]:
@@ -568,6 +981,12 @@ def _build_plot_assets(
         ),
         _plot_cost_drag(
             evidence, plot_dir / 'implementation_cost_drag.png'
+        ),
+        _plot_supervised_rank_ic(
+            evidence, plot_dir / 'supervised_rank_ic.png'
+        ),
+        _plot_supervised_calibration(
+            evidence, plot_dir / 'supervised_calibration.png'
         ),
     )
     return assets
@@ -982,7 +1401,7 @@ def _slide_cover(
         )
 
         _add_text(
-            slide, value, x + 0.16, 5.42, 2.35, 0.3,
+            slide, value, x + 0.16, 5.42, 2.35, 0.36,
             size=21, color=WHITE, bold=True, font=FONT_HEAD,
         )
         _add_text(
@@ -1005,7 +1424,7 @@ def _slide_decision(
         'The decision in one page',
         'The controls improved materially; the alpha claim did not.',
         2,
-        '13 August validation scorecard and point-in-time comparison',
+        f'Validation {evidence.validation_as_of_date}; research through {evidence.as_of_date}',
     )
     _add_callout(
         slide,
@@ -1035,8 +1454,8 @@ def _slide_decision(
     _add_callout(
         slide,
         'What still blocks full deployment',
-        'Observed PIT evidence is incomplete, and Wolf lagged equal '
-        'weight by 1.06% per year in this 60-month sample (p=0.734).',
+        'Observed PIT evidence is incomplete, and '
+        + _equal_weight_sentence(evidence),
         6.82, 1.43, 5.95, 1.18,
         fill=PALE_RED, accent=RED,
     )
@@ -1120,9 +1539,9 @@ def _slide_workflow(
     )
     _add_callout(
         slide,
-        'DRL is a challenger, not the final authority',
-        'The current DRL proposal was rejected because turnover exceeded '
-        'its hard limit. The CVaR baseline remained selected.',
+        'ML challengers cannot override governance',
+        'PPO, bandit, convex and supervised challengers remain research-only. '
+        'Their legacy OOS results are diagnostics; the baseline remains at 100%.',
         6.82, 4.64, 5.95, 1.14,
         fill=PALE_GOLD, accent=GOLD,
     )
@@ -1134,27 +1553,411 @@ def _slide_workflow(
         align=PP_ALIGN.CENTER,
     )
 
+
+def _slide_supervised_stack(
+    presentation: Presentation, evidence: DeckEvidence
+) -> None:
+    profile = evidence.supervised_dataset.loc[
+        evidence.supervised_dataset['horizon_months'].eq(3)
+    ].iloc[0]
+    candidate_count = int(
+        evidence.supervised_validation.loc[
+            ~evidence.supervised_validation['candidate'].eq(
+                'supervised_alpha_ensemble'
+            ),
+            'candidate',
+        ].nunique()
+    )
+    overall = evidence.supervised_acceptance.loc[
+        evidence.supervised_acceptance['scope'].eq('overall')
+    ].iloc[0]
+    slide = _new_slide(
+        presentation,
+        'The new supervised alpha research stack',
+        'Benchmark-relative stock ranking across four investment horizons.',
+        4,
+        'Supervised dataset, validation checkpoints and model manifests',
+    )
+    kpis = [
+        (f"{int(profile['securities']):,}", 'research securities'),
+        (str(candidate_count), 'fixed candidate specifications'),
+        ('4', 'forecast horizons: 3/6/9/12m'),
+        (_pct(float(overall['deployment_blend_weight']), 0), 'live supervised blend'),
+    ]
+    for index, (value, label) in enumerate(kpis):
+        _add_kpi(
+            slide,
+            value,
+            label,
+            0.55 + index * 3.08,
+            1.42,
+            2.78,
+            fill=WHITE,
+            accent=RED if index == 3 else GREEN if index == 0 else BLUE,
+        )
+
+    panels = [
+        (
+            'Evidence and targets',
+            [
+                f"{int(profile['decision_dates'])} monthly decision dates",
+                f"{int(profile['numeric_features'])} numeric plus 4 categorical features",
+                'Returns measured versus regional and sector peers',
+                'PIT status remains reconstructed proxy',
+            ],
+            GREEN,
+        ),
+        (
+            'Model challengers',
+            [
+                'OLS with train-only Fama-MacBeth screening',
+                'Ridge, Elastic Net and robust Huber regression',
+                'Random Forest, Extra Trees and histogram boosting',
+                'XGBoost return and learning-to-rank models',
+            ],
+            BLUE,
+        ),
+        (
+            'Controls before prediction',
+            [
+                'Expanding-window purged cross-validation',
+                'Preprocessing and screening fitted inside each fold',
+                'One linear, tree and ranker winner per ensemble',
+                'Explicit turnover, impact, FX and 25bp bank fee',
+            ],
+            GOLD,
+        ),
+    ]
+    for index, (heading, bullets, accent) in enumerate(panels):
+        x = 0.55 + index * 4.12
+        _add_rect(slide, x, 2.78, 3.83, 3.0, fill=WHITE, line=BORDER)
+        _add_rect(slide, x, 2.78, 3.83, 0.09, fill=accent, line=accent)
+        _add_text(
+            slide,
+            heading,
+            x + 0.18,
+            3.08,
+            3.45,
+            0.34,
+            size=16,
+            bold=True,
+            font=FONT_HEAD,
+        )
+        _add_bullets(
+            slide,
+            bullets,
+            x + 0.18,
+            3.58,
+            3.43,
+            1.92,
+            size=11.5,
+            spacing=8,
+        )
+    _add_callout(
+        slide,
+        'Governance boundary',
+        'The supervised ensemble and every DRL challenger remain research-only. '
+        'The governed baseline still receives 100% of portfolio weight.',
+        0.55,
+        6.12,
+        12.22,
+        0.68,
+        fill=PALE_RED,
+        accent=RED,
+    )
+
+
+def _slide_supervised_results(
+    presentation: Presentation,
+    evidence: DeckEvidence,
+    chart: Path,
+) -> None:
+    rows = _supervised_ensemble_rows(evidence)
+    primary = rows.loc[rows['horizon_months'].eq(3)].iloc[0]
+    slide = _new_slide(
+        presentation,
+        'Supervised signal: encouraging, not yet proven',
+        'Positive ranking results do not overcome four independent 3-month samples.',
+        5,
+        'Frozen validation and already-inspected legacy OOS diagnostics',
+    )
+    _add_picture_contain(slide, chart, 0.45, 1.38, 7.0, 4.82)
+    table_rows = []
+    for row in rows.itertuples(index=False):
+        table_rows.append(
+            (
+                f'{int(row.horizon_months)}m',
+                str(int(row.observations)),
+                str(int(row.independent_observations)),
+                f'{float(row.mean_rank_ic):.3f}',
+                f'{float(row.independent_rank_ic_sign_test_p_value):.3f}',
+                _pct(float(row.mean_horizon_net_active_return), 1),
+            )
+        )
+    _add_table(
+        slide,
+        ['Horizon', 'Monthly', 'Independent', 'Rank IC', 'Sign p', 'Net cohort'],
+        table_rows,
+        7.63,
+        1.48,
+        5.14,
+        2.92,
+        widths=[0.78, 0.76, 1.0, 0.76, 0.72, 1.0],
+        font_size=8.7,
+        highlight_rows=[0],
+    )
+    _add_callout(
+        slide,
+        'Primary 3-month diagnostic',
+        f"Rank IC {float(primary['mean_rank_ic']):.3f}; "
+        f"mean net active cohort return {_pct(float(primary['mean_horizon_net_active_return']), 1)}; "
+        f"exact sign-test p={float(primary['independent_rank_ic_sign_test_p_value']):.4f}.",
+        7.63,
+        4.72,
+        5.14,
+        1.18,
+        fill=PALE_GOLD,
+        accent=GOLD,
+    )
+    _add_callout(
+        slide,
+        'What is deliberately absent',
+        'No headline CAGR, Sharpe, t-statistic or confidence interval is reported '
+        'until 12 independent prospective cohorts exist.',
+        0.55,
+        6.32,
+        12.22,
+        0.56,
+        fill=PALE_BLUE,
+        accent=BLUE,
+    )
+
+
+def _slide_supervised_calibration(
+    presentation: Presentation,
+    evidence: DeckEvidence,
+    chart: Path,
+) -> None:
+    oos = _supervised_ensemble_rows(evidence).set_index('horizon_months')
+    quantiles = evidence.supervised_quantiles.set_index('horizon_months')
+    slide = _new_slide(
+        presentation,
+        'Uncertainty and implementation are now controlled',
+        'Coverage clears target; wide long-horizon bands still signal low precision.',
+        6,
+        'Purged conformal calibration and cost-aware legacy OOS cohorts',
+    )
+    _add_picture_contain(slide, chart, 0.45, 1.4, 7.05, 4.78)
+    table_rows = []
+    for horizon in (3, 6, 9, 12):
+        result = oos.loc[horizon]
+        quantile = quantiles.loc[horizon]
+        turnover = result['annualised_turnover']
+        cost = result['annualised_cost_drag']
+        table_rows.append(
+            (
+                f'{horizon}m',
+                f'{float(turnover):.2f}x' if pd.notna(turnover) else 'N/A',
+                _pct(float(cost), 2) if pd.notna(cost) else 'N/A',
+                _pct(float(quantile['central_90_coverage']), 1),
+                _pct(float(quantile['mean_interval_width']), 0),
+            )
+        )
+    _add_table(
+        slide,
+        ['Horizon', 'Turnover', 'Cost drag', '90% cover', 'Band width'],
+        table_rows,
+        7.72,
+        1.52,
+        5.05,
+        2.92,
+        widths=[0.8, 0.95, 1.0, 1.0, 1.0],
+        font_size=9.2,
+        highlight_rows=[0, 1, 2],
+    )
+    _add_callout(
+        slide,
+        'Implementation result',
+        'Recurring turnover is 0.54x, 0.47x and 0.35x at 3/6/9 months. '
+        'The 12-month record has no recurring rebalance, so it remains unestimable.',
+        7.72,
+        4.73,
+        5.05,
+        1.24,
+        fill=PALE_GREEN,
+        accent=GREEN,
+    )
+    _add_callout(
+        slide,
+        'Interpretation',
+        'Calibration is fixed; precision is not. A 117% average 12-month band is '
+        'a warning against confident long-horizon stock claims.',
+        0.55,
+        6.3,
+        12.22,
+        0.58,
+        fill=PALE_GOLD,
+        accent=GOLD,
+    )
+
+
+def _slide_portfolio_outputs(
+    presentation: Presentation, evidence: DeckEvidence
+) -> None:
+    baseline = set(
+        evidence.holdings.loc[
+            ~evidence.holdings['ticker'].astype(str).str.upper().isin(
+                {'CASH', 'CASH.USD'}
+            ),
+            'ticker',
+        ].astype(str)
+    )
+    regional = evidence.regional_alpha.copy()
+    regional_weights = pd.to_numeric(
+        regional['target_weight'], errors='coerce'
+    ).fillna(0.0)
+    regional_names = set(
+        regional.loc[regional_weights.gt(1e-9), 'ticker'].astype(str)
+    )
+    shared = sorted(baseline & regional_names)
+    baseline_only = sorted(baseline - regional_names)
+    regional_only = sorted(regional_names - baseline)
+    watchlist = _supervised_watchlist(evidence)
+    slide = _new_slide(
+        presentation,
+        'Recommendations: target portfolio versus research challengers',
+        'Only the governed CVaR target is actionable; challenger names remain shadow evidence.',
+        7,
+        'Resolved portfolio, regional-alpha target and supervised 3-month rankings',
+    )
+    kpis = [
+        (str(len(baseline)), 'governed target equities'),
+        (str(len(regional_names)), 'regional challenger equities'),
+        (f'{len(shared)} / 20', 'names shared by both'),
+        ('0%', 'supervised live blend'),
+    ]
+    for index, (value, label) in enumerate(kpis):
+        _add_kpi(
+            slide,
+            value,
+            label,
+            0.55 + index * 3.08,
+            1.4,
+            2.78,
+            fill=WHITE,
+            accent=GREEN if index == 0 else RED if index == 3 else BLUE,
+        )
+
+    comparison = [
+        ('Governed-only names', baseline_only, GREEN),
+        ('Shared core', shared, BLUE),
+        ('Regional-only names', regional_only, GOLD),
+    ]
+    for index, (heading, names, accent) in enumerate(comparison):
+        x = 0.55 + index * 4.12
+        _add_rect(slide, x, 2.69, 3.83, 1.22, fill=WHITE, line=BORDER)
+        _add_rect(slide, x, 2.69, 0.055, 1.22, fill=accent, line=accent)
+        _add_text(
+            slide,
+            heading,
+            x + 0.18,
+            2.84,
+            3.4,
+            0.26,
+            size=13,
+            bold=True,
+            font=FONT_HEAD,
+        )
+        _add_text(
+            slide,
+            ', '.join(names),
+            x + 0.18,
+            3.18,
+            3.45,
+            0.57,
+            size=8.6,
+            color=MUTED,
+        )
+
+    watch_rows = []
+    for row in watchlist.itertuples(index=False):
+        watch_rows.append(
+            (
+                row.ticker,
+                row.region,
+                f'{float(row.supervised_alpha_score):.1f}',
+                _pct(float(row.cost_adjusted_predicted_excess_return), 1),
+                _pct(float(row.q05_excess_return), 0),
+                _pct(float(row.q95_excess_return), 0),
+            )
+        )
+    _add_text(
+        slide,
+        'Highest supervised 3-month research rank in each region',
+        0.58,
+        4.14,
+        8.2,
+        0.3,
+        size=15,
+        bold=True,
+        font=FONT_HEAD,
+    )
+    _add_table(
+        slide,
+        ['Ticker', 'Region', 'Score', 'Cost-adj alpha', 'Q05', 'Q95'],
+        watch_rows,
+        0.55,
+        4.53,
+        12.22,
+        1.85,
+        widths=[1.2, 1.7, 0.8, 1.25, 0.8, 0.8],
+        font_size=8.8,
+    )
+    _add_text(
+        slide,
+        'Research watchlist only. These are not buy orders; uncertainty bands are wide and the deployment gate is closed.',
+        0.58,
+        6.62,
+        12.15,
+        0.24,
+        size=9.5,
+        color=RED,
+        bold=True,
+        align=PP_ALIGN.CENTER,
+    )
+
+
 def _slide_evidence(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
     profile = evidence.walk_forward_manifest['source_profile']
     artifact = evidence.walk_forward_manifest['artifact_profile']
     coverage = evidence.pit_coverage['coverage']
+    production = evidence.production_pit.set_index('dataset')
+    fundamental_vintages = int(
+        production.loc['fundamental_vintages', 'rows']
+    )
+    corporate_action_vintages = int(
+        production.loc['corporate_action_vintages', 'rows']
+    )
+    market_cap_vintages = int(
+        production.loc['market_cap_vintages', 'rows']
+    )
     all_row = evidence.universe.loc[
         evidence.universe['region'] == 'ALL'
     ].iloc[0]
     slide = _new_slide(
         presentation,
         'Evidence breadth and point-in-time progress',
-        'Delistings improved; observed historical availability remains the main gap.',
-        4,
-        'Universe, walk-forward manifest and PIT evidence coverage',
+        'Bloomberg vintages expanded; survivorship-clean membership remains the main gap.',
+        8,
+        'Universe, walk-forward manifest and aggregate PIT coverage',
     )
     kpis = [
         (f'{int(all_row.active):,}', 'active equities'),
         ('{:,}'.format(int(profile['security_count'])), 'walk-forward eligible'),
         ('{:,}'.format(int(artifact['forecast_rows'])), 'historical forecasts'),
-        (f"{int(coverage['delisting_events']):,}", 'delistings archived'),
+        (f'{fundamental_vintages:,}', 'Bloomberg fundamental vintages'),
     ]
     for index, (value, label) in enumerate(kpis):
         _add_kpi(
@@ -1223,10 +2026,11 @@ def _slide_evidence(
 
     _add_callout(
         slide,
-        'Provider outcome',
-        'EODHD added 59,183 delistings; Nasdaq entitlement yielded five '
-        'usable rows; Beam was unavailable; SEC blocked this runner. '
-        'Unavailable history is never treated as observed.',
+        'Bloomberg checkpoint and publication boundary',
+        f'{fundamental_vintages:,} fundamental, {market_cap_vintages:,} market-cap '
+        f'and {corporate_action_vintages:,} corporate-action vintages are stored '
+        'locally. Daily capacity paused the remaining snapshots at a durable '
+        'checkpoint; only aggregate counts are published.',
         0.55, 6.18, 12.22, 0.65,
         fill=PALE_GOLD, accent=GOLD,
     )
@@ -1239,11 +2043,18 @@ def _slide_trades(
     reduces = int(
         (evidence.trades['trade_action'] == 'Reduce').sum()
     )
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    equity_count = len(equities)
+    equity_regions = int(equities['region'].nunique())
+    max_name_weight = float(equities['final_weight'].max())
     slide = _new_slide(
         presentation,
         'Equities to establish in the target portfolio',
         'Model trade direction versus current holdings; weights are targets.',
-        5,
+        9,
         'Final portfolio weights and portfolio trade list',
     )
     _add_kpi(
@@ -1256,15 +2067,15 @@ def _slide_trades(
         3.02, 1.39, 2.3, fill=PALE_GOLD, accent=GOLD,
     )
     _add_kpi(
-        slide, '5.0%', 'target per name',
+        slide, _pct(max_name_weight, 1), 'maximum name',
         5.49, 1.39, 2.3, fill=WHITE, accent=BLUE,
     )
     _add_kpi(
-        slide, '20', 'target holdings',
+        slide, str(equity_count), 'equity holdings',
         7.96, 1.39, 2.3, fill=WHITE, accent=TEAL,
     )
     _add_kpi(
-        slide, '6', 'equity regions',
+        slide, str(equity_regions), 'equity regions',
         10.43, 1.39, 2.34, fill=WHITE, accent=GREEN,
     )
 
@@ -1307,6 +2118,18 @@ def _slide_trades(
 def _slide_exposure(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    cash_weight = float(
+        evidence.holdings.loc[cash_mask, 'final_weight'].sum()
+    )
+    max_name_weight = float(equities['final_weight'].max())
+    region_weights = equities.groupby('region')['final_weight'].sum()
+    sector_weights = equities.groupby('sector')['final_weight'].sum()
+    largest_region = str(region_weights.idxmax())
+    largest_sector = str(sector_weights.idxmax())
     chart = (
         evidence.release_root
         / 'plots/final_portfolio_exposures.png'
@@ -1315,7 +2138,7 @@ def _slide_exposure(
         presentation,
         'A deliberately diversified target',
         'The portfolio uses equal name weights and explicit exposure caps.',
-        6,
+        10,
         'Final portfolio weights and constraint report',
     )
     _add_picture_contain(slide, chart, 0.47, 1.39, 8.2, 5.33)
@@ -1327,12 +2150,13 @@ def _slide_exposure(
     _add_bullets(
         slide,
         [
-            '20 holdings at 5% each',
+            f'{len(equities)} equities at no more than '
+            f'{_pct(max_name_weight, 1)} each',
+            f'{_pct(cash_weight, 0)} cash reserve',
             'No sector above 25%',
             'No country above 30%',
             'No region or currency above 40%',
             'One listing per issuer',
-            'No quarantined price history',
         ],
         8.94, 2.03, 3.65, 2.64,
         size=14,
@@ -1340,8 +2164,9 @@ def _slide_exposure(
     _add_callout(
         slide,
         'Largest allocations',
-        'Mainland China 30%; EU ex-DACH 25%; Financials and '
-        'Consumer Staples 25% each.',
+        f'{largest_region} {_pct(region_weights.max(), 0)}; '
+        f'{largest_sector} {_pct(sector_weights.max(), 0)}. '
+        'Cash is excluded from equity exposure caps.',
         8.94, 5.02, 3.72, 1.18,
         fill=PALE_BLUE, accent=BLUE,
     )
@@ -1365,7 +2190,7 @@ def _slide_optimizer(
         presentation,
         'Why the CVaR portfolio is the baseline',
         'It balances expected return, downside loss and diversification.',
-        7,
+        11,
 
         'Portfolio optimisation summary',
     )
@@ -1447,7 +2272,7 @@ def _slide_pit_growth(
         presentation,
         'Five-year point-in-time proxy',
         'The relevant model evidence uses dated monthly decisions.',
-        8,
+        12,
         '60-month reconstructed point-in-time portfolio returns',
     )
     _add_picture_contain(slide, plot_path, 0.47, 1.38, 8.45, 5.45)
@@ -1479,7 +2304,7 @@ def _slide_pit_growth(
         'Not a forecast',
         'This scales the realised proxy path to current AUM. The 25 bp '
         'annual bank fee is modeled separately in the long replay.',
-        9.12, 5.42, 3.65, 1.05,
+        9.12, 5.42, 3.65, 1.30,
         fill=PALE_GOLD, accent=GOLD,
     )
 
@@ -1495,7 +2320,7 @@ def _slide_pit_comparison(
         presentation,
         'What beat what over 60 months',
         'Wolf delivered the best risk-adjusted result, not the best return.',
-        9,
+        13,
         'Point-in-time strategy comparison, net of modeled costs',
     )
     _add_picture_contain(slide, plot_path, 0.55, 1.43, 8.3, 4.85)
@@ -1505,7 +2330,7 @@ def _slide_pit_comparison(
         f'Wolf Sharpe was {float(wolf.sharpe):.2f} and drawdown was '
         f'{_pct(abs(float(wolf.maximum_drawdown)))}, better than both '
         'simple controls on these risk measures.',
-        9.08, 1.56, 3.69, 1.25,
+        9.08, 1.56, 3.69, 1.31,
         fill=PALE_GREEN, accent=GREEN,
     )
     _add_callout(
@@ -1514,7 +2339,7 @@ def _slide_pit_comparison(
         f'Equal weight returned {_pct(equal.annualised_return, 2)} versus '
         f'Wolf at {_pct(wolf.annualised_return, 2)}. The model did not '
         'beat the simplest control on net return.',
-        9.08, 3.16, 3.69, 1.25,
+        9.08, 3.16, 3.69, 1.31,
         fill=PALE_GOLD, accent=GOLD,
     )
     _add_callout(
@@ -1522,7 +2347,7 @@ def _slide_pit_comparison(
         'Investment interpretation',
         'The current case is risk control and decision discipline. '
         'Incremental stock-selection alpha remains unproven.',
-        9.08, 4.76, 3.69, 1.25,
+        9.08, 4.76, 3.69, 1.31,
         fill=PALE_BLUE, accent=BLUE,
     )
     _add_text(
@@ -1544,7 +2369,7 @@ def _slide_alpha(
         presentation,
         'Alpha and overfitting: the hard truth',
         'The retrospective strategies are interesting; deployable alpha is not established.',
-        10,
+        14,
         'Point-in-time alpha tests and CSCV overfitting diagnostics',
     )
     alpha_rows = []
@@ -1595,7 +2420,7 @@ def _slide_long_history(
         presentation,
         'The 1997 replay is a stress map',
         'It shows how today\'s holdings behaved through history, not what the model knew then.',
-        11,
+        15,
         '1997-present retrospective holdings replay',
     )
     chosen = [
@@ -1656,7 +2481,7 @@ def _slide_long_history(
         'The securities were chosen with current information and then '
         'replayed backward. Survivorship and selection look-ahead '
         'make the long PnL unsuitable as a live promise.',
-        6.82, 5.24, 5.95, 1.25,
+        6.82, 5.24, 5.95, 1.31,
         fill=PALE_GOLD, accent=GOLD,
     )
 
@@ -1667,7 +2492,7 @@ def _slide_macro_events(
         presentation,
         'Performance through major market shocks',
         'Event windows are descriptive overlaps, not causal estimates.',
-        12,
+        16,
         'Macro-event timeline and event performance table',
     )
     chart = evidence.backtest_root / 'plots/macro_event_timeline.png'
@@ -1693,7 +2518,7 @@ def _slide_regimes(
         presentation,
         'Interest-rate and market-regime context',
         'Conditional groupings show where the final portfolio was most comfortable.',
-        13,
+        17,
         'Lagged rate and market-regime performance',
     )
 
@@ -1732,11 +2557,14 @@ def _slide_regimes(
 def _slide_governance(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    locked = evidence.walk_forward_manifest['locked_risk_calibration']
+    pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
+    warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
     slide = _new_slide(
         presentation,
         'Risk calibration now passes; approval stays conditional',
         'Adaptive VaR fixed exception clustering without hiding PIT and alpha limits.',
-        14,
+        18,
         'Validation scorecard and overall/holdout VaR tests',
     )
     chart = evidence.release_root / 'plots/validation_scorecard.png'
@@ -1773,18 +2601,21 @@ def _slide_governance(
     )
     _add_callout(
         slide,
-        'Adaptive risk stack: 15 / 15',
+        'Development-locked risk stack: 15 / 15',
         'DCC-IGARCH Student-t, filtered historical simulation, EWMA '
         'Normal and EWMA Student-t are selected using trailing data. '
+        f'Development data selected a {float(locked["selected_scale_factor"]):.3f}x '
+        f'scale and {float(locked["selected_exception_multiplier"]):.2f}x '
+        f'buffer for {int(locked["selected_exception_days"])} day after a breach. '
         'The holdout is chronological reconstructed evidence, not a '
         'pristine future shadow period.',
-        6.93, 4.65, 5.84, 1.45,
+        6.93, 4.65, 5.84, 1.50,
         fill=PALE_GREEN, accent=GREEN,
     )
     _add_text(
         slide,
-        f'Overall {evidence.governance_score:g}/100  |  6 pass  |  PIT and '
-        'portfolio warnings  |  0 critical failures  |  full local suite passed',
+        f'Overall {evidence.governance_score:g}/100  |  {pass_count} pass  |  '
+        f'{warning_count} warnings  |  0 critical failures  |  full local suite passed',
         0.58, 6.5, 12.05, 0.28,
         size=12.3, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
@@ -1800,7 +2631,7 @@ def _slide_costs(
         presentation,
         'Turnover and modeled cost drag now meet target',
         'Retention hysteresis and minimum-turnover transitions reduced churn.',
-        15,
+        19,
         'Before/after point-in-time cost and turnover validation',
     )
     _add_picture_contain(slide, plot_path, 0.48, 1.43, 7.56, 4.85)
@@ -1826,9 +2657,9 @@ def _slide_costs(
     _add_callout(
         slide,
         'Why portfolio remains a warning',
-        'Both cost gates pass, but Wolf trailed equal weight by 1.06% '
-        'per year and the difference was not significant (p=0.734).',
-        8.32, 5.35, 4.45, 1.03,
+        'Both cost gates pass, but '
+        + _equal_weight_sentence(evidence),
+        8.32, 5.35, 4.45, 1.12,
         fill=PALE_GOLD, accent=GOLD,
     )
     _add_text(
@@ -1848,7 +2679,7 @@ def _slide_pilot(
         presentation,
         'A controlled path to live use',
         'Scale only when operations, costs and evidence earn it.',
-        16,
+        20,
         'Proposed implementation and model-risk controls',
     )
     phases = [
@@ -1937,7 +2768,7 @@ def _slide_glossary(
         presentation,
         'How to read the results',
         'Plain-language definitions for the investment committee.',
-        17,
+        21,
         'Backtest methodology and validation framework',
     )
 
@@ -2126,6 +2957,19 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     cap = summary.loc['cap_weight_eligible']
     wolf_end = _ending_value(evidence, 'wolf_cvar')
     coverage = evidence.pit_coverage['coverage']
+    production = evidence.production_pit.set_index('dataset')
+    fundamental_vintages = int(
+        production.loc['fundamental_vintages', 'rows']
+    )
+    corporate_action_vintages = int(
+        production.loc['corporate_action_vintages', 'rows']
+    )
+    market_cap_vintages = int(
+        production.loc['market_cap_vintages', 'rows']
+    )
+    locked = evidence.walk_forward_manifest['locked_risk_calibration']
+    pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
+    warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
     fee = evidence.backtest_manifest['annual_bank_fee']
     risk = evidence.risk_backtest.set_index(
         ['evaluation_segment', 'confidence_level']
@@ -2209,21 +3053,101 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     relative_return_text = _pct(
         float(wolf.annualised_return - equal.annualised_return), 2
     )
+    _, paired_p_value = _equal_weight_comparison(evidence)
     buys = sorted(
         evidence.trades.loc[
             evidence.trades['trade_action'] == 'Buy', 'ticker'
         ].tolist()
     )
-    reduce_names = sorted(
-        evidence.trades.loc[
-            evidence.trades['trade_action'] == 'Reduce', 'ticker'
-        ].tolist()
+    reductions = evidence.trades.loc[
+        evidence.trades['trade_action'] == 'Reduce',
+        ['ticker', 'target_weight'],
+    ].sort_values('ticker')
+    cash_mask = evidence.holdings['ticker'].astype(str).str.upper().isin(
+        {'CASH', 'CASH.USD'}
+    )
+    equities = evidence.holdings.loc[~cash_mask]
+    cash_weight = float(
+        evidence.holdings.loc[cash_mask, 'final_weight'].sum()
     )
 
-    buy_text = ', '.join(f'`{ticker}`' for ticker in buys)
-    reduce_text = ', '.join(
-        f'`{ticker}`' for ticker in reduce_names
+    buy_text = ', '.join(
+        f'{chr(96)}{ticker}{chr(96)}' for ticker in buys
     )
+    reduce_text = ', '.join(
+        f'{chr(96)}{row.ticker}{chr(96)} to '
+        f'{_pct(float(row.target_weight), 1)}'
+        for row in reductions.itertuples()
+    )
+    supervised_oos = _supervised_ensemble_rows(evidence)
+    supervised_quantiles = evidence.supervised_quantiles.set_index(
+        'horizon_months'
+    )
+    supervised_rows = []
+    for row in supervised_oos.itertuples(index=False):
+        quantile = supervised_quantiles.loc[int(row.horizon_months)]
+        turnover = (
+            f'{float(row.annualised_turnover):.2f}x'
+            if pd.notna(row.annualised_turnover)
+            else 'N/A'
+        )
+        supervised_rows.append(
+            f'| {int(row.horizon_months)}m | {int(row.observations)} | '
+            f'{int(row.independent_observations)} | '
+            f'{float(row.mean_rank_ic):.3f} | '
+            f'{float(row.independent_rank_ic_sign_test_p_value):.3f} | '
+            f'{_pct(float(row.mean_horizon_net_active_return), 1)} | '
+            f'{turnover} | '
+            f'{_pct(float(quantile.central_90_coverage), 1)} | '
+            f'{_pct(float(quantile.mean_interval_width), 0)} |'
+        )
+    supervised_result_rows = '\n'.join(supervised_rows)
+    supervised_profile = evidence.supervised_dataset.loc[
+        evidence.supervised_dataset['horizon_months'].eq(3)
+    ].iloc[0]
+    supervised_decision = evidence.supervised_acceptance.loc[
+        evidence.supervised_acceptance['scope'].eq('overall')
+    ].iloc[0]
+    watchlist = _supervised_watchlist(evidence)
+    watchlist_rows = '\n'.join(
+        f'| `{row.ticker}` | {row.region} | '
+        f'{float(row.supervised_alpha_score):.1f} | '
+        f'{_pct(float(row.cost_adjusted_predicted_excess_return), 1)} | '
+        f'{_pct(float(row.q05_excess_return), 0)} | '
+        f'{_pct(float(row.q95_excess_return), 0)} |'
+        for row in watchlist.itertuples(index=False)
+    )
+    baseline_names = set(equities['ticker'].astype(str))
+    regional_weights = pd.to_numeric(
+        evidence.regional_alpha['target_weight'], errors='coerce'
+    ).fillna(0.0)
+    regional_names = set(
+        evidence.regional_alpha.loc[
+            regional_weights.gt(1e-9), 'ticker'
+        ].astype(str)
+    )
+    shared_names = sorted(baseline_names & regional_names)
+    baseline_only_names = sorted(baseline_names - regional_names)
+    regional_only_names = sorted(regional_names - baseline_names)
+    selected_drl = evidence.drl_challengers.loc[
+        evidence.drl_challengers['split'].eq('legacy_locked_oos')
+        & evidence.drl_challengers['selected_parameter_by_validation'].fillna(
+            False
+        )
+    ]
+    drl_rows = '\n'.join(
+        f'| {row.algorithm.replace("_", " ").title()} | '
+        f'{_pct(float(row.total_net_return), 1)} | '
+        f'{_pct(float(row.baseline_total_return), 1)} | '
+        f'{_pct(float(row.mean_active_return), 2)} | Research only |'
+        for row in selected_drl.itertuples(index=False)
+    )
+    first_supervised_due = pd.Timestamp(
+        evidence.supervised_freeze['first_outcome_due_date']
+    ).strftime('%d %B %Y')
+    full_supervised_due = pd.Timestamp(
+        evidence.supervised_freeze['earliest_full_evidence_date']
+    ).strftime('%d %B %Y')
     return f'''# Wolf Quant Model Investment Principal Report
 
 As of {evidence.as_of_date}
@@ -2231,8 +3155,8 @@ As of {evidence.as_of_date}
 ## Decision
 
 **Approve a controlled, human-supervised live pilot.** Governance improved
-from {prior_score:g}/100 to {evidence.governance_score:g}/100. Six components pass,
-two remain warnings, and there are zero critical failures. Adaptive risk
+from {prior_score:g}/100 to {evidence.governance_score:g}/100. {pass_count} components pass,
+{warning_count} remain warnings, and there are zero critical failures. Adaptive risk
 backtesting and the turnover/cost targets now pass. Full-scale or unattended
 deployment remains unapproved because observed point-in-time evidence is
 incomplete and
@@ -2249,12 +3173,83 @@ transitions drove the implementation improvement. The configured no-trade
 band did not trigger in this 60-month sample, so it is not credited for the
 observed result.
 
+## Supervised Benchmark-Relative Alpha
+
+The new research stack compares OLS after train-only Fama-MacBeth screening,
+Ridge, Elastic Net, robust Huber regression, Random Forest, Extra Trees,
+histogram gradient boosting, XGBoost regression and XGBoost ranking across
+3/6/9/12-month horizons. The primary panel contains
+**{int(supervised_profile.securities):,} securities**, versus the much larger
+price master, because model rows also require historical fundamentals,
+features and realised outcomes.
+
+| Horizon | Monthly cohorts | Independent | Rank IC | Sign p | Net cohort return | Turnover | 90% coverage | Band width |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+{supervised_result_rows}
+
+The 3-month rank IC is positive, but four independent cohorts produce an exact
+sign-test p-value above 5%. Longer horizons have only two, one and one
+independent observations. Net cohort returns are not compounded portfolio CAGR.
+Formal annualised return, Sharpe, t-statistics and confidence intervals remain
+suppressed. The governed decision is **{supervised_decision.status}** with a
+**{_pct(float(supervised_decision.deployment_blend_weight), 0)} live blend**.
+
+Purged date-block conformal calibration now clears the central 90% coverage
+target at every horizon. That correction also reveals low precision: average
+9- and 12-month bands span about 100% and 117% of benchmark-relative return.
+Recurring 3/6/9-month turnover is below 1.5x and includes spread, FX, impact
+and the separate 25bp annual bank fee. Twelve-month recurring turnover remains
+unestimable from one cohort.
+
+## Portfolio Outputs And Stock Recommendations
+
+The governed CVaR target remains the only committee portfolio. The low-latency
+regional-alpha challenger also holds 20 equal-weight names, but only
+**{len(shared_names)} names overlap**. The supervised overlay cannot change
+weights while its deployment blend is zero.
+
+- Governed-only: {', '.join(f'`{name}`' for name in baseline_only_names)}
+- Shared core: {', '.join(f'`{name}`' for name in shared_names)}
+- Regional-challenger only: {', '.join(f'`{name}`' for name in regional_only_names)}
+
+Highest supervised 3-month research rank in each region:
+
+| Ticker | Region | Score | Cost-adjusted alpha | Q05 | Q95 |
+| --- | --- | ---: | ---: | ---: | ---: |
+{watchlist_rows}
+
+These six names are a research watchlist, not buy orders. The live recommendation
+remains the governed target described below.
+
+## DRL And Prospective Evidence
+
+The five PPO seeds, contextual bandit and convex residual challenger remain
+rejected for deployment. The selected simple challengers also trailed the
+baseline in the 12-month legacy OOS diagnostic:
+
+| Challenger | Net return | Baseline | Mean active return | Status |
+| --- | ---: | ---: | ---: | --- |
+{drl_rows}
+
+DRL receives {_pct(float(evidence.drl_acceptance['blend_weight_drl']), 0)} and
+the baseline receives {_pct(float(evidence.drl_acceptance['blend_weight_baseline']), 0)}.
+The generic shadow programme has completed
+{int(evidence.shadow_status['completed_prospective_cycles'])} of
+{int(evidence.shadow_status['required_prospective_cycles'])} required cycles.
+The supervised model was separately frozen for prospective evidence: its first
+3-month result is due {first_supervised_due}, and 12 non-overlapping cohorts
+cannot complete before {full_supervised_due}.
+
 ## Adaptive Risk Backtesting
 
 The trailing model-selection stack contains DCC-IGARCH Student-t, filtered
 historical simulation, EWMA Normal, and EWMA Student-t forecasts. Kupiec
 coverage and Christoffersen independence tests pass overall and on the 40%
-chronological holdout.
+chronological holdout. Development data selected a
+{float(locked['selected_scale_factor']):.3f}x global scale and a
+{float(locked['selected_exception_multiplier']):.2f}x buffer for
+{int(locked['selected_exception_days'])} day after an observed exception; those
+parameters were locked before holdout scoring.
 
 | Sample | VaR | Exceptions | Kupiec p | Independence p | Result |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -2267,6 +3262,11 @@ shadow period. Live monitoring is still required.
 
 The evidence store now contains **{int(coverage['delisting_events']):,}** delisting events and
 **{int(coverage['fundamental_rows_with_filing_date']):,}** fundamental rows with filing dates.
+Bloomberg aggregate coverage adds **{fundamental_vintages:,}** database-as-of
+fundamental vintages, **{market_cap_vintages:,}** historical market-cap vintages,
+and **{corporate_action_vintages:,}** corporate-action vintages. The remaining
+snapshot pull is resumable from its daily-capacity checkpoint; licensed rows stay
+in the ignored local warehouse and are not published.
 Observed acceptance timestamps, dated
 index membership, inactive-name prices, and historical volume remain below
 their governance thresholds. EODHD populated delistings; the Nasdaq
@@ -2276,13 +3276,15 @@ The point-in-time component therefore remains **7.5/15, warning**.
 
 ## Current Target Portfolio
 
-The resolved baseline contains 20 equal-weight positions at 5% each. The
-current trade comparison produces 19 buys and one reduction. These are model
-targets, not executable orders; live NAV, FX, liquidity, prices and compliance
+The resolved baseline contains {len(equities)} equities capped at
+{_pct(float(equities['final_weight'].max()), 1)} each and
+{_pct(cash_weight, 1)} cash. The current trade comparison produces
+{len(buys)} buys and {len(reductions)} reductions. These are model targets,
+not executable orders; live NAV, FX, liquidity, prices and compliance
 approval must be refreshed first.
 
 - Buy: {buy_text}
-- Reduce to 5%: {reduce_text}
+- Reduce: {reduce_text}
 
 ## Point-In-Time Performance
 
@@ -2298,7 +3300,8 @@ forecast or a live-capacity result.
 
 The portfolio component remains **5/10, warning** even though both cost gates
 pass. Wolf returned {relative_return_text} per year relative to equal weight.
-The paired difference was not statistically significant (p=0.734).
+The paired difference was not statistically significant
+(p={paired_p_value:.3f}).
 
 ## Alpha And Overfitting
 
@@ -2349,6 +3352,10 @@ def build_investment_principal_deck(
     _slide_cover(presentation, evidence)
     _slide_decision(presentation, evidence)
     _slide_workflow(presentation, evidence)
+    _slide_supervised_stack(presentation, evidence)
+    _slide_supervised_results(presentation, evidence, plot_paths[4])
+    _slide_supervised_calibration(presentation, evidence, plot_paths[5])
+    _slide_portfolio_outputs(presentation, evidence)
     _slide_evidence(presentation, evidence)
     _slide_trades(presentation, evidence)
     _slide_exposure(presentation, evidence)
@@ -2381,10 +3388,14 @@ def build_investment_principal_deck(
     report_path.write_text(
         _report_markdown(evidence), encoding='utf-8'
     )
+    recommendation_path = output_directory / 'recommendation_snapshot.csv'
+    _recommendation_snapshot(evidence).to_csv(recommendation_path, index=False)
 
     input_paths = [
         evidence.release_root / 'validation/validation_manifest.json',
         evidence.release_root / 'validation/risk_backtesting_report.csv',
+        evidence.release_root
+        / 'validation/benchmark_significance_report.csv',
         evidence.release_root / 'validation/transaction_cost_validation.csv',
         evidence.release_root / 'walk_forward_manifest.json',
         evidence.release_root / 'universe_summary.csv',
@@ -2397,6 +3408,18 @@ def build_investment_principal_deck(
         / 'validation/portfolio_strategy_comparison.csv',
         evidence.outputs_root / 'final_portfolio_weights.csv',
         evidence.outputs_root / 'portfolio_trade_list.csv',
+        evidence.outputs_root / 'supervised_alpha/dataset_profile.csv',
+        evidence.outputs_root / 'supervised_alpha/validation_summary.csv',
+        evidence.outputs_root / 'supervised_alpha/oos_summary.csv',
+        evidence.outputs_root / 'supervised_alpha/quantile_metrics.csv',
+        evidence.outputs_root / 'supervised_alpha/acceptance_decision.csv',
+        evidence.outputs_root / 'supervised_alpha/ensemble_weights.csv',
+        evidence.outputs_root
+        / 'supervised_alpha/prospective_freeze_manifest.json',
+        evidence.outputs_root / 'drl_acceptance_decision.csv',
+        evidence.outputs_root / 'drl_simple_challenger_comparison.csv',
+        evidence.outputs_root
+        / 'shadow_operation/shadow_operation_status.json',
         evidence.backtest_root / 'run_manifest.json',
         evidence.backtest_root / 'point_in_time_alpha_significance.csv',
         evidence.backtest_root / 'strategy_overfitting_summary.csv',
@@ -2419,6 +3442,46 @@ def build_investment_principal_deck(
             'sha256': _sha256(report_path),
             'bytes': report_path.stat().st_size,
         },
+        'recommendations': {
+            'path': _manifest_path(recommendation_path, evidence.repo_root),
+            'sha256': _sha256(recommendation_path),
+            'bytes': recommendation_path.stat().st_size,
+            'publication_scope': (
+                'governed target, regional challenger and six-name research watchlist'
+            ),
+        },
+        'restricted_inputs': [
+            {
+                'name': 'regional_alpha_security_level_output',
+                'sha256': (
+                    _sha256(
+                        evidence.outputs_root
+                        / 'optimised_portfolio_regional_alpha.csv'
+                    )
+                    if (
+                        evidence.outputs_root
+                        / 'optimised_portfolio_regional_alpha.csv'
+                    ).exists()
+                    else None
+                ),
+                'publication_status': 'local_only_licensed_derived',
+            },
+            {
+                'name': 'supervised_security_level_predictions',
+                'sha256': (
+                    _sha256(
+                        evidence.outputs_root
+                        / 'supervised_alpha/latest_predictions.csv'
+                    )
+                    if (
+                        evidence.outputs_root
+                        / 'supervised_alpha/latest_predictions.csv'
+                    ).exists()
+                    else None
+                ),
+                'publication_status': 'local_only_licensed_derived',
+            },
+        ],
 
         'inputs': [
             {

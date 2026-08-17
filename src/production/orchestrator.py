@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 
+import pandas as pd
+
 from .alerts.console import ConsoleAlertSink
 from .alerts.router import AlertRouter
 from .approval_gate import evaluate_approval_gate
@@ -22,6 +24,7 @@ from .retry import RetryPolicy
 from .run_context import create_run_context
 from .run_lock import ProductionRunAlreadyActive, ProductionRunLock
 from .run_registry import ProductionRunRegistry
+from .shadow_operation import run_shadow_operation_from_outputs
 from .status_report import write_global_status, write_run_status_reports
 from .step_runner import build_step_definitions, run_step
 
@@ -147,6 +150,37 @@ def run_production_pipeline(
             approval_status = gate.status
             critical_failures.extend(gate.critical_failures)
             final_status = "SUCCEEDED_WITH_WARNINGS" if gate.approved and gate.warnings else ("SUCCEEDED" if gate.approved else "BLOCKED")
+            shadow_config = production_config.get("shadow_operation", {}) or {}
+            shadow_enabled = bool(shadow_config.get("enabled", False))
+            shadow_schedule_allowed = (
+                not bool(shadow_config.get("monthly_only", True))
+                or mode in {"monthly", "release_candidate"}
+            )
+            if shadow_enabled and shadow_schedule_allowed and required_steps_passed:
+                try:
+                    cycle_id = run_shadow_operation_from_outputs(
+                        repository_root=repository_root,
+                        as_of_date=pd.Timestamp(context.as_of_date),
+                        production_run_id=context.production_run_id,
+                        governance_status=approval_status,
+                        maximum_recording_lag_days=int(
+                            shadow_config.get("maximum_recording_lag_days", 7)
+                        ),
+                        required_cycles=int(
+                            shadow_config.get("required_prospective_cycles", 3)
+                        ),
+                        prospective_start_date=shadow_config.get(
+                            "prospective_start_date"
+                        ),
+                    )
+                    LOGGER.info("Monthly shadow cycle recorded: %s", cycle_id)
+                except Exception as error:
+                    LOGGER.exception("Monthly shadow-cycle recording failed.")
+                    warnings.append(
+                        f"Shadow-cycle recording failed: {type(error).__name__}"
+                    )
+                    if final_status == "SUCCEEDED":
+                        final_status = "SUCCEEDED_WITH_WARNINGS"
     except ProductionRunAlreadyActive as error:
         final_status = "BLOCKED"
         approval_status = "BLOCKED"

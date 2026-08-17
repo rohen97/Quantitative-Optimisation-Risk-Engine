@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from src.models.regional_alpha import RegionalAlphaSettings, add_regional_alpha_signals
 from src.optimisation.constraints import (
     apply_diversification_caps,
     build_eligibility_mask,
@@ -13,6 +14,7 @@ from src.optimisation.objectives import (
     cvar_expected_shortfall_objective,
     dividend_income_objective,
     regime_aware_objective,
+    regional_benchmark_relative_objective,
     risk_adjusted_return_objective,
     score_weighted_objective,
 )
@@ -32,19 +34,29 @@ def _apply_turnover_limit(
     '''Project a feasible target toward a fully invested feasible current portfolio.'''
     status = dict(target_weights.attrs)
     target = pd.Series(target_weights, index=data.index, dtype=float).fillna(0.0)
+    target_cash = float(
+        status.get("cash_weight", max(1.0 - float(target.sum()), 0.0))
+    )
     current = pd.to_numeric(
         data.get('current_weight', pd.Series(0.0, index=data.index)),
         errors='coerce',
     ).fillna(0.0).clip(lower=0.0)
+    current_cash = max(1.0 - float(current.sum()), 0.0)
     maximum_turnover = float(limits.get('maximum_turnover', 1.0))
-    unconstrained_turnover = float(0.5 * (target - current).abs().sum())
-    fully_invested_current = abs(float(current.sum()) - 1.0) <= 1.0e-6
+    unconstrained_turnover = float(
+        0.5 * ((target - current).abs().sum() + abs(target_cash - current_cash))
+    )
+    fully_invested_current = (
+        abs(float(current.sum()) + current_cash - 1.0) <= 1.0e-6
+    )
     retention_eligible = build_retention_eligibility_mask(data, limits)
     hard_exit_required = bool(
         current.where(~retention_eligible, 0.0).gt(1.0e-12).any()
     )
     current_feasible = bool(
         current.max() <= float(limits.get('max_single_name_weight', 1.0)) + 1.0e-10
+        and current_cash
+        <= float(limits.get('maximum_cash_weight', 1.0)) + 1.0e-10
     )
     for column, key in (
         ('sector', 'max_sector_weight'),
@@ -70,6 +82,7 @@ def _apply_turnover_limit(
         and unconstrained_turnover <= minimum_rebalance
     ):
         target = current.copy()
+        target_cash = current_cash
         no_trade_band_applied = True
     if (
         fully_invested_current
@@ -80,8 +93,12 @@ def _apply_turnover_limit(
     ):
         scale = maximum_turnover / unconstrained_turnover
         target = current + scale * (target - current)
+        target_cash = current_cash + scale * (target_cash - current_cash)
         target = target.clip(lower=0.0)
-        target /= target.sum()
+        total = float(target.sum()) + target_cash
+        if total > 0:
+            target /= total
+            target_cash /= total
         applied = True
     status.update(
         {
@@ -92,11 +109,73 @@ def _apply_turnover_limit(
             'turnover_constraint_skipped_for_infeasible_current': (
                 fully_invested_current and not current_feasible
             ),
-            'projected_turnover': float(0.5 * (target - current).abs().sum()),
+            'projected_turnover': float(
+                0.5
+                * (
+                    (target - current).abs().sum()
+                    + abs(target_cash - current_cash)
+                )
+            ),
+            'cash_weight': target_cash,
+            'current_cash_weight': current_cash,
         }
     )
     target.attrs.update(status)
     return target
+
+
+def _append_cash_position(
+    portfolio: pd.DataFrame,
+    data: pd.DataFrame,
+    cash_weight: float,
+    method: str,
+    status: dict[str, object],
+    eligible_count: int,
+    candidate_count: int,
+    fallback_used: bool,
+) -> pd.DataFrame:
+    if cash_weight <= 1e-12:
+        return portfolio
+    cash = {column: pd.NA for column in portfolio.columns}
+    for column in data.select_dtypes(include=[np.number]).columns:
+        if column in cash:
+            cash[column] = 0.0
+    for column in data.select_dtypes(include=['bool']).columns:
+        if column in cash:
+            cash[column] = False
+    cash.update(
+        {
+            'security_id': 'CASH',
+            'ticker': 'CASH',
+            'issuer_id': 'CASH',
+            'company_name': 'USD Cash',
+            'instrument_type': 'Cash',
+            'listing_status': 'Active',
+            'exchange_code': 'CASH',
+            'country': 'Cash',
+            'region': 'Cash',
+            'sector': 'Cash',
+            'industry': 'Cash',
+            'currency': 'USD',
+            'final_recommendation': 'Hold',
+            'recommendation': 'Hold',
+            'target_weight': cash_weight,
+            'current_weight': float(status.get('current_cash_weight', 0.0)),
+            'portfolio_method': method,
+            'eligible_for_optimisation': False,
+            'fallback_eligibility_used': fallback_used,
+            'optimisation_feasible': bool(status.get('feasible', False)),
+            'optimisation_status': str(status.get('status', 'unknown')),
+            'eligible_security_count': eligible_count,
+            'candidate_security_count': candidate_count,
+            'liquidity_score': 100.0,
+            'average_daily_value_usd': np.inf,
+            'liquidity_observation_count': 10_000,
+            'passes_hard_filters': True,
+            'retention_eligible': True,
+        }
+    )
+    return pd.concat([portfolio, pd.DataFrame([cash])], ignore_index=True)
 
 
 def _candidate_mask(
@@ -163,8 +242,10 @@ def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: d
     raw = _normalise_scores(eligible_scores)
     weights = apply_diversification_caps(raw, data, limits)
     weights = _apply_turnover_limit(weights, data, eligible, limits)
-    feasible = bool(weights.attrs.get("feasible", False))
-    status = str(weights.attrs.get("status", "unknown"))
+    weight_status = dict(weights.attrs)
+    feasible = bool(weight_status.get("feasible", False))
+    status = str(weight_status.get("status", "unknown"))
+    cash_weight = float(weight_status.get("cash_weight", 0.0))
     retained = candidate_mask | pd.to_numeric(data.get("current_weight", 0.0), errors="coerce").fillna(0.0).gt(0)
     weights = weights.where(retained, 0.0)
     portfolio = data.loc[retained].copy()
@@ -177,25 +258,35 @@ def _portfolio_from_scores(data: pd.DataFrame, scores: pd.Series, constraints: d
     portfolio["eligible_security_count"] = int(eligible.sum())
     portfolio["candidate_security_count"] = int(candidate_mask.sum())
     portfolio['unconstrained_turnover'] = float(
-        weights.attrs.get('unconstrained_turnover', 0.0)
+        weight_status.get('unconstrained_turnover', 0.0)
     )
     portfolio['projected_turnover'] = float(
-        weights.attrs.get('projected_turnover', 0.0)
+        weight_status.get('projected_turnover', 0.0)
     )
     portfolio['turnover_constraint_applied'] = bool(
-        weights.attrs.get('turnover_constraint_applied', False)
+        weight_status.get('turnover_constraint_applied', False)
     )
     portfolio['no_trade_band_applied'] = bool(
-        weights.attrs.get('no_trade_band_applied', False)
+        weight_status.get('no_trade_band_applied', False)
     )
     portfolio['retention_eligible'] = build_retention_eligibility_mask(
         data, limits
     ).loc[portfolio.index].to_numpy()
     portfolio['turnover_constraint_skipped_for_hard_exit'] = bool(
-        weights.attrs.get('turnover_constraint_skipped_for_hard_exit', False)
+        weight_status.get('turnover_constraint_skipped_for_hard_exit', False)
     )
     portfolio['turnover_constraint_skipped_for_infeasible_current'] = bool(
-        weights.attrs.get('turnover_constraint_skipped_for_infeasible_current', False)
+        weight_status.get('turnover_constraint_skipped_for_infeasible_current', False)
+    )
+    portfolio = _append_cash_position(
+        portfolio,
+        data,
+        cash_weight,
+        method,
+        weight_status,
+        int(eligible.sum()),
+        int(candidate_mask.sum()),
+        fallback_used,
     )
     return portfolio.reset_index(drop=True)
 
@@ -229,6 +320,15 @@ def cvar_constrained_portfolio(data: pd.DataFrame, constraints: dict | None = No
     return _portfolio_from_scores(data, cvar_expected_shortfall_objective(data), constraints, "cvar_constrained")
 
 
+def regional_alpha_portfolio(data: pd.DataFrame, constraints: dict | None = None) -> pd.DataFrame:
+    return _portfolio_from_scores(
+        data,
+        regional_benchmark_relative_objective(data),
+        constraints,
+        "regional_benchmark_relative_cost_aware",
+    )
+
+
 def dividend_income_portfolio(data: pd.DataFrame, constraints: dict | None = None) -> pd.DataFrame:
     scores = dividend_income_objective(data)
     scores = scores.where(data["dividend_cut_probability"].fillna(0.10) <= (constraints or {}).get("maximum_dividend_cut_probability", 0.35), 0)
@@ -260,6 +360,27 @@ def run_all_optimisers(data: pd.DataFrame, optimisation_config: dict | None = No
         )
     if methods.get("cvar_constrained", {}).get("enabled", True):
         outputs["optimised_portfolio_cvar_constrained"] = cvar_constrained_portfolio(data, constraints)
+    if methods.get("regional_alpha", {}).get("enabled", True):
+        observed_nav = float(
+            pd.to_numeric(
+                data.get("current_market_value_usd", pd.Series(dtype=float)),
+                errors="coerce",
+            ).fillna(0.0).sum()
+        )
+        regional_settings = RegionalAlphaSettings.from_mapping(
+            methods.get("regional_alpha", {}),
+            portfolio_nav_usd=float(
+                config.get(
+                    "portfolio_nav_usd",
+                    observed_nav or 100_000_000.0,
+                )
+            ),
+        )
+        regional_data = add_regional_alpha_signals(data, regional_settings)
+        outputs["optimised_portfolio_regional_alpha"] = regional_alpha_portfolio(
+            regional_data,
+            constraints,
+        )
     if methods.get("dividend_income", {}).get("enabled", True):
         outputs["optimised_portfolio_dividend_income"] = dividend_income_portfolio(data, constraints)
     if methods.get("regime_aware", {}).get("enabled", True):

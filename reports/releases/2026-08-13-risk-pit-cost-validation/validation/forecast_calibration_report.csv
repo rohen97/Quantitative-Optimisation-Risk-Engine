@@ -1,5 +1,5 @@
 horizon,status,observation_count,mean_forecast,mean_realised,forecast_bias,commentary
-3M,PASS,39240,0.027009056141532647,0.037016953736030075,-0.010007897594497429,All configured point-forecast thresholds passed.
-6M,PASS,39240,0.05394324379040989,0.07628108552502756,-0.02233784173461767,All configured point-forecast thresholds passed.
-9M,PASS,39240,0.07947813912089434,0.12273163885314638,-0.04325349973225204,All configured point-forecast thresholds passed.
-12M,PASS,38788,0.10367170147514065,0.16980382588511134,-0.06613212440997068,All configured point-forecast thresholds passed.
+3M,PASS,45416,0.025844060072857566,0.03529522813620417,-0.009451168063346605,All configured point-forecast thresholds passed.
+6M,PASS,45416,0.051662154933464106,0.07298466371606677,-0.02132250878260266,All configured point-forecast thresholds passed.
+9M,PASS,45416,0.07677286054349436,0.11709167459108055,-0.04031881404758619,All configured point-forecast thresholds passed.
+12M,PASS,44965,0.10085409850538231,0.16347590203258758,-0.06262180352720527,All configured point-forecast thresholds passed.

@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 
+from src.data_ingestion.bloomberg_adapter import bloomberg_equity_symbol
 from src.data_ingestion.http_client import DataSourceRequestError, HttpClient, HttpClientConfig
 from src.data_ingestion.mock_data import generate_mock_universe
 from src.data_ingestion.provider_registry import load_data_source_registry
@@ -122,6 +123,7 @@ def _provider_symbol_columns(code: str, exchange_code: str, eodhd_ticker: str) -
     yfinance_ticker = _yfinance_symbol(code, exchange_code)
     us_symbol = code if exchange_code == "US" else pd.NA
     return {
+        "bloomberg_ticker": bloomberg_equity_symbol(code, exchange_code),
         "yfinance_ticker": yfinance_ticker,
         "finnhub_ticker": us_symbol if exchange_code == "US" else eodhd_ticker,
         "alpha_vantage_ticker": us_symbol,

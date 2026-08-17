@@ -39,6 +39,8 @@ logs/production/*
 !logs/production/.gitkeep
 logs/*.log
 reports/logs/
+reports/outputs/overnight/latest_status.json
+reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf
 reports/two_phase_smoke/
 reports/outputs/equity_universe.csv
 reports/outputs/*_smoke.pdf

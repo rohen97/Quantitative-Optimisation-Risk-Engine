@@ -10,6 +10,7 @@ from src.drl.market_environment import DRLMarketEnvironment
 from src.drl.policy_ensemble import build_regime_gated_action
 from src.drl.ppo_agent import PPOTrainingResult, ensure_minimum_seeds, ppo_config_from_dict
 from src.drl.regime_gating import RiskThrottle
+from src.drl.regional_ppo import train_historical_regional_ppo
 
 
 @dataclass(frozen=True)
@@ -142,8 +143,27 @@ def run_seed_training(
     constraints: dict,
     config: dict,
     throttle: RiskThrottle | None = None,
-) -> tuple[pd.DataFrame, dict[int, np.ndarray], list[dict[str, float]]]:
-    """Train/evaluate mock PPO policies across seeds through the environment."""
+    historical_panel: pd.DataFrame | None = None,
+) -> tuple[pd.DataFrame, dict[int, np.ndarray], list[dict[str, float]], pd.DataFrame]:
+    """Train historical regional PPO when evidence exists, else use labelled fallback."""
+    if historical_panel is not None and not historical_panel.empty:
+        historical = train_historical_regional_ppo(
+            historical_panel,
+            asset_data,
+            baseline_weights,
+            constraints,
+            config,
+            action_scale=float(throttle.action_scale) if throttle is not None else 1.0,
+        )
+        if not historical[0].empty:
+            return historical
+    if str(config.get("mode", "mock")) == "historical_walk_forward" and not bool(
+        config.get("allow_mock_fallback", False)
+    ):
+        raise RuntimeError(
+            "Historical DRL mode requires a non-empty regional panel, Stable-Baselines3, "
+            "and a trainable chronological split; mock fallback is disabled."
+        )
     start_time = time.perf_counter()
     rows = []
     actions: dict[int, np.ndarray] = {}
@@ -204,12 +224,12 @@ def run_seed_training(
                 "selected_by_validation": int(seed) == best_seed,
                 "test_metrics": {"test_reward": float(result.reward)},
                 "constraint_violations": constraint_violations,
-                "model_mode": "real" if ppo_cfg.use_stable_baselines else "mock",
-                "dependency_mode": "stable_baselines3" if ppo_cfg.use_stable_baselines else "deterministic_mock",
+                "model_mode": "mock_fallback",
+                "dependency_mode": "deterministic_mock",
                 "runtime_seconds": runtime_seconds,
                 "random_split_used": False,
                 "test_period_model_selection_used": False,
             }
         )
     summary = pd.DataFrame(rows).drop(columns=["action"])
-    return summary, actions, reward_rows
+    return summary, actions, reward_rows, pd.DataFrame()

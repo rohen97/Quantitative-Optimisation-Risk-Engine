@@ -1,6 +1,27 @@
 import pandas as pd
+import pytest
 
 from src.drl.drl_pipeline import _limit_drl_universe, run_drl_pipeline
+from src.drl.mock_drl_data import build_temporal_mock_features
+
+
+def test_temporal_features_treat_nullable_cash_as_zero_risk():
+    features = build_temporal_mock_features(
+        pd.DataFrame(
+            {
+                "ticker": ["CASH"],
+                "expected_volatility_12m": [pd.NA],
+                "expected_total_return_12m": [pd.NA],
+                "liquidity_score": [pd.NA],
+                "large_drawdown_probability_12m": [pd.NA],
+            }
+        )
+    )
+    row = features.iloc[0]
+    assert row["daily_return_mean_60d"] == 0.0
+    assert row["volatility_60d"] == 0.0
+    assert row["rolling_drawdown"] == 0.0
+    assert row["rolling_corr_portfolio"] == 0.0
 
 
 def test_drl_universe_is_bounded_but_retains_existing_allocations():
@@ -103,3 +124,6 @@ def test_drl_pipeline_generates_required_outputs(tmp_path):
     assert not outputs["drl_training_summary"]["random_split_used"].any()
     assert not outputs["drl_training_summary"]["test_period_model_selection_used"].any()
     assert "drl_model_card" in outputs
+    challenger = outputs["drl_challenger_portfolio"]
+    assert challenger["ticker"].eq("CASH").any()
+    assert challenger["selected_weight"].sum() == pytest.approx(1.0)

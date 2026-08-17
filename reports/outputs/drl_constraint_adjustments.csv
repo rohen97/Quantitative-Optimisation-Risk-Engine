@@ -1,5 +1,5 @@
 security_id,ticker,baseline_optimiser_weight,raw_drl_residual,raw_drl_weight,eligibility_mask_adjustment,single_name_cap_adjustment,sector_cap_adjustment,country_cap_adjustment,currency_cap_adjustment,liquidity_adjustment,turnover_adjustment,regime_throttle_adjustment,final_projected_weight,human_readable_explanation
-000333.SHE,000333.SHE,0.05000000000000002,0.002264957436749855,0.044283651661400227,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04614965421286592,"DRL proposed a 0.2 percentage-point increase in 000333.SHE.
+000333.SHE,000333.SHE,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 000333.SHE.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -11,13 +11,31 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 4.4%
-- after single-name cap: 4.4%
-- after country cap: 4.4%
-- final executable weight: 4.6%
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-ALV.XETRA,ALV.XETRA,0.05000000000000002,0.003723362935894934,0.04558142271219024,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04533088247196275,"DRL proposed a 0.4 percentage-point increase in ALV.XETRA.
+HIG.US,HIG.US,0.0499999999999999,0.0,0.0474999999999999,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0474999999999999,"DRL proposed a 0.0 percentage-point increase in HIG.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.7%
+- after single-name cap: 4.7%
+- after country cap: 4.7%
+- final executable weight: 4.7%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601398.SHG,601398.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601398.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -29,13 +47,31 @@ Negative drivers:
 - no dominant negative model attribution exceeded the reporting threshold
 
 Constraint projection:
-- raw target weight: 4.6%
-- after single-name cap: 4.6%
-- after country cap: 4.6%
-- final executable weight: 4.5%
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-601398.SHG,601398.SHG,0.0,0.004662700883481037,0.004149132891107373,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0022558568848005797,"DRL proposed a 0.5 percentage-point increase in 601398.SHG.
+600036.SHG,600036.SHG,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 600036.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+AD.AS,AD.AS,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in AD.AS.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -47,30 +83,13 @@ Negative drivers:
 - no dominant negative model attribution exceeded the reporting threshold
 
 Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-601816.SHG,601816.SHG,0.05000000000000002,0.001803890549598779,0.04387336847268948,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.045741769746746715,"DRL proposed a 0.2 percentage-point increase in 601816.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.4%
-- after single-name cap: 4.4%
-- after country cap: 4.4%
-- final executable weight: 4.6%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600036.SHG,600036.SHG,0.05000000000000002,0.004726452878068816,0.046474028430596406,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04621582163138123,"DRL proposed a 0.5 percentage-point increase in 600036.SHG.
+3988.HK,3988.HK,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 3988.HK.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -82,99 +101,13 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 4.6%
-- after single-name cap: 4.6%
-- after country cap: 4.6%
-- final executable weight: 4.6%
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-NOVN.SW,NOVN.SW,0.05000000000000002,0.0013771581891613353,0.04349363807251227,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04536425944202179,"DRL proposed a 0.1 percentage-point increase in NOVN.SW.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.3%
-- after single-name cap: 4.3%
-- after country cap: 4.3%
-- final executable weight: 4.5%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-AD.AS,AD.AS,0.05000000000000002,0.0022698481255614008,0.04428800367074315,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04615398077820722,"DRL proposed a 0.2 percentage-point increase in AD.AS.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.4%
-- after single-name cap: 4.4%
-- after country cap: 4.4%
-- final executable weight: 4.6%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-0939.HK,0939.HK,0.0,0.004243700393041496,0.0037762827427240786,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0018851900816405785,"DRL proposed a 0.4 percentage-point increase in 0939.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-PG.US,PG.US,0.05000000000000002,0.0011146550981808352,0.04326004809193616,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04513203514613873,"DRL proposed a 0.1 percentage-point increase in PG.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.3%
-- after single-name cap: 4.3%
-- after country cap: 4.3%
-- final executable weight: 4.5%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600919.SHG,600919.SHG,0.0,0.004373212202589659,0.0038915296183465054,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0019997620916969248,"DRL proposed a 0.4 percentage-point increase in 600919.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601728.SHG,601728.SHG,0.0,-0.000780978610074589,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107670430646,"DRL proposed a 0.1 percentage-point decrease in 601728.SHG.
+601728.SHG,601728.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601728.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -191,603 +124,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-PRU.US,PRU.US,0.0,0.002019981537475749,0.0017974929222380506,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.2 percentage-point increase in PRU.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-1113.HK,1113.HK,0.0,-0.0004011872891281782,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284507,"DRL proposed a 0.0 percentage-point decrease in 1113.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-2318.HK,2318.HK,0.0,0.002191899562660916,0.001950475228136572,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,6.829023478763002e-05,"DRL proposed a 0.2 percentage-point increase in 2318.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-2328.HK,2328.HK,0.0,0.0001150208018747594,0.00010235196383942557,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 2328.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-1919.HK,1919.HK,0.0,-0.0018689601508656089,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284594,"DRL proposed a 0.2 percentage-point decrease in 1919.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-1288.HK,1288.HK,0.0,0.0027677255528582613,0.002462877506384064,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.000578961957131735,"DRL proposed a 0.3 percentage-point increase in 1288.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-HNR1.XETRA,HNR1.XETRA,0.0,0.0031458324015716417,0.0027993381976344138,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0009139468926236636,"DRL proposed a 0.3 percentage-point increase in HNR1.XETRA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-AIG.US,AIG.US,0.0,0.0005463088988488602,0.00048613631402969127,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.1 percentage-point increase in AIG.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-ALL.US,ALL.US,0.0,0.0007583566791055823,0.0006748283278507945,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.1 percentage-point increase in ALL.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-BMY.US,BMY.US,0.0,0.0022993209794725904,0.0020460648327114044,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0022736535808210545,"DRL proposed a 0.2 percentage-point increase in BMY.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-ADP.US,ADP.US,0.0,-0.0004132931324509932,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284835,"DRL proposed a 0.0 percentage-point decrease in ADP.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-SHEL.LSE,SHEL.LSE,0.0,0.0024982880485487683,0.002223116895706892,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0024496705085410623,"DRL proposed a 0.2 percentage-point increase in SHEL.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-MET.US,MET.US,0.0,0.0018455114828165458,0.0016422396773077522,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,6.211228455961392e-19,"DRL proposed a 0.2 percentage-point increase in MET.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-NVS.US,NVS.US,0.0,0.0003509206936575641,0.000312268924945019,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0005499943199887569,"DRL proposed a 0.0 percentage-point increase in NVS.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-PGR.US,PGR.US,0.0,0.003983141009108404,0.003544422381748843,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0016546874560042528,"DRL proposed a 0.4 percentage-point increase in PGR.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-SHEL.US,SHEL.US,0.05000000000000002,0.0025180909081887262,0.044508904028736966,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04637358964043115,"DRL proposed a 0.3 percentage-point increase in SHEL.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.5%
-- after single-name cap: 4.5%
-- after country cap: 4.5%
-- final executable weight: 4.6%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-T.US,T.US,0.0,0.0028769159281718214,0.0025600412294980415,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.002784625011877251,"DRL proposed a 0.3 percentage-point increase in T.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.3%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-LOW.US,LOW.US,0.0,-0.0002678084715935387,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284345,"DRL proposed a 0.0 percentage-point decrease in LOW.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-EOG.US,EOG.US,0.0,-0.0013629387517610997,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284754,"DRL proposed a 0.1 percentage-point decrease in EOG.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-3968.HK,3968.HK,0.0,0.00360502821061441,0.003207956396049834,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0013201917562395702,"DRL proposed a 0.4 percentage-point increase in 3968.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-2020.HK,2020.HK,0.0,0.00025448061656787224,0.00022645113266685847,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0004646782622044739,"DRL proposed a 0.0 percentage-point increase in 2020.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-3988.HK,3988.HK,0.05000000000000002,0.004213073886314751,0.04601719499574392,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04576410294814645,"DRL proposed a 0.4 percentage-point increase in 3988.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.6%
-- after single-name cap: 4.6%
-- after country cap: 4.6%
-- final executable weight: 4.6%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601288.SHG,601288.SHG,0.0,0.0036692510134185043,0.0032651054498134186,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0013770061547210685,"DRL proposed a 0.4 percentage-point increase in 601288.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601169.SHG,601169.SHG,0.0,0.00479752327434754,0.004269105419987311,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0023751268746163325,"DRL proposed a 0.5 percentage-point increase in 601169.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600690.SHG,600690.SHG,0.0,0.002116019474097434,0.0018829528673618796,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0021114952508998574,"DRL proposed a 0.2 percentage-point increase in 600690.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600019.SHG,600019.SHG,0.0,-0.00025957686545368243,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510772228468,"DRL proposed a 0.0 percentage-point decrease in 600019.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600050.SHG,600050.SHG,0.0,0.0015075212908052765,0.0013414770383158448,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.001573185163169085,"DRL proposed a 0.2 percentage-point increase in 600050.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600406.SHG,600406.SHG,0.0,-0.0003022037211278818,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284686,"DRL proposed a 0.0 percentage-point decrease in 600406.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601766.SHG,601766.SHG,0.0,0.0020517795727741637,0.001825788598376458,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0020546651934375774,"DRL proposed a 0.2 percentage-point increase in 601766.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-603195.SHG,603195.SHG,0.0,-0.00014131449559186558,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510782115287,"DRL proposed a 0.0 percentage-point decrease in 603195.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-2057.HK,2057.HK,0.0,-0.0021707570763464536,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107821152546,"DRL proposed a 0.2 percentage-point decrease in 2057.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-EN.PA,EN.PA,0.0,-0.0002820537733680929,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107670430622,"DRL proposed a 0.0 percentage-point decrease in EN.PA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-ORA.PA,ORA.PA,0.049999999999999725,0.0001683918805522086,0.042418009981831616,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04429492001681856,"DRL proposed a 0.0 percentage-point increase in ORA.PA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.2%
-- after single-name cap: 4.2%
-- after country cap: 4.2%
-- final executable weight: 4.4%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601988.SHG,601988.SHG,0.0,0.0040050069842301386,0.0035638799534097533,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0016740310861561285,"DRL proposed a 0.4 percentage-point increase in 601988.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-002415.SHE,002415.SHE,0.0,-0.0012064139327243358,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284616,"DRL proposed a 0.1 percentage-point decrease in 002415.SHE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-002352.SHE,002352.SHE,0.0,-1.2686867669629549e-05,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510772228466,"DRL proposed a 0.0 percentage-point decrease in 002352.SHE.
+002352.SHE,002352.SHE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 002352.SHE.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -804,40 +141,58 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-0293.HK,0293.HK,0.0,0.001631149177659854,0.0014514880693523192,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.001682553013940828,"DRL proposed a 0.2 percentage-point increase in 0293.HK.
+002415.SHE,002415.SHE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 002415.SHE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+0728.HK,0728.HK,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 0728.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600050.SHG,600050.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600050.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
 - high dividend safety had high attribution
 - regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.2%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-MCD.US,MCD.US,0.05000000000000002,0.0010502803881881511,0.04320276386263197,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.045075085829610936,"DRL proposed a 0.1 percentage-point increase in MCD.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
 - low contribution to portfolio CVaR was associated with the allocation
 
 Negative drivers:
 - no dominant negative model attribution exceeded the reporting threshold
 
 Constraint projection:
-- raw target weight: 4.3%
-- after single-name cap: 4.3%
-- after country cap: 4.3%
-- final executable weight: 4.5%
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-FGR.PA,FGR.PA,0.0,0.0002882356073830034,0.0002564882176375606,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0004945397354774191,"DRL proposed a 0.0 percentage-point increase in FGR.PA.
+AIG.US,AIG.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in AIG.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -855,56 +210,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-000538.SHE,000538.SHE,0.05000000000000002,0.0007732137015174258,0.04295621437738226,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04482997779792562,"DRL proposed a 0.1 percentage-point increase in 000538.SHE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.3%
-- after single-name cap: 4.3%
-- after country cap: 4.3%
-- final executable weight: 4.5%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-TMUS.US,TMUS.US,0.0,-0.004980797128212272,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107670430812,"DRL proposed a 0.5 percentage-point decrease in TMUS.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-TTE.PA,TTE.PA,0.0,-0.0009306220075628195,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510772228454,"DRL proposed a 0.1 percentage-point decrease in TTE.PA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601658.SHG,601658.SHG,0.0,0.0037221024460397426,0.003312135620289894,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0014237609243850666,"DRL proposed a 0.4 percentage-point increase in 601658.SHG.
+ALL.US,ALL.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in ALL.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -916,164 +222,13 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-PSON.LSE,PSON.LSE,0.0,-0.0014341408138434937,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284564,"DRL proposed a 0.1 percentage-point decrease in PSON.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
 - raw target weight: 0.0%
 - after single-name cap: 0.0%
 - after country cap: 0.0%
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-JNJ.US,JNJ.US,0.0,-0.00198607255227327,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284524,"DRL proposed a 0.2 percentage-point decrease in JNJ.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-FDX.US,FDX.US,0.0,-0.0013479501793183801,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510782115282,"DRL proposed a 0.1 percentage-point decrease in FDX.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601838.SHG,601838.SHG,0.0,0.003664135830935773,0.0032605536734045333,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0013724810332294939,"DRL proposed a 0.4 percentage-point increase in 601838.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-BUD.US,BUD.US,0.0,-0.0012044064761379402,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107821152632,"DRL proposed a 0.1 percentage-point decrease in BUD.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-GILD.US,GILD.US,0.0,0.0008875787404733846,0.0007898173692832707,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.001024750775494402,"DRL proposed a 0.1 percentage-point increase in GILD.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-BNZL.LSE,BNZL.LSE,0.0,0.00044235299473148763,0.0003936305171156549,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0006308802319931112,"DRL proposed a 0.0 percentage-point increase in BNZL.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-STT.US,STT.US,0.0,0.0014610476338355585,0.001300122170499589,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.1 percentage-point increase in STT.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601009.SHG,601009.SHG,0.0,0.0023245569195468802,0.002068521188290894,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.000186335329987539,"DRL proposed a 0.2 percentage-point increase in 601009.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-COP.US,COP.US,0.0,-0.002632370577136772,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284692,"DRL proposed a 0.3 percentage-point decrease in COP.US.
+600406.SHG,600406.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600406.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1088,7 +243,24 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-601166.SHG,601166.SHG,0.0,0.0044109945893132775,0.0039251505061917635,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.002033186101605134,"DRL proposed a 0.4 percentage-point increase in 601166.SHG.
+VZ.US,VZ.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in VZ.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+HNR1.XETRA,HNR1.XETRA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in HNR1.XETRA.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1100,13 +272,319 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 0.4%
-- after single-name cap: 0.4%
-- after country cap: 0.4%
-- final executable weight: 0.2%
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-DCC.LSE,DCC.LSE,0.0,-0.0014760866613099792,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107821152784,"DRL proposed a 0.1 percentage-point decrease in DCC.LSE.
+VLO.US,VLO.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in VLO.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ABT.US,ABT.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in ABT.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600019.SHG,600019.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600019.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ALV.XETRA,ALV.XETRA,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in ALV.XETRA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+1398.HK,1398.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 1398.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+2020.HK,2020.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 2020.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+2318.HK,2318.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 2318.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+NXT.LSE,NXT.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in NXT.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+1288.HK,1288.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 1288.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+0939.HK,0939.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 0939.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+0288.HK,0288.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 0288.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+0291.HK,0291.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 0291.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+IMB.LSE,IMB.LSE,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in IMB.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+1113.HK,1113.HK,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 1113.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+1109.HK,1109.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 1109.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+3968.HK,3968.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 3968.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600690.SHG,600690.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600690.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+PGR.US,PGR.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in PGR.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+CVX.US,CVX.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in CVX.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1122,7 +600,22 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-ABI.BR,ABI.BR,0.0,0.0013795580647050015,0.0012276081791432877,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0014599820392022756,"DRL proposed a 0.1 percentage-point increase in ABI.BR.
+COP.US,COP.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in COP.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+SHELL.AS,SHELL.AS,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in SHELL.AS.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1134,16 +627,18 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.1%
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-SCHP.SW,SCHP.SW,0.0,-0.0043879970469463195,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107821152773,"DRL proposed a 0.4 percentage-point decrease in SCHP.SW.
+601766.SHG,601766.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601766.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
 - low contribution to portfolio CVaR was associated with the allocation
 
 Negative drivers:
@@ -1156,7 +651,24 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-DHL.XETRA,DHL.XETRA,0.0,-0.0008050281094193628,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284513,"DRL proposed a 0.1 percentage-point decrease in DHL.XETRA.
+PUB.PA,PUB.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in PUB.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+LOW.US,LOW.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in LOW.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1172,7 +684,697 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-RHHBY.US,RHHBY.US,0.0,-0.004350341765547177,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284654,"DRL proposed a 0.4 percentage-point decrease in RHHBY.US.
+MET.US,MET.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in MET.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+603195.SHG,603195.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 603195.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+CA.PA,CA.PA,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in CA.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+DG.PA,DG.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in DG.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+FGR.PA,FGR.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in FGR.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ORA.PA,ORA.PA,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in ORA.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+BMY.US,BMY.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in BMY.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601288.SHG,601288.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601288.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+T.US,T.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in T.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600741.SHG,600741.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600741.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+HEN3.XETRA,HEN3.XETRA,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in HEN3.XETRA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601169.SHG,601169.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601169.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+PG.US,PG.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in PG.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+1299.HK,1299.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 1299.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601988.SHG,601988.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601988.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ADP.US,ADP.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in ADP.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601816.SHG,601816.SHG,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 601816.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601658.SHG,601658.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601658.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+FDX.US,FDX.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in FDX.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+STT.US,STT.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in STT.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600919.SHG,600919.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 600919.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601838.SHG,601838.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601838.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+MRSH.US,MRSH.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in MRSH.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+MDT.US,MDT.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in MDT.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+XOM.US,XOM.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in XOM.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+GSK.LSE,GSK.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in GSK.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+TTE.US,TTE.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in TTE.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+NOVN.SW,NOVN.SW,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in NOVN.SW.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601166.SHG,601166.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601166.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+DCC.LSE,DCC.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in DCC.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+2057.HK,2057.HK,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 2057.HK.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+BT-A.LSE,BT-A.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in BT-A.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+STAN.LSE,STAN.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in STAN.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+DHL.XETRA,DHL.XETRA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in DHL.XETRA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601211.SHG,601211.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601211.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601939.SHG,601939.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601939.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+MCD.US,MCD.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in MCD.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+AFL.US,AFL.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in AFL.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+A5G.IR,A5G.IR,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in A5G.IR.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+FITB.US,FITB.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in FITB.US.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+601818.SHG,601818.SHG,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 601818.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+GD.US,GD.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in GD.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1187,25 +1389,39 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-TFC.US,TFC.US,0.0,0.0015206675173022963,0.0013531752883464174,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.2 percentage-point increase in TFC.US.
+TTE.PA,TTE.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in TTE.PA.
 
 Positive drivers:
 - strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
 - low contribution to portfolio CVaR was associated with the allocation
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-GSK.US,GSK.US,0.0,-0.0015856457855867104,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0002395510772228455,"DRL proposed a 0.2 percentage-point decrease in GSK.US.
+000538.SHE,000538.SHE,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 000538.SHE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ROP.SW,ROP.SW,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in ROP.SW.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1220,112 +1436,11 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-601939.SHG,601939.SHG,0.0,0.0034112442988391304,0.003035516597270807,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0011487617352892614,"DRL proposed a 0.3 percentage-point increase in 601939.SHG.
+BBVA.MC,BBVA.MC,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in BBVA.MC.
 
 Positive drivers:
 - strong 12-month expected return distribution
 - high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.3%
-- after single-name cap: 0.3%
-- after country cap: 0.3%
-- final executable weight: 0.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-SBRY.LSE,SBRY.LSE,0.05000000000000002,-0.00010361966489817185,0.042175958844906575,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.044054284033714836,"DRL proposed a 0.0 percentage-point decrease in SBRY.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.2%
-- after single-name cap: 4.2%
-- after country cap: 4.2%
-- final executable weight: 4.4%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-PRU.LSE,PRU.LSE,0.0,-0.0034571891924075845,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,1.3553843156296286e-18,"DRL proposed a 0.3 percentage-point decrease in PRU.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601211.SHG,601211.SHG,0.0,0.0008863633903852481,0.0007887358825761215,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,1.438043761476865e-18,"DRL proposed a 0.1 percentage-point increase in 601211.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-0823.HK,0823.HK,0.05000000000000002,0.0013544832778221616,0.04347346066401206,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04534420000105097,"DRL proposed a 0.1 percentage-point increase in 0823.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.3%
-- after single-name cap: 4.3%
-- after country cap: 4.3%
-- final executable weight: 4.5%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-MDT.US,MDT.US,0.0,-0.0041461917197880655,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284472,"DRL proposed a 0.4 percentage-point decrease in MDT.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-LMT.US,LMT.US,0.0,-0.004893817211306482,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284627,"DRL proposed a 0.5 percentage-point decrease in LMT.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
 - regime suitability contributed to the model allocation
 
 Negative drivers:
@@ -1338,27 +1453,11 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-HEN3.XETRA,HEN3.XETRA,0.05000000000000002,-0.0004471622541432927,0.04187025537128616,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.043750367856881446,"DRL proposed a 0.0 percentage-point decrease in HEN3.XETRA.
+GILD.US,GILD.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in GILD.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- no dominant negative model attribution exceeded the reporting threshold
-
-Constraint projection:
-- raw target weight: 4.2%
-- after single-name cap: 4.2%
-- after country cap: 4.2%
-- final executable weight: 4.4%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-AENA.MC,AENA.MC,0.0,-0.0028483780495955837,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.000239551078211527,"DRL proposed a 0.3 percentage-point decrease in AENA.MC.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
+- regime suitability contributed to the model allocation
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
@@ -1370,7 +1469,7 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-601818.SHG,601818.SHG,0.05000000000000002,0.0038072499984436203,0.04565607012772406,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.045405092764208184,"DRL proposed a 0.4 percentage-point increase in 601818.SHG.
+USB.US,USB.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in USB.US.
 
 Positive drivers:
 - strong 12-month expected return distribution
@@ -1382,17 +1481,18 @@ Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
 
 Constraint projection:
-- raw target weight: 4.6%
-- after single-name cap: 4.6%
-- after country cap: 4.6%
-- final executable weight: 4.5%
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-AFL.US,AFL.US,0.0,-0.0033854418948109414,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.3 percentage-point decrease in AFL.US.
+601009.SHG,601009.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601009.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
-- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
@@ -1404,7 +1504,42 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-GD.US,GD.US,0.0,-0.004997093888097762,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107821152703,"DRL proposed a 0.5 percentage-point decrease in GD.US.
+EN.PA,EN.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in EN.PA.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+TSCO.LSE,TSCO.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in TSCO.LSE.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- high dividend safety had high attribution
+- regime suitability contributed to the model allocation
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+NOC.US,NOC.US,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in NOC.US.
 
 Positive drivers:
 - portfolio fit and risk-adjusted score influenced the model allocation
@@ -1419,27 +1554,13 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-USB.US,USB.US,0.0,0.0017815310482465687,0.0015853062963992498,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.2 percentage-point increase in USB.US.
+601998.SHG,601998.SHG,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 601998.SHG.
 
 Positive drivers:
 - strong 12-month expected return distribution
+- high dividend safety had high attribution
 - regime suitability contributed to the model allocation
 - low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-ROP.SW,ROP.SW,0.0,-0.004734661502721759,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284543,"DRL proposed a 0.5 percentage-point decrease in ROP.SW.
-
-Positive drivers:
-- strong 12-month expected return distribution
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
@@ -1451,47 +1572,10 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-CS.PA,CS.PA,0.05000000000000002,0.003334522845598846,0.045235410980289444,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.044986896923504,"DRL proposed a 0.3 percentage-point increase in CS.PA.
+AZN.LSE,AZN.LSE,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in AZN.LSE.
 
 Positive drivers:
 - strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.5%
-- after single-name cap: 4.5%
-- after country cap: 4.5%
-- final executable weight: 4.5%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-MTB.US,MTB.US,0.0,0.0013885729665800283,0.0012356301446981217,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,4.930196901370828e-19,"DRL proposed a 0.1 percentage-point increase in MTB.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.1%
-- after single-name cap: 0.1%
-- after country cap: 0.1%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-5.HK,5.HK,0.0,0.00020062059533029492,0.00017852346344314973,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 5.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
 
 Negative drivers:
 - no dominant negative model attribution exceeded the reporting threshold
@@ -1503,12 +1587,73 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-SREN.SW,SREN.SW,0.0,-3.180740713046472e-05,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,7.929014990935698e-19,"DRL proposed a 0.0 percentage-point decrease in SREN.SW.
+OR.PA,OR.PA,0.0,0.0,0.0,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in OR.PA.
 
 Positive drivers:
 - strong 12-month expected return distribution
-- high dividend safety had high attribution
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 0.0%
+- after single-name cap: 0.0%
+- after country cap: 0.0%
+- final executable weight: 0.0%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ESSITY-B.ST,ESSITY-B.ST,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in ESSITY-B.ST.
+
+Positive drivers:
+- strong 12-month expected return distribution
 - low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+ELE.MC,ELE.MC,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in ELE.MC.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- no dominant negative model attribution exceeded the reporting threshold
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+600018.SHG,600018.SHG,0.05,0.0,0.0475,4.163336342344337e-17,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0475,"DRL proposed a 0.0 percentage-point increase in 600018.SHG.
+
+Positive drivers:
+- strong 12-month expected return distribution
+- low contribution to portfolio CVaR was associated with the allocation
+
+Negative drivers:
+- dividend-cut risk was associated with lower allocation confidence
+
+Constraint projection:
+- raw target weight: 4.8%
+- after single-name cap: 4.8%
+- after country cap: 4.8%
+- final executable weight: 4.8%
+
+Attributions are model attributions and should not be interpreted as causal relationships."
+0002.HK,0002.HK,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in 0002.HK.
+
+Positive drivers:
+- portfolio fit and risk-adjusted score influenced the model allocation
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence
@@ -1520,157 +1665,10 @@ Constraint projection:
 - final executable weight: 0.0%
 
 Attributions are model attributions and should not be interpreted as causal relationships."
-BBVA.MC,BBVA.MC,0.0,0.00031303616170751434,0.0002785571425454567,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in BBVA.MC.
+NESN.SW,NESN.SW,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.0 percentage-point increase in NESN.SW.
 
 Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-601998.SHG,601998.SHG,0.0,0.0021474649983112644,0.0019109348593562515,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,2.9626665882470756e-05,"DRL proposed a 0.2 percentage-point increase in 601998.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.2%
-- after single-name cap: 0.2%
-- after country cap: 0.2%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-LI.PA,LI.PA,0.05000000000000002,0.0017760588456248367,0.043848602260732165,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04571714833051368,"DRL proposed a 0.2 percentage-point increase in LI.PA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- high dividend safety had high attribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.4%
-- after single-name cap: 4.4%
-- after country cap: 4.4%
-- final executable weight: 4.6%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-HSY.US,HSY.US,0.0,-0.004995340165862396,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284242,"DRL proposed a 0.5 percentage-point decrease in HSY.US.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-TSCO.LSE,TSCO.LSE,0.0,-0.0011141765947765812,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284358,"DRL proposed a 0.1 percentage-point decrease in TSCO.LSE.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- regime suitability contributed to the model allocation
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-OR.PA,OR.PA,0.0,-0.004997095326252107,0.0,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.00023955107722284337,"DRL proposed a 0.5 percentage-point decrease in OR.PA.
-
-Positive drivers:
-- strong 12-month expected return distribution
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-ESSITY-B.ST,ESSITY-B.ST,0.05000000000000002,-0.0010922138931542674,0.041296252226163746,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.04317972062490259,"DRL proposed a 0.1 percentage-point decrease in ESSITY-B.ST.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 4.1%
-- after single-name cap: 4.1%
-- after country cap: 4.1%
-- final executable weight: 4.3%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-600018.SHG,600018.SHG,0.05000000000000002,-0.00340216990261761,0.03924072374698751,0.011014388553062106,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.041136209802967234,"DRL proposed a 0.3 percentage-point decrease in 600018.SHG.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 3.9%
-- after single-name cap: 3.9%
-- after country cap: 3.9%
-- final executable weight: 4.1%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-0002.HK,0002.HK,0.0,-0.0035026677910644085,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.4 percentage-point decrease in 0002.HK.
-
-Positive drivers:
-- strong 12-month expected return distribution
-- low contribution to portfolio CVaR was associated with the allocation
-
-Negative drivers:
-- dividend-cut risk was associated with lower allocation confidence
-
-Constraint projection:
-- raw target weight: 0.0%
-- after single-name cap: 0.0%
-- after country cap: 0.0%
-- final executable weight: 0.0%
-
-Attributions are model attributions and should not be interpreted as causal relationships."
-NESN.SW,NESN.SW,0.0,-0.0049957287941312855,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.5,0.0,"DRL proposed a 0.5 percentage-point decrease in NESN.SW.
-
-Positive drivers:
-- strong 12-month expected return distribution
+- portfolio fit and risk-adjusted score influenced the model allocation
 
 Negative drivers:
 - dividend-cut risk was associated with lower allocation confidence

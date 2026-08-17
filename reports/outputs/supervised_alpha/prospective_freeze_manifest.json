@@ -1,0 +1,27 @@
+{
+  "artifact_version": 1,
+  "earliest_full_evidence_date": "2029-08-31",
+  "effective_date": "2026-08-31",
+  "first_outcome_due_date": "2026-11-30",
+  "freeze_hash": "4e10c1fe12f9534bdcd74ed8b1fbabe896dab935f4152d538d3d05541a800fbb",
+  "frozen_at": "2026-08-17T07:20:31.161767+00:00",
+  "legacy_oos_eligible_for_deployment": false,
+  "model_bundle_hashes": {
+    "12": "d1cb22edbded6c1da82c1efa68c02a35ab3c74941bfbea91382488d06a67cb28",
+    "3": "ef4ecc7c19ff3e02878b8697de95a4da250aa950e5a53eb366ad8fe0905ab436",
+    "6": "bb4e63d7f2bce8417ac7a44e014bc7691e78b986d5bfcd0609882fe83a6746a3",
+    "9": "42189662da978e5418374a7d4b05b8567b2d564369c04ce8085d859bcd3a785f"
+  },
+  "primary_horizon_months": 3,
+  "prospective_evidence_only": true,
+  "required_independent_cohorts": 12,
+  "source_hashes": {
+    "acceptance_decision": "646ac2b88a462fa6eb2fecf1fe3f9af00bd45305fb54a41f67e3a25d89bf0edf",
+    "config": "f8fe500c9975dd2e106822d999852f7a16d32fceba64cde6209a25e79dff873f",
+    "ensemble_weights": "d70d3051cc1f4053d991596f08bb87ff03d52cc331b4a4cfc301e693094f7c1b",
+    "latest_predictions": "23425892f69cd07dad2ec3b1c01d3f2305bfc52160c1da9216386135376b2143",
+    "model_manifest": "32a12102250da75b1416b1a890d933efb67f86184a098fd55e25e4d39531820a",
+    "model_source": "f236e86b5259d600e404999692b83c8fd23adbcedd3170c850483d9c878dd042",
+    "run_manifest": "0699ea35d526f9518e27f188259d87f456ff9343ab1b33bd97dc1fa9f69a92a4"
+  }
+}

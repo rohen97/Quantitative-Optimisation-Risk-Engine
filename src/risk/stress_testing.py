@@ -7,7 +7,24 @@ import pandas as pd
 from src.risk.scenario_library import build_scenario_library
 
 
+def _number(value: object, default: float) -> float:
+    try:
+        if pd.isna(value):
+            return default
+    except (TypeError, ValueError):
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def _scenario_shock(row: pd.Series, scenario: dict) -> tuple[float, str]:
+    if (
+        str(row.get("ticker", "")).upper() == "CASH"
+        or str(row.get("instrument_type", "")).lower() == "cash"
+    ):
+        return 0.0, "cash"
     shock = float(scenario.get("base_shock", 0.0))
     drivers = []
     for key, col in [("region_shocks", "region"), ("country_shocks", "country"), ("sector_shocks", "sector"), ("currency_shocks", "currency")]:
@@ -15,37 +32,45 @@ def _scenario_shock(row: pd.Series, scenario: dict) -> tuple[float, str]:
         if value:
             shock += value
             drivers.append(f"{col}:{row.get(col)}")
-    if scenario.get("beta_extra") and row.get("beta_local_market", 1) > 1.1:
+    if scenario.get("beta_extra") and _number(row.get("beta_local_market"), 1.0) > 1.1:
         shock += scenario["beta_extra"]
         drivers.append("high_beta")
-    if scenario.get("liquidity_extra") and row.get("liquidity_score", 50) < 45:
+    if scenario.get("liquidity_extra") and _number(row.get("liquidity_score"), 50.0) < 45:
         shock += scenario["liquidity_extra"]
         drivers.append("liquidity")
-    if scenario.get("low_quality_extra") and row.get("balance_sheet_strength_score", 50) < 45:
+    if scenario.get("low_quality_extra") and _number(
+        row.get("balance_sheet_strength_score"), 50.0
+    ) < 45:
         shock += scenario["low_quality_extra"]
         drivers.append("low_quality")
-    if scenario.get("regulatory_extra") and row.get("regulatory_risk_score", 0) > 60:
+    if scenario.get("regulatory_extra") and _number(
+        row.get("regulatory_risk_score"), 0.0
+    ) > 60:
         shock += scenario["regulatory_extra"]
         drivers.append("regulatory")
-    if scenario.get("debt_extra") and row.get("net_debt_to_ebitda", 2) > 3:
+    if scenario.get("debt_extra") and _number(row.get("net_debt_to_ebitda"), 2.0) > 3:
         shock += scenario["debt_extra"]
         drivers.append("high_debt")
-    if scenario.get("credit_extra") and row.get("credit_stress_score", 0) > 50:
+    if scenario.get("credit_extra") and _number(row.get("credit_stress_score"), 0.0) > 50:
         shock += scenario["credit_extra"]
         drivers.append("credit_stress")
-    if scenario.get("dividend_cut_extra") and row.get("dividend_cut_probability", 0.1) > 0.35:
+    if scenario.get("dividend_cut_extra") and _number(
+        row.get("dividend_cut_probability"), 0.1
+    ) > 0.35:
         shock += scenario["dividend_cut_extra"]
         drivers.append("dividend_cut_probability")
-    if scenario.get("payout_extra") and row.get("payout_ratio", 0.55) > 0.85:
+    if scenario.get("payout_extra") and _number(row.get("payout_ratio"), 0.55) > 0.85:
         shock += scenario["payout_extra"]
         drivers.append("high_payout")
-    if scenario.get("low_adv_extra") and row.get("average_daily_value_usd", 5_000_000) < 5_000_000:
+    if scenario.get("low_adv_extra") and _number(
+        row.get("average_daily_value_usd"), 5_000_000.0
+    ) < 5_000_000:
         shock += scenario["low_adv_extra"]
         drivers.append("low_adv")
     if scenario.get("meta_wolf_extra") and "META WOLF" in str(row.get("company_name", "")).upper():
         shock += scenario["meta_wolf_extra"]
         drivers.append("meta_wolf")
-    if scenario.get("tail_risk_extra") and row.get("tail_risk_score", 50) > 70:
+    if scenario.get("tail_risk_extra") and _number(row.get("tail_risk_score"), 50.0) > 70:
         shock += scenario["tail_risk_extra"]
         drivers.append("tail_risk")
     return max(shock, -0.85), ";".join(drivers) or "base"

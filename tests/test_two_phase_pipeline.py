@@ -95,6 +95,8 @@ def test_two_phase_pipeline_resumes_and_finalises_globally(tmp_path, monkeypatch
     assert first["completed_batches"] == first["batch_count"]
     assert resumed["completed_batches"] == 0
     assert resumed["skipped_batches"] == first["batch_count"]
+    assert first["worker_count"] == 2
+    assert resumed["worker_count"] == 0
     assert len(outputs["scorecard"]) == len(universe)
     assert len(outputs["final_recommendations"]) == len(universe)
     assert (config.artifact_dir / "PHASE1_SUCCESS.json").exists()

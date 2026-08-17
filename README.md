@@ -15,20 +15,22 @@ The LLM benchmark is an explanation and comparison layer only. It cannot bypass 
 ## Current Validated Run
 
 The latest full-universe evidence package was regenerated on 2026-08-13.
+The supervised-alpha and challenger research layer was refreshed on 2026-08-17;
+it remains deployment-blocked and does not change the validated baseline.
 
 | Measure | Result |
 |---|---:|
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
 | Walk-forward eligible securities | 1,409 |
-| Historical forecasts | 156,960 |
-| Aligned realised outcomes | 156,508 |
+| Historical forecasts | 181,664 |
+| Aligned realised outcomes | 181,213 |
 | Portfolio decisions | 60 monthly anchors |
 | Governance score | 87.5 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Annual turnover | 1.33x |
-| Annualised cost drag | 1.28% |
+| Annual turnover | 1.10x |
+| Annualised cost drag | 0.82% |
 | 95% / 99% VaR backtests | `PASS` / `PASS` |
 
 The complete, checksummed result is in
@@ -36,20 +38,26 @@ The complete, checksummed result is in
 
 The investment-principal package presents the results in plain language:
 [PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
-[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf),
-and [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md).
-It recommends a controlled, human-supervised live pilot, not unattended or
-full-scale deployment.
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-17.pdf),
+[written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md),
+and [publication-safe recommendation snapshot](reports/presentations/wolf_investment_principal/recommendation_snapshot.csv).
+The 22-slide briefing includes the supervised model stack, OOS diagnostics,
+calibrated uncertainty, DRL challengers, portfolio differences and stock
+recommendations. It recommends a controlled, human-supervised live pilot, not
+unattended or full-scale deployment.
 
 ![Validation scorecard](reports/releases/2026-08-13-risk-pit-cost-validation/plots/validation_scorecard.png)
 
 ![Walk-forward portfolio performance](reports/releases/2026-08-13-risk-pit-cost-validation/plots/cumulative_returns.png)
 
 Conditional approval is deliberate. The evidence store now archives 59,183
-delisting events, but observed filing acceptance, dated membership,
-inactive-security prices, historical volume, sentiment, narrative and regime
-vintages remain incomplete. This repository is research software and does not
-authorize unattended live trading.
+delisting events plus aggregate local Bloomberg coverage of 25,240
+database-as-of fundamental vintages, 151,659 corporate-action vintages and
+694,246 historical market-cap observations. Observed filing acceptance, dated
+membership, inactive-security prices, broad historical volume, sentiment,
+narrative and regime vintages remain incomplete. Licensed Bloomberg rows stay
+in the ignored local warehouse and are not redistributed. This repository is
+research software and does not authorize unattended live trading.
 
 ## 1997-Present Portfolio Backtest
 
@@ -70,7 +78,7 @@ Overfitting now distinguish measured replay alpha from credible deployable alpha
 
 > The long history is a retrospective replay of today's holdings. It is useful for
 > exposure, path, liquidity, and benchmark diagnostics, but it contains selection
-> look-ahead and survivorship bias. The dated 60-month model walk-forward remains a
+> look-ahead and survivorship bias. The dated 89-decision model walk-forward remains a
 > separate evidence set. The current evidence does not establish deployable alpha.
 
 Open the complete [1997-present backtest report](reports/backtests/1997_to_latest/README.md)
@@ -101,6 +109,28 @@ python -m pytest -q
 Keep provider credentials in `.env` only. The tracked `.env.example` contains
 names and safe defaults, never usable credentials.
 
+### Bloomberg Desktop API
+
+Bloomberg ingestion is currently paused. Keep
+`BLOOMBERG_DESKTOP_ENABLED=false`; the overnight supervisor also excludes the
+`bloomberg` resource group. Existing licensed observations remain only in the
+ignored local DuckDB and are not removed or redistributed.
+
+On an entitled Windows workstation with Bloomberg Terminal open and logged in:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-bloomberg.txt
+.\.venv\Scripts\python.exe scripts\run_bloomberg_backfill.py --health-check
+.\.venv\Scripts\python.exe scripts\run_bloomberg_backfill.py `
+  --regions 'Mainland China' 'Hong Kong' --start 1997-01-01 --resume
+.\.venv\Scripts\python.exe scripts\run_bloomberg_pit_backfill.py --coverage-only
+```
+
+Bloomberg observations remain in the ignored local DuckDB. See
+[`docs/BLOOMBERG_DATA.md`](docs/BLOOMBERG_DATA.md) for limits and operations and
+[`docs/PRODUCTION_POINT_IN_TIME.md`](docs/PRODUCTION_POINT_IN_TIME.md) for vintage
+semantics, resume commands and measured gaps.
+
 Run the mock-data pipeline:
 
 ```bash
@@ -124,18 +154,35 @@ for a paced retry after a provider rate limit.
 Run the observed DuckDB universe with resumable regional model batches:
 
 ~~~powershell
-python scripts/run_two_phase_pipeline.py phase1 --batch-size 2500
+python scripts/refresh_model_input_summaries.py
+python scripts/run_two_phase_pipeline.py phase1 --batch-size 2500 --workers 2 --max-inflight-securities 5000
 python scripts/run_two_phase_pipeline.py status
 python scripts/run_two_phase_pipeline.py phase2 --with-governance
 ~~~
 
-Phase 1 uses observed metadata and reported annual statements by default. It partitions
+The exact price-summary cache replaces a repeated full scan of the 100M+ row price
+table; it is automatically ignored when stale. Phase 1 uses observed metadata and
+reported annual statements by default. It partitions
 DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong under
 data/interim/observed_full_universe_pipeline/. Completed batches are skipped on
-restart. Phase 2 merges every region before cross-sectional ranks, portfolio
+restart, and bounded workers cap the number of securities in flight. Phase 2 merges every region before cross-sectional ranks, portfolio
 optimisation, risk and DRL, so batch boundaries do not become investment boundaries.
 Use all for one foreground command. Synthetic test data requires the explicit
 --input-mode synthetic_test option.
+
+Run the complete research chain unattended with one process lock, durable stage
+checkpoints, Windows sleep prevention and free-memory guardrails:
+
+~~~powershell
+.\.venv\Scripts\python.exe scripts\run_overnight_research.py --max-hours 12
+~~~
+
+The runner continues local model work when Bloomberg reaches its external daily
+capacity, shares a cooldown across Bloomberg stages, and revisits deferred pulls
+without redoing completed chunks. Status and evidence are written under
+`reports/outputs/overnight/`; detailed child logs remain under
+`reports/logs/overnight/`. Press `Ctrl+C` once for a controlled interruption and
+rerun the same command to resume.
 
 Build the feature store and scorecard outputs:
 
@@ -167,6 +214,39 @@ Run the mock ML Forecasting & Distributional Risk Engine:
 python scripts/run_ml_forecasting.py
 ```
 
+Run the governed supervised benchmark-relative alpha challengers:
+
+```powershell
+python -m pip install -e ".[ml]"
+.\.venv\Scripts\python.exe scripts\run_supervised_alpha.py
+```
+
+The supervised research stack compares train-only OLS screening, OLS, Ridge,
+ElasticNet, robust Huber regression, Random Forest, Extra Trees, histogram
+gradient boosting, XGBoost regression and XGBoost ranking. Expanding-window
+folds fit preprocessing and feature screening on training data only; every
+validation label must mature before both its validation block and the legacy
+OOS start. A rank-normalised linear/tree/ranker ensemble drives regional,
+cost-aware cohort selection with retention bands.
+
+The observed run used 80,582 reconstructed PIT-proxy feature rows, 285,934
+realised outcomes and 16 convergent candidate specifications. At the primary
+3-month horizon, validation rank IC was 0.0980 and the already-inspected legacy
+OOS rank IC was 0.1570 across 11 monthly scores but only four non-overlapping
+cohorts. Mean 3-month net active cohort return was 7.40%, recurring annual
+turnover was 0.54x and annualised cost drag was 0.50%, including the separate
+25bp bank fee. Incomplete terminal outcome cross-sections are excluded, initial
+funding is reported separately from recurring turnover, and formal annualised
+return, Sharpe, t-statistics and confidence intervals are suppressed until 12
+independent cohorts exist. Purged date-block conformal calibration produced
+central 90% coverage of 94.6%, 93.4%, 91.9% and 90.5% at 3/6/9/12 months, albeit
+with wide long-horizon intervals. These are encouraging diagnostics, not
+deployable alpha: the history is reconstructed, the OOS record has informed
+research iteration and the 12-independent-cohort gate is unmet. The supervised
+blend therefore remains exactly 0%. See the published aggregate
+[challenger report](reports/outputs/supervised_alpha/supervised_alpha_report.md)
+and its [publication boundary](reports/outputs/supervised_alpha/PUBLICATION.md).
+
 Run the portfolio optimisation and constraint engine:
 
 ```bash
@@ -187,7 +267,7 @@ Run the constrained, regime-gated and explainable DRL allocation overlay:
 python scripts/run_drl_pipeline.py
 ```
 
-The DRL engine is a residual overlay, not a replacement for the selected optimiser. It proposes bounded active-weight deltas against the baseline optimiser, applies probabilistic regime gating and the Wolf Chaos risk throttle, then projects weights through hard constraints. The acceptance gate records whether the result is rejected, blended or accepted as a challenger, and final recommendations retain the baseline source separately from DRL challenger status.
+The DRL engine is a residual overlay, not a replacement for the selected optimiser. Production research mode trains five Stable-Baselines3 PPO seeds on a hashed six-region panel with 60 train months, 14 validation months, two embargo months and a locked 12-month legacy OOS record. It optimises benchmark-relative return after costs with explicit turnover, drawdown and tail-risk penalties. Ridge contextual-bandit and convex-residual challengers use the same validation-only selection protocol. All three approaches remain rejected, leaving the classical baseline at 100%; deployment requires three completed genuinely prospective monthly shadow cycles beginning August 31, 2026.
 
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
@@ -210,7 +290,7 @@ python scripts/pull_external_data.py --status-only
 python scripts/pull_external_data.py --start 2020-01-01
 ```
 
-Backfill the 2018-2020 annual filings required by the 60-month reconstructed
+Backfill missing observed annual-filing timestamps for the expanded reconstructed
 walk-forward, or inspect resumable coverage without making network requests:
 
 ```powershell
@@ -404,6 +484,15 @@ fundamentals, and EODHD supplies delistings plus entitlement-dependent symbol an
 membership history. Provider failures do not become passes; measured coverage is
 written to `reports/outputs/validation/pit_evidence_coverage.json`.
 
+Pull immutable FRED/ALFRED macro vintages and register every walk-forward
+decision snapshot:
+
+```powershell
+python scripts/run_macro_vintage_backfill.py --start 1994-01-01
+python scripts/archive_walk_forward_snapshots.py
+python scripts/build_pit_coverage_report.py
+```
+
 Build the compact GitHub release package after validation and IC reporting:
 
 ```bash
@@ -415,6 +504,22 @@ constraint, transaction-cost and adaptive VaR/Expected Shortfall evidence to
 `reports/outputs/walk_forward/`. It then writes the approval bundle to
 `reports/outputs/validation/<validation_run_id>/` and refreshes
 `reports/outputs/validation/latest/`.
+
+The current measured walk-forward contains 89 usable monthly decisions from
+February 2019 through June 2026. Cost-aware regional alpha returned 13.78%
+annualised versus 11.54% for Wolf CVaR and 16.21% for equal weight. Its Sharpe
+was 1.19 versus 1.12 and 1.09 respectively, but its improvement over Wolf was
+not statistically significant. Train-only isotonic calibration reduced locked
+drawdown ECE to 2.61%, below the 10% target. These are research results, not a
+promotion decision.
+
+Refresh the regional challenger and record or evaluate immutable shadow cycles:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_regional_alpha_optimisation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py --evaluate-only
+```
 
 The risk forecaster selects chronologically from EWMA Normal, EWMA Student-t,
 filtered historical simulation and DCC-IGARCH Student-t candidates. Overall and

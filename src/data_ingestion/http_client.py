@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import time
 from dataclasses import dataclass
+from http.client import HTTPException
 from urllib.error import HTTPError, URLError
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
@@ -121,7 +122,7 @@ class HttpClient:
                         f"HTTP {exc.code} from {safe_url}: {error_body}"
                     ) from exc
                 last_error = exc
-            except (URLError, TimeoutError, OSError) as exc:
+            except (URLError, TimeoutError, OSError, HTTPException) as exc:
                 last_error = exc
 
             if attempt + 1 < max(self.config.retry_attempts, 1):

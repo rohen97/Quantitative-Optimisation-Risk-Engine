@@ -92,3 +92,27 @@ def test_diversification_solver_reports_infeasible_group_system():
     )
     assert not capped.attrs["feasible"]
     assert capped.sum() == 0
+
+
+def test_diversification_solver_uses_bounded_cash_before_relaxing_caps():
+    countries = ["US"] * 10 + ["UK"] * 4 + ["HK"] * 3 + ["CH"] * 2 + ["FR"]
+    data = pd.DataFrame(
+        {
+            "sector": [f"S{i % 5}" for i in range(20)],
+            "country": countries,
+            "region": [f"R{i % 5}" for i in range(20)],
+            "currency": [f"CUR{i % 5}" for i in range(20)],
+        }
+    )
+    capped = apply_diversification_caps(
+        pd.Series(1.0, index=data.index),
+        data,
+        {
+            "max_single_name_weight": 0.05,
+            "max_country_weight": 0.30,
+            "maximum_cash_weight": 0.25,
+        },
+    )
+    assert capped.attrs["feasible"]
+    assert abs(float(capped.sum()) + capped.attrs["cash_weight"] - 1.0) < 1e-9
+    assert abs(float(capped.attrs["cash_weight"]) - 0.20) < 1e-9

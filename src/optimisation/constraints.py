@@ -234,10 +234,15 @@ def apply_diversification_caps(weights: pd.Series, data: pd.DataFrame, constrain
     preference /= max(float(preference.max()), 1.0)
     preference += np.linspace(1e-12, 0.0, len(preference), endpoint=False)
     max_weight = float(limits.get("max_single_name_weight", 0.05))
-    if len(active) * max_weight < 1.0 - 1e-10:
+    max_cash_weight = float(limits.get("maximum_cash_weight", 0.0))
+    if len(active) * max_weight + max_cash_weight < 1.0 - 1e-10:
         partial = np.minimum(raw.iloc[active_positions].to_numpy(dtype=float), max_weight)
         output.iloc[active_positions] = partial
-        output.attrs.update(feasible=False, status="insufficient_single_name_capacity")
+        output.attrs.update(
+            feasible=False,
+            status="insufficient_single_name_and_cash_capacity",
+            cash_weight=0.0,
+        )
         return output
 
     row_indices: list[int] = []
@@ -257,26 +262,37 @@ def apply_diversification_caps(weights: pd.Series, data: pd.DataFrame, constrain
             upper_bounds.append(cap)
             constraint_row += 1
     a_ub = (
-        csr_matrix((values, (row_indices, column_indices)), shape=(constraint_row, len(active)))
+        csr_matrix(
+            (values, (row_indices, column_indices)),
+            shape=(constraint_row, len(active) + 1),
+        )
         if constraint_row
         else None
     )
     result = linprog(
-        c=-preference,
+        c=np.concatenate([-preference, np.array([0.0])]),
         A_ub=a_ub,
         b_ub=np.asarray(upper_bounds, dtype=float) if upper_bounds else None,
-        A_eq=np.ones((1, len(active)), dtype=float),
+        A_eq=np.ones((1, len(active) + 1), dtype=float),
         b_eq=np.array([1.0]),
-        bounds=[(0.0, max_weight)] * len(active),
+        bounds=[(0.0, max_weight)] * len(active) + [(0.0, max_cash_weight)],
         method="highs",
     )
     if not result.success:
-        output.attrs.update(feasible=False, status=f"infeasible:{result.message}")
+        output.attrs.update(
+            feasible=False,
+            status=f"infeasible:{result.message}",
+            cash_weight=0.0,
+        )
         return output
-    solved = np.where(np.asarray(result.x) > 1e-10, np.asarray(result.x), 0.0)
-    solved /= solved.sum()
+    solved = np.where(np.asarray(result.x[:-1]) > 1e-10, np.asarray(result.x[:-1]), 0.0)
+    cash_weight = float(max(result.x[-1], 0.0))
     output.iloc[active_positions] = solved
-    output.attrs.update(feasible=True, status="optimal")
+    output.attrs.update(
+        feasible=True,
+        status="optimal_with_cash" if cash_weight > 1e-10 else "optimal",
+        cash_weight=cash_weight,
+    )
     return output
 
 

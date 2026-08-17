@@ -8,19 +8,19 @@ This package compares every investable portfolio output currently produced by th
 
 | Portfolio | Start | CAGR | Sharpe | Max drawdown | Ending value | PnL |
 |---|---:|---:|---:|---:|---:|---:|
-| Current Portfolio | $186,060,522 | 14.06% | 0.75 | -42.57% | $9,013,105,522 | $8,827,045,000 |
-| Portfolio-Aware Overlay | $186,060,522 | 12.96% | 0.77 | -41.21% | $6,770,759,519 | $6,584,698,997 |
-| Clean-Sheet Quant | $100,000 | 8.97% | 0.66 | -27.73% | $1,260,577 | $1,160,577 |
-| LLM Analyst Benchmark | $100,000 | 9.50% | 0.81 | -20.91% | $1,454,455 | $1,354,455 |
-| CVaR-Constrained Optimiser | $100,000 | 9.72% | 0.65 | -32.27% | $1,541,859 | $1,441,859 |
-| Dividend-Income Optimiser | $100,000 | 10.51% | 0.63 | -41.29% | $1,906,226 | $1,806,226 |
-| Mean-Variance Optimiser | $100,000 | 9.26% | 0.66 | -29.60% | $1,362,692 | $1,262,692 |
-| Regime-Aware Optimiser | $100,000 | 10.38% | 0.66 | -36.59% | $1,843,697 | $1,743,697 |
-| Risk-Parity Optimiser | $100,000 | 10.89% | 0.77 | -30.56% | $2,108,263 | $2,008,263 |
-| Score-Weighted Optimiser | $100,000 | 10.57% | 0.69 | -35.52% | $1,935,381 | $1,835,381 |
-| Final Resolved Portfolio | $186,060,522 | 9.09% | 0.65 | -28.45% | $2,424,094,460 | $2,238,033,938 |
-| DRL Baseline Portfolio | $186,060,522 | 9.09% | 0.65 | -28.45% | $2,424,094,460 | $2,238,033,938 |
-| DRL Raw Challenger | $186,060,522 | 8.83% | 0.65 | -27.87% | $2,260,590,356 | $2,074,529,834 |
+| Current Portfolio | $186,060,522 | 14.06% | 0.75 | -42.57% | $9,013,102,206 | $8,827,041,684 |
+| Portfolio-Aware Overlay | $186,060,522 | 13.69% | 0.77 | -47.39% | $8,192,397,366 | $8,006,336,844 |
+| Clean-Sheet Quant | $100,000 | 8.50% | 0.61 | -36.03% | $1,108,623 | $1,008,623 |
+| LLM Analyst Benchmark | $100,000 | 5.52% | 0.63 | -13.29% | $488,283 | $388,283 |
+| CVaR-Constrained Optimiser | $100,000 | 8.69% | 0.59 | -37.09% | $1,168,765 | $1,068,765 |
+| Dividend-Income Optimiser | $100,000 | 10.60% | 0.59 | -45.88% | $1,951,982 | $1,851,982 |
+| Mean-Variance Optimiser | $100,000 | 9.02% | 0.61 | -37.88% | $1,278,845 | $1,178,845 |
+| Regime-Aware Optimiser | $100,000 | 10.11% | 0.61 | -39.50% | $1,713,229 | $1,613,229 |
+| Risk-Parity Optimiser | $100,000 | 10.41% | 0.74 | -29.10% | $1,859,175 | $1,759,175 |
+| Score-Weighted Optimiser | $100,000 | 9.81% | 0.62 | -33.64% | $1,580,605 | $1,480,605 |
+| Final Resolved Portfolio | $186,060,522 | 8.34% | 0.58 | -37.34% | $1,976,496,316 | $1,790,435,794 |
+| DRL Baseline Portfolio | $186,060,522 | 8.34% | 0.58 | -37.34% | $1,976,496,316 | $1,790,435,794 |
+| DRL Raw Challenger | $186,060,522 | 8.05% | 0.57 | -35.80% | $1,826,083,914 | $1,640,023,392 |
 | Trend and Risk-Controlled Regional Indices | $100,000 | 4.43% | 0.30 | -23.30% | $358,822 | $258,822 |
 
 ## Evidence Included
@@ -40,10 +40,5 @@ This package compares every investable portfolio output currently produced by th
 - HTML and PDF reports, source manifest, compact result tables, plots, and SHA-256 checksums
 
 Open [backtest_report.html](backtest_report.html) or [portfolio_backtest_analysis.pdf](portfolio_backtest_analysis.pdf) for the complete rendered report and [written_interpretation.md](written_interpretation.md) for the plain-language explanation of every table. See [docs/BACKTEST_METHODOLOGY.md](../../../docs/BACKTEST_METHODOLOGY.md) for formulas, assumptions, and the paper-to-code mapping.
-
-For a concise non-technical presentation of the current holdings, model
-evidence and live-pilot decision, open the
-[investment committee PowerPoint](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx)
-or its [rendered PDF](../../presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pdf).
 
 Raw provider histories are intentionally excluded from Git. This is research evidence, not authorization for live trading.

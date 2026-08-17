@@ -4,7 +4,7 @@ observed_filing_acceptance_coverage,WARNING,0,Observed regulator acceptance time
 historical_membership_evidence,WARNING,0,Dated index or universe membership events.,0.0,1.0
 delisting_evidence,PASS,0,Archived delisting events used to measure survivorship coverage.,59183.0,1.0
 inactive_security_price_coverage,WARNING,0,Inactive securities with archived price history.,0.0,0.5
-historical_volume_coverage,WARNING,0,Priced securities with observed historical volume.,0.0,0.8
+historical_volume_coverage,WARNING,0,Priced securities with observed historical volume.,0.0003449903765842321,0.8
 walk_forward_future_fundamental_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,
 walk_forward_future_price_feature_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,
 walk_forward_hard_constraint_breaches,PASS,0,Reconstructed walk-forward chronology invariant.,,

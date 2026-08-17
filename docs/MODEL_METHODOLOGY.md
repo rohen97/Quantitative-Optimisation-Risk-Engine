@@ -126,9 +126,9 @@ The ML layer follows the paper-inspired idea that financial models should foreca
 
 `mu` is conditional expected total return, `sigma` is conditional volatility, `nu` controls tail thickness and `xi` controls skewness. The current skewed Student-t implementation is documented as an approximation: it widens downside or upside tails around a Student-t base and is designed to be replaced later with a full implementation.
 
-The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-risk score, skewness-risk score, forecast uncertainty and distribution model confidence. Probabilistic validation includes Log Predictive Score, CRPS approximation, PIT diagnostics, quantile coverage and calibration error. VaR/ES backtesting includes exceedance rates and a Kupiec test, with placeholders for Christoffersen independence and richer ES tests.
+The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-risk score, skewness-risk score, forecast uncertainty and distribution model confidence. Probabilistic validation includes Log Predictive Score, CRPS approximation, PIT diagnostics, quantile coverage and calibration error. VaR/ES backtesting includes exceedance rates plus Kupiec coverage and Christoffersen independence tests. The production risk stack compares DCC-IGARCH Student-t, filtered historical simulation, EWMA Normal and EWMA Student-t forecasts using trailing information only. Its scale and causal post-exception buffer are selected on the development segment and then locked for the chronological holdout.
 
-Future research hooks are present but disabled or research-only: additional asset classes, Transformer/xLSTM/CNN/LSTM distributional forecasters, sensitivity analysis, quantile-based forecasting, conformal prediction and distribution-derived trading signal research. No automated trading, DRL or deep-learning dependency is enabled.
+Future research hooks are present but disabled or research-only: additional asset classes, Transformer/xLSTM/CNN/LSTM distributional forecasters, quantile-based forecasting, conformal prediction and distribution-derived trading signal research. DRL is enabled only as a bounded, multi-seed PPO challenger with a deterministic fallback and an explicit rejection gate; it cannot authorize automated trading or override the classical portfolio and governance controls.
 
 ## Portfolio Optimisation Methodology
 
@@ -141,6 +141,7 @@ Implemented constructors:
 - Risk-parity portfolio using volatility proxies.
 - Mean-variance baseline using expected return and variance penalty.
 - CVaR / Expected Shortfall constrained portfolio.
+- Regional benchmark-relative, cost-aware stock-selection portfolio.
 - Dividend-income constrained portfolio.
 - Regime-aware portfolio.
 
@@ -153,7 +154,70 @@ portfolio and feasible target retain their diversification caps. Mandatory hard
 exits override the budget and are disclosed rather than delayed. This control is
 operationally specified before evaluation and is not fitted to realised returns.
 
+The regional-alpha challenger ranks each security against its dated regional
+and sector peers. The objective combines benchmark-relative expected return,
+momentum, valuation, cash-flow quality, balance-sheet strength, dividend safety,
+volatility and tail risk. Estimated spread, FX and participation-based impact
+costs reduce selection utility, while a fixed retention bonus discourages
+unnecessary replacement of existing holdings. Signal weights are fixed in
+configuration before evaluation.
+
 The trade list compares current and target weights and assigns Buy, Increase, Reduce, Sell, Hold or Avoid actions. Optimisation cannot override hard exclusions or use high expected return alone to justify high-risk names. Future upgrades can add Hierarchical Risk Parity, Black-Litterman, transaction-cost models, tax constraints, robust covariance estimation, robust optimisation and a DRL allocation overlay.
+
+## Supervised Benchmark-Relative Alpha Methodology
+
+The supervised alpha layer is a governed challenger to the regional-alpha
+optimiser, not an automatic replacement. It trains OLS after train-only
+Fama-MacBeth feature screening, Ridge, ElasticNet, SGD Huber, Random Forest,
+Extra Trees, histogram gradient boosting, XGBoost regression and XGBoost
+ranking models. Fixed, deliberately small parameter grids limit search degrees
+of freedom. One positive-validation model from each of the linear, tree and
+ranking categories may enter an equal-weight ensemble.
+
+Features are reconstructed at monthly decision dates. Fundamental availability
+and price-feature timestamps must not exceed the decision date. Targets are
+realised returns relative to contemporaneous regional and sufficiently broad
+sector peers. Every expanding-window training fold is purged so its labels
+mature before the next validation block. In addition, all labels used for model
+or family selection must mature before the legacy OOS calendar begins. Numeric
+imputation, missing indicators, clipping, scaling, categorical encoding and OLS
+screening are fitted separately inside each training fold.
+
+Candidate scores combine rank information coefficient, net active cohort
+return, turnover and risk. Ensemble component outputs are converted to
+within-region percentile ranks before averaging, avoiding invalid combinations
+of arbitrary ranker scores and return forecasts. Portfolio evaluation selects
+the strongest cost-adjusted fraction in each represented region, penalises
+expensive entrants and grants a fixed retention bonus to reduce replacement.
+Spread, FX and square-root participation impact estimates are charged on
+weight changes. The recurring cost report excludes initial funding and adds the
+separate 25bp annual bank fee. Decision dates with less than 90% realised
+cross-section coverage are excluded so terminal data truncation cannot create
+forced sales. Desired portfolios are transitioned through a 1.5x annual
+turnover budget using a convex blend fixed before outcomes are scored;
+unavoidable exits are identified separately. Quantile gradient-boosting models separately estimate the 5th,
+50th and 95th percentile benchmark-relative outcomes. They train before a
+purged 12-date calibration block; date-block conformal correction uses a
+conservative 95% calibration target around the published central 90% interval.
+
+Forward-return windows overlap, so monthly decision scores are not called
+independent observations. Governance counts a deterministic non-overlapping
+subset. Formal annualised return, Sharpe, Newey-West statistics and block
+bootstrap intervals are suppressed until 12 independent cohorts exist. The current
+3-month legacy record contains 11 monthly scores but four independent cohorts;
+longer horizons contain two, one and one. Validation-to-legacy-OOS rank IC does
+not deteriorate in the observed sample, but that cannot disprove overfitting:
+the holdout has already informed research iteration and all historical features
+are labelled `reconstructed_pit_proxy`.
+
+Deployment therefore fails closed. The optimiser blend remains zero until a
+new prospective shadow record supplies at least 12 independent cohorts using
+native point-in-time evidence, with positive net active return and confidence
+bound, a significant independent sign test, rank IC above threshold and annual
+turnover no greater than 1.5x. Code cannot manufacture that evidence. The
+remaining external requirements are future outcomes, original filing/vintage
+timestamps, historical membership and inactive-security mappings, broader
+historical fundamentals and observed execution fills.
 
 ## Constrained Regime-Gated DRL Methodology
 
@@ -167,15 +231,34 @@ Constraint projection is mandatory. Excluded stocks receive zero weight. The pro
 
 The transaction-cost model estimates commission, half-spread/slippage, nonlinear market impact using participation rate, currency conversion placeholders and optional country transaction-tax placeholders. Costs reduce reward and are included in net benchmark metrics.
 
-Reward design is conservative and decomposed. Positive components include Differential Sharpe, net total return, dividend income, regime suitability improvement, diversification improvement, cash-flow quality and dividend safety. Negative components include CVaR, Expected Shortfall, drawdown, transaction costs, turnover, concentration, dividend-cut risk, liquidity risk, forecast uncertainty, narrative/credit stress and stress-scenario loss. Differential Sharpe is updated online from exponentially smoothed first and second moments, so raw return alone is never the objective.
+The historical regional PPO reward is benchmark-relative and net of costs. It
+rewards return above the dated regional benchmark and penalises transaction
+costs, incremental turnover, drawdown above 10%, realised absolute and active
+tail losses, expected CVaR excess and volatility. Every component is emitted in
+the reward decomposition. The live security-level projection retains the wider
+quality, dividend, regime, liquidity and stress diagnostics; raw return alone is
+never the objective.
 
 The Wolf Chaos risk throttle scales actions during elevated chaos, blocks additions during high stress and can force a baseline fallback under severe chaos. Specialist agents are blended probabilistically rather than switched by a hard rule. The stable low-chaos specialist emphasises total return, dividend income, quality, cash flow, diversification and low turnover. The crisis high-chaos specialist emphasises CVaR, Expected Shortfall, drawdown control, liquidity, cash, defensive sectors, low leverage, dividend safety and reduced turnover. Inflation, regional-stress and credit-stress specialists are future-ready.
 
-PPO is the primary policy interface with continuous residual actions, deterministic evaluation and at least five seeds. Stable-Baselines3 is optional; deterministic mock fallback keeps the pipeline runnable and labels outputs as mock. SAC and TD3 are optional challengers documented in configuration but not active production policies.
+PPO is the primary policy interface with continuous residual actions,
+deterministic evaluation and at least five seeds. A train-only ridge contextual
+bandit and a convex residual allocator are lower-variance challengers. Their
+hyperparameters are selected on validation data only, then frozen before the
+legacy OOS evaluation. Historical mode fails closed if Stable-Baselines3 or the
+required dated panel is unavailable; deterministic mock fallback is restricted
+to explicit mock runs.
 
 The optional TCN/GAP policy encoder is available only when PyTorch is present. It uses asset-independent temporal streams, shared parameters, causal dilated convolutions, residual blocks, Global Average Pooling, a cross-asset fully connected layer, cash logit and softmax portfolio weights. CAM/Grad-CAM explainability is future-ready for that path. Current explainability outputs include constraint traces, feature-group attribution, asset-time attribution and human-readable explanations that describe model attributions rather than causal relationships.
 
-Training uses chronological walk-forward validation only. The default layout is five years training, one year validation, one year testing, shifted forward one year, with limited-history fallback and a rebalance-period embargo. Scaling is fit on training data only. Model selection uses validation only; test data is held out and never used for model selection. Multi-seed evaluation reports every seed plus mean, median, standard deviation, best, worst and interquartile range.
+Training uses a frozen chronological split whose dates and SHA-256 panel hash are
+saved in `drl_split_manifest.csv`. The current evidence has 60 train months from
+February 2019 through January 2024, 14 validation months through April 2025, two
+embargo months and a 12-month legacy locked OOS record from June 2025 through
+May 2026. Scaling is fit on training data only and model selection uses
+validation only. The legacy OOS window has already been observed once and is not
+called untouched. New deployment evidence begins with prospective monthly
+shadow decisions after the policy freeze.
 
 Benchmarking is labelled by information set. Fair comparisons give DRL and classical optimisers the same return, volatility, covariance, current-weight and cash inputs. Full Wolf comparisons allow richer scorecard, distributional, regime, sentiment, narrative, risk, stress and liquidity features. The model does not claim DRL beats MVO when DRL is using a richer state unless the comparison is clearly labelled.
 
@@ -185,9 +268,14 @@ The acceptance gate rejects DRL and selects the baseline optimiser when there is
 
 Current limitations:
 
-- The MVP uses deterministic local/mock policies and mock/sample returns.
-- Point-in-time vendor history is not yet connected.
-- PPO integration is optional and dependency-gated.
+- Five PPO seeds, the contextual bandit and the convex residual allocator all
+  underperform the optimiser on the legacy locked OOS record.
+- Bloomberg ingestion is paused; existing licensed local aggregates are not
+  redistributed.
+- Historical membership, mappable inactive securities, observed volume and
+  filing-acceptance coverage remain incomplete.
+- Three completed prospective monthly shadow outcomes are required before any
+  deployment reconsideration.
 - TCN/GAP and CAM are research interfaces, not fully validated production policy explanations.
 - Outputs are decision-support artifacts and not execution instructions.
 
@@ -195,7 +283,7 @@ Future research:
 
 - full TCN + GAP PPO policy
 - robust CAM / Grad-CAM attribution
-- SAC and TD3 challengers
+- additional low-variance and offline-RL challengers after prospective evidence exists
 - distributional reinforcement learning
 - constrained policy optimisation
 - Lagrangian risk constraints
@@ -246,9 +334,19 @@ Current limitations:
 
 ## Validation Methodology
 
-Validation is chronological: training precedes calibration/validation, which precedes an untouched test period, followed by rolling walk-forward evaluation. Purge and embargo gaps reduce label overlap. Scaling, imputation and covariance estimation must use prior training data only.
+Validation is chronological: training precedes calibration/validation, which
+precedes a locked evaluation period. Purge and embargo gaps reduce label overlap.
+Scaling, imputation and covariance estimation use prior training data only. A
+test period that has already been inspected is labelled legacy OOS rather than
+untouched; future claims require a new prospective shadow record.
 
-Point forecasts use MAE, RMSE, normalised RMSE, bias, directional accuracy and rank IC by horizon and segment. Distribution validation measures P5/P50/P95 coverage, pinball loss, interval coverage and quantile crossing. Binary risks use Brier score and calibration error. Small samples remain explicitly insufficient.
+Point forecasts use MAE, RMSE, normalised RMSE, bias, directional accuracy and
+rank IC by horizon and segment. Distribution validation measures P5/P50/P95
+coverage, pinball loss, interval coverage and quantile crossing. Binary drawdown
+risk compares raw, isotonic, Platt and beta calibration. Calibrators fit on the
+training segment, method selection uses validation only, a 12-month embargo
+separates labels, and the selected method is reported on the locked holdout.
+Small samples remain explicitly insufficient.
 
 Risk backtesting converts return-side negative VaR values to positive losses before Kupiec and Christoffersen tests. Expected Shortfall is the average positive loss beyond VaR. CVaR and Expected Shortfall at the same confidence level are reported without being double-counted in governance.
 

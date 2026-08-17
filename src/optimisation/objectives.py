@@ -65,6 +65,17 @@ def cvar_expected_shortfall_objective(frame: pd.DataFrame) -> pd.Series:
     ).clip(lower=0)
 
 
+def regional_benchmark_relative_objective(frame: pd.DataFrame) -> pd.Series:
+    """Regional peer-relative utility after estimated implementation costs."""
+    return pd.to_numeric(
+        frame.get(
+            "regional_alpha_selection_utility",
+            frame.get("final_recommendation_score", pd.Series(0.0, index=frame.index)),
+        ),
+        errors="coerce",
+    ).fillna(0.0).clip(lower=0.0)
+
+
 def regime_aware_objective(frame: pd.DataFrame, dominant_regime: str = "steady_state_low_chaos") -> pd.Series:
     """Regime-aware objective with conservative sector/quality tilts."""
     base = score_weighted_objective(frame) + 0.35 * frame["regime_suitability_score"].fillna(50)

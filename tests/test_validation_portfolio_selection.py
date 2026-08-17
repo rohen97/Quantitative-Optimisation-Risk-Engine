@@ -11,3 +11,14 @@ def test_validation_uses_accepted_drl_weights_before_raw_challenger_weights():
         }
     )
     assert _weight_column(frame) == "accepted_target_weight"
+
+
+def test_validation_skips_a_partial_legacy_weight_column():
+    frame = pd.DataFrame(
+        {
+            "final_selected_weight": [0.50, None],
+            "final_weight": [0.50, 0.50],
+        }
+    )
+
+    assert _weight_column(frame) == "final_weight"

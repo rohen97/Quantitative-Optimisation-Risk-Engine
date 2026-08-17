@@ -32,6 +32,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-securities", type=int, default=0)
     parser.add_argument("--price-lookback-rows", type=int, default=253)
     parser.add_argument("--regime-lookback-rows", type=int, default=126)
+    parser.add_argument("--workers", type=int, default=2)
+    parser.add_argument("--max-inflight-securities", type=int, default=5000)
     parser.add_argument("--regions", nargs="*", default=[])
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--force", action="store_true")
@@ -56,6 +58,8 @@ def _config(args: argparse.Namespace):
         resume=not args.no_resume,
         force=args.force,
         retain_intermediates=args.retain_intermediates,
+        max_workers=args.workers,
+        max_inflight_securities=args.max_inflight_securities,
     )
 
 

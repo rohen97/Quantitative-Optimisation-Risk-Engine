@@ -6,7 +6,7 @@ import hashlib
 import json
 import logging
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
 import pandas as pd
@@ -17,12 +17,17 @@ from src.data.repository.duckdb_repository import DuckDBRepository
 from src.features.feature_store import build_feature_store
 from src.features.risk_features import build_price_risk_features
 from src.models.forecasting import build_ml_forecast_features
+from src.models.regional_alpha import RegionalAlphaSettings, add_regional_alpha_signals
 from src.models.scorecard import build_scorecard
 from src.optimisation.optimiser_inputs import build_optimiser_input_dataset
-from src.optimisation.optimisers import cvar_constrained_portfolio
+from src.optimisation.optimisers import (
+    cvar_constrained_portfolio,
+    regional_alpha_portfolio,
+)
 from src.optimisation.constraints import build_retention_eligibility_mask
 from src.utils.config import ROOT, load_yaml
 from src.validation.transaction_cost_validation import estimate_transaction_cost
+from src.validation.risk_calibration import apply_locked_risk_calibration
 from src.validation.risk_models import (
     RiskModelSettings,
     forecast_risk,
@@ -32,9 +37,9 @@ from src.validation.risk_models import (
 
 
 LOGGER = logging.getLogger(__name__)
-ARTIFACT_VERSION = 3
+ARTIFACT_VERSION = 4
 FORECAST_HORIZONS = (3, 6, 9, 12)
-CASH_SECURITY_ID = 'CASH.USD'
+CASH_SECURITY_ID = 'CASH'
 MONETARY_COLUMNS = (
     'revenue',
     'operating_income',
@@ -51,6 +56,10 @@ MONETARY_COLUMNS = (
     'ebitda',
     'interest_expense',
 )
+
+
+class InsufficientPortfolioCoverageError(RuntimeError):
+    """Raised when dated evidence cannot support the hard portfolio constraints."""
 
 
 @dataclass(frozen=True)
@@ -81,6 +90,8 @@ class WalkForwardConfig:
     risk_calibration_scale_factors: tuple[float, ...] = (1.0,)
     risk_exception_response_multiplier: float = 1.10
     risk_exception_response_days: int = 1
+    include_historical_inactive: bool = True
+    minimum_anchor_securities: int = 1
 
 
 @dataclass(frozen=True)
@@ -158,11 +169,17 @@ def load_walk_forward_config(
         risk_exception_response_days=int(
             risk_forecast.get('exception_response_days', 1)
         ),
+        include_historical_inactive=bool(
+            values.get('include_historical_inactive', True)
+        ),
+        minimum_anchor_securities=int(values.get('minimum_anchor_securities', 1)),
     )
     if config.risk_exception_response_multiplier < 1.0:
         raise ValueError('Risk exception response multiplier cannot be below one.')
     if config.risk_exception_response_days < 0:
         raise ValueError('Risk exception response days cannot be negative.')
+    if config.minimum_anchor_securities < 1:
+        raise ValueError('Minimum anchor securities must be at least one.')
     _risk_model_settings(config).validate()
     return config
 
@@ -203,8 +220,24 @@ def reconstruct_statement_availability(
         errors='coerce',
         utc=True,
     ).dt.tz_localize(None)
+    explicit_available = pd.to_datetime(
+        result.get('available_from', pd.Series(pd.NaT, index=result.index)),
+        errors='coerce',
+        utc=True,
+    ).dt.tz_localize(None)
     proxy_date = period_end + pd.to_timedelta(int(filing_lag_days), unit='D')
     source = result.get('source', pd.Series('', index=result.index)).astype(str)
+    trusted_database_snapshot = source.str.contains(
+        'bloomberg_database_as_of',
+        case=False,
+        na=False,
+    )
+    valid_database_snapshot = (
+        trusted_database_snapshot
+        & explicit_available.notna()
+        & period_end.notna()
+        & explicit_available.ge(period_end)
+    )
     trusted_filing_source = ~source.str.contains(
         'yahoo_finance_timeseries',
         case=False,
@@ -221,13 +254,20 @@ def reconstruct_statement_availability(
         & period_end.notna()
         & observed_acceptance.ge(period_end)
     )
-    result['reconstructed_available_from'] = observed_acceptance.where(
-        valid_acceptance,
-        filing_date.where(valid_filing, proxy_date),
+    result['reconstructed_available_from'] = explicit_available.where(
+        valid_database_snapshot,
+        observed_acceptance.where(
+            valid_acceptance,
+            filing_date.where(valid_filing, proxy_date),
+        ),
     )
     result['availability_basis'] = np.select(
-        [valid_acceptance, valid_filing],
-        ['observed_sec_acceptance_datetime', 'reported_filing_date'],
+        [valid_database_snapshot, valid_acceptance, valid_filing],
+        [
+            'bloomberg_fundamental_database_as_of',
+            'observed_sec_acceptance_datetime',
+            'reported_filing_date',
+        ],
         default=f'fiscal_period_end_plus_{int(filing_lag_days)}d',
     )
     return result
@@ -273,6 +313,45 @@ class _FxMatcher:
             valid = matched >= 0
             output[indexes[valid]] = rates[matched[valid]]
         return pd.Series(output, index=original_index, dtype=float)
+
+
+class _MarketCapMatcher:
+    def __init__(self, snapshots: pd.DataFrame) -> None:
+        self._groups: dict[str, pd.DataFrame] = {}
+        if snapshots.empty:
+            return
+        clean = snapshots.copy()
+        clean['available_from'] = pd.to_datetime(clean['available_from'])
+        clean['as_of_date'] = pd.to_datetime(clean['as_of_date'])
+        clean = clean.sort_values(
+            ['security_id', 'available_from', 'as_of_date', 'retrieved_at']
+        )
+        for security_id, group in clean.groupby('security_id', sort=False):
+            self._groups[str(security_id)] = group.reset_index(drop=True)
+
+    def match(self, security_ids: pd.Series, as_of_date: pd.Timestamp) -> pd.DataFrame:
+        rows: list[dict[str, Any]] = []
+        target = np.datetime64(pd.Timestamp(as_of_date), 'ns')
+        for security_id in map(str, security_ids):
+            group = self._groups.get(security_id)
+            if group is None:
+                continue
+            dates = group['available_from'].to_numpy(dtype='datetime64[ns]')
+            position = int(np.searchsorted(dates, target, side='right')) - 1
+            if position < 0:
+                continue
+            row = group.iloc[position]
+            rows.append(
+                {
+                    'security_id': security_id,
+                    'pit_market_cap_local': row.get('market_cap_local'),
+                    'pit_shares_outstanding': row.get('shares_outstanding'),
+                    'pit_market_cap_currency': row.get('currency'),
+                    'pit_market_cap_as_of_date': row.get('as_of_date'),
+                    'pit_market_cap_available_from': row.get('available_from'),
+                }
+            )
+        return pd.DataFrame(rows)
 
 
 class _PriceMatcher:
@@ -383,7 +462,14 @@ class _PriceMatcher:
 def _load_source_data(
     repository: DuckDBRepository,
     config: WalkForwardConfig,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+]:
     minimum_periods = int(config.minimum_annual_periods)
     universe = repository.query(
         f'''
@@ -405,11 +491,41 @@ def _load_source_data(
                 FROM security_reference_snapshots
             )
             WHERE reference_row = 1
+        ),
+        resolved_events AS (
+            SELECT
+                e.event_id,
+                COALESCE(direct.security_id, mapped.security_id) AS security_id,
+                e.event_type,
+                e.effective_from,
+                ROW_NUMBER() OVER (
+                    PARTITION BY e.event_id
+                    ORDER BY
+                        CASE WHEN direct.security_id IS NOT NULL THEN 0 ELSE 1 END,
+                        mapped.security_id
+                ) AS mapping_row
+            FROM security_reference_events e
+            LEFT JOIN securities direct
+              ON direct.security_id = e.security_id
+            LEFT JOIN security_identifiers mapped
+              ON UPPER(mapped.identifier_value) = UPPER(e.provider_symbol)
+        ),
+        delistings AS (
+            SELECT security_id, MIN(effective_from) AS delisting_date
+            FROM resolved_events
+            WHERE mapping_row = 1
+              AND security_id IS NOT NULL
+              AND event_type = 'delisted'
+            GROUP BY security_id
         )
         SELECT
             s.security_id, s.security_id AS ticker,
             'NAME:' || REGEXP_REPLACE(LOWER(s.company_name), '[^a-z0-9]+', '', 'g') AS issuer_id,
-            s.company_name, s.instrument_type, s.listing_status, s.exchange_code,
+            s.company_name, s.instrument_type,
+            s.listing_status AS current_listing_status,
+            s.listing_status,
+            d.delisting_date,
+            s.exchange_code,
             s.country, s.region,
             COALESCE(NULLIF(r.sector, ''), NULLIF(s.sector, ''), 'Unknown') AS sector,
             COALESCE(NULLIF(r.industry, ''), NULLIF(s.industry, ''), 'Unknown') AS industry,
@@ -422,7 +538,11 @@ def _load_source_data(
         FROM securities s
         JOIN coverage c USING (security_id)
         LEFT JOIN reference r USING (security_id)
-        WHERE s.listing_status = 'Active'
+        LEFT JOIN delistings d USING (security_id)
+        WHERE (
+              s.listing_status = 'Active'
+              OR ({str(config.include_historical_inactive).upper()} AND d.delisting_date IS NOT NULL)
+          )
           AND s.instrument_type = 'Equity'
           AND s.region IN ('US', 'UK', 'DACH', 'Mainland China', 'Hong Kong', 'EU ex-DACH')
         ORDER BY s.region, s.security_id
@@ -432,23 +552,20 @@ def _load_source_data(
     placeholder = chr(63)
     statements = repository.query(
         f'''
-        WITH selected AS (
-            SELECT *, ROW_NUMBER() OVER (
-                PARTITION BY security_id, fiscal_period_end, fiscal_period_type
-                ORDER BY
-                    CASE
-                        WHEN source = 'sec_companyfacts' THEN 1
-                        WHEN source IN (
-                            'finnhub_reported',
-                            'eastmoney_china_financials',
-                            'eastmoney_hk_financials'
-                        ) THEN 2
-                        WHEN source LIKE 'akshare%' THEN 3
-                        WHEN source = 'yahoo_finance_timeseries' THEN 4
-                        ELSE 5
-                    END,
-                    retrieved_at DESC
-            ) AS source_row
+        WITH ranked AS (
+            SELECT *,
+                CASE
+                    WHEN source = 'bloomberg_database_as_of' THEN 1
+                    WHEN source = 'sec_companyfacts' THEN 2
+                    WHEN source IN (
+                        'finnhub_reported',
+                        'eastmoney_china_financials',
+                        'eastmoney_hk_financials'
+                    ) THEN 3
+                    WHEN source LIKE 'akshare%' THEN 4
+                    WHEN source = 'yahoo_finance_timeseries' THEN 5
+                    ELSE 6
+                END AS source_priority
             FROM fundamentals_reported
             WHERE security_id IN (SELECT UNNEST({placeholder}))
               AND fiscal_period_type = 'annual'
@@ -465,14 +582,13 @@ def _load_source_data(
             GROUP BY security_id, report_date
         )
         SELECT
-            selected.* EXCLUDE (source_row),
+            ranked.*,
             observed_filings.observed_acceptance_datetime,
             observed_filings.filing_metadata_source
-        FROM selected
+        FROM ranked
         LEFT JOIN observed_filings
-          ON selected.security_id = observed_filings.security_id
-         AND selected.fiscal_period_end = observed_filings.report_date
-        WHERE selected.source_row = 1
+          ON ranked.security_id = observed_filings.security_id
+         AND ranked.fiscal_period_end = observed_filings.report_date
         ORDER BY security_id, fiscal_period_end
         ''',
         [security_ids],
@@ -519,7 +635,53 @@ def _load_source_data(
         ORDER BY quote_currency, rate_date
         '''
     )
-    return universe, statements, prices, fx
+    market_caps = repository.query(
+        f'''
+        SELECT
+            security_id, as_of_date, available_from, market_cap_local,
+            shares_outstanding, currency, retrieved_at, vintage_id
+        FROM market_cap_vintages
+        WHERE security_id IN (SELECT UNNEST({placeholder}))
+          AND available_from <= {placeholder}
+        ORDER BY security_id, available_from, as_of_date
+        ''',
+        [security_ids, config.strategy_end_date],
+    )
+    reference_events = repository.query(
+        f'''
+        WITH resolved AS (
+            SELECT
+                e.event_id,
+                COALESCE(direct.security_id, mapped.security_id) AS security_id,
+                e.provider_symbol,
+                e.event_type,
+                e.effective_from,
+                e.effective_to,
+                e.index_symbol,
+                e.is_delisted,
+                e.source,
+                e.retrieved_at,
+                ROW_NUMBER() OVER (
+                    PARTITION BY e.event_id
+                    ORDER BY
+                        CASE WHEN direct.security_id IS NOT NULL THEN 0 ELSE 1 END,
+                        mapped.security_id
+                ) AS mapping_row
+            FROM security_reference_events e
+            LEFT JOIN securities direct
+              ON direct.security_id = e.security_id
+            LEFT JOIN security_identifiers mapped
+              ON UPPER(mapped.identifier_value) = UPPER(e.provider_symbol)
+        )
+        SELECT * EXCLUDE (mapping_row)
+        FROM resolved
+        WHERE mapping_row = 1
+          AND security_id IN (SELECT UNNEST({placeholder}))
+        ORDER BY security_id, effective_from
+        ''',
+        [security_ids],
+    )
+    return universe, statements, prices, fx, market_caps, reference_events
 
 
 def _prepare_prices(prices: pd.DataFrame) -> pd.DataFrame:
@@ -603,6 +765,50 @@ def _fundamental_snapshot(
     ].copy()
     if available.empty:
         return pd.DataFrame()
+    if 'source_priority' in available:
+        source_priority = pd.to_numeric(
+            available['source_priority'], errors='coerce'
+        ).fillna(99)
+    else:
+        source = available.get(
+            'source', pd.Series('', index=available.index)
+        ).fillna('').astype(str)
+        source_priority = pd.Series(6, index=available.index, dtype=int)
+        source_priority.loc[source.eq('bloomberg_database_as_of')] = 1
+        source_priority.loc[source.eq('sec_companyfacts')] = 2
+        source_priority.loc[
+            source.isin(
+                {
+                    'finnhub_reported',
+                    'eastmoney_china_financials',
+                    'eastmoney_hk_financials',
+                }
+            )
+        ] = 3
+        source_priority.loc[source.str.startswith('akshare', na=False)] = 4
+        source_priority.loc[source.eq('yahoo_finance_timeseries')] = 5
+    available['_source_priority'] = source_priority
+    period_keys = ['security_id', 'fiscal_period_end', 'fiscal_period_type']
+    best_available_priority = available.groupby(period_keys)[
+        '_source_priority'
+    ].transform('min')
+    available = available.loc[
+        available['_source_priority'].eq(best_available_priority)
+    ]
+    available = available.sort_values(
+        [
+            'security_id',
+            'fiscal_period_end',
+            '_source_priority',
+            'reconstructed_available_from',
+            'retrieved_at',
+        ]
+    )
+    available = available.groupby(
+        period_keys,
+        as_index=False,
+        sort=False,
+    ).tail(1)
     available = available.sort_values(['security_id', 'fiscal_period_end'])
     available['_period_count'] = available.groupby('security_id')[
         'security_id'
@@ -659,14 +865,92 @@ def _safe_ratio(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
     return values.replace([np.inf, -np.inf], np.nan)
 
 
+def historical_universe_snapshot(
+    universe: pd.DataFrame,
+    reference_events: pd.DataFrame,
+    as_of_date: pd.Timestamp,
+) -> pd.DataFrame:
+    """Resolve dated listing eligibility without treating today's inactive names as absent."""
+
+    snapshot = universe.copy()
+    current_status = snapshot.get(
+        'current_listing_status',
+        snapshot.get('listing_status', pd.Series('Active', index=snapshot.index)),
+    ).fillna('Unknown').astype(str)
+    snapshot['current_listing_status'] = current_status
+    snapshot['delisting_date'] = pd.to_datetime(
+        snapshot.get('delisting_date', pd.Series(pd.NaT, index=snapshot.index)),
+        errors='coerce',
+    )
+    events = reference_events.copy()
+    if not events.empty:
+        events['effective_from'] = pd.to_datetime(
+            events['effective_from'], errors='coerce'
+        )
+        events['effective_to'] = pd.to_datetime(
+            events.get('effective_to'), errors='coerce'
+        )
+        delistings = (
+            events.loc[events['event_type'].astype(str).str.lower().eq('delisted')]
+            .groupby('security_id')['effective_from']
+            .min()
+        )
+        snapshot['delisting_date'] = snapshot['delisting_date'].fillna(
+            snapshot['security_id'].astype(str).map(delistings)
+        )
+    currently_active = current_status.str.casefold().eq('active')
+    dated_inactive_was_live = (
+        ~currently_active
+        & snapshot['delisting_date'].notna()
+        & snapshot['delisting_date'].gt(pd.Timestamp(as_of_date))
+    )
+    snapshot = snapshot.loc[currently_active | dated_inactive_was_live].copy()
+    snapshot['listing_status'] = 'Active'
+    snapshot['listing_status_basis'] = np.where(
+        snapshot['current_listing_status'].astype(str).str.casefold().eq('active'),
+        'current_active_security',
+        'dated_delisting_after_decision',
+    )
+
+    snapshot['historical_index_member'] = False
+    snapshot['historical_index_symbols'] = ''
+    if not events.empty:
+        memberships = events.loc[
+            events['event_type'].astype(str).str.lower().eq('index_membership')
+            & events['effective_from'].le(pd.Timestamp(as_of_date))
+            & (
+                events['effective_to'].isna()
+                | events['effective_to'].ge(pd.Timestamp(as_of_date))
+            )
+        ].copy()
+        if not memberships.empty:
+            symbols = memberships.groupby('security_id')['index_symbol'].agg(
+                lambda values: ','.join(sorted(set(map(str, values.dropna()))))
+            )
+            snapshot['historical_index_symbols'] = (
+                snapshot['security_id'].astype(str).map(symbols).fillna('')
+            )
+            snapshot['historical_index_member'] = snapshot[
+                'historical_index_symbols'
+            ].ne('')
+    return snapshot.reset_index(drop=True)
+
+
 def _build_anchor_inputs(
     universe: pd.DataFrame,
     statements: pd.DataFrame,
+    reference_events: pd.DataFrame,
     price_matcher: _PriceMatcher,
     fx_matcher: _FxMatcher,
+    market_cap_matcher: _MarketCapMatcher,
     as_of_date: pd.Timestamp,
     config: WalkForwardConfig,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    dated_universe = historical_universe_snapshot(
+        universe,
+        reference_events,
+        as_of_date,
+    )
     financials = _fundamental_snapshot(
         statements,
         as_of_date,
@@ -678,7 +962,7 @@ def _build_anchor_inputs(
         columns=['currency', 'financial_currency', 'ticker'],
         errors='ignore',
     )
-    candidates = universe.merge(financials, on='security_id', how='inner')
+    candidates = dated_universe.merge(financials, on='security_id', how='inner')
     recent, latest_prices = price_matcher.trailing(
         candidates['security_id'],
         as_of_date,
@@ -720,11 +1004,56 @@ def _build_anchor_inputs(
         candidates['price_scale'],
         errors='coerce',
     ).fillna(1.0)
-    candidates['market_cap_usd'] = (
+    matched_market_caps = market_cap_matcher.match(
+        candidates['security_id'],
+        as_of_date,
+    )
+    if not matched_market_caps.empty:
+        candidates = candidates.merge(
+            matched_market_caps,
+            on='security_id',
+            how='left',
+        )
+    else:
+        for column in (
+            'pit_market_cap_local',
+            'pit_shares_outstanding',
+            'pit_market_cap_currency',
+            'pit_market_cap_as_of_date',
+            'pit_market_cap_available_from',
+        ):
+            candidates[column] = np.nan
+    valuation_shares = pd.to_numeric(
+        candidates['pit_shares_outstanding'],
+        errors='coerce',
+    ).fillna(pd.to_numeric(candidates['diluted_shares'], errors='coerce'))
+    candidates['valuation_shares'] = valuation_shares
+    price_implied_market_cap = (
         candidates['anchor_close_price']
         * candidates['price_scale']
-        * pd.to_numeric(candidates['diluted_shares'], errors='coerce')
+        * valuation_shares
         / candidates['_quote_fx']
+    )
+    market_cap_currency = candidates['pit_market_cap_currency'].where(
+        candidates['pit_market_cap_currency'].fillna('').astype(str).str.strip().ne(''),
+        candidates['currency'],
+    )
+    market_cap_fx = fx_matcher.match(
+        market_cap_currency,
+        pd.Series(as_of_date, index=candidates.index),
+    )
+    pit_market_cap_usd = (
+        pd.to_numeric(candidates['pit_market_cap_local'], errors='coerce')
+        / market_cap_fx
+    )
+    candidates['market_cap_usd'] = pit_market_cap_usd.where(
+        pit_market_cap_usd.gt(0),
+        price_implied_market_cap,
+    )
+    candidates['market_cap_data_source'] = np.where(
+        pit_market_cap_usd.gt(0),
+        'bloomberg_point_in_time',
+        'price_times_available_shares',
     )
     candidates['revenue'] = pd.to_numeric(candidates['revenue_usd'], errors='coerce')
     candidates['operating_income'] = pd.to_numeric(
@@ -815,12 +1144,6 @@ def _build_anchor_inputs(
         candidates['price_scale'],
         errors='coerce',
     ).fillna(1.0)
-    candidates['market_cap_usd'] = (
-        candidates['anchor_close_price']
-        * candidates['price_scale']
-        * pd.to_numeric(candidates['diluted_shares'], errors='coerce')
-        / candidates['_quote_fx']
-    )
     recent = recent.loc[
         recent['security_id'].astype(str).isin(candidates['security_id'].astype(str))
     ].copy()
@@ -863,7 +1186,7 @@ def _build_anchor_inputs(
     candidates = candidates.loc[
         candidates['market_cap_usd'].gt(0)
         & candidates['avg_daily_traded_value_usd'].gt(0)
-        & pd.to_numeric(candidates['diluted_shares'], errors='coerce').gt(0)
+        & candidates['valuation_shares'].gt(0)
     ].copy()
     if candidates.empty:
         return pd.DataFrame(), pd.DataFrame()
@@ -945,6 +1268,11 @@ def _build_anchor_inputs(
         'company_name',
         'instrument_type',
         'listing_status',
+        'current_listing_status',
+        'listing_status_basis',
+        'delisting_date',
+        'historical_index_member',
+        'historical_index_symbols',
         'exchange_code',
         'country',
         'region',
@@ -962,7 +1290,9 @@ def _build_anchor_inputs(
         'historical_price_volume_fx',
         'current_reference_adv_proxy',
     )
-    universe_snapshot['market_cap_data_source'] = 'historical_price_reported_shares'
+    universe_snapshot['market_cap_data_source'] = candidates[
+        'market_cap_data_source'
+    ].to_numpy()
     universe_snapshot['sector_data_source'] = 'current_security_reference_proxy'
     universe_snapshot['is_synthetic_data'] = False
 
@@ -1084,6 +1414,123 @@ def _build_anchor_inputs(
     return features.reset_index(drop=True), recent.reset_index(drop=True)
 
 
+def build_walk_forward_feature_panel(
+    config: WalkForwardConfig | None = None,
+    *,
+    output_path: str | Path | None = None,
+    force: bool = False,
+) -> pd.DataFrame:
+    """Build and cache the dated feature matrix used by supervised challengers."""
+
+    config = config or load_walk_forward_config()
+    path = Path(output_path or config.output_directory / 'historical_features.parquet')
+    if not path.is_absolute():
+        path = ROOT / path
+    if path.exists() and not force:
+        LOGGER.info('Loading cached walk-forward feature panel from %s.', path)
+        return pd.read_parquet(path)
+
+    data_config = load_data_config()
+    repository = DuckDBRepository(data_config.duckdb_path, read_only=True)
+    LOGGER.info('Loading observed source data for the walk-forward feature panel.')
+    (
+        universe,
+        statements_raw,
+        prices_raw,
+        fx,
+        market_caps,
+        reference_events,
+    ) = _load_source_data(repository, config)
+    if universe.empty or statements_raw.empty or prices_raw.empty:
+        raise RuntimeError('Observed walk-forward source data is incomplete.')
+
+    fx_matcher = _FxMatcher(fx)
+    prices = _prepare_prices(prices_raw)
+    statements = _prepare_statements(
+        statements_raw,
+        universe,
+        fx_matcher,
+        config.filing_lag_days,
+    )
+    price_matcher = _PriceMatcher(prices)
+    market_cap_matcher = _MarketCapMatcher(market_caps)
+    anchors = pd.date_range(config.start_date, config.strategy_end_date, freq='ME')
+    frames: list[pd.DataFrame] = []
+    skipped: list[dict[str, Any]] = []
+
+    for position, anchor in enumerate(anchors, start=1):
+        features, _ = _build_anchor_inputs(
+            universe,
+            statements,
+            reference_events,
+            price_matcher,
+            fx_matcher,
+            market_cap_matcher,
+            pd.Timestamp(anchor),
+            config,
+        )
+        if len(features) < config.minimum_anchor_securities:
+            skipped.append(
+                {
+                    'as_of_date': pd.Timestamp(anchor),
+                    'feature_security_count': len(features),
+                    'reason': 'insufficient_point_in_time_feature_coverage',
+                }
+            )
+            continue
+        frames.append(features)
+        LOGGER.info(
+            'Feature-panel anchor %s/%s %s: securities=%s.',
+            position,
+            len(anchors),
+            anchor.date(),
+            len(features),
+        )
+
+    if not frames:
+        raise RuntimeError('No walk-forward anchors produced usable feature rows.')
+    panel = (
+        pd.concat(frames, ignore_index=True)
+        .sort_values(['as_of_date', 'security_id'])
+        .drop_duplicates(['as_of_date', 'security_id'], keep='last')
+        .reset_index(drop=True)
+    )
+    future_fundamentals = pd.to_datetime(
+        panel['fundamentals_available_from'], errors='coerce'
+    ).gt(pd.to_datetime(panel['as_of_date'], errors='coerce'))
+    future_prices = pd.to_datetime(
+        panel['price_feature_end_date'], errors='coerce'
+    ).gt(pd.to_datetime(panel['as_of_date'], errors='coerce'))
+    if bool(future_fundamentals.any() or future_prices.any()):
+        raise RuntimeError('Feature-panel chronology check failed.')
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_parquet(panel, path)
+    manifest = {
+        'artifact_version': 1,
+        'generated_at': datetime.now(UTC).isoformat(),
+        'evidence_mode': config.evidence_mode,
+        'source_database': str(data_config.duckdb_path),
+        'rows': len(panel),
+        'securities': int(panel['security_id'].nunique()),
+        'anchors': int(panel['as_of_date'].nunique()),
+        'start_date': str(pd.to_datetime(panel['as_of_date']).min()),
+        'end_date': str(pd.to_datetime(panel['as_of_date']).max()),
+        'future_fundamental_rows': int(future_fundamentals.sum()),
+        'future_price_feature_rows': int(future_prices.sum()),
+        'skipped_anchors': skipped,
+        'panel_hash': _frame_hash(panel, ['as_of_date', 'security_id']),
+    }
+    _atomic_json(manifest, path.with_name('historical_features_manifest.json'))
+    LOGGER.info(
+        'Walk-forward feature panel completed: rows=%s anchors=%s securities=%s.',
+        len(panel),
+        panel['as_of_date'].nunique(),
+        panel['security_id'].nunique(),
+    )
+    return panel
+
+
 def _forecast_anchor(
     features: pd.DataFrame,
     as_of_date: pd.Timestamp,
@@ -1191,6 +1638,136 @@ def build_realised_outcomes(
     ].reset_index(drop=True)
 
 
+def build_walk_forward_outcome_panel(
+    feature_panel: pd.DataFrame,
+    config: WalkForwardConfig | None = None,
+    *,
+    output_path: str | Path | None = None,
+    force: bool = False,
+) -> pd.DataFrame:
+    """Extend realised outcomes to every dated feature anchor supported by prices."""
+
+    config = config or load_walk_forward_config()
+    path = Path(
+        output_path
+        or config.output_directory / 'historical_realised_outcomes_extended.parquet'
+    )
+    if not path.is_absolute():
+        path = ROOT / path
+    if path.exists() and not force:
+        LOGGER.info('Loading cached extended outcome panel from %s.', path)
+        return pd.read_parquet(path)
+    required = {'security_id', 'ticker', 'as_of_date'}
+    missing = required.difference(feature_panel.columns)
+    if missing:
+        raise ValueError(f'Feature panel is missing outcome keys: {sorted(missing)}')
+
+    anchors = feature_panel[list(required)].drop_duplicates().copy()
+    anchors['as_of_date'] = pd.to_datetime(anchors['as_of_date'], errors='coerce')
+    horizons = pd.DataFrame({'horizon_months': list(FORECAST_HORIZONS)})
+    anchors['_join_key'] = 1
+    horizons['_join_key'] = 1
+    requests = anchors.merge(horizons, on='_join_key', how='inner').drop(
+        columns='_join_key'
+    )
+    requests['horizon'] = requests['horizon_months'].astype(str) + 'M'
+
+    data_config = load_data_config()
+    repository = DuckDBRepository(data_config.duckdb_path, read_only=True)
+    security_ids = sorted(requests['security_id'].astype(str).unique())
+    placeholder = chr(63)
+    maximum_target = max(
+        pd.Timestamp(date) + pd.DateOffset(months=int(months))
+        for date, months in zip(requests['as_of_date'], requests['horizon_months'])
+    )
+    prices_raw = repository.query(
+        f'''
+        SELECT
+            security_id, trade_date, close_price,
+            COALESCE(adjusted_close, close_price) AS adjusted_close,
+            volume, trading_currency, source
+        FROM (
+            SELECT *, ROW_NUMBER() OVER (
+                PARTITION BY security_id, trade_date
+                ORDER BY
+                    CASE WHEN adjusted_close IS NOT NULL THEN 0 ELSE 1 END,
+                    CASE
+                        WHEN source = 'yfinance' THEN 1
+                        WHEN source = 'eodhd' THEN 2
+                        WHEN source = 'alpaca' THEN 3
+                        WHEN source = 'tickdb' THEN 4
+                        ELSE 5
+                    END,
+                    retrieved_at DESC
+            ) AS source_row
+            FROM prices_daily
+            WHERE security_id IN (SELECT UNNEST({placeholder}))
+              AND trade_date <= {placeholder}
+              AND COALESCE(adjusted_close, close_price) > 0
+        )
+        WHERE source_row = 1
+        ORDER BY security_id, trade_date
+        ''',
+        [security_ids, maximum_target.date()],
+    )
+    if prices_raw.empty:
+        raise RuntimeError('No observed prices were available for extended outcomes.')
+    prices = _prepare_prices(prices_raw)
+    outcomes = build_realised_outcomes(
+        requests,
+        _PriceMatcher(prices),
+        config.outcome_date_tolerance_days,
+    )
+    if outcomes.empty:
+        raise RuntimeError('No extended realised outcomes could be aligned.')
+    outcomes = (
+        outcomes.sort_values(['horizon_months', 'as_of_date', 'security_id'])
+        .drop_duplicates(['security_id', 'as_of_date', 'horizon_months'], keep='last')
+        .reset_index(drop=True)
+    )
+    chronology_errors = pd.to_datetime(outcomes['outcome_date']).lt(
+        pd.to_datetime(outcomes['target_date'])
+    )
+    if bool(chronology_errors.any()):
+        raise RuntimeError('Extended outcome chronology check failed.')
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_parquet(outcomes, path)
+    profile = {
+        str(int(horizon)): {
+            'rows': len(group),
+            'decision_dates': int(group['as_of_date'].nunique()),
+            'last_decision_date': str(pd.to_datetime(group['as_of_date']).max()),
+            'last_outcome_date': str(pd.to_datetime(group['outcome_date']).max()),
+        }
+        for horizon, group in outcomes.groupby('horizon_months', sort=True)
+    }
+    _atomic_json(
+        {
+            'artifact_version': 1,
+            'generated_at': datetime.now(UTC).isoformat(),
+            'source_database': str(data_config.duckdb_path),
+            'feature_rows': len(feature_panel),
+            'request_rows': len(requests),
+            'outcome_rows': len(outcomes),
+            'outcomes_before_target_rows': int(chronology_errors.sum()),
+            'profile_by_horizon_months': profile,
+            'outcome_hash': _frame_hash(
+                outcomes,
+                ['as_of_date', 'security_id', 'horizon_months'],
+            ),
+        },
+        path.with_name('historical_realised_outcomes_extended_manifest.json'),
+    )
+    LOGGER.info(
+        'Extended outcome panel completed: requests=%s outcomes=%s dates=%s.',
+        len(requests),
+        len(outcomes),
+        outcomes['as_of_date'].nunique(),
+    )
+    return outcomes
+
+
 def _cardinality_constrained_portfolio(
     scorecard: pd.DataFrame,
     constraints: dict[str, Any],
@@ -1202,7 +1779,9 @@ def _cardinality_constrained_portfolio(
         kind='stable',
     ).drop_duplicates('issuer_id')
     if eligible.empty:
-        raise RuntimeError('No names satisfied the historical portfolio constraints.')
+        raise InsufficientPortfolioCoverageError(
+            'No names satisfied the historical portfolio constraints.'
+        )
     position_weight = float(constraints.get('max_single_name_weight', 0.05))
     if not 0 < position_weight <= 1:
         raise ValueError('max_single_name_weight must be between zero and one.')
@@ -1256,7 +1835,7 @@ def _cardinality_constrained_portfolio(
     cash_weight = max(1.0 - len(selected) * position_weight, 0.0)
     maximum_cash_weight = float(constraints.get('maximum_cash_weight', 0.25))
     if len(selected) < minimum_holdings or cash_weight > maximum_cash_weight + 1.0e-9:
-        raise RuntimeError(
+        raise InsufficientPortfolioCoverageError(
             f'Only {len(selected)} names satisfied the historical portfolio constraints; '
             f'required cash weight would be {cash_weight:.2%}.'
         )
@@ -1555,9 +2134,11 @@ def _apply_walk_forward_rebalance_control(
 def _build_anchor_portfolios(
     features: pd.DataFrame,
     forecast_wide: pd.DataFrame,
-    previous_wolf_weights: pd.Series | None = None,
+    previous_strategy_weights: Mapping[str, pd.Series] | None = None,
     maximum_rebalance_turnover: float = 0.10,
+    portfolio_nav_usd: float = 100_000_000.0,
 ) -> tuple[dict[str, pd.DataFrame], pd.DataFrame]:
+    previous = dict(previous_strategy_weights or {})
     merge_columns = [
         column
         for column in forecast_wide.columns
@@ -1570,11 +2151,20 @@ def _build_anchor_portfolios(
     )
     risk_limits = load_yaml('configs/risk_limits.yaml')
     scorecard = build_scorecard(model_features, risk_limits)
+    LOGGER.info(
+        "Historical anchor scorecard: securities=%s hard_filter_pass=%s regions=%s.",
+        len(scorecard),
+        int(scorecard['passes_hard_filters'].fillna(False).sum()),
+        scorecard.loc[
+            scorecard['passes_hard_filters'].fillna(False), 'region'
+        ].value_counts().to_dict(),
+    )
     optimisation = load_yaml('configs/optimisation.yaml').get('optimisation', {})
     constraints = dict(optimisation.get('constraints', {}))
     constraints['maximum_candidates'] = int(optimisation.get('maximum_candidates', 2000))
     constraints['maximum_turnover'] = float(maximum_rebalance_turnover)
     optimiser_input = build_optimiser_input_dataset(scorecard)
+    previous_wolf_weights = previous.get('wolf_cvar')
     if previous_wolf_weights is not None:
         optimiser_input['current_weight'] = (
             optimiser_input['security_id']
@@ -1601,6 +2191,57 @@ def _build_anchor_portfolios(
     wolf['strategy'] = 'wolf_cvar'
     wolf['weight'] = pd.to_numeric(wolf['target_weight'], errors='coerce')
 
+    alpha_config = (
+        load_yaml('configs/validation.yaml')
+        .get('validation', {})
+        .get('walk_forward', {})
+        .get('classical_alpha', {})
+    )
+    regional_scorecard = scorecard.copy()
+    previous_regional = previous.get('wolf_regional_alpha')
+    regional_scorecard['current_weight'] = (
+        regional_scorecard['security_id']
+        .astype(str)
+        .map(previous_regional if previous_regional is not None else {})
+        .fillna(0.0)
+    )
+    regional_scorecard = add_regional_alpha_signals(
+        regional_scorecard,
+        RegionalAlphaSettings.from_mapping(
+            alpha_config,
+            portfolio_nav_usd=portfolio_nav_usd,
+        ),
+    )
+    regional_input = build_optimiser_input_dataset(regional_scorecard)
+    regional = regional_alpha_portfolio(regional_input, constraints)
+    regional = regional.loc[
+        pd.to_numeric(regional['target_weight'], errors='coerce').gt(1.0e-10)
+    ]
+    regional_feasible = (
+        not regional.empty
+        and bool(
+            regional.get('optimisation_feasible', pd.Series(False))
+            .fillna(False)
+            .all()
+        )
+        and abs(float(regional['target_weight'].sum()) - 1.0) <= 1.0e-6
+    )
+    if not regional_feasible:
+        fallback = regional_scorecard.copy()
+        fallback['final_recommendation_score'] = fallback[
+            'regional_alpha_selection_utility'
+        ]
+        regional = _cardinality_constrained_portfolio(fallback, constraints)
+    regional = _apply_walk_forward_rebalance_control(
+        regional,
+        previous_regional,
+        regional_scorecard,
+        constraints,
+    )
+    regional = regional.copy()
+    regional['strategy'] = 'wolf_regional_alpha'
+    regional['weight'] = pd.to_numeric(regional['target_weight'], errors='coerce')
+
     benchmark_base = scorecard.loc[
         scorecard['passes_hard_filters'].fillna(False)
     ].sort_values(
@@ -1609,7 +2250,9 @@ def _build_anchor_portfolios(
         kind='stable',
     ).drop_duplicates('issuer_id')
     if benchmark_base.empty:
-        raise RuntimeError('No eligible historical benchmark securities were available.')
+        raise InsufficientPortfolioCoverageError(
+            'No eligible historical benchmark securities were available.'
+        )
     equal = benchmark_base.copy()
     equal['weight'] = 1.0 / len(equal)
     equal['strategy'] = 'equal_weight_eligible'
@@ -1622,6 +2265,7 @@ def _build_anchor_portfolios(
     cap['strategy'] = 'cap_weight_eligible'
     return {
         'wolf_cvar': wolf,
+        'wolf_regional_alpha': regional,
         'equal_weight_eligible': equal,
         'cap_weight_eligible': cap,
     }, scorecard
@@ -1872,6 +2516,7 @@ def _risk_rows(
 def _constraint_rows(
     portfolio: pd.DataFrame,
     as_of_date: pd.Timestamp,
+    strategy: str = 'wolf_cvar',
 ) -> pd.DataFrame:
     optimisation = load_yaml('configs/optimisation.yaml').get('optimisation', {})
     limits = optimisation.get('constraints', {})
@@ -1882,7 +2527,7 @@ def _constraint_rows(
     rows = [
         {
             'as_of_date': as_of_date,
-            'strategy': 'wolf_cvar',
+            'strategy': strategy,
             'constraint_name': 'weights_sum_to_one',
             'constraint_type': 'hard',
             'actual_value': float(weights.sum()),
@@ -1891,7 +2536,7 @@ def _constraint_rows(
         },
         {
             'as_of_date': as_of_date,
-            'strategy': 'wolf_cvar',
+            'strategy': strategy,
             'constraint_name': 'maximum_single_name_weight',
             'constraint_type': 'hard',
             'actual_value': float(risky_weights.max()) if not risky_weights.empty else 0.0,
@@ -1901,7 +2546,7 @@ def _constraint_rows(
         },
         {
             'as_of_date': as_of_date,
-            'strategy': 'wolf_cvar',
+            'strategy': strategy,
             'constraint_name': 'maximum_cash_weight',
             'constraint_type': 'hard',
             'actual_value': cash_weight,
@@ -1927,7 +2572,7 @@ def _constraint_rows(
         rows.append(
             {
                 'as_of_date': as_of_date,
-                'strategy': 'wolf_cvar',
+                'strategy': strategy,
                 'constraint_name': f'maximum_{column}_weight',
                 'constraint_type': 'hard',
                 'actual_value': actual,
@@ -1974,7 +2619,14 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     data_config = load_data_config()
     repository = DuckDBRepository(data_config.duckdb_path, read_only=True)
     LOGGER.info('Loading observed walk-forward source data from %s.', data_config.duckdb_path)
-    universe, statements_raw, prices_raw, fx = _load_source_data(repository, config)
+    (
+        universe,
+        statements_raw,
+        prices_raw,
+        fx,
+        market_caps,
+        reference_events,
+    ) = _load_source_data(repository, config)
     if universe.empty or statements_raw.empty or prices_raw.empty:
         raise RuntimeError('Observed walk-forward source data is incomplete.')
     fx_matcher = _FxMatcher(fx)
@@ -1986,6 +2638,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         config.filing_lag_days,
     )
     price_matcher = _PriceMatcher(prices)
+    market_cap_matcher = _MarketCapMatcher(market_caps)
     anchors = pd.date_range(
         config.start_date,
         config.strategy_end_date,
@@ -1999,6 +2652,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     risk_frames: list[pd.DataFrame] = []
     constraint_frames: list[pd.DataFrame] = []
     anchor_rows: list[dict[str, Any]] = []
+    skipped_anchor_rows: list[dict[str, Any]] = []
     previous_weights: dict[str, pd.Series] = {}
     risk_exception_days = 0
 
@@ -2006,13 +2660,32 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         features, recent = _build_anchor_inputs(
             universe,
             statements,
+            reference_events,
             price_matcher,
             fx_matcher,
+            market_cap_matcher,
             pd.Timestamp(anchor),
             config,
         )
-        if features.empty:
-            raise RuntimeError(f'No point-in-time features were available at {anchor.date()}.')
+        if len(features) < config.minimum_anchor_securities:
+            skipped_anchor_rows.append(
+                {
+                    'as_of_date': pd.Timestamp(anchor),
+                    'feature_security_count': len(features),
+                    'minimum_anchor_securities': config.minimum_anchor_securities,
+                    'reason': 'insufficient_point_in_time_feature_coverage',
+                    'details': '',
+                }
+            )
+            LOGGER.warning(
+                'Skipping walk-forward anchor %s/%s %s: features=%s below minimum=%s.',
+                position,
+                len(anchors),
+                anchor.date(),
+                len(features),
+                config.minimum_anchor_securities,
+            )
+            continue
         forecasts, forecast_wide = _forecast_anchor(
             features,
             pd.Timestamp(anchor),
@@ -2027,12 +2700,32 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             forecast_frames.append(forecasts)
             outcome_frames.append(realised)
 
-        portfolios, scorecard = _build_anchor_portfolios(
-            features,
-            forecast_wide,
-            previous_weights.get(config.primary_strategy),
-            config.maximum_rebalance_turnover,
-        )
+        try:
+            portfolios, scorecard = _build_anchor_portfolios(
+                features,
+                forecast_wide,
+                previous_weights,
+                config.maximum_rebalance_turnover,
+                config.portfolio_nav_usd,
+            )
+        except InsufficientPortfolioCoverageError as exc:
+            skipped_anchor_rows.append(
+                {
+                    'as_of_date': pd.Timestamp(anchor),
+                    'feature_security_count': len(features),
+                    'minimum_anchor_securities': config.minimum_anchor_securities,
+                    'reason': 'portfolio_constraints_infeasible',
+                    'details': str(exc),
+                }
+            )
+            LOGGER.warning(
+                'Skipping walk-forward anchor %s/%s %s: %s',
+                position,
+                len(anchors),
+                anchor.date(),
+                exc,
+            )
+            continue
         regime = (
             'high_volatility'
             if float(features['volatility_1y'].median()) > 0.30
@@ -2099,7 +2792,10 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
                 risk.attrs.get('exception_days_remaining', 0)
             )
             risk_frames.append(risk)
-        constraint_frames.append(_constraint_rows(wolf, pd.Timestamp(anchor)))
+        constraint_frames.extend(
+            _constraint_rows(portfolios[strategy], pd.Timestamp(anchor), strategy)
+            for strategy in ('wolf_cvar', 'wolf_regional_alpha')
+        )
         region_counts = (
             features.groupby('region')['security_id']
             .nunique()
@@ -2127,6 +2823,12 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
                 'wolf_holding_count': int(
                     (wolf['weight'].gt(1.0e-10) & ~_cash_mask(wolf)).sum()
                 ),
+                'regional_alpha_holding_count': int(
+                    (
+                        portfolios['wolf_regional_alpha']['weight'].gt(1.0e-10)
+                        & ~_cash_mask(portfolios['wolf_regional_alpha'])
+                    ).sum()
+                ),
                 'wolf_cash_weight': float(
                     pd.to_numeric(
                         wolf.loc[_cash_mask(wolf), 'weight'],
@@ -2150,13 +2852,65 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             int((wolf['weight'].gt(1.0e-10) & ~_cash_mask(wolf)).sum()),
         )
 
+    if not forecast_frames or not weight_frames or not portfolio_rows:
+        raise RuntimeError(
+            'No walk-forward anchors met the minimum point-in-time evidence requirement.'
+        )
     historical_forecasts = pd.concat(forecast_frames, ignore_index=True)
     outcomes = pd.concat(outcome_frames, ignore_index=True)
     portfolio_weights = pd.concat(weight_frames, ignore_index=True, sort=False)
     portfolio_returns = pd.DataFrame(portfolio_rows)
     risk_forecasts = pd.concat(risk_frames, ignore_index=True)
+    risk_config = (
+        load_yaml('configs/validation.yaml')
+        .get('validation', {})
+        .get('walk_forward', {})
+        .get('risk_forecast', {})
+    )
+    locked_risk_calibration: dict[str, object]
+    minimum_locked_rows = int(
+        risk_config.get('locked_minimum_training_rows', 504)
+    ) + int(risk_config.get('locked_minimum_holdout_rows', 252))
+    if len(risk_forecasts) >= minimum_locked_rows:
+        risk_forecasts, locked_risk_calibration = apply_locked_risk_calibration(
+            risk_forecasts,
+            scale_factors=risk_config.get(
+                'locked_scale_factors', [1.0, 1.025, 1.05, 1.075, 1.10]
+            ),
+            exception_multipliers=risk_config.get(
+                'locked_exception_multipliers', [1.0]
+            ),
+            exception_days=risk_config.get(
+                'locked_exception_days', [0]
+            ),
+            holdout_fraction=float(
+                risk_config.get('locked_holdout_fraction', 0.40)
+            ),
+            minimum_training_rows=int(
+                risk_config.get('locked_minimum_training_rows', 504)
+            ),
+            minimum_holdout_rows=int(
+                risk_config.get('locked_minimum_holdout_rows', 252)
+            ),
+        )
+    else:
+        locked_risk_calibration = {
+            'status': 'not_applied_insufficient_history',
+            'observations': len(risk_forecasts),
+            'minimum_required': minimum_locked_rows,
+        }
     constraints = pd.concat(constraint_frames, ignore_index=True)
     anchor_summary = pd.DataFrame(anchor_rows)
+    skipped_anchors = pd.DataFrame(
+        skipped_anchor_rows,
+        columns=[
+            'as_of_date',
+            'feature_security_count',
+            'minimum_anchor_securities',
+            'reason',
+            'details',
+        ],
+    )
 
     chronology_checks = {
         'future_fundamental_rows': int(
@@ -2178,6 +2932,19 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             ).sum()
         ),
         'hard_constraint_breaches': int(constraints['breach_flag'].fillna(False).sum()),
+        'selected_on_or_after_delisting_rows': int(
+            (
+                pd.to_datetime(portfolio_weights.get('delisting_date'), errors='coerce')
+                .notna()
+                & pd.to_datetime(portfolio_weights['as_of_date']).ge(
+                    pd.to_datetime(
+                        portfolio_weights.get('delisting_date'),
+                        errors='coerce',
+                    )
+                )
+                & ~_cash_mask(portfolio_weights)
+            ).sum()
+        ),
     }
     if any(chronology_checks.values()):
         raise RuntimeError(f'Walk-forward chronology checks failed: {chronology_checks}')
@@ -2190,6 +2957,7 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
     _atomic_parquet(risk_forecasts, output / 'historical_risk_forecasts.parquet')
     _atomic_parquet(constraints, output / 'historical_constraint_report.parquet')
     _atomic_parquet(anchor_summary, output / 'walk_forward_anchor_summary.parquet')
+    _atomic_parquet(skipped_anchors, output / 'walk_forward_skipped_anchors.parquet')
 
     primary_returns = portfolio_returns.loc[
         portfolio_returns['strategy'].eq(config.primary_strategy)
@@ -2215,9 +2983,20 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
         'primary_strategy': config.primary_strategy,
         'configuration': asdict(config),
         'source_database': str(data_config.duckdb_path),
+        'locked_risk_calibration': locked_risk_calibration,
         'source_universe_hash': _frame_hash(universe, ['security_id', 'region']),
         'source_profile': {
             'security_count': int(universe['security_id'].nunique()),
+            'current_inactive_with_dated_delisting_count': int(
+                (
+                    universe['current_listing_status']
+                    .astype(str)
+                    .str.casefold()
+                    .ne('active')
+                    & pd.to_datetime(universe['delisting_date'], errors='coerce').notna()
+                ).sum()
+            ),
+            'mapped_reference_event_count': len(reference_events),
             'statement_rows': len(statements),
             'price_rows': len(prices),
             'price_min_date': pd.to_datetime(prices['trade_date']).min(),
@@ -2238,7 +3017,12 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             },
         },
         'artifact_profile': {
-            'anchors': len(anchors),
+            'requested_anchors': len(anchors),
+            'anchors': len(anchor_summary),
+            'skipped_anchors': len(skipped_anchors),
+            'effective_start_date': pd.to_datetime(
+                anchor_summary['as_of_date']
+            ).min(),
             'forecast_rows': len(historical_forecasts),
             'outcome_rows': len(outcomes),
             'aligned_outcome_fraction': len(outcomes) / max(len(historical_forecasts), 1),
@@ -2264,7 +3048,8 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             'Historical filing availability is reconstructed from fiscal period end plus a conservative reporting lag when an observed filing date is unavailable.',
             'Early anchors include only regions and securities for which usable historical filings were available; region counts are reported for every anchor.',
             'When represented countries cannot support full equity investment under hard concentration caps, the reconstruction holds up to 25% in zero-return cash rather than relaxing those caps.',
-            'The current active universe and current sector metadata introduce survivorship and reference-data bias.',
+            'Dated delistings admit mappable inactive securities before their exit, but incomplete identifier and historical membership coverage leaves residual survivorship bias.',
+            'Current sector and industry labels remain a reference-data proxy when no dated classification is available.',
             'Historical sentiment, narrative, and regime vintages are unavailable and are held neutral in this reconstruction.',
             'Stored candidate price bars have zero volume, so observed current 3-month ADV is used as a static liquidity proxy.',
             'Adjusted-close outcomes may include provider-side retrospective corporate-action adjustments.',

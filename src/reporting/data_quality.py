@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from src.reporting.models import ICDataBundle
+from src.utils.config import ROOT
 
 
 REQUIRED_FRAMES = (
@@ -17,6 +18,13 @@ REQUIRED_FRAMES = (
     "regime_summary",
     "model_run_lineage",
 )
+
+
+def _portable_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return str(path)
 
 
 def build_data_quality_report(bundle: ICDataBundle) -> pd.DataFrame:
@@ -31,7 +39,7 @@ def build_data_quality_report(bundle: ICDataBundle) -> pd.DataFrame:
                 "available": not frame.empty,
                 "row_count": len(frame),
                 "freshness_checked": path.exists(),
-                "file_path": str(path),
+                "file_path": _portable_path(path),
                 "status": "pass" if not frame.empty else "missing_or_empty",
             }
         )

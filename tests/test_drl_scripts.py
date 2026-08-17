@@ -11,6 +11,7 @@ def _run_script(script: str, output_dir: Path, timeout: int = 300) -> None:
     environment = os.environ.copy()
     environment["PIPELINE_OUTPUT_DIR"] = str(output_dir)
     environment["PIPELINE_REGISTER_MODEL_RUN"] = "false"
+    environment["DRL_MOCK_MODE"] = "true"
     result = subprocess.run(
         [sys.executable, script],
         cwd=REPO_ROOT,

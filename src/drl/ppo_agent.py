@@ -37,6 +37,10 @@ class PPOAgentConfig:
     learning_rate_start: float = 3e-4
     learning_rate_end: float = 1e-5
     n_epochs: int = 16
+    n_steps: int = 128
+    batch_size: int = 64
+    ent_coef: float = 0.001
+    torch_num_threads: int = 1
     total_timesteps: int = 2048
     deterministic_evaluation: bool = True
     use_stable_baselines: bool = False
@@ -56,6 +60,10 @@ def ppo_config_from_dict(config: dict | None = None) -> PPOAgentConfig:
         learning_rate_start=float(raw.get("learning_rate_start", 3e-4)),
         learning_rate_end=float(raw.get("learning_rate_end", 1e-5)),
         n_epochs=int(raw.get("n_epochs", 16)),
+        n_steps=int(raw.get("n_steps", 128)),
+        batch_size=int(raw.get("batch_size", 64)),
+        ent_coef=float(raw.get("ent_coef", 0.001)),
+        torch_num_threads=int(raw.get("torch_num_threads", 1)),
         total_timesteps=int(raw.get("total_timesteps", 2048)),
         deterministic_evaluation=bool(raw.get("deterministic_evaluation", True)),
         use_stable_baselines=bool(raw.get("use_stable_baselines", False)),
@@ -125,6 +133,12 @@ class StableBaselinesPPOAgent:
         self.seed = int(seed)
         self.config = ppo_config_from_dict(config) if not isinstance(config, PPOAgentConfig) else config
         self.env = env
+        try:
+            import torch
+
+            torch.set_num_threads(max(int(self.config.torch_num_threads), 1))
+        except ImportError:  # pragma: no cover - imported with stable-baselines3
+            pass
         self.model = PPO(
             self.config.policy,
             env,
@@ -133,6 +147,12 @@ class StableBaselinesPPOAgent:
             clip_range=self.config.clip_range,
             learning_rate=linear_learning_rate_schedule(self.config.learning_rate_start, self.config.learning_rate_end),
             n_epochs=self.config.n_epochs,
+            n_steps=max(int(self.config.n_steps), 2),
+            batch_size=max(
+                2,
+                min(int(self.config.batch_size), int(self.config.n_steps)),
+            ),
+            ent_coef=self.config.ent_coef,
             seed=self.seed,
             policy_kwargs=sb3_policy_kwargs(self.config),
             verbose=0,

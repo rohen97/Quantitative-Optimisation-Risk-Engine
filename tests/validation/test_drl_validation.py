@@ -11,6 +11,6 @@ def test_unstable_or_underseeded_drl_is_rejected():
     assert decision.accepted_blend == 0.0
 
 
-def test_accepted_blend_is_capped_at_25_percent():
-    decision = evaluate_drl_approval(0.5, 1.0, -0.2, -0.1, 0.2, 0.1, 0.1, True, 0.35, 0.8)
-    assert decision.accepted_blend == 0.25
+def test_accepted_blend_is_capped_at_10_percent():
+    decision = evaluate_drl_approval(0.5, 1.0, -0.2, -0.1, -0.2, -0.1, 0.1, True, 0.35, 0.8)
+    assert decision.accepted_blend == 0.10

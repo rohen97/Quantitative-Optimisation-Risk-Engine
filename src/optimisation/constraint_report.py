@@ -39,6 +39,20 @@ def build_constraint_report(portfolio: pd.DataFrame, constraints: dict | None = 
     weights = portfolio["target_weight"].fillna(0)
     rows = []
     invested = portfolio.loc[weights.gt(1e-12)].copy()
+    cash_mask = (
+        invested.get("ticker", pd.Series("", index=invested.index))
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .eq("CASH")
+        | invested.get("instrument_type", pd.Series("", index=invested.index))
+        .fillna("")
+        .astype(str)
+        .str.lower()
+        .eq("cash")
+    )
+    risky = invested.loc[~cash_mask]
+    cash_weight = float(invested.loc[cash_mask, "target_weight"].sum())
     total_weight = float(weights.sum())
     rows.append(
         _row(
@@ -62,7 +76,8 @@ def build_constraint_report(portfolio: pd.DataFrame, constraints: dict | None = 
         )
     )
     if "issuer_id" in invested:
-        duplicated_issuer = invested["issuer_id"].fillna("").astype(str).duplicated(keep=False)
+        issuer_ids = invested["issuer_id"].fillna("").astype(str).str.strip()
+        duplicated_issuer = issuer_ids.ne("") & issuer_ids.duplicated(keep=False)
         rows.append(
             _row(
                 "unique_issuer",
@@ -88,7 +103,26 @@ def build_constraint_report(portfolio: pd.DataFrame, constraints: dict | None = 
         )
     )
     max_weight = float(limits.get("max_single_name_weight", 0.05))
-    rows.append(_row("single_name_concentration", "hard", max_weight, float(weights.max()), weights.max() > max_weight + 1e-9))
+    max_risky_weight = float(risky["target_weight"].max()) if not risky.empty else 0.0
+    rows.append(
+        _row(
+            "single_name_concentration",
+            "hard",
+            max_weight,
+            max_risky_weight,
+            max_risky_weight > max_weight + 1e-9,
+        )
+    )
+    max_cash = float(limits.get("maximum_cash_weight", 0.0))
+    rows.append(
+        _row(
+            "cash_weight",
+            "hard",
+            max_cash,
+            cash_weight,
+            cash_weight > max_cash + 1e-9,
+        )
+    )
     for name, exposure_fn, key in [
         ("sector_concentration", calculate_sector_exposure, "max_sector_weight"),
         ("country_concentration", calculate_country_exposure, "max_country_weight"),
@@ -96,10 +130,22 @@ def build_constraint_report(portfolio: pd.DataFrame, constraints: dict | None = 
         ("currency_concentration", calculate_currency_exposure, "max_currency_weight"),
     ]:
         limit = float(limits.get(key, 1.0))
-        exposure = exposure_fn(portfolio)
+        exposure = exposure_fn(risky)
         actual = float(exposure["weight"].max()) if not exposure.empty else 0.0
         rows.append(_row(name, "hard", limit, actual, actual > limit + 1e-9, ", ".join(exposure.loc[exposure["weight"] > limit, exposure.columns[0]].astype(str))))
-    liquidity_breaches = portfolio.loc[(portfolio["target_weight"] > 0) & (portfolio["liquidity_score"] < limits.get("minimum_liquidity_score", 40)), "ticker"].astype(str)
+    portfolio_cash = (
+        portfolio.get("ticker", pd.Series("", index=portfolio.index))
+        .fillna("")
+        .astype(str)
+        .str.upper()
+        .eq("CASH")
+    )
+    liquidity_breaches = portfolio.loc[
+        (portfolio["target_weight"] > 0)
+        & ~portfolio_cash
+        & (portfolio["liquidity_score"] < limits.get("minimum_liquidity_score", 40)),
+        "ticker",
+    ].astype(str)
     rows.append(_row("liquidity", "hard", limits.get("minimum_liquidity_score", 40), int(len(liquidity_breaches)), len(liquidity_breaches) > 0, ", ".join(liquidity_breaches)))
     rows.extend(
         [
