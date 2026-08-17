@@ -6,6 +6,7 @@ optimisation:
   long_only: true
   fully_invested: true
   maximum_candidates: 2000
+  portfolio_nav_usd: 186060522.0
 
   methods:
     equal_weight:
@@ -19,6 +20,18 @@ optimisation:
       risk_aversion_lambda: 5.0
     cvar_constrained:
       enabled: true
+    regional_alpha:
+      enabled: true
+      regional_rank_weight: 0.70
+      sector_rank_weight: 0.30
+      minimum_peer_count: 5
+      base_cost_bps: 17.5
+      currency_conversion_bps: 2.0
+      impact_coefficient_bps: 10.0
+      maximum_participation_rate: 0.05
+      assumed_position_weight: 0.05
+      retention_bonus_points: 3.0
+      cost_penalty_points_per_portfolio_bp: 1.5
     dividend_income:
       enabled: true
     regime_aware:

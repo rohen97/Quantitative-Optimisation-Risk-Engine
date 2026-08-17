@@ -69,6 +69,18 @@ drl:
     narrative_credit_penalty_weight: 0.03
     stress_loss_penalty_weight: 0.02
 
+  regional_reward:
+    active_return_scale: 100.0
+    transaction_cost_scale: 25.0
+    turnover_scale: 0.05
+    drawdown_threshold: 0.10
+    drawdown_penalty_scale: 0.75
+    tail_loss_threshold: 0.05
+    tail_loss_penalty_scale: 2.0
+    expected_cvar_limit: -0.25
+    expected_tail_penalty_scale: 0.25
+    volatility_penalty_scale: 0.10
+
   risk_throttle:
     enabled: true
     low_threshold: 35
@@ -82,8 +94,14 @@ drl:
   algorithms:
     primary: ppo
     challengers:
-      - sac
-      - td3
+      - contextual_bandit
+      - convex_residual
+    contextual_bandit:
+      ridge_penalties: [0.1, 1.0, 10.0]
+    convex_residual:
+      risk_aversion_values: [1.0, 3.0, 10.0]
+      turnover_penalty: 2.0
+      cost_penalty: 0.02
     use_stable_baselines3_if_available: true
     fallback_policy: deterministic_mock
     allow_mock_fallback: false
@@ -124,6 +142,13 @@ drl:
     embargo_rebalance_periods: 1
     use_random_split: false
     retraining_frequency: annual
+    minimum_train_periods: 60
+    minimum_validation_periods: 12
+    minimum_test_periods: 12
+    frozen_test_start: 2025-06-30
+    frozen_test_end: 2026-05-31
+    holdout_label: legacy_locked_oos_seen_once
+    prospective_holdout_start: 2026-08-31
 
   specialist_agents:
     enabled: true
@@ -160,3 +185,4 @@ drl:
     minimum_oos_sharpe_improvement: 0.0
     oos_tail_risk_tolerance: 0.0
     require_positive_active_return_ci: true
+    required_prospective_shadow_cycles: 3

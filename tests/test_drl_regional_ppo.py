@@ -8,6 +8,7 @@ from src.drl.regional_ppo import (
     REGIONAL_SLEEVES,
     RegionalResidualEnv,
     apply_regional_scaler,
+    build_regional_panel,
     chronological_regional_split,
     fit_regional_scaler,
     map_regional_overlay_to_assets,
@@ -31,6 +32,23 @@ def _panel(periods: int = 40) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def test_regional_panel_does_not_reuse_canonical_artifacts_for_isolated_output(
+    tmp_path,
+    monkeypatch,
+):
+    canonical = tmp_path / "reports" / "outputs" / "walk_forward"
+    canonical.mkdir(parents=True)
+    pd.DataFrame({"sentinel": [1]}).to_parquet(
+        canonical / "historical_portfolio_weights.parquet",
+        index=False,
+    )
+    monkeypatch.chdir(tmp_path)
+
+    panel = build_regional_panel(tmp_path / "isolated-output")
+
+    assert panel.empty
+
+
 def test_regional_split_is_chronological_and_embargoed():
     panel = _panel()
     split = chronological_regional_split(panel["date"].unique(), 0.58, 0.19, 1)
@@ -41,6 +59,27 @@ def test_regional_split_is_chronological_and_embargoed():
     assert set(split.validation_dates).isdisjoint(split.test_dates)
     assert max(split.train_dates) < min(split.validation_dates) < min(split.test_dates)
     assert len(split.embargo_dates) == 2
+
+
+def test_regional_split_keeps_configured_test_dates_frozen():
+    panel = _panel(96)
+    split = chronological_regional_split(
+        panel['date'].unique(),
+        0.58,
+        0.19,
+        1,
+        frozen_test_start='2028-01-31',
+        frozen_test_end='2028-12-31',
+        minimum_train_periods=48,
+        minimum_validation_periods=12,
+        minimum_test_periods=12,
+    )
+
+    assert min(split.test_dates) == pd.Timestamp('2028-01-31')
+    assert max(split.test_dates) == pd.Timestamp('2028-12-31')
+    assert len(split.test_dates) == 12
+    assert max(split.validation_dates) < min(split.test_dates)
+    assert set(split.test_dates).isdisjoint(split.train_dates)
 
 
 def test_scaler_fits_training_dates_only():

@@ -31,7 +31,7 @@ Transaction costs include commission, half-spread/slippage, nonlinear market imp
 
 ## Reward
 
-The reward is conservative and decomposed. Positive components include Differential Sharpe, net total return, dividend income, regime suitability improvement, diversification improvement and quality exposure. Negative components include CVaR, Expected Shortfall, drawdown, transaction costs, turnover, concentration, dividend-cut risk, liquidity risk, forecast uncertainty, narrative/credit stress and stress-scenario loss.
+The historical regional PPO reward is benchmark-relative and net of costs. It rewards active return over the dated regional benchmark and explicitly penalises transaction costs, turnover, drawdown beyond the configured threshold, realised tail loss, expected CVaR excess and volatility. The live security-level overlay retains the broader decomposed reward used for projection diagnostics.
 
 Differential Sharpe is updated online from exponentially smoothed first and second moments, keeping the reward focused on risk-adjusted incremental performance rather than raw return alone.
 
@@ -41,7 +41,7 @@ The Wolf Chaos risk throttle scales or blocks actions as chaos and crisis probab
 
 ## Algorithms
 
-Production mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. It fails closed when historical evidence or the PPO dependency is unavailable. The deterministic fallback remains available only for explicitly configured tests and is labelled `mock_fallback`. SAC and TD3 are inactive research challengers.
+Production research mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. A ridge contextual bandit and convex residual allocator are evaluated on the same frozen split as lower-variance challengers. The pipeline fails closed when historical evidence or the PPO dependency is unavailable.
 
 The TCN/GAP encoder is optional and dependency-light. When PyTorch is available, it supports causal dilated convolutions, residual blocks, Global Average Pooling, cross-asset layers and a cash logit. It is not a hard dependency.
 
@@ -62,19 +62,20 @@ The DRL allocation is rejected and replaced with the baseline optimiser for hard
 
 ## Current Limitations
 
-- The real regional panel currently contains 59 monthly observations, so the untouched test contains only 12 months.
-- Bloomberg PIT fundamentals and market-cap vintages are being expanded; existing historical portfolio artifacts predate that backfill and must be regenerated before they inherit the new evidence grade.
+- Exact panel dates, hashes, embargoes and locked evaluation dates are written to `drl_split_manifest.csv`.
+- The 2025-06 through 2026-05 OOS window is now a legacy locked record; deployment requires three genuinely prospective monthly shadow cycles beginning after the policy freeze.
+- Bloomberg ingestion is paused. Existing licensed local aggregates remain available, but no new Bloomberg requests are part of this run.
 - The action space is regional; security selection remains with the constrained optimiser.
 - Current five-seed validation information ratios are negative, so the validation guard retains the baseline optimiser.
 - TCN/GAP and CAM paths are interfaces, not yet a fully validated production policy.
-- SAC, TD3, distributional RL and constrained policy optimisation are research extensions.
+- The contextual-bandit and convex-residual challengers also underperform the baseline on the legacy locked OOS period.
 - Outputs are research and decision-support artifacts, not trade execution instructions.
 
 ## Future Research
 
 - full TCN + GAP PPO policy
 - robust CAM / Grad-CAM attribution
-- SAC and TD3 challengers
+- additional offline-RL challengers after prospective evidence exists
 - distributional reinforcement learning
 - constrained policy optimisation
 - Lagrangian risk constraints

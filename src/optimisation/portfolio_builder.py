@@ -14,6 +14,7 @@ OUTPUT_NAME_MAP = {
     "optimised_portfolio_risk_parity": "optimised_portfolio_risk_parity",
     "optimised_portfolio_mean_variance": "optimised_portfolio_mean_variance",
     "optimised_portfolio_cvar_constrained": "optimised_portfolio_cvar_constrained",
+    "optimised_portfolio_regional_alpha": "optimised_portfolio_regional_alpha",
     "optimised_portfolio_dividend_income": "optimised_portfolio_dividend_income",
     "optimised_portfolio_regime_aware": "optimised_portfolio_regime_aware",
 }

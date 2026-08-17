@@ -149,6 +149,13 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
                     default=1,
                 )
             ),
+            "frozen_test_start": _coalesce(training.get("frozen_test_start"), raw.get("frozen_test_start")),
+            "frozen_test_end": _coalesce(training.get("frozen_test_end"), raw.get("frozen_test_end")),
+            "holdout_label": str(_coalesce(training.get("holdout_label"), default="legacy_locked_oos")),
+            "prospective_holdout_start": _coalesce(training.get("prospective_holdout_start"), raw.get("prospective_holdout_start")),
+            "minimum_train_periods": int(_coalesce(training.get("minimum_train_periods"), default=24)),
+            "minimum_validation_periods": int(_coalesce(training.get("minimum_validation_periods"), default=6)),
+            "minimum_test_periods": int(_coalesce(training.get("minimum_test_periods"), default=6)),
             "minimum_oos_observations": int(
                 _coalesce(acceptance.get("minimum_oos_observations"), default=12)
             ),
@@ -160,6 +167,12 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             ),
             "require_positive_active_return_ci": bool(
                 _coalesce(acceptance.get("require_positive_active_return_ci"), default=True)
+            ),
+            "required_prospective_shadow_cycles": int(
+                _coalesce(acceptance.get("required_prospective_shadow_cycles"), default=0)
+            ),
+            "prospective_shadow_cycles_completed": int(
+                _coalesce(raw.get("prospective_shadow_cycles_completed"), default=0)
             ),
         }
     )

@@ -25,6 +25,7 @@ def main() -> None:
         "optimised_portfolio_risk_parity": "optimised_portfolio_risk_parity.csv",
         "optimised_portfolio_mean_variance": "optimised_portfolio_mean_variance.csv",
         "optimised_portfolio_cvar_constrained": "optimised_portfolio_cvar_constrained.csv",
+        "optimised_portfolio_regional_alpha": "optimised_portfolio_regional_alpha.csv",
         "optimised_portfolio_dividend_income": "optimised_portfolio_dividend_income.csv",
         "optimised_portfolio_regime_aware": "optimised_portfolio_regime_aware.csv",
         "portfolio_trade_list": "portfolio_trade_list.csv",

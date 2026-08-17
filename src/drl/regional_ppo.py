@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
+import hashlib
 import json
 import logging
 import multiprocessing as mp
@@ -78,7 +79,8 @@ def _walk_forward_dir(output_dir: Path) -> Path:
     if direct.exists():
         return direct
     default = Path("reports/outputs/walk_forward")
-    return default if default.exists() else direct
+    canonical_output = Path("reports/outputs").resolve()
+    return default if output_dir.resolve() == canonical_output and default.exists() else direct
 
 
 def _load_prices(security_ids: list[str], start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
@@ -227,16 +229,69 @@ def chronological_regional_split(
     train_fraction: float = 0.60,
     validation_fraction: float = 0.20,
     embargo_periods: int = 1,
+    frozen_test_start: str | pd.Timestamp | None = None,
+    frozen_test_end: str | pd.Timestamp | None = None,
+    minimum_train_periods: int = 24,
+    minimum_validation_periods: int = 6,
+    minimum_test_periods: int = 6,
 ) -> RegionalSplit:
     ordered = tuple(pd.DatetimeIndex(pd.to_datetime(dates)).dropna().sort_values().unique())
-    if len(ordered) < 36:
+    if len(ordered) < (
+        minimum_train_periods + minimum_validation_periods + minimum_test_periods
+    ):
         return RegionalSplit(tuple(), tuple(), tuple(), tuple())
-    train_count = max(24, int(len(ordered) * train_fraction))
     embargo = max(int(embargo_periods), 0)
+    if frozen_test_start is not None:
+        test_start_date = pd.Timestamp(frozen_test_start)
+        test_end_date = (
+            pd.Timestamp(frozen_test_end)
+            if frozen_test_end is not None
+            else pd.Timestamp.max
+        )
+        test_dates = tuple(
+            value
+            for value in ordered
+            if value >= test_start_date and value <= test_end_date
+        )
+        if len(test_dates) < minimum_test_periods:
+            return RegionalSplit(tuple(), tuple(), tuple(), tuple())
+        test_start_index = ordered.index(test_dates[0])
+        test_embargo_start = max(test_start_index - embargo, 0)
+        development = ordered[:test_embargo_start]
+        validation_count = max(
+            minimum_validation_periods,
+            int(len(ordered) * validation_fraction),
+        )
+        validation_count = min(
+            validation_count,
+            len(development) - minimum_train_periods - embargo,
+        )
+        if validation_count < minimum_validation_periods:
+            return RegionalSplit(tuple(), tuple(), tuple(), tuple())
+        validation_start = len(development) - validation_count
+        train_end = max(validation_start - embargo, 0)
+        train_dates = ordered[:train_end]
+        validation_dates = development[validation_start:]
+        if len(train_dates) < minimum_train_periods:
+            return RegionalSplit(tuple(), tuple(), tuple(), tuple())
+        embargo_dates = (
+            ordered[train_end:validation_start]
+            + ordered[test_embargo_start:test_start_index]
+        )
+        return RegionalSplit(
+            train_dates=train_dates,
+            validation_dates=validation_dates,
+            test_dates=test_dates,
+            embargo_dates=embargo_dates,
+        )
+    train_count = max(minimum_train_periods, int(len(ordered) * train_fraction))
     remaining = len(ordered) - train_count - 2 * embargo
-    validation_count = max(6, min(int(len(ordered) * validation_fraction), remaining // 2))
+    validation_count = max(
+        minimum_validation_periods,
+        min(int(len(ordered) * validation_fraction), remaining // 2),
+    )
     test_count = remaining - validation_count
-    if validation_count < 6 or test_count < 6:
+    if validation_count < minimum_validation_periods or test_count < minimum_test_periods:
         return RegionalSplit(tuple(), tuple(), tuple(), tuple())
     train_end = train_count
     validation_start = train_end + embargo
@@ -249,6 +304,69 @@ def chronological_regional_split(
         test_dates=ordered[test_start : test_start + test_count],
         embargo_dates=embargo_dates,
     )
+
+
+def regional_split_from_config(
+    panel: pd.DataFrame,
+    config: Mapping[str, Any],
+) -> RegionalSplit:
+    dates = list(pd.DatetimeIndex(panel["date"].unique()).sort_values())
+    return chronological_regional_split(
+        dates,
+        float(config.get("train_fraction", 0.60)),
+        float(config.get("validation_fraction", 0.20)),
+        int(config.get("embargo_periods", 1)),
+        config.get("frozen_test_start"),
+        config.get("frozen_test_end"),
+        int(config.get("minimum_train_periods", 24)),
+        int(config.get("minimum_validation_periods", 6)),
+        int(config.get("minimum_test_periods", 6)),
+    )
+
+
+def build_regional_split_manifest(
+    panel: pd.DataFrame,
+    config: Mapping[str, Any],
+) -> pd.DataFrame:
+    split = regional_split_from_config(panel, config)
+    columns = [
+        column
+        for column in (
+            "date",
+            "sleeve",
+            "baseline_weight",
+            "forward_return",
+            *REGIONAL_FEATURES,
+        )
+        if column in panel
+    ]
+    ordered = panel[columns].sort_values(["date", "sleeve"]).reset_index(drop=True)
+    row_hashes = pd.util.hash_pandas_object(ordered, index=False).to_numpy(dtype=np.uint64)
+    digest = hashlib.sha256(row_hashes.tobytes()).hexdigest()
+    rows = []
+    for label, values in (
+        ("train", split.train_dates),
+        ("validation", split.validation_dates),
+        ("embargo", split.embargo_dates),
+        ("legacy_locked_oos", split.test_dates),
+    ):
+        rows.append(
+            {
+                "split": label,
+                "start_date": min(values) if values else pd.NaT,
+                "end_date": max(values) if values else pd.NaT,
+                "observations": len(values),
+                "panel_hash_sha256": digest,
+                "holdout_label": str(
+                    config.get("holdout_label", "legacy_locked_oos")
+                ),
+                "prospective_holdout_start": config.get(
+                    "prospective_holdout_start"
+                ),
+                "test_period_model_selection_allowed": False,
+            }
+        )
+    return pd.DataFrame(rows)
 
 
 def fit_regional_scaler(panel: pd.DataFrame, train_dates: tuple[pd.Timestamp, ...]) -> RegionalScalingStats:
@@ -315,6 +433,10 @@ class RegionalResidualEnv(_BaseEnv):
             .reindex(REGIONAL_SLEEVES)
             .fillna(0.0)
         )
+
+    def current_rows(self) -> pd.DataFrame:
+        """Return the current dated sleeve state for deterministic challengers."""
+        return self._rows().copy()
 
     def _observation(self) -> np.ndarray:
         rows = self._rows()
@@ -397,12 +519,46 @@ class RegionalResidualEnv(_BaseEnv):
         expected_volatility = float(
             np.dot(target, _safe_numeric(rows, "expected_volatility_12m", 0.20).to_numpy(dtype=float))
         )
+        expected_cvar = float(
+            np.dot(target, _safe_numeric(rows, "cvar_5_12m", -0.25).to_numpy(dtype=float))
+        )
+        reward_config = self.config.get("regional_reward", {}) or {}
+        drawdown_threshold = float(reward_config.get("drawdown_threshold", 0.10))
+        tail_loss_threshold = float(reward_config.get("tail_loss_threshold", 0.05))
+        expected_cvar_limit = abs(float(reward_config.get("expected_cvar_limit", -0.25)))
+        drawdown_excess = max(-drawdown - drawdown_threshold, 0.0)
+        realised_tail_loss = max(-net_return - tail_loss_threshold, 0.0)
+        active_tail_loss = max(-active_return - tail_loss_threshold, 0.0)
+        expected_tail_excess = max(-expected_cvar - expected_cvar_limit, 0.0)
+        active_return_component = float(
+            reward_config.get("active_return_scale", 100.0)
+        ) * active_return
+        transaction_cost_penalty = float(
+            reward_config.get("transaction_cost_scale", 25.0)
+        ) * transaction_cost
+        turnover_penalty = float(
+            reward_config.get("turnover_scale", 0.05)
+        ) * turnover
+        drawdown_penalty = float(
+            reward_config.get("drawdown_penalty_scale", 0.50)
+        ) * drawdown_excess
+        tail_penalty = float(
+            reward_config.get("tail_loss_penalty_scale", 2.0)
+        ) * (realised_tail_loss + active_tail_loss)
+        expected_tail_penalty = float(
+            reward_config.get("expected_tail_penalty_scale", 0.25)
+        ) * expected_tail_excess
+        volatility_penalty = float(
+            reward_config.get("volatility_penalty_scale", 0.10)
+        ) * max(expected_volatility - 0.30, 0.0)
         reward = (
-            100.0 * active_return
-            - 25.0 * transaction_cost
-            - 0.05 * turnover
-            - 0.50 * max(-drawdown - 0.10, 0.0)
-            - 0.10 * max(expected_volatility - 0.30, 0.0)
+            active_return_component
+            - transaction_cost_penalty
+            - turnover_penalty
+            - drawdown_penalty
+            - tail_penalty
+            - expected_tail_penalty
+            - volatility_penalty
         )
         self.previous_overlay = overlay
         self.step_index += 1
@@ -417,6 +573,13 @@ class RegionalResidualEnv(_BaseEnv):
             "transaction_cost": transaction_cost,
             "incremental_turnover": turnover,
             "drawdown": drawdown,
+            "expected_cvar": expected_cvar,
+            "active_return_component": active_return_component,
+            "transaction_cost_penalty": transaction_cost_penalty,
+            "turnover_penalty": turnover_penalty,
+            "drawdown_penalty": drawdown_penalty,
+            "tail_risk_penalty": tail_penalty + expected_tail_penalty,
+            "volatility_penalty": volatility_penalty,
             "constraint_violations": 0,
             "overlay_json": json.dumps(dict(zip(REGIONAL_SLEEVES, map(float, overlay)))),
         }
@@ -608,6 +771,8 @@ def _train_regional_seed(
         "transaction_cost_penalty": test_metrics.get("transaction_costs", 0.0),
         "turnover_penalty": test_metrics.get("annualised_incremental_turnover", 0.0),
         "information_ratio": test_metrics.get("information_ratio", 0.0),
+        "tail_risk_penalty": float(test_path.get("tail_risk_penalty", pd.Series(dtype=float)).sum()),
+        "drawdown_penalty": float(test_path.get("drawdown_penalty", pd.Series(dtype=float)).sum()),
     }
     test_path = test_path.copy()
     test_path["seed"] = int(seed)
@@ -625,13 +790,7 @@ def train_historical_regional_ppo(
 ) -> tuple[pd.DataFrame, dict[int, np.ndarray], list[dict[str, float]], pd.DataFrame]:
     if panel.empty or not SB3_AVAILABLE or not ppo_config_from_dict(dict(config)).use_stable_baselines:
         return pd.DataFrame(), {}, [], pd.DataFrame()
-    dates = list(pd.DatetimeIndex(panel["date"].unique()).sort_values())
-    split = chronological_regional_split(
-        dates,
-        float(config.get("train_fraction", 0.60)),
-        float(config.get("validation_fraction", 0.20)),
-        int(config.get("embargo_periods", 1)),
-    )
+    split = regional_split_from_config(panel, config)
     if not split.train_dates:
         return pd.DataFrame(), {}, [], pd.DataFrame()
     scaler = fit_regional_scaler(panel, split.train_dates)
@@ -705,6 +864,19 @@ def train_historical_regional_ppo(
     path_frames = [item["path"] for item in results]
 
     summary = pd.DataFrame(rows)
+    split_manifest = build_regional_split_manifest(panel, config)
+    panel_hash = (
+        str(split_manifest["panel_hash_sha256"].iloc[0])
+        if not split_manifest.empty
+        else ""
+    )
+    summary["panel_hash_sha256"] = panel_hash
+    summary["holdout_label"] = str(
+        config.get("holdout_label", "legacy_locked_oos")
+    )
+    summary["prospective_holdout_start"] = config.get(
+        "prospective_holdout_start"
+    )
     best_seed = int(summary.loc[summary["validation_reward"].idxmax(), "seed"])
     summary["best_validation_score"] = float(summary["validation_reward"].max())
     summary["selected_by_validation"] = summary["seed"].eq(best_seed)

@@ -1,6 +1,6 @@
 # Wolf Quant Model Investment Principal Report
 
-As of 13 August 2026
+As of 17 August 2026
 
 ## Decision
 
@@ -26,6 +26,82 @@ Retention hysteresis, a 6% monthly turnover cap, and minimum-turnover
 transitions drove the implementation improvement. The configured no-trade
 band did not trigger in this 60-month sample, so it is not credited for the
 observed result.
+
+## Supervised Benchmark-Relative Alpha
+
+The new research stack compares OLS after train-only Fama-MacBeth screening,
+Ridge, Elastic Net, robust Huber regression, Random Forest, Extra Trees,
+histogram gradient boosting, XGBoost regression and XGBoost ranking across
+3/6/9/12-month horizons. The primary panel contains
+**1,374 securities**, versus the much larger
+price master, because model rows also require historical fundamentals,
+features and realised outcomes.
+
+| Horizon | Monthly cohorts | Independent | Rank IC | Sign p | Net cohort return | Turnover | 90% coverage | Band width |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 3m | 11 | 4 | 0.157 | 0.062 | 7.4% | 0.54x | 94.6% | 56% |
+| 6m | 7 | 2 | 0.182 | 0.250 | 14.2% | 0.47x | 93.4% | 83% |
+| 9m | 4 | 1 | 0.226 | 0.500 | 24.8% | 0.35x | 91.9% | 100% |
+| 12m | 1 | 1 | 0.253 | 0.500 | 37.0% | N/A | 90.5% | 117% |
+
+The 3-month rank IC is positive, but four independent cohorts produce an exact
+sign-test p-value above 5%. Longer horizons have only two, one and one
+independent observations. Net cohort returns are not compounded portfolio CAGR.
+Formal annualised return, Sharpe, t-statistics and confidence intervals remain
+suppressed. The governed decision is **INSUFFICIENT_EVIDENCE** with a
+**0% live blend**.
+
+Purged date-block conformal calibration now clears the central 90% coverage
+target at every horizon. That correction also reveals low precision: average
+9- and 12-month bands span about 100% and 117% of benchmark-relative return.
+Recurring 3/6/9-month turnover is below 1.5x and includes spread, FX, impact
+and the separate 25bp annual bank fee. Twelve-month recurring turnover remains
+unestimable from one cohort.
+
+## Portfolio Outputs And Stock Recommendations
+
+The governed CVaR target remains the only committee portfolio. The low-latency
+regional-alpha challenger also holds 20 equal-weight names, but only
+**8 names overlap**. The supervised overlay cannot change
+weights while its deployment blend is zero.
+
+- Governed-only: `000538.SHE`, `0728.HK`, `1113.HK`, `3988.HK`, `600018.SHG`, `601816.SHG`, `601818.SHG`, `ELE.MC`, `ESSITY-B.ST`, `HIG.US`, `NOVN.SW`, `SHELL.AS`
+- Shared core: `000333.SHE`, `600036.SHG`, `AD.AS`, `ALV.XETRA`, `CA.PA`, `HEN3.XETRA`, `IMB.LSE`, `ORA.PA`
+- Regional-challenger only: `002415.SHE`, `600406.SHG`, `ABT.US`, `CVX.US`, `DG.PA`, `DHL.XETRA`, `GSK.LSE`, `LOW.US`, `NXT.LSE`, `PUB.PA`, `SHEL.LSE`, `T.US`
+
+Highest supervised 3-month research rank in each region:
+
+| Ticker | Region | Score | Cost-adjusted alpha | Q05 | Q95 |
+| --- | --- | ---: | ---: | ---: | ---: |
+| `NA9.XETRA` | DACH | 99.6 | 4.2% | -33% | 41% |
+| `SESG.PA` | EU ex-DACH | 99.2 | 3.7% | -31% | 41% |
+| `0354.HK` | Hong Kong | 99.4 | 4.5% | -32% | 43% |
+| `000009.SHE` | Mainland China | 85.5 | 2.9% | -31% | 49% |
+| `GEN.LSE` | UK | 100.0 | 4.9% | -32% | 39% |
+| `HPQ.US` | US | 100.0 | 3.6% | -30% | 36% |
+
+These six names are a research watchlist, not buy orders. The live recommendation
+remains the governed target described below.
+
+## DRL And Prospective Evidence
+
+The five PPO seeds, contextual bandit and convex residual challenger remain
+rejected for deployment. The selected simple challengers also trailed the
+baseline in the 12-month legacy OOS diagnostic:
+
+| Challenger | Net return | Baseline | Mean active return | Status |
+| --- | ---: | ---: | ---: | --- |
+| Contextual Bandit | 14.2% | 14.6% | -0.03% | Research only |
+| Convex Residual | 13.8% | 14.6% | -0.06% | Research only |
+
+DRL receives 0% and
+the baseline receives 100%.
+The generic shadow programme has completed
+0 of
+3 required cycles.
+The supervised model was separately frozen for prospective evidence: its first
+3-month result is due 30 November 2026, and 12 non-overlapping cohorts
+cannot complete before 31 August 2029.
 
 ## Adaptive Risk Backtesting
 

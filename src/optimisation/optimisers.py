@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from src.models.regional_alpha import RegionalAlphaSettings, add_regional_alpha_signals
 from src.optimisation.constraints import (
     apply_diversification_caps,
     build_eligibility_mask,
@@ -13,6 +14,7 @@ from src.optimisation.objectives import (
     cvar_expected_shortfall_objective,
     dividend_income_objective,
     regime_aware_objective,
+    regional_benchmark_relative_objective,
     risk_adjusted_return_objective,
     score_weighted_objective,
 )
@@ -318,6 +320,15 @@ def cvar_constrained_portfolio(data: pd.DataFrame, constraints: dict | None = No
     return _portfolio_from_scores(data, cvar_expected_shortfall_objective(data), constraints, "cvar_constrained")
 
 
+def regional_alpha_portfolio(data: pd.DataFrame, constraints: dict | None = None) -> pd.DataFrame:
+    return _portfolio_from_scores(
+        data,
+        regional_benchmark_relative_objective(data),
+        constraints,
+        "regional_benchmark_relative_cost_aware",
+    )
+
+
 def dividend_income_portfolio(data: pd.DataFrame, constraints: dict | None = None) -> pd.DataFrame:
     scores = dividend_income_objective(data)
     scores = scores.where(data["dividend_cut_probability"].fillna(0.10) <= (constraints or {}).get("maximum_dividend_cut_probability", 0.35), 0)
@@ -349,6 +360,27 @@ def run_all_optimisers(data: pd.DataFrame, optimisation_config: dict | None = No
         )
     if methods.get("cvar_constrained", {}).get("enabled", True):
         outputs["optimised_portfolio_cvar_constrained"] = cvar_constrained_portfolio(data, constraints)
+    if methods.get("regional_alpha", {}).get("enabled", True):
+        observed_nav = float(
+            pd.to_numeric(
+                data.get("current_market_value_usd", pd.Series(dtype=float)),
+                errors="coerce",
+            ).fillna(0.0).sum()
+        )
+        regional_settings = RegionalAlphaSettings.from_mapping(
+            methods.get("regional_alpha", {}),
+            portfolio_nav_usd=float(
+                config.get(
+                    "portfolio_nav_usd",
+                    observed_nav or 100_000_000.0,
+                )
+            ),
+        )
+        regional_data = add_regional_alpha_signals(data, regional_settings)
+        outputs["optimised_portfolio_regional_alpha"] = regional_alpha_portfolio(
+            regional_data,
+            constraints,
+        )
     if methods.get("dividend_income", {}).get("enabled", True):
         outputs["optimised_portfolio_dividend_income"] = dividend_income_portfolio(data, constraints)
     if methods.get("regime_aware", {}).get("enabled", True):

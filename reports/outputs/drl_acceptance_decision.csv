@@ -1,2 +1,2 @@
 accepted,selected_weights_source,rejection_reasons,blend_weight_drl,blend_weight_baseline
-False,baseline_optimiser,"('drl_did_not_improve_oos_net_sharpe', 'oos_active_return_not_statistically_positive', 'all_ppo_seeds_failed_validation_guard')",0.0,1.0
+False,baseline_optimiser,"('excessive_seed_instability', 'oos_active_return_not_statistically_positive', 'all_ppo_seeds_failed_validation_guard', 'insufficient_prospective_shadow_cycles')",0.0,1.0

@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 import pandas as pd
 
 from src.validation.alignment import HORIZON_MONTHS, align_forecasts_with_outcomes
-from src.validation.binary_calibration import binary_calibration
+from src.validation.binary_calibration import (
+    binary_calibration,
+    chronological_binary_calibration_comparison,
+)
 from src.validation.distribution_calibration import (
     distribution_coverage,
     quantile_crossing_count,
@@ -237,34 +241,86 @@ def _evaluate_forecasts(
         and 'large_drawdown_probability' in twelve_month
     ):
         event = twelve_month['realised_return'].le(-0.20).astype(int)
-        binary_metrics, _ = binary_calibration(
+        comparison, _, split_info = chronological_binary_calibration_comparison(
             twelve_month['large_drawdown_probability'],
             event,
-            bins=int(binary_config.get('calibration_bins', 10)),
-            minimum_observations=int(forecast_config.get('minimum_observations', 30)),
-        )
-        if binary_metrics.get('status') == 'EVALUATED':
-            passed = (
-                float(binary_metrics['brier_score'])
-                <= float(binary_config.get('maximum_brier_score', 0.25))
-                and float(binary_metrics['expected_calibration_error'])
-                <= float(
-                    binary_config.get('maximum_expected_calibration_error', 0.10)
+            twelve_month['as_of_date'],
+            methods=tuple(
+                str(value)
+                for value in binary_config.get(
+                    'methods',
+                    ['raw', 'isotonic', 'platt', 'beta'],
                 )
-            )
-            binary_status = 'PASS' if passed else 'WARNING'
-        else:
-            binary_status = 'NOT_EVALUATED'
-        binary = pd.DataFrame(
-            [
-                {
-                    'event': 'realised_12m_drawdown_below_20pct',
-                    **binary_metrics,
-                    'status': binary_status,
-                    'event_rate': float(event.mean()) if len(event) else np.nan,
-                }
-            ]
+            ),
+            bins=int(binary_config.get('calibration_bins', 10)),
+            holdout_fraction=float(
+                binary_config.get('chronological_holdout_fraction', 0.20)
+            ),
+            validation_fraction=float(
+                binary_config.get('selection_validation_fraction', 0.25)
+            ),
+            embargo_months=int(binary_config.get('embargo_months', 12)),
+            minimum_training_dates=int(
+                binary_config.get('minimum_training_dates', 6)
+            ),
+            minimum_validation_dates=int(
+                binary_config.get('minimum_validation_dates', 6)
+            ),
+            minimum_holdout_dates=int(
+                binary_config.get('minimum_holdout_dates', 6)
+            ),
         )
+        if not comparison.empty:
+            comparison['event'] = 'realised_12m_drawdown_below_20pct'
+            comparison['observation_count'] = comparison['observations'].astype(int)
+            comparison['calibration_selection_status'] = split_info.get('status')
+            comparison['selected_method'] = split_info.get('selected_method')
+            comparison['status'] = np.where(
+                comparison['brier_score'].le(
+                    float(binary_config.get('maximum_brier_score', 0.25))
+                )
+                & comparison['expected_calibration_error'].le(
+                    float(
+                        binary_config.get(
+                            'maximum_expected_calibration_error',
+                            0.10,
+                        )
+                    )
+                ),
+                'PASS',
+                'WARNING',
+            )
+            comparison['selected_locked_holdout'] = (
+                comparison['selected_by_validation'].astype(bool)
+                & comparison['split'].eq('locked_holdout')
+            )
+            comparison['event_rate'] = comparison['event_rate'].astype(float)
+            binary = comparison.sort_values(
+                ['selected_locked_holdout', 'split', 'method'],
+                ascending=[False, True, True],
+                kind='stable',
+            ).reset_index(drop=True)
+        else:
+            binary_metrics, _ = binary_calibration(
+                twelve_month['large_drawdown_probability'],
+                event,
+                bins=int(binary_config.get('calibration_bins', 10)),
+                minimum_observations=int(
+                    forecast_config.get('minimum_observations', 30)
+                ),
+            )
+            binary = pd.DataFrame(
+                [
+                    {
+                        'event': 'realised_12m_drawdown_below_20pct',
+                        **binary_metrics,
+                        'status': 'NOT_EVALUATED',
+                        'event_rate': float(event.mean()) if len(event) else np.nan,
+                        'calibration_selection_status': split_info.get('status'),
+                        'commentary': split_info.get('reason'),
+                    }
+                ]
+            )
 
     regional_rows: list[dict] = []
     if not aligned_all.empty and 'region' in aligned_all:
@@ -524,13 +580,31 @@ def _evaluate_portfolio(
         aggfunc='last',
     )
     baseline = 'equal_weight_eligible'
-    if primary in pivot and baseline in pivot:
-        paired = pivot[[primary, baseline]].dropna()
-        test = paired_mean_test(
-            paired[primary].to_numpy(),
-            paired[baseline].to_numpy(),
+    wolf_strategies = sorted(
+        strategy for strategy in pivot.columns if str(strategy).startswith('wolf_')
+    )
+    comparison_pairs = [
+        (strategy, baseline)
+        for strategy in wolf_strategies
+        if baseline in pivot and strategy != baseline
+    ]
+    if primary in pivot:
+        comparison_pairs.extend(
+            (strategy, primary)
+            for strategy in wolf_strategies
+            if strategy != primary
         )
-        difference = paired[primary] - paired[baseline]
+    comparison_pairs = list(dict.fromkeys(comparison_pairs))
+    significance_rows: list[dict[str, Any]] = []
+    for strategy, comparison_baseline in comparison_pairs:
+        paired = pivot[[strategy, comparison_baseline]].dropna()
+        if paired.empty:
+            continue
+        test = paired_mean_test(
+            paired[strategy].to_numpy(),
+            paired[comparison_baseline].to_numpy(),
+        )
+        difference = paired[strategy] - paired[comparison_baseline]
         lower, upper = block_bootstrap_interval(
             difference.to_numpy(),
             samples=samples,
@@ -548,38 +622,47 @@ def _evaluate_portfolio(
             and float(test['p_value']) < 0.05
             and upper < 0
         )
-        significance_status = (
-            'PASS'
-            if positive_significant
-            else 'WARNING'
-            if float(test['mean_difference']) > 0
-            else 'FAIL'
-            if negative_significant
-            else 'WARNING'
+        significance_rows.append(
+            {
+                'strategy': strategy,
+                'baseline': comparison_baseline,
+                'observations': len(paired),
+                **test,
+                'difference_ci_lower': lower,
+                'difference_ci_upper': upper,
+                'bootstrap_block_size': block_size,
+                'bootstrap_significant': bool(lower > 0 or upper < 0),
+                'status': (
+                    'PASS'
+                    if positive_significant
+                    else 'FAIL'
+                    if negative_significant
+                    else 'WARNING'
+                ),
+            }
         )
-        significance = pd.DataFrame(
-            [
-                {
-                    'strategy': primary,
-                    'baseline': baseline,
-                    'observations': len(paired),
-                    **test,
-                    'difference_ci_lower': lower,
-                    'difference_ci_upper': upper,
-                    'bootstrap_block_size': block_size,
-                    'bootstrap_significant': bool(lower > 0 or upper < 0),
-                    'status': significance_status,
-                }
-            ]
-        )
+    if significance_rows:
+        significance = pd.DataFrame(significance_rows)
     else:
         significance = _status_frame(
             'benchmark_significance',
             'NOT_EVALUATED',
-            'Primary and equal-weight returns were not aligned.',
+            'Wolf strategy and benchmark returns were not aligned.',
         )
     if bool(portfolio_config.get('require_significant_benchmark_outperformance', True)):
-        benchmark_status = str(significance.iloc[0].get('status', 'NOT_EVALUATED'))
+        primary_comparison = (
+            significance.loc[
+                significance['strategy'].eq(primary)
+                & significance['baseline'].eq(baseline)
+            ]
+            if {'strategy', 'baseline'}.issubset(significance.columns)
+            else pd.DataFrame()
+        )
+        benchmark_status = (
+            str(primary_comparison.iloc[0].get('status', 'NOT_EVALUATED'))
+            if not primary_comparison.empty
+            else 'NOT_EVALUATED'
+        )
         if portfolio_status not in {'FAIL', 'NOT_EVALUATED'}:
             if benchmark_status == 'FAIL':
                 portfolio_status = 'FAIL'

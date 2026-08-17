@@ -15,6 +15,7 @@ from src.drl.benchmark import (
     decide_drl_acceptance,
 )
 from src.drl.config import load_drl_config, normalize_drl_config
+from src.drl.challengers import run_regional_challengers
 from src.drl.evaluation import build_backtest_results
 from src.drl.explainability import (
     asset_time_attributions,
@@ -25,13 +26,20 @@ from src.drl.explainability import (
 from src.drl.market_environment import DRLMarketEnvironment
 from src.drl.mock_drl_data import build_temporal_mock_features, read_output
 from src.drl.regime_gating import calculate_regime_agent_weights, calculate_risk_throttle_from_dashboard, risk_throttle_frame
-from src.drl.regional_ppo import build_regional_panel
+from src.drl.regional_ppo import (
+    build_regional_panel,
+    build_regional_split_manifest,
+)
 from src.drl.state_builder import build_drl_state, build_state_schema
 from src.drl.training import chronological_train_validation_test_split, run_seed_training
 from src.drl.trade_list import build_drl_trade_list
+from src.data.config import load_data_config
+from src.data.repository.duckdb_repository import DuckDBRepository
 from src.optimisation.constraints import build_eligibility_mask
+from src.production.shadow_operation import completed_shadow_cycle_count
 from src.reporting.report_writer import write_csv, write_markdown
 from src.utils.config import ensure_output_dir
+from src.utils.env import env_flag
 
 
 def _constraints(config: dict, optimisation_config: dict | None = None) -> dict:
@@ -180,7 +188,7 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             "## Reward",
             "",
-            "The reward is conservative and decomposed. Positive components include Differential Sharpe, net total return, dividend income, regime suitability improvement, diversification improvement and quality exposure. Negative components include CVaR, Expected Shortfall, drawdown, transaction costs, turnover, concentration, dividend-cut risk, liquidity risk, forecast uncertainty, narrative/credit stress and stress-scenario loss.",
+            "The historical regional PPO reward is benchmark-relative and net of costs. It rewards active return over the dated regional benchmark and explicitly penalises transaction costs, turnover, drawdown beyond the configured threshold, realised tail loss, expected CVaR excess and volatility. The live security-level overlay retains the broader decomposed reward used for projection diagnostics.",
             "",
             "Differential Sharpe is updated online from exponentially smoothed first and second moments, keeping the reward focused on risk-adjusted incremental performance rather than raw return alone.",
             "",
@@ -190,7 +198,7 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             "## Algorithms",
             "",
-            "Production mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. It fails closed when historical evidence or the PPO dependency is unavailable. The deterministic fallback remains available only for explicitly configured tests and is labelled `mock_fallback`. SAC and TD3 are inactive research challengers.",
+            "Production research mode trains Stable-Baselines3 PPO policies with continuous regional residual actions, deterministic evaluation and five independent seeds. A ridge contextual bandit and convex residual allocator are evaluated on the same frozen split as lower-variance challengers. The pipeline fails closed when historical evidence or the PPO dependency is unavailable.",
             "",
             "The TCN/GAP encoder is optional and dependency-light. When PyTorch is available, it supports causal dilated convolutions, residual blocks, Global Average Pooling, cross-asset layers and a cash logit. It is not a hard dependency.",
             "",
@@ -211,19 +219,20 @@ def build_model_card(config: dict, benchmark: pd.DataFrame) -> str:
             "",
             "## Current Limitations",
             "",
-            "- The real regional panel currently contains 59 monthly observations, so the untouched test contains only 12 months.",
-            "- Bloomberg PIT fundamentals and market-cap vintages are being expanded; existing historical portfolio artifacts predate that backfill and must be regenerated before they inherit the new evidence grade.",
+            "- Exact panel dates, hashes, embargoes and locked evaluation dates are written to `drl_split_manifest.csv`.",
+            "- The 2025-06 through 2026-05 OOS window is now a legacy locked record; deployment requires three genuinely prospective monthly shadow cycles beginning after the policy freeze.",
+            "- Bloomberg ingestion is paused. Existing licensed local aggregates remain available, but no new Bloomberg requests are part of this run.",
             "- The action space is regional; security selection remains with the constrained optimiser.",
             "- Current five-seed validation information ratios are negative, so the validation guard retains the baseline optimiser.",
             "- TCN/GAP and CAM paths are interfaces, not yet a fully validated production policy.",
-            "- SAC, TD3, distributional RL and constrained policy optimisation are research extensions.",
+            "- The contextual-bandit and convex-residual challengers also underperform the baseline on the legacy locked OOS period.",
             "- Outputs are research and decision-support artifacts, not trade execution instructions.",
             "",
             "## Future Research",
             "",
             "- full TCN + GAP PPO policy",
             "- robust CAM / Grad-CAM attribution",
-            "- SAC and TD3 challengers",
+            "- additional offline-RL challengers after prospective evidence exists",
             "- distributional reinforcement learning",
             "- constrained policy optimisation",
             "- Lagrangian risk constraints",
@@ -303,7 +312,10 @@ def build_validation_report(seed_results: pd.DataFrame, benchmark: pd.DataFrame)
             "",
             "- `drl_state_schema.csv`",
             "- `drl_training_summary.csv`",
+            "- `drl_split_manifest.csv`",
             "- `drl_seed_results.csv`",
+            "- `drl_simple_challenger_comparison.csv`",
+            "- `drl_simple_challenger_oos_paths.csv`",
             "- `drl_backtest_results.csv`",
             "- `drl_benchmark_comparison.csv`",
             "- `drl_acceptance_decision.csv`",
@@ -318,13 +330,13 @@ def build_validation_report(seed_results: pd.DataFrame, benchmark: pd.DataFrame)
             "",
             "## Current Limitations",
             "",
-            "Production evaluation uses Stable-Baselines3 PPO over a chronological regional panel with train-only scaling, embargoes, validation-only seed selection and an untouched test. The current policy is rejected because validation and OOS active performance do not beat the optimiser. It does not execute trades and does not claim causal validity of input features.",
+            "Production research evaluation uses Stable-Baselines3 PPO over a frozen chronological regional panel with train-only scaling, embargoes and validation-only selection. The June 2025 through May 2026 window is a legacy locked OOS record that has already been observed once, so it is not described as untouched. Deployment evidence must come from the prospective monthly shadow record beginning after the policy freeze. The current policy is rejected because validation and legacy-OOS active performance do not beat the optimiser.",
             "",
             "## Future Research",
             "",
             "- full TCN + GAP PPO policy",
             "- robust CAM / Grad-CAM attribution",
-            "- SAC and TD3 challengers",
+            "- additional low-variance challengers after prospective evidence exists",
             "- distributional reinforcement learning",
             "- constrained policy optimisation",
             "- Lagrangian risk constraints",
@@ -351,6 +363,16 @@ def run_drl_pipeline(
 ) -> dict[str, pd.DataFrame | str]:
     """Run the constrained, regime-gated and explainable DRL allocation overlay."""
     config = normalize_drl_config(drl_config) if drl_config is not None else load_drl_config()
+    if env_flag("USE_MOCK_DATA", False):
+        config = {
+            **config,
+            "mode": "mock",
+            "allow_mock_fallback": True,
+            "ppo": {
+                **config.get("ppo", {}),
+                "use_stable_baselines": False,
+            },
+        }
     out = Path(output_dir) if output_dir else ensure_output_dir()
     frames = _load_inputs(out, input_frames)
     baseline = choose_baseline_portfolio(frames, out)
@@ -395,6 +417,27 @@ def run_drl_pipeline(
     gate_weights = calculate_regime_agent_weights(frames.get("regime_dashboard_summary", pd.DataFrame()))
     throttle = calculate_risk_throttle_from_dashboard(frames.get("regime_dashboard_summary", pd.DataFrame()))
     effective_config = config.copy()
+    required_shadow_cycles = int(
+        effective_config.get("required_prospective_shadow_cycles", 0)
+    )
+    if required_shadow_cycles > 0:
+        try:
+            repository = DuckDBRepository(
+                load_data_config().duckdb_path,
+                read_only=True,
+            )
+            observed_shadow_cycles = completed_shadow_cycle_count(
+                repository,
+                effective_config.get("prospective_holdout_start"),
+            )
+            effective_config["prospective_shadow_cycles_completed"] = max(
+                int(effective_config.get("prospective_shadow_cycles_completed", 0)),
+                observed_shadow_cycles,
+            )
+        except Exception:
+            effective_config["prospective_shadow_cycles_completed"] = int(
+                effective_config.get("prospective_shadow_cycles_completed", 0)
+            )
     effective_config["max_adjustment"] = constraints["max_delta_weight"]
     effective_config["cash_weight"] = max(
         float(config.get("cash_weight", 0.02)),
@@ -428,6 +471,20 @@ def run_drl_pipeline(
         effective_config.get("ppo", {}).get("use_stable_baselines", False)
     ):
         historical_panel = build_regional_panel(out)
+    split_manifest = (
+        build_regional_split_manifest(historical_panel, effective_config)
+        if not historical_panel.empty
+        else pd.DataFrame()
+    )
+    challenger_comparison, challenger_paths = (
+        run_regional_challengers(
+            historical_panel,
+            constraints,
+            effective_config,
+        )
+        if not historical_panel.empty
+        else (pd.DataFrame(), pd.DataFrame())
+    )
     seed_results, actions, reward_rows, oos_paths = run_seed_training(
         baseline,
         baseline_weights,
@@ -602,6 +659,9 @@ def run_drl_pipeline(
     outputs: dict[str, pd.DataFrame | str] = {
         "drl_state_schema": state_schema,
         "drl_training_summary": training_summary,
+        "drl_split_manifest": split_manifest,
+        "drl_simple_challenger_comparison": challenger_comparison,
+        "drl_simple_challenger_oos_paths": challenger_paths,
         "drl_seed_results": seed_evaluation,
         "drl_oos_monthly_results": oos_paths,
         "drl_backtest_results": backtest,

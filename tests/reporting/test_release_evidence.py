@@ -1,7 +1,20 @@
 import pandas as pd
 import pytest
 
-from src.reporting.release_evidence import build_universe_summary
+from src.reporting.release_evidence import (
+    _normalise_text_whitespace,
+    build_universe_summary,
+)
+from src.utils.config import ROOT
+
+
+def test_release_text_paths_are_portable(tmp_path):
+    report = tmp_path / 'report.md'
+    report.write_text(f'Source: {ROOT / "reports" / "outputs"}\n', encoding='utf-8')
+
+    _normalise_text_whitespace(tmp_path)
+
+    assert report.read_text(encoding='utf-8') == 'Source: .\\reports\\outputs\n'
 
 
 def test_build_universe_summary_counts_active_and_delisted_by_region():

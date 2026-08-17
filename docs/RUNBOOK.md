@@ -26,6 +26,10 @@ external quota interruption; local modelling continues and the provider group is
 retried after its cooldown. Review
 `reports/outputs/overnight/overnight_execution_report.md` for exact step evidence.
 
+To pause new Bloomberg requests without deleting local licensed evidence, set
+`BLOOMBERG_DESKTOP_ENABLED=false` and list `bloomberg` under
+`overnight.disabled_resource_groups`. Coverage-only reporting remains available.
+
 Run the complete 1997-present portfolio-output backtest:
 
 ```powershell
@@ -61,7 +65,7 @@ python scripts/compare_legacy_vs_duckdb.py
 python scripts/export_duckdb_to_parquet.py
 ```
 
-Extend annual filing history for the 60-month reconstructed walk-forward:
+Extend observed annual-filing evidence for the reconstructed walk-forward:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\run_historical_fundamentals_backfill.py --coverage-only
@@ -148,7 +152,43 @@ python scripts/run_drl_explainability.py
 python scripts/run_drl_pipeline.py
 ```
 
-The DRL scripts run in mock mode unless `configs/drl.yaml` is changed. They load the selected optimiser baseline, construct point-in-time states, validate state dimensions and eligibility masks, run the market environment smoke test, train PPO or deterministic mock fallback, run walk-forward and multi-seed backtests, apply regime gating and the Wolf Chaos throttle, project actions through hard constraints, compare benchmarks, run ablations, generate explanations, build the DRL trade list and save the acceptance decision.
+The tracked configuration runs historical walk-forward mode. It uses the hashed
+60-month train, 14-month validation, two-month embargo and 12-month legacy OOS
+split, then compares five PPO seeds with a contextual bandit and convex residual
+allocator. Explicit `USE_MOCK_DATA=true` or `DRL_MOCK_MODE=true` is required for
+mock fallback. The prospective shadow record, not the already-inspected legacy
+OOS window, is the next deployment evidence.
+
+Run the supervised equity-alpha challengers against the cached observed
+walk-forward panel and realised outcomes:
+
+```powershell
+python -m pip install -e ".[ml]"
+.\.venv\Scripts\python.exe scripts\run_supervised_alpha.py
+.\.venv\Scripts\python.exe scripts\freeze_supervised_alpha.py --effective-date 2026-08-31
+```
+
+Use `--force-feature-panel` or `--force-outcomes` only when the corresponding
+observed cache must be rebuilt. Validation model predictions are checkpointed
+by horizon under `data/interim/supervised_alpha_checkpoints/`; compatible runs
+resume without repeating the full grid. `--seal-existing` regenerates reports,
+plots, governed portfolio outputs and checksums without refitting. Outputs are
+under `reports/outputs/supervised_alpha/`. Confirm `acceptance_decision.csv`
+before using any prediction: the current reconstructed and already-inspected
+evidence correctly produces a zero deployment blend. Freeze only after the
+final checksummed run. The freeze is idempotent for an unchanged model and
+fails closed if any model, source, config or evidence file changes. At the
+3-month primary horizon, the first prospective outcome is due November 30,
+2026; 12 non-overlapping cohorts cannot be complete before August 31, 2029.
+
+Refresh the low-latency regional-alpha challenger and record or evaluate a
+monthly shadow cycle:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_regional_alpha_optimisation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py --evaluate-only
+```
 
 Validate Alpaca credentials:
 

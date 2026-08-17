@@ -397,6 +397,7 @@ def run_pipeline_from_inputs(
         "optimised_portfolio_risk_parity.csv": optimisation_outputs["optimised_portfolio_risk_parity"],
         "optimised_portfolio_mean_variance.csv": optimisation_outputs["optimised_portfolio_mean_variance"],
         "optimised_portfolio_cvar_constrained.csv": optimisation_outputs["optimised_portfolio_cvar_constrained"],
+        "optimised_portfolio_regional_alpha.csv": optimisation_outputs["optimised_portfolio_regional_alpha"],
         "optimised_portfolio_dividend_income.csv": optimisation_outputs["optimised_portfolio_dividend_income"],
         "optimised_portfolio_regime_aware.csv": optimisation_outputs["optimised_portfolio_regime_aware"],
         "portfolio_trade_list.csv": optimisation_outputs["portfolio_trade_list"],

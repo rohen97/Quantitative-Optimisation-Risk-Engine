@@ -12,9 +12,47 @@ from src.validation.walk_forward import (
     _fundamental_snapshot,
     _risk_rows,
     build_realised_outcomes,
+    historical_universe_snapshot,
     load_walk_forward_config,
     reconstruct_statement_availability,
 )
+
+
+def test_historical_universe_includes_inactive_name_only_before_dated_delisting():
+    universe = pd.DataFrame(
+        {
+            'security_id': ['LIVE', 'OLD', 'UNDATED'],
+            'listing_status': ['Active', 'Inactive', 'Inactive'],
+            'current_listing_status': ['Active', 'Inactive', 'Inactive'],
+            'delisting_date': [pd.NaT, pd.Timestamp('2024-06-15'), pd.NaT],
+        }
+    )
+    events = pd.DataFrame(
+        {
+            'security_id': ['OLD'],
+            'event_type': ['delisted'],
+            'effective_from': [pd.Timestamp('2024-06-15')],
+            'effective_to': [pd.NaT],
+            'index_symbol': [pd.NA],
+        }
+    )
+
+    before = historical_universe_snapshot(
+        universe,
+        events,
+        pd.Timestamp('2024-05-31'),
+    )
+    after = historical_universe_snapshot(
+        universe,
+        events,
+        pd.Timestamp('2024-06-30'),
+    )
+
+    assert set(before['security_id']) == {'LIVE', 'OLD'}
+    assert set(after['security_id']) == {'LIVE'}
+    assert before.set_index('security_id').loc['OLD', 'listing_status_basis'] == (
+        'dated_delisting_after_decision'
+    )
 
 
 def test_yahoo_retrieval_date_is_reconstructed_with_reporting_lag():

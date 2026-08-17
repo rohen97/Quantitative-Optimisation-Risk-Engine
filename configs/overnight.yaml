@@ -1,5 +1,6 @@
 overnight:
   max_hours: 12
+  disabled_resource_groups: [bloomberg]
   checkpoint_path: data/locks/overnight_checkpoint.json
   output_directory: reports/outputs/overnight
   log_directory: reports/logs/overnight

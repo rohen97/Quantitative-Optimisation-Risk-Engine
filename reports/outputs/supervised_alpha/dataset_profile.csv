@@ -1,0 +1,5 @@
+horizon_months,rows,securities,decision_dates,start_date,end_date,latest_target_date,minimum_outcome_cross_section_coverage,median_outcome_cross_section_coverage,evidence_modes,numeric_features,categorical_features
+3,77895,1374,88,2019-01-31,2026-04-30,2026-07-30,0.9902694610778444,1.0,reconstructed_pit_proxy,67,4
+6,72509,1371,84,2019-01-31,2025-12-31,2026-06-30,1.0,1.0,reconstructed_pit_proxy,67,4
+9,68449,1366,81,2019-01-31,2025-09-30,2026-06-30,1.0,1.0,reconstructed_pit_proxy,67,4
+12,64404,1361,78,2019-01-31,2025-06-30,2026-06-30,1.0,1.0,reconstructed_pit_proxy,67,4

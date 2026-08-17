@@ -528,7 +528,17 @@ def run_overnight_plan(
     max_hours: float | None = None,
 ) -> int:
     settings = dict(config.get('overnight', config))
-    steps = [OvernightStep.from_mapping(item) for item in settings.get('steps', [])]
+    disabled_resource_groups = {
+        str(value).strip()
+        for value in settings.get('disabled_resource_groups', [])
+        if str(value).strip()
+    }
+    steps = [
+        OvernightStep.from_mapping(item)
+        for item in settings.get('steps', [])
+        if str(item.get('resource_group', '')).strip()
+        not in disabled_resource_groups
+    ]
     if not steps:
         raise ValueError('Overnight plan contains no steps.')
     configured_hours = float(settings.get('max_hours', 12))

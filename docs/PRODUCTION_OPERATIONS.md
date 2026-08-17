@@ -27,6 +27,38 @@ python scripts/run_monthly_production.py
 python scripts/run_release_candidate.py
 ```
 
+## Shadow Operation
+
+Monthly and release-candidate runs record an immutable, pre-outcome decision
+cycle after the pipeline succeeds. The record includes selected, classical,
+regional-alpha, DRL, equal-weight and cap-weight challengers when their outputs
+are available. Decision prices are frozen at record time; results are evaluated
+only after the one-month due date.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_regional_alpha_optimisation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py
+.\.venv\Scripts\python.exe scripts\run_shadow_operation.py --evaluate-only
+```
+
+Three completed prospective monthly cycles beginning August 31, 2026 are
+required. The August 14 cycle is a pre-freeze rehearsal and does not count.
+Recording a second set of weights for an already-frozen date fails closed. Raw local observations remain
+in ignored DuckDB tables; the tracked report contains aggregate status only.
+
+The supervised-alpha challenger has a separate 3-month evidence clock. Freeze
+the exact checksummed model and report once, before its first prospective
+decision:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\freeze_supervised_alpha.py --effective-date 2026-08-31
+```
+
+Its first outcome is due November 30, 2026. Twelve independent 3-month cohorts
+require decisions spaced three months apart, so the earliest complete evidence
+date is August 31, 2029. Monthly overlapping scores may be monitored but cannot
+shorten this governance clock.
+
 ## Health And Diagnostics
 
 ```bash
@@ -78,6 +110,7 @@ The operations layer:
 - prevents concurrent runs with a production lock
 - preserves failed run outputs
 - records status, manifests and logs
+- records immutable monthly shadow decisions without executing trades
 - performs freshness and drift checks
 - blocks approval on critical health, validation, point-in-time, hard constraint, final-weight, IC report or DRL governance failures
 - never stores secrets in DuckDB, Parquet, manifests or logs

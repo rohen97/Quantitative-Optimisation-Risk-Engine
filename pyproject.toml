@@ -25,6 +25,7 @@ dependencies = [
 
 [project.optional-dependencies]
 bloomberg = ['blpapi>=3.26,<4']
+ml = ['xgboost>=2.1,<4']
 
 [tool.setuptools.packages.find]
 where = ['.']

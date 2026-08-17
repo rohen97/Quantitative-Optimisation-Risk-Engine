@@ -1,0 +1,13 @@
+horizon_months,candidate,family,category,ensemble_weight
+3,huber,huber,linear,0.3333333333333333
+3,extra_trees,extra_trees,tree,0.3333333333333333
+3,xgb_ranker,xgb_ranker,ranker,0.3333333333333333
+6,huber,huber,linear,0.3333333333333333
+6,hist_gradient_boosting__l2_regularization-10p0_learning_rate-0p04_max_iter-160_max_leaf_nodes-15,hist_gradient_boosting,tree,0.3333333333333333
+6,xgb_ranker,xgb_ranker,ranker,0.3333333333333333
+9,elastic_net__alpha-0p001_l1_ratio-0p5,elastic_net,linear,0.3333333333333333
+9,hist_gradient_boosting__l2_regularization-5p0_learning_rate-0p04_max_iter-160_max_leaf_nodes-7,hist_gradient_boosting,tree,0.3333333333333333
+9,xgb_ranker,xgb_ranker,ranker,0.3333333333333333
+12,ridge__alpha-100p0,ridge,linear,0.3333333333333333
+12,random_forest__max_depth-6_max_features-0p7_min_samples_leaf-80_n_estimators-120,random_forest,tree,0.3333333333333333
+12,xgb_ranker,xgb_ranker,ranker,0.3333333333333333

@@ -368,6 +368,10 @@ def decide_drl_acceptance(
         add_reason("test_leakage_detected")
     if bool(cfg.get("historical_validation_guard_triggered", False)):
         add_reason("all_ppo_seeds_failed_validation_guard")
+    required_shadow_cycles = int(cfg.get("required_prospective_shadow_cycles", 0))
+    completed_shadow_cycles = int(cfg.get("prospective_shadow_cycles_completed", 0))
+    if completed_shadow_cycles < required_shadow_cycles:
+        add_reason("insufficient_prospective_shadow_cycles")
     if bool(cfg.get("hard_constraint_violation", False)):
         add_reason("hard_constraint_violation")
     if bool(cfg.get("liquidity_requirement_failed", False)):

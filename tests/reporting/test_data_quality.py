@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 
 from src.reporting.data_quality import (
@@ -12,6 +14,16 @@ def test_data_quality_flags_missing_required_frames():
     quality = build_data_quality_report(ICDataBundle({"final_recommendations": pd.DataFrame({"x": [1]})}))
     assert not report_is_valid(quality)
     assert "missing_or_empty" in set(quality["status"])
+
+
+def test_data_quality_uses_repository_relative_paths():
+    root = Path(__file__).resolve().parents[2]
+    bundle = ICDataBundle(
+        {"final_recommendations": pd.DataFrame({"x": [1]})},
+        source_root=root / "reports" / "outputs",
+    )
+    quality = build_data_quality_report(bundle)
+    assert quality["file_path"].str.startswith("reports/outputs/").all()
 
 
 def test_wolf_chaos_index_is_not_validated_as_probability():

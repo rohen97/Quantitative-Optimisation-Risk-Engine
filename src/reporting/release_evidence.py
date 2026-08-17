@@ -328,6 +328,8 @@ def _normalise_text_whitespace(directory: Path) -> None:
         if not path.is_file() or path.suffix.lower() not in text_suffixes:
             continue
         text = path.read_text(encoding='utf-8')
+        text = text.replace(str(ROOT.resolve()), '.')
+        text = text.replace(ROOT.resolve().as_posix(), '.')
         normalised = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
         path.write_text(normalised, encoding='utf-8')
 
@@ -360,6 +362,11 @@ def _write_release_notes(
     scorecard: pd.DataFrame,
     strategies: pd.DataFrame,
     significance: pd.DataFrame,
+    calibration: pd.DataFrame,
+    drl_seeds: pd.DataFrame,
+    drl_challengers: pd.DataFrame,
+    drl_acceptance: pd.DataFrame,
+    shadow_status: dict[str, object],
     final_portfolio_count: int,
     pit_coverage: dict[str, object],
     production_pit: pd.DataFrame,
@@ -368,11 +375,73 @@ def _write_release_notes(
     equal_weight = strategies.loc[
         strategies['strategy'].eq('equal_weight_eligible')
     ].iloc[0]
+    regional_alpha = strategies.loc[
+        strategies['strategy'].eq('wolf_regional_alpha')
+    ].iloc[0]
     paired = significance.loc[
         significance.get('strategy', pd.Series(dtype=str)).eq('wolf_cvar')
     ]
     paired_p_value = (
         float(paired.iloc[0]['p_value']) if not paired.empty else float('nan')
+    )
+    regional_vs_wolf = significance.loc[
+        significance.get('strategy', pd.Series(dtype=str)).eq('wolf_regional_alpha')
+        & significance.get('baseline', pd.Series(dtype=str)).eq('wolf_cvar')
+    ]
+    regional_p_value = (
+        float(regional_vs_wolf.iloc[0]['p_value'])
+        if not regional_vs_wolf.empty
+        else float('nan')
+    )
+    selected_calibration = calibration.loc[
+        calibration.get('split', pd.Series(dtype=str)).eq('locked_holdout')
+        & calibration.get('selected_locked_holdout', pd.Series(dtype=bool)).fillna(False).astype(bool)
+    ]
+    calibration_method = (
+        str(selected_calibration.iloc[0]['method'])
+        if not selected_calibration.empty
+        else 'not evaluated'
+    )
+    calibration_ece = (
+        float(selected_calibration.iloc[0]['expected_calibration_error'])
+        if not selected_calibration.empty
+        else float('nan')
+    )
+    mean_seed = drl_seeds.loc[drl_seeds.get('row_type', '').eq('mean')]
+    mean_drl_ir = (
+        float(mean_seed.iloc[0]['information_ratio'])
+        if not mean_seed.empty
+        else float('nan')
+    )
+    selected_simple_oos = drl_challengers.loc[
+        drl_challengers.get('split', pd.Series(dtype=str)).eq('legacy_locked_oos')
+        & drl_challengers.get(
+            'selected_challenger_by_validation', pd.Series(dtype=bool)
+        ).fillna(False).astype(bool)
+    ]
+    best_simple_name = (
+        str(selected_simple_oos.iloc[0]['algorithm'])
+        if not selected_simple_oos.empty
+        else 'not evaluated'
+    )
+    best_simple_ir = (
+        float(selected_simple_oos.iloc[0]['information_ratio'])
+        if not selected_simple_oos.empty
+        else float('nan')
+    )
+    drl_selected_source = (
+        str(drl_acceptance.iloc[0]['selected_weights_source'])
+        if not drl_acceptance.empty
+        else 'unavailable'
+    )
+    required_shadow_cycles = int(
+        shadow_status.get('required_prospective_cycles', 3)
+    )
+    shadow_start_raw = shadow_status.get('prospective_start_date')
+    shadow_start = (
+        pd.Timestamp(shadow_start_raw).date().isoformat()
+        if shadow_start_raw is not None
+        else 'after the policy freeze'
     )
     profile = walk_manifest['artifact_profile']
     overall = universe_summary.loc[universe_summary['region'].eq('ALL')].iloc[0]
@@ -425,6 +494,9 @@ def _write_release_notes(
         f'- Active universe: **{int(overall.active):,}** of **{int(overall.total):,}** listed and historical securities',
         f'- Walk-forward evidence: **{forecast_rows:,}** forecasts and **{outcome_rows:,}** aligned outcomes',
         f'- Portfolio: **{portfolio_months}** monthly decisions, **{float(wolf.annualised_return):.1%}** annualised net return, **{float(wolf.sharpe):.2f}** Sharpe',
+        f'- Regional-alpha challenger: **{float(regional_alpha.annualised_return):.1%}** annualised net return, **{float(regional_alpha.sharpe):.2f}** Sharpe',
+        f'- Drawdown calibration: **{calibration_method}**, locked-holdout ECE **{calibration_ece:.2%}**',
+        f'- DRL selected source: **{drl_selected_source}**; completed prospective shadow cycles: **{int(shadow_status.get("completed_prospective_cycles", 0))}/{required_shadow_cycles}**',
         '',
         (
             'The result is capped at conditional approval because filing availability '
@@ -483,6 +555,31 @@ def _write_release_notes(
         '',
         '![Portfolio comparison](plots/portfolio_comparison.png)',
         '',
+        '## Classical Challenger',
+        '',
+        (
+            f'The regional benchmark-relative, cost-aware strategy returned '
+            f'{float(regional_alpha.annualised_return):.2%} annually versus '
+            f'{float(wolf.annualised_return):.2%} for Wolf CVaR and '
+            f'{float(equal_weight.annualised_return):.2%} for equal weight. Its '
+            f'Sharpe was {float(regional_alpha.sharpe):.2f}, but the monthly '
+            f'improvement over Wolf was not statistically established '
+            f'(paired p-value {regional_p_value:.3f}). It remains a shadow challenger.'
+        ),
+        '',
+        '## Calibration, DRL And Shadow',
+        '',
+        (
+            f'Train-only {calibration_method} calibration achieved '
+            f'{calibration_ece:.2%} ECE on the locked drawdown holdout. PPO mean '
+            f'legacy-OOS information ratio was {mean_drl_ir:.2f}; the '
+            f'validation-selected simple challenger ({best_simple_name}) also '
+            f'remained negative at {best_simple_ir:.2f}. The baseline therefore '
+            'keeps 100% weight. A pre-freeze rehearsal cycle is frozen; genuinely '
+            f'prospective decisions begin {shadow_start}. '
+            'Three completed monthly outcomes are required before reconsideration.'
+        ),
+        '',
         '![VaR backtest](plots/risk_backtest.png)',
         '',
         '![Final exposures](plots/final_portfolio_exposures.png)',
@@ -500,6 +597,7 @@ def _write_release_notes(
         ),
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
         '- `walk_forward_manifest.json`: source profile, chronology checks, limitations, and evidence counts.',
+        '- `research/`: frozen DRL split, PPO seeds, simple challengers, regional-alpha portfolio, skipped PIT anchors and shadow-operation status.',
         '- `bloomberg_pit_coverage.csv`: aggregate licensed-data coverage only; no Bloomberg observations.',
         '- `production_pit_coverage.md`: data-vintage semantics and measured production gaps.',
         '- `manifest.json`: SHA-256 checksum and byte size for every release artifact.',
@@ -532,6 +630,20 @@ def build_release_evidence(
     _copy_directory(ic_source, output / 'investment_committee')
     _copy_file(walk_source / 'walk_forward_manifest.json', output / 'walk_forward_manifest.json')
     _copy_file(outputs / 'final_portfolio_weights.csv', output / 'final_portfolio_weights.csv')
+    research = output / 'research'
+    for name in (
+        'drl_acceptance_decision.csv',
+        'drl_seed_results.csv',
+        'drl_simple_challenger_comparison.csv',
+        'drl_split_manifest.csv',
+        'optimised_portfolio_regional_alpha.csv',
+    ):
+        _copy_file(outputs / name, research / name)
+    _copy_file(
+        walk_source / 'walk_forward_skipped_anchors.parquet',
+        research / 'walk_forward_skipped_anchors.parquet',
+    )
+    _copy_directory(outputs / 'shadow_operation', research / 'shadow_operation')
     enrichment = outputs / 'free_data_enrichment_status.json'
     if enrichment.exists():
         _copy_file(enrichment, output / 'free_data_enrichment_status.json')
@@ -567,6 +679,17 @@ def build_release_evidence(
     significance = _read_csv(
         validation_source / 'benchmark_significance_report.csv'
     )
+    calibration = _read_csv(
+        validation_source / 'binary_probability_calibration.csv'
+    )
+    drl_seeds = _read_csv(outputs / 'drl_seed_results.csv')
+    drl_challengers = _read_csv(outputs / 'drl_simple_challenger_comparison.csv')
+    drl_acceptance = _read_csv(outputs / 'drl_acceptance_decision.csv')
+    shadow_status = json.loads(
+        (outputs / 'shadow_operation' / 'shadow_operation_status.json').read_text(
+            encoding='utf-8-sig'
+        )
+    )
     regional = _read_csv(validation_source / 'regional_performance_report.csv')
     returns = pd.read_parquet(walk_source / 'historical_portfolio_returns.parquet')
     portfolio = _read_csv(outputs / 'final_portfolio_weights.csv')
@@ -588,6 +711,11 @@ def build_release_evidence(
         scorecard,
         strategies,
         significance,
+        calibration,
+        drl_seeds,
+        drl_challengers,
+        drl_acceptance,
+        shadow_status,
         int(len(portfolio)),
         pit_evidence,
         production_pit,

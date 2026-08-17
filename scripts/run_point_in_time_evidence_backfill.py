@@ -40,6 +40,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--end-year", type=int, default=datetime.now(UTC).year)
     parser.add_argument("--max-us-symbols", type=int, default=100)
     parser.add_argument(
+        "--listing-status",
+        nargs="+",
+        default=["Active", "Inactive"],
+        help="Security-master statuses eligible for filing backfill.",
+    )
+    parser.add_argument(
         "--symbols",
         nargs="*",
         default=[],
@@ -74,6 +80,7 @@ def _candidates(
     repository: DuckDBRepository,
     maximum: int,
     symbols: list[str] | None = None,
+    listing_statuses: list[str] | None = None,
 ) -> pd.DataFrame:
     frame = repository.query(
         """
@@ -97,10 +104,22 @@ def _candidates(
         LEFT JOIN identifiers i USING (security_id)
         WHERE s.region = 'US'
           AND s.instrument_type = 'Equity'
-          AND s.listing_status = 'Active'
         ORDER BY s.security_id
         """
     )
+    accepted_statuses = {
+        str(value).strip().casefold()
+        for value in (listing_statuses or ["Active", "Inactive"])
+        if str(value).strip()
+    }
+    if accepted_statuses:
+        status = repository.query(
+            "SELECT security_id, listing_status FROM securities WHERE region = 'US'"
+        )
+        frame = frame.merge(status, on="security_id", how="left")
+        frame = frame.loc[
+            frame["listing_status"].astype(str).str.casefold().isin(accepted_statuses)
+        ].drop(columns="listing_status")
     if symbols:
         requested = {str(symbol).strip().upper() for symbol in symbols}
         frame = frame.loc[frame['ticker'].astype(str).str.upper().isin(requested)]
@@ -161,7 +180,12 @@ def main() -> int:
     )
     run_id = str(uuid4())
     retrieved_at = pd.Timestamp(started_at).tz_localize(None)
-    candidates = _candidates(repository, args.max_us_symbols, args.symbols)
+    candidates = _candidates(
+        repository,
+        args.max_us_symbols,
+        args.symbols,
+        args.listing_status,
+    )
 
     if "beam" in args.sources:
         client = BeamSecMetadataClient(http)

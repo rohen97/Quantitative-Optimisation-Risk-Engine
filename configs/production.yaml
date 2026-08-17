@@ -99,6 +99,16 @@ production:
     maximum_regime_probability_change_warning: 0.30
     baseline_refresh_requires_approval: true
 
+  shadow_operation:
+    enabled: true
+    monthly_only: true
+    required_prospective_cycles: 3
+    prospective_start_date: 2026-08-31
+    maximum_recording_lag_days: 7
+    price_tolerance_days: 14
+    minimum_valid_weight: 0.90
+    transaction_cost_bps: 17.5
+
   approval:
     daily_requires_smoke_validation_pass: true
     weekly_requires_standard_validation_pass: true
