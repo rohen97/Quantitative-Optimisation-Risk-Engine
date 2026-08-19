@@ -346,9 +346,15 @@ def _normalise_text_whitespace(directory: Path) -> None:
         if not path.is_file() or path.suffix.lower() not in text_suffixes:
             continue
         text = path.read_text(encoding='utf-8')
-        text = text.replace(str(ROOT.resolve()), '.')
-        text = text.replace(ROOT.resolve().as_posix(), '.')
-        normalised = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
+        roots = (str(ROOT.resolve()), ROOT.resolve().as_posix())
+        lines: list[str] = []
+        for line in text.splitlines():
+            if any(root in line for root in roots):
+                for root in roots:
+                    line = line.replace(root, '.')
+                line = line.replace('\\', '/')
+            lines.append(line.rstrip())
+        normalised = '\n'.join(lines) + '\n'
         path.write_text(normalised, encoding='utf-8')
 
 

@@ -53,7 +53,9 @@ def test_akshare_adapter_normalises_china_and_hk_bars():
         ["700.HK", "000001.SZ", "AAPL"],
         end="2026-01-31",
     )
-    assert module.calls == [("a_share", "000001"), ("hk", "00700")]
+    assert sorted(module.calls) == sorted(
+        [("a_share", "000001"), ("hk", "00700")]
+    )
     assert set(frame["ticker"]) == {"000001.SZ", "700.HK"}
     assert frame["volume"].eq(12345).all()
     assert frame["source"].eq("akshare").all()

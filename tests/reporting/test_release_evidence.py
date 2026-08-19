@@ -16,7 +16,7 @@ def test_release_text_paths_are_portable(tmp_path):
 
     _normalise_text_whitespace(tmp_path)
 
-    assert report.read_text(encoding='utf-8') == 'Source: .\\reports\\outputs\n'
+    assert report.read_text(encoding='utf-8') == 'Source: ./reports/outputs\n'
 
 
 def test_build_universe_summary_counts_active_and_delisted_by_region():

@@ -1,13 +1,13 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-08-19T07:34:33.310701+00:00",
+  "generated_at_utc": "2026-08-19T08:37:41.007336+00:00",
   "as_of_date": "19 August 2026",
   "approval_status": "CONDITIONALLY_APPROVED",
   "governance_score": 75.0,
   "slide_count": 23,
   "presentation": {
     "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx",
-    "sha256": "efb9016adf3ad71e5d2a3699e7dc19f379a5d22b9da93e05c93248e19132f0fc",
+    "sha256": "aeccaf313e009dab5dfcda2da3715e722a12453d298742721d2084beca0f91ba",
     "bytes": 1266647
   },
   "report": {
@@ -123,8 +123,8 @@
       "sha256": "a1e7538bcbded4a73668375b4f28bc437aec29ceb171402073e25d59e4b38f4d"
     },
     {
-      "path": "reports/outputs/validation/drl_long_history_manifest.json",
-      "sha256": "4e2d252aca4799cd364af71554e5828bbfe72fb934ab9d8c6d5c238ce1e0bcea"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/public_data/drl_long_history_manifest.json",
+      "sha256": "1feb81a5ab20c4c35beef5e15a082aac085e4c309faede2f6af825ba3f8da392"
     },
     {
       "path": "reports/outputs/shadow_operation/shadow_operation_status.json",
@@ -175,7 +175,7 @@
   ],
   "rendered_pdf": {
     "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-19.pdf",
-    "sha256": "a030af5e6b251ff754d0886496b72eadf8051a67579515aa05d6420089988c5a",
+    "sha256": "c2e2513c5acda96fdf9c867df36bdb0186d3d75207648ae51ada8664cfd04112",
     "bytes": 1290312
   },
   "rendering": {

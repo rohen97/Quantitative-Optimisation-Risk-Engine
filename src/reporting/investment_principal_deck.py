@@ -213,7 +213,7 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         outputs_root / 'drl_simple_challenger_comparison.csv',
         outputs_root / 'drl_training_summary.csv',
         outputs_root / 'drl_split_manifest.csv',
-        outputs_root / 'validation/drl_long_history_manifest.json',
+        release_root / 'public_data/drl_long_history_manifest.json',
         outputs_root / 'shadow_operation/shadow_operation_status.json',
     ]
     _require_files(required)
@@ -387,7 +387,7 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
             outputs_root / 'drl_split_manifest.csv'
         ),
         drl_long_history=_read_json(
-            outputs_root / 'validation/drl_long_history_manifest.json'
+            release_root / 'public_data/drl_long_history_manifest.json'
         ),
         shadow_status=_read_json(
             outputs_root / 'shadow_operation/shadow_operation_status.json'
@@ -3765,7 +3765,7 @@ def build_investment_principal_deck(
         evidence.outputs_root / 'drl_simple_challenger_comparison.csv',
         evidence.outputs_root / 'drl_training_summary.csv',
         evidence.outputs_root / 'drl_split_manifest.csv',
-        evidence.outputs_root / 'validation/drl_long_history_manifest.json',
+        evidence.release_root / 'public_data/drl_long_history_manifest.json',
         evidence.outputs_root
         / 'shadow_operation/shadow_operation_status.json',
         evidence.backtest_root / 'run_manifest.json',
