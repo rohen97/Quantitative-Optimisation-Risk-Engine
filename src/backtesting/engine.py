@@ -9,7 +9,10 @@ from src.backtesting.models import MarketDataBundle, PortfolioSpec, ReplayResult
 def _monthly_prices(prices: pd.DataFrame) -> pd.DataFrame:
     if prices.empty:
         return prices.copy()
-    return prices.sort_index().resample('ME').last()
+    monthly = prices.sort_index().resample('ME').last()
+    observed = monthly.notna()
+    has_later_observation = observed.iloc[::-1].cummax().iloc[::-1]
+    return monthly.ffill().where(has_later_observation)
 
 
 def _monthly_dollar_volume(volume: pd.DataFrame) -> pd.DataFrame:

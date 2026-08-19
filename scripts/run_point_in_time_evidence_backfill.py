@@ -21,6 +21,7 @@ from src.data_ingestion.point_in_time_sources import (
     BeamSecMetadataClient,
     EodhdReferenceHistoryClient,
     NasdaqMergentClient,
+    SecCompanyFactsClient,
     SecSubmissionsClient,
     point_in_time_coverage,
 )
@@ -217,8 +218,13 @@ def main() -> int:
 
     if "sec" in args.sources:
         client = SecSubmissionsClient(http)
+        facts_client = SecCompanyFactsClient(http)
         frames = []
         failed = 0
+        fact_failures = 0
+        facts_seen = 0
+        fundamental_vintages_written = 0
+        fundamentals_written = 0
         ticker_map_available = False
         ticker_ciks: dict[str, str] = {}
         try:
@@ -226,6 +232,7 @@ def main() -> int:
             ticker_map_available = True
         except DataSourceRequestError as exc:
             failed = len(candidates)
+            fact_failures = len(candidates)
             LOGGER.warning("SEC ticker map failed: %s", exc)
         for row in candidates.itertuples(index=False) if ticker_map_available else ():
             ticker = str(row.ticker).strip().upper()
@@ -233,6 +240,7 @@ def main() -> int:
             if not cik:
                 failed += 1
                 continue
+            frame = pd.DataFrame()
             try:
                 frame = client.filings(
                     str(row.security_id),
@@ -247,6 +255,41 @@ def main() -> int:
             except (DataSourceRequestError, ValueError) as exc:
                 failed += 1
                 LOGGER.warning("SEC submissions failed for %s: %s", ticker, exc)
+            acceptance_by_accession = (
+                frame.dropna(subset=["acceptance_datetime"])
+                .set_index("accession_number")["acceptance_datetime"]
+                .to_dict()
+                if not frame.empty
+                else {}
+            )
+            try:
+                facts = facts_client.fundamentals(
+                    str(row.security_id),
+                    cik,
+                    start_date=date(args.start_year, 1, 1),
+                    end_date=date(args.end_year, 12, 31),
+                    retrieved_at=retrieved_at,
+                    ingestion_run_id=run_id,
+                    acceptance_by_accession=acceptance_by_accession,
+                )
+                facts_seen += facts.facts_seen
+                if not facts.fundamental_vintages.empty:
+                    repository.write_table(
+                        "fundamental_vintages",
+                        facts.fundamental_vintages,
+                        SCHEMAS["fundamental_vintages"].primary_key,
+                    )
+                    fundamental_vintages_written += len(facts.fundamental_vintages)
+                if not facts.fundamentals_reported.empty:
+                    repository.write_table(
+                        "fundamentals_reported",
+                        facts.fundamentals_reported,
+                        SCHEMAS["fundamentals_reported"].primary_key,
+                    )
+                    fundamentals_written += len(facts.fundamentals_reported)
+            except (DataSourceRequestError, ValueError) as exc:
+                fact_failures += 1
+                LOGGER.warning("SEC companyfacts failed for %s: %s", ticker, exc)
             time.sleep(max(args.request_sleep_seconds, 0.0))
         combined = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
         if not combined.empty:
@@ -254,9 +297,23 @@ def main() -> int:
                 "filing_metadata", combined, SCHEMAS["filing_metadata"].primary_key
             )
         status["sec"] = {
-            "rows": len(combined),
-            "failed_symbols": failed,
+            "filing_rows": len(combined),
+            "companyfacts_seen": facts_seen,
+            "fundamental_vintage_rows": fundamental_vintages_written,
+            "fundamentals_reported_rows": fundamentals_written,
+            "filing_failed_symbols": failed,
+            "companyfacts_failed_symbols": fact_failures,
             "ticker_map_available": ticker_map_available,
+            "source_status": (
+                "completed"
+                if ticker_map_available
+                and (
+                    candidates.empty
+                    or len(combined) > 0
+                    or fundamentals_written > 0
+                )
+                else "blocked"
+            ),
         }
 
     if "nasdaq" in args.sources:
@@ -335,7 +392,13 @@ def main() -> int:
         status["eodhd"] = {"rows": len(combined), "failed_requests": failed}
 
     _write_report(repository, report_path, source_status=status, started_at=started_at)
-    return 0
+    blocked = [
+        source
+        for source in args.sources
+        if isinstance(status.get(source), dict)
+        and status[source].get("source_status") in {"blocked", "failed"}
+    ]
+    return 2 if blocked else 0
 
 
 if __name__ == "__main__":

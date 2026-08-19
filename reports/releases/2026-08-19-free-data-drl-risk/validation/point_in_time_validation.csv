@@ -1,0 +1,12 @@
+check_name,status,failures,commentary,metric_value,threshold
+decision_date_parseable,PASS,0,,,
+observed_filing_acceptance_coverage,WARNING,0,Observed regulator acceptance timestamps by fundamental security.,0.0,0.8
+historical_membership_evidence,WARNING,0,Dated index or universe membership events.,0.0,1.0
+delisting_evidence,PASS,0,Archived delisting events used to measure survivorship coverage.,59183.0,1.0
+inactive_security_price_coverage,WARNING,0,Inactive securities with archived price history.,0.0,0.5
+historical_volume_coverage,WARNING,0,Priced securities with observed historical volume.,0.1541728681889135,0.8
+walk_forward_future_fundamental_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,
+walk_forward_future_price_feature_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,
+walk_forward_hard_constraint_breaches,PASS,0,Reconstructed walk-forward chronology invariant.,,
+walk_forward_outcomes_before_target_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,
+walk_forward_selected_on_or_after_delisting_rows,PASS,0,Reconstructed walk-forward chronology invariant.,,

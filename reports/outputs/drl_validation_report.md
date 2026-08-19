@@ -29,7 +29,7 @@ The environment supports reset/step semantics, chronological progression, daily 
 
 Seeds tested: 11, 23, 37, 53, 71
 Number of seeds: 5
-Seed stability acceptable: True
+Seed stability acceptable: False
 Training split: chronological with no random train/test split.
 Validation occurs before test and model selection uses validation only.
 A rebalance-period embargo is applied between windows.

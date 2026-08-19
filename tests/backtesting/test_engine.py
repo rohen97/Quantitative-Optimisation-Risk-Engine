@@ -3,7 +3,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from src.backtesting.engine import _liquidity_constrained_target, replay_portfolio
+from src.backtesting.engine import (
+    _liquidity_constrained_target,
+    _monthly_prices,
+    replay_portfolio,
+)
 from src.backtesting.models import MarketDataBundle, PortfolioSpec
 
 
@@ -97,6 +101,26 @@ def test_prelisting_weight_remains_cash_until_price_exists() -> None:
     assert np.isclose(result.monthly.iloc[0]['cash_weight'], 0.5)
     assert np.isclose(result.monthly.iloc[1]['live_weight'], 1.0)
     assert result.full_investment_start == pd.Timestamp('1997-02-28')
+
+
+def test_monthly_prices_carry_only_bounded_suspension_gaps() -> None:
+    dates = pd.to_datetime(['2010-06-30', '2010-09-30'])
+    prices = pd.DataFrame(
+        {
+            'SUSPENDED': [100.0, 105.0],
+            'DELISTED': [50.0, np.nan],
+            'PRELISTING': [np.nan, 20.0],
+        },
+        index=dates,
+    )
+
+    monthly = _monthly_prices(prices)
+
+    assert monthly.loc['2010-07-31', 'SUSPENDED'] == 100.0
+    assert monthly.loc['2010-08-31', 'SUSPENDED'] == 100.0
+    assert pd.isna(monthly.loc['2010-07-31', 'DELISTED'])
+    assert pd.isna(monthly.loc['2010-08-31', 'DELISTED'])
+    assert pd.isna(monthly.loc['2010-08-31', 'PRELISTING'])
 
 
 def test_liquidity_cap_leaves_unfilled_weight_in_cash() -> None:

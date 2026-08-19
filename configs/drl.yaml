@@ -121,7 +121,7 @@ drl:
     torch_num_threads: 1
     total_timesteps_mock: 5000
     total_timesteps_full: 50000
-    total_timesteps: 2048
+    total_timesteps: 50000
     use_stable_baselines: true
     minimum_random_seeds: 5
 
@@ -149,6 +149,18 @@ drl:
     frozen_test_end: 2026-05-31
     holdout_label: legacy_locked_oos_seen_once
     prospective_holdout_start: 2026-08-31
+    block_bootstrap:
+      enabled: true
+      environment_count: 4
+      block_length_periods: 24
+      episode_periods: 120
+      training_only: true
+
+  long_history:
+    enabled: true
+    panel_path: data/processed/drl/regional_long_history.parquet
+    training_start: 1997-01-31
+    proxy_history_only: true
 
   specialist_agents:
     enabled: true

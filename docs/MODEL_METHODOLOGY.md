@@ -126,7 +126,7 @@ The ML layer follows the paper-inspired idea that financial models should foreca
 
 `mu` is conditional expected total return, `sigma` is conditional volatility, `nu` controls tail thickness and `xi` controls skewness. The current skewed Student-t implementation is documented as an approximation: it widens downside or upside tails around a Student-t base and is designed to be replaced later with a full implementation.
 
-The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-risk score, skewness-risk score, forecast uncertainty and distribution model confidence. Probabilistic validation includes Log Predictive Score, CRPS approximation, PIT diagnostics, quantile coverage and calibration error. VaR/ES backtesting includes exceedance rates plus Kupiec coverage and Christoffersen independence tests. The production risk stack compares DCC-IGARCH Student-t, filtered historical simulation, EWMA Normal and EWMA Student-t forecasts using trailing information only. Its scale and causal post-exception buffer are selected on the development segment and then locked for the chronological holdout.
+The engine derives P5/P50/P95, VaR 5%, VaR 1%, CVaR, Expected Shortfall, tail-risk score, skewness-risk score, forecast uncertainty and distribution model confidence. Probabilistic validation includes Log Predictive Score, CRPS approximation, PIT diagnostics, quantile coverage and calibration error. VaR/ES backtesting includes exceedance rates plus Kupiec coverage and Christoffersen independence tests. The production risk stack compares DCC-IGARCH Student-t, filtered historical simulation, EWMA Normal and EWMA Student-t forecasts using trailing information only. Its scale and causal post-exception buffer are selected by three blocked development folds and then locked for the chronological holdout. Overall rows remain diagnostics; when the minimum holdout exists, the explicitly labelled chronological holdout is the governance gate.
 
 Future research hooks are present but disabled or research-only: additional asset classes, Transformer/xLSTM/CNN/LSTM distributional forecasters, quantile-based forecasting, conformal prediction and distribution-derived trading signal research. DRL is enabled only as a bounded, multi-seed PPO challenger with a deterministic fallback and an explicit rejection gate; it cannot authorize automated trading or override the classical portfolio and governance controls.
 
@@ -252,13 +252,16 @@ to explicit mock runs.
 The optional TCN/GAP policy encoder is available only when PyTorch is present. It uses asset-independent temporal streams, shared parameters, causal dilated convolutions, residual blocks, Global Average Pooling, a cross-asset fully connected layer, cash logit and softmax portfolio weights. CAM/Grad-CAM explainability is future-ready for that path. Current explainability outputs include constraint traces, feature-group attribution, asset-time attribution and human-readable explanations that describe model attributions rather than causal relationships.
 
 Training uses a frozen chronological split whose dates and SHA-256 panel hash are
-saved in `drl_split_manifest.csv`. The current evidence has 60 train months from
-February 2019 through January 2024, 14 validation months through April 2025, two
-embargo months and a 12-month legacy locked OOS record from June 2025 through
-May 2026. Scaling is fit on training data only and model selection uses
-validation only. The legacy OOS window has already been observed once and is not
-called untouched. New deployment evidence begins with prospective monthly
-shadow decisions after the policy freeze.
+saved in `drl_split_manifest.csv`. Public regional benchmarks and point-in-time
+macro releases extend the common six-region panel to July 1997. The current
+evidence has 268 train months through October 2019, a one-month embargo, 65
+validation months through April 2025, a second one-month embargo and a 12-month
+legacy locked OOS record from June 2025 through May 2026. Four bounded
+environments per seed sample contiguous 24-month blocks from training dates only;
+validation and OOS dates are never bootstrap candidates. Scaling is fit on
+training data only and model selection uses validation only. The legacy OOS
+window has already been observed once and is not called untouched. New deployment
+evidence begins with prospective monthly shadow decisions after the policy freeze.
 
 Benchmarking is labelled by information set. Fair comparisons give DRL and classical optimisers the same return, volatility, covariance, current-weight and cash inputs. Full Wolf comparisons allow richer scorecard, distributional, regime, sentiment, narrative, risk, stress and liquidity features. The model does not claim DRL beats MVO when DRL is using a richer state unless the comparison is clearly labelled.
 
@@ -268,8 +271,9 @@ The acceptance gate rejects DRL and selects the baseline optimiser when there is
 
 Current limitations:
 
-- Five PPO seeds, the contextual bandit and the convex residual allocator all
-  underperform the optimiser on the legacy locked OOS record.
+- All five PPO seeds and both simpler challengers have negative validation
+  information ratios. No challenger establishes positive active return in the
+  legacy locked OOS diagnostic, so the optimiser retains 100% weight.
 - Bloomberg ingestion is paused; existing licensed local aggregates are not
   redistributed.
 - Historical membership, mappable inactive securities, observed volume and

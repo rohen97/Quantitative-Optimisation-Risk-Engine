@@ -17,6 +17,15 @@ import pandas as pd
 from src.utils.config import ROOT
 
 
+PUBLIC_RESEARCH_OUTPUTS = (
+    'drl_acceptance_decision.csv',
+    'drl_seed_results.csv',
+    'drl_training_summary.csv',
+    'drl_simple_challenger_comparison.csv',
+    'drl_split_manifest.csv',
+)
+
+
 PASS = '#2F855A'
 WARNING = '#C07A16'
 FAIL = '#C53030'
@@ -322,15 +331,30 @@ def _normalise_json_paths(directory: Path) -> None:
         )
 
 
+def _release_artifact_files(output: Path) -> list[Path]:
+    root_manifest = output / 'manifest.json'
+    return sorted(
+        path
+        for path in output.rglob('*')
+        if path.is_file() and path != root_manifest
+    )
+
+
 def _normalise_text_whitespace(directory: Path) -> None:
     text_suffixes = {'.csv', '.css', '.html', '.json', '.md', '.txt'}
     for path in sorted(directory.rglob('*')):
         if not path.is_file() or path.suffix.lower() not in text_suffixes:
             continue
         text = path.read_text(encoding='utf-8')
-        text = text.replace(str(ROOT.resolve()), '.')
-        text = text.replace(ROOT.resolve().as_posix(), '.')
-        normalised = '\n'.join(line.rstrip() for line in text.splitlines()) + '\n'
+        roots = (str(ROOT.resolve()), ROOT.resolve().as_posix())
+        lines: list[str] = []
+        for line in text.splitlines():
+            if any(root in line for root in roots):
+                for root in roots:
+                    line = line.replace(root, '.')
+                line = line.replace('\\', '/')
+            lines.append(line.rstrip())
+        normalised = '\n'.join(lines) + '\n'
         path.write_text(normalised, encoding='utf-8')
 
 
@@ -370,6 +394,8 @@ def _write_release_notes(
     final_portfolio_count: int,
     pit_coverage: dict[str, object],
     production_pit: pd.DataFrame,
+    free_data: pd.DataFrame,
+    credential_audit: dict[str, object],
 ) -> None:
     wolf = strategies.loc[strategies['strategy'].eq('wolf_cvar')].iloc[0]
     equal_weight = strategies.loc[
@@ -471,15 +497,47 @@ def _write_release_notes(
         if not production_pit.empty and 'dataset' in production_pit
         else pd.DataFrame()
     )
+    production_count_column = (
+        'rows' if 'rows' in production_lookup.columns else 'row_count'
+    )
     fundamental_vintages = (
-        int(production_lookup.loc['fundamental_vintages', 'rows'])
+        int(production_lookup.loc['fundamental_vintages', production_count_column])
         if 'fundamental_vintages' in production_lookup.index
+        and production_count_column in production_lookup.columns
         else 0
     )
     market_cap_vintages = (
-        int(production_lookup.loc['market_cap_vintages', 'rows'])
+        int(production_lookup.loc['market_cap_vintages', production_count_column])
         if 'market_cap_vintages' in production_lookup.index
+        and production_count_column in production_lookup.columns
         else 0
+    )
+    free_lookup = (
+        free_data.set_index('source')
+        if not free_data.empty and 'source' in free_data
+        else pd.DataFrame()
+    )
+
+    def free_metric(source: str, column: str, default: object = 0) -> object:
+        if source not in free_lookup.index or column not in free_lookup.columns:
+            return default
+        return free_lookup.loc[source, column]
+
+    akshare_rows = int(free_metric('akshare', 'rows', 0) or 0)
+    akshare_entities = int(free_metric('akshare', 'entities', 0) or 0)
+    yfinance_rows = int(free_metric('yfinance', 'rows', 0) or 0)
+    yfinance_volume_entities = int(
+        free_metric('yfinance', 'positive_volume_entities', 0) or 0
+    )
+    macro_rows = int(free_metric('fred_alfred', 'rows', 0) or 0)
+    openfigi_entities = int(free_metric('openfigi', 'entities', 0) or 0)
+    openfigi_coverage = float(free_metric('openfigi', 'coverage_fraction', float('nan')))
+    sec_status = str(free_metric('sec_edgar', 'status', 'blocked_or_unavailable'))
+    credential_tree_status = str(
+        credential_audit.get('current_tree_status', 'NOT_EVALUATED')
+    )
+    credential_history_status = str(
+        credential_audit.get('history_status', 'NOT_EVALUATED')
     )
     lines = [
         '# Full-Universe Model Evidence',
@@ -545,10 +603,19 @@ def _write_release_notes(
             'their governance thresholds and therefore retain a warning.'
         ),
         (
-            f'Aggregate Bloomberg coverage includes **{fundamental_vintages:,}** '
-            f'database-as-of fundamental vintages and **{market_cap_vintages:,}** '
-            'historical market-cap vintages. Licensed observations are not included '
-            'in this release.'
+            f'Aggregate public-data evidence includes **{akshare_rows:,}** AKShare '
+            f'bars across **{akshare_entities:,}** China/HK securities, '
+            f'**{yfinance_rows:,}** yfinance China/HK bars with observed volume '
+            f'for **{yfinance_volume_entities:,}** securities, '
+            f'**{macro_rows:,}** FRED/ALFRED macro-vintage rows, and '
+            f'**{openfigi_entities:,}** current OpenFIGI matches '
+            f'({openfigi_coverage:.1%} coverage). SEC filing-vintage status is '
+            f'**{sec_status}**.'
+        ),
+        (
+            f'Legacy local licensed aggregates contain **{fundamental_vintages:,}** '
+            f'fundamental and **{market_cap_vintages:,}** market-cap vintages. '
+            'No licensed observations are included in this release.'
         ),
         '',
         '![Cumulative returns](plots/cumulative_returns.png)',
@@ -597,7 +664,13 @@ def _write_release_notes(
         ),
         '- `universe_summary.csv`: compact active and delisted security coverage by region.',
         '- `walk_forward_manifest.json`: source profile, chronology checks, limitations, and evidence counts.',
-        '- `research/`: frozen DRL split, PPO seeds, simple challengers, regional-alpha portfolio, skipped PIT anchors and shadow-operation status.',
+        '- `research/`: frozen DRL split, PPO seeds, simple challengers, skipped PIT anchors and shadow-operation status. Security-level licensed-derived challenger files remain local.',
+        '- `public_data/`: aggregate OpenFIGI, OpenBB, macro-vintage and long-history manifests; no credentials or raw provider payloads.',
+        (
+            '- `security/credential_history_audit.json`: redacted known-provider '
+            f'audit; current tree **{credential_tree_status}**, history '
+            f'**{credential_history_status}**. Provider-side revocation remains an owner action.'
+        ),
         '- `bloomberg_pit_coverage.csv`: aggregate licensed-data coverage only; no Bloomberg observations.',
         '- `production_pit_coverage.md`: data-vintage semantics and measured production gaps.',
         '- `manifest.json`: SHA-256 checksum and byte size for every release artifact.',
@@ -631,14 +704,15 @@ def build_release_evidence(
     _copy_file(walk_source / 'walk_forward_manifest.json', output / 'walk_forward_manifest.json')
     _copy_file(outputs / 'final_portfolio_weights.csv', output / 'final_portfolio_weights.csv')
     research = output / 'research'
-    for name in (
-        'drl_acceptance_decision.csv',
-        'drl_seed_results.csv',
-        'drl_simple_challenger_comparison.csv',
-        'drl_split_manifest.csv',
-        'optimised_portfolio_regional_alpha.csv',
-    ):
+    (research / 'optimised_portfolio_regional_alpha.csv').unlink(
+        missing_ok=True
+    )
+    for name in PUBLIC_RESEARCH_OUTPUTS:
         _copy_file(outputs / name, research / name)
+    _copy_file(
+        outputs / 'validation' / 'drl_long_history_manifest.json',
+        research / 'drl_long_history_manifest.json',
+    )
     _copy_file(
         walk_source / 'walk_forward_skipped_anchors.parquet',
         research / 'walk_forward_skipped_anchors.parquet',
@@ -647,6 +721,33 @@ def build_release_evidence(
     enrichment = outputs / 'free_data_enrichment_status.json'
     if enrichment.exists():
         _copy_file(enrichment, output / 'free_data_enrichment_status.json')
+    public_data = output / 'public_data'
+    for name in (
+        'drl_long_history_manifest.json',
+        'free_data_evidence_manifest.json',
+        'free_data_evidence_summary.csv',
+        'free_data_stack_status.json',
+        'macro_vintage_backfill_status.csv',
+        'openbb_benchmark_validation.json',
+        'openfigi_backfill_status.json',
+        'openfigi_key_validation.json',
+    ):
+        candidates = (outputs / 'validation' / name, outputs / name)
+        source = next((path for path in candidates if path.exists()), None)
+        if source is not None:
+            _copy_file(source, public_data / name)
+    credential_audit_path = outputs / 'validation' / 'credential_history_audit.json'
+    credential_audit: dict[str, object] = {}
+    if credential_audit_path.exists():
+        _copy_file(
+            credential_audit_path,
+            output / 'security' / 'credential_history_audit.json',
+        )
+        credential_audit = json.loads(
+            credential_audit_path.read_text(encoding='utf-8-sig')
+        )
+    free_data_path = outputs / 'validation' / 'free_data_evidence_summary.csv'
+    free_data = _read_csv(free_data_path) if free_data_path.exists() else pd.DataFrame()
     pit_evidence_path = outputs / 'validation' / 'pit_evidence_coverage.json'
     pit_evidence: dict[str, object] = {}
     if pit_evidence_path.exists():
@@ -654,7 +755,17 @@ def build_release_evidence(
         pit_payload = json.loads(pit_evidence_path.read_text(encoding='utf-8-sig'))
         if isinstance(pit_payload, dict) and isinstance(pit_payload.get('coverage'), dict):
             pit_evidence = dict(pit_payload['coverage'])
-    production_pit_path = outputs / 'bloomberg_pit_coverage.csv'
+    production_pit_path = next(
+        (
+            path
+            for path in (
+                outputs / 'production_pit_coverage.csv',
+                outputs / 'bloomberg_pit_coverage.csv',
+            )
+            if path.exists()
+        ),
+        None,
+    )
     production_pit = pd.DataFrame()
     for name in (
         'bloomberg_pit_coverage.csv',
@@ -664,7 +775,7 @@ def build_release_evidence(
         source = outputs / name
         if source.exists():
             _copy_file(source, output / name)
-    if production_pit_path.exists():
+    if production_pit_path is not None:
         production_pit = _read_csv(production_pit_path)
 
     universe = _read_csv(outputs / 'equity_universe.csv')
@@ -719,11 +830,13 @@ def build_release_evidence(
         int(len(portfolio)),
         pit_evidence,
         production_pit,
+        free_data,
+        credential_audit,
     )
     _normalise_text_whitespace(output)
     _normalise_json_paths(output)
 
-    files = sorted(path for path in output.rglob('*') if path.is_file() and path.name != 'manifest.json')
+    files = _release_artifact_files(output)
     artifact_manifest = {
         'release_id': release_id,
         'source_validation_run_id': validation_manifest['validation_run_id'],

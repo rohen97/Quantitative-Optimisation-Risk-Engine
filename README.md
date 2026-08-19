@@ -14,48 +14,49 @@ The LLM benchmark is an explanation and comparison layer only. It cannot bypass 
 
 ## Current Validated Run
 
-The latest full-universe evidence package was regenerated on 2026-08-13.
-The supervised-alpha and challenger research layer was refreshed on 2026-08-17;
-it remains deployment-blocked and does not change the validated baseline.
+The latest full-universe evidence package, supervised challengers and DRL
+validation were regenerated on 2026-08-19. Every research challenger remains
+deployment-blocked and does not change the validated baseline.
 
 | Measure | Result |
 |---|---:|
 | Security master | 112,570 active and delisted listings |
 | Active universe | 55,504 equities |
 | Walk-forward eligible securities | 1,409 |
-| Historical forecasts | 181,664 |
-| Aligned realised outcomes | 181,213 |
-| Portfolio decisions | 60 monthly anchors |
-| Governance score | 87.5 / 100 |
+| Historical forecasts | 263,048 |
+| Aligned realised outcomes | 262,627 |
+| Portfolio decisions | 89 monthly anchors |
+| Governance score | 75.0 / 100 |
 | Approval | `CONDITIONALLY_APPROVED` |
 | Hard constraint breaches | 0 |
-| Annual turnover | 1.10x |
-| Annualised cost drag | 0.82% |
-| 95% / 99% VaR backtests | `PASS` / `PASS` |
+| Annual turnover | 1.01x |
+| Annualised cost drag | 0.83% |
+| Chronological 95% / 99% VaR gates | `PASS` / `PASS` |
 
 The complete, checksummed result is in
-[`reports/releases/2026-08-13-risk-pit-cost-validation`](reports/releases/2026-08-13-risk-pit-cost-validation/README.md).
+[`reports/releases/2026-08-19-free-data-drl-risk`](reports/releases/2026-08-19-free-data-drl-risk/README.md).
 
 The investment-principal package presents the results in plain language:
 [PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
-[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-17.pdf),
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-19.pdf),
 [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md),
 and [publication-safe recommendation snapshot](reports/presentations/wolf_investment_principal/recommendation_snapshot.csv).
-The 22-slide briefing includes the supervised model stack, OOS diagnostics,
+The 23-slide briefing includes the supervised model stack, OOS diagnostics,
 calibrated uncertainty, DRL challengers, portfolio differences and stock
-recommendations. It recommends a controlled, human-supervised live pilot, not
-unattended or full-scale deployment.
+recommendations. It recommends continued paper and shadow operation; no live,
+unattended or full-scale deployment is approved.
 
-![Validation scorecard](reports/releases/2026-08-13-risk-pit-cost-validation/plots/validation_scorecard.png)
+![Validation scorecard](reports/releases/2026-08-19-free-data-drl-risk/plots/validation_scorecard.png)
 
-![Walk-forward portfolio performance](reports/releases/2026-08-13-risk-pit-cost-validation/plots/cumulative_returns.png)
+![Walk-forward portfolio performance](reports/releases/2026-08-19-free-data-drl-risk/plots/cumulative_returns.png)
 
 Conditional approval is deliberate. The evidence store now archives 59,183
 delisting events plus aggregate local Bloomberg coverage of 25,240
 database-as-of fundamental vintages, 151,659 corporate-action vintages and
 694,246 historical market-cap observations. Observed filing acceptance, dated
-membership, inactive-security prices, broad historical volume, sentiment,
-narrative and regime vintages remain incomplete. Licensed Bloomberg rows stay
+membership, inactive-security prices, sentiment, narrative and regime vintages
+remain incomplete; measured historical-volume coverage is 15.4%, below the 80%
+governance threshold despite the China/HK enrichment. Licensed Bloomberg rows stay
 in the ignored local warehouse and are not redistributed. This repository is
 research software and does not authorize unattended live trading.
 
@@ -151,6 +152,25 @@ liquid, dividend-paying candidates in every region. Both phases commit increment
 and skip completed rows on restart. Use --workers 1 --request-interval-seconds 0.75
 for a paced retry after a provider rate limit.
 
+Run the checkpointed public-data stack for macro vintages, SEC filing vintages,
+current FIGI mappings, OpenBB benchmark validation and China/Hong Kong OHLCV:
+
+```powershell
+python -m pip install -e ".[free-data,openbb]"
+$env:SEC_USER_AGENT='The Wolf Quant Model research-contact@example.com'
+python scripts/run_free_data_stack.py --start 1994-01-01
+```
+
+Each phase can be resumed independently with `--phases`. FRED/ALFRED observations
+retain their release vintages; SEC Company Facts retain filing accessions and
+amendments; OpenFIGI is explicitly labelled as a current snapshot rather than
+historical identifier evidence. OpenBB normalises a named upstream provider and is
+used for cross-validation, not counted as an independent data source. AKShare uses
+unadjusted bars so a secondary source can fill volume without replacing the
+preferred provider's adjusted close. The orchestrator runs a long-history yfinance
+volume pass first and invokes AKShare only for securities still below the 120-row
+observed volume threshold.
+
 Run the observed DuckDB universe with resumable regional model batches:
 
 ~~~powershell
@@ -177,9 +197,9 @@ checkpoints, Windows sleep prevention and free-memory guardrails:
 .\.venv\Scripts\python.exe scripts\run_overnight_research.py --max-hours 12
 ~~~
 
-The runner continues local model work when Bloomberg reaches its external daily
-capacity, shares a cooldown across Bloomberg stages, and revisits deferred pulls
-without redoing completed chunks. Status and evidence are written under
+The committed overnight profile explicitly disables Bloomberg Desktop and runs
+only public-data and local-model stages. Private profiles may enable licensed
+stages without changing the checkpoint contract. Status and evidence are written under
 `reports/outputs/overnight/`; detailed child logs remain under
 `reports/logs/overnight/`. Press `Ctrl+C` once for a controlled interruption and
 rerun the same command to resume.
@@ -263,11 +283,24 @@ python scripts/run_hedge_engine.py
 
 Run the constrained, regime-gated and explainable DRL allocation overlay:
 
-```bash
-python scripts/run_drl_pipeline.py
+```powershell
+python scripts/build_drl_long_history.py --download-start 1994-01-01 --panel-start 1997-01-31
+python scripts/run_drl_pipeline.py --total-timesteps 50000 --parallel-seed-workers 2
 ```
 
-The DRL engine is a residual overlay, not a replacement for the selected optimiser. Production research mode trains five Stable-Baselines3 PPO seeds on a hashed six-region panel with 60 train months, 14 validation months, two embargo months and a locked 12-month legacy OOS record. It optimises benchmark-relative return after costs with explicit turnover, drawdown and tail-risk penalties. Ridge contextual-bandit and convex-residual challengers use the same validation-only selection protocol. All three approaches remain rejected, leaving the classical baseline at 100%; deployment requires three completed genuinely prospective monthly shadow cycles beginning August 31, 2026.
+The DRL engine is a residual overlay, not a replacement for the selected optimiser.
+Production research mode trains five Stable-Baselines3 PPO seeds on a checksummed
+six-region panel beginning in July 1997. The current split contains 268 training
+months, one embargo month, 65 validation months, a second embargo month and a
+12-month legacy locked OOS record. Four train-only block-bootstrap environments per
+seed add regime diversity without sampling validation or OOS dates. The reward uses
+benchmark-relative return after costs with explicit turnover, drawdown and tail-risk
+penalties. Ridge contextual-bandit and convex-residual challengers follow the same
+validation-only selection protocol. In the latest full run, every PPO seed had a
+negative validation information ratio and both simpler challengers trailed the
+baseline, so governance correctly retained the classical optimiser at 100% and PPO
+at 0%. Deployment also requires three completed genuinely prospective monthly
+shadow cycles beginning August 31, 2026.
 
 Validate Alpaca credentials or pull optional Alpaca daily bars:
 
@@ -311,9 +344,9 @@ Configured sources include yfinance, TickDB, Alpaca, EODHD, Finnhub, Alpha Vanta
 [OpenBB Workspace](https://docs.openbb.co/workspace/developers/data-integration)
 can display or integrate the model through a custom backend, but it is not an
 additional data vendor. [OpenBB provider extensions](https://docs.openbb.co/odp/python/extensions/providers)
-route requests to their underlying sources and subscriptions. The ingestion hot
-path therefore uses the source APIs directly, avoiding a large application
-dependency while preserving the same provider provenance in DuckDB.
+route requests to their underlying sources and subscriptions. The optional OpenBB
+adapter therefore records both the normalisation layer and the named upstream
+provider; direct source adapters remain the default ingestion path.
 
 The legacy single-process pipeline can still use mock mode. The two-phase production
 runner defaults to observed DuckDB inputs and never silently substitutes mock
@@ -496,7 +529,7 @@ python scripts/build_pit_coverage_report.py
 Build the compact GitHub release package after validation and IC reporting:
 
 ```bash
-python scripts/build_release_evidence.py --release-id 2026-08-13-risk-pit-cost-validation
+python scripts/build_release_evidence.py --release-id 2026-08-19-free-data-drl-risk
 ```
 
 The command writes immutable forecast, realised-outcome, monthly portfolio,

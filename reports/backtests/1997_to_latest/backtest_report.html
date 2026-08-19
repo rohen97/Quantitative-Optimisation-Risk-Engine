@@ -46,12 +46,12 @@
     <div class='metric'><strong>13</strong><span>portfolio outputs tested</span></div>
     <div class='metric'><strong>29.6</strong><span>requested historical years</span></div>
     <div class='metric'><strong>$186,060,522</strong><span>current-derived starting NAV</span></div>
-    <div class='metric'><strong>2014-08-31</strong><span>common 80% investable start</span></div>
-    <div class='metric'><strong>60</strong><span>separate reconstructed PIT months</span></div>
+    <div class='metric'><strong>2016-08-31</strong><span>common 80% investable start</span></div>
+    <div class='metric'><strong>89</strong><span>separate reconstructed PIT months</span></div>
     <div class='metric'><strong>19</strong><span>standalone benchmark paths</span></div>
     <div class='metric'><strong>13</strong><span>source-backed macro-event windows</span></div>
   </div>
-  <p class='interpretation'>The test covers 29.6 years and 13 portfolio outputs. The current portfolio starts at $186,060,522 and finishes at $9,013,102,206 after modeled costs, a net PnL of $8,827,041,684. On the common investable window, Portfolio-Aware Overlay has the highest Sharpe ratio at 0.85. The long results replay securities selected with today's information, so they describe exposure and path behavior rather than proving historical selection skill.</p>
+  <p class='interpretation'>The test covers 29.6 years and 13 portfolio outputs. The current portfolio starts at $186,060,522 and finishes at $9,013,102,206 after modeled costs, a net PnL of $8,827,041,684. On the common investable window, Portfolio-Aware Overlay has the highest Sharpe ratio at 0.89. The long results replay securities selected with today's information, so they describe exposure and path behavior rather than proving historical selection skill.</p>
 
   <h2>Executive Comparison</h2>
   <div class='table-wrap'><table class="dataframe data-table">
@@ -69,14 +69,14 @@
   </thead>
   <tbody>
     <tr>
-      <td>Portfolio-Aware Overlay</td>
-      <td>$186,060,522</td>
-      <td>13.69%</td>
-      <td>15.47%</td>
-      <td>0.77</td>
-      <td>-47.39%</td>
-      <td>$8,192,397,366</td>
-      <td>$8,006,336,844</td>
+      <td>Risk-Parity Optimiser</td>
+      <td>$100,000</td>
+      <td>11.83%</td>
+      <td>12.47%</td>
+      <td>0.79</td>
+      <td>-31.79%</td>
+      <td>$2,709,164</td>
+      <td>$2,609,164</td>
     </tr>
     <tr>
       <td>Current Portfolio</td>
@@ -89,114 +89,114 @@
       <td>$8,827,041,684</td>
     </tr>
     <tr>
-      <td>Risk-Parity Optimiser</td>
-      <td>$100,000</td>
-      <td>10.41%</td>
-      <td>11.42%</td>
+      <td>Portfolio-Aware Overlay</td>
+      <td>$186,060,522</td>
+      <td>13.11%</td>
+      <td>15.47%</td>
       <td>0.74</td>
-      <td>-29.10%</td>
-      <td>$1,859,175</td>
-      <td>$1,759,175</td>
-    </tr>
-    <tr>
-      <td>LLM Analyst Benchmark</td>
-      <td>$100,000</td>
-      <td>5.52%</td>
-      <td>5.31%</td>
-      <td>0.63</td>
-      <td>-13.29%</td>
-      <td>$488,283</td>
-      <td>$388,283</td>
+      <td>-46.36%</td>
+      <td>$7,038,270,415</td>
+      <td>$6,852,209,893</td>
     </tr>
     <tr>
       <td>Score-Weighted Optimiser</td>
       <td>$100,000</td>
-      <td>9.81%</td>
-      <td>13.05%</td>
-      <td>0.62</td>
-      <td>-33.64%</td>
-      <td>$1,580,605</td>
-      <td>$1,480,605</td>
-    </tr>
-    <tr>
-      <td>Regime-Aware Optimiser</td>
-      <td>$100,000</td>
-      <td>10.11%</td>
-      <td>13.80%</td>
-      <td>0.61</td>
-      <td>-39.50%</td>
-      <td>$1,713,229</td>
-      <td>$1,613,229</td>
-    </tr>
-    <tr>
-      <td>Clean-Sheet Quant</td>
-      <td>$100,000</td>
-      <td>8.50%</td>
-      <td>10.81%</td>
-      <td>0.61</td>
-      <td>-36.03%</td>
-      <td>$1,108,623</td>
-      <td>$1,008,623</td>
+      <td>10.59%</td>
+      <td>12.32%</td>
+      <td>0.71</td>
+      <td>-32.62%</td>
+      <td>$1,947,693</td>
+      <td>$1,847,693</td>
     </tr>
     <tr>
       <td>Mean-Variance Optimiser</td>
       <td>$100,000</td>
-      <td>9.02%</td>
-      <td>11.88%</td>
-      <td>0.61</td>
-      <td>-37.88%</td>
-      <td>$1,278,845</td>
-      <td>$1,178,845</td>
+      <td>9.92%</td>
+      <td>12.18%</td>
+      <td>0.66</td>
+      <td>-33.96%</td>
+      <td>$1,630,361</td>
+      <td>$1,530,361</td>
     </tr>
     <tr>
       <td>CVaR-Constrained Optimiser</td>
       <td>$100,000</td>
-      <td>8.69%</td>
-      <td>11.56%</td>
-      <td>0.59</td>
-      <td>-37.09%</td>
-      <td>$1,168,765</td>
-      <td>$1,068,765</td>
+      <td>9.80%</td>
+      <td>11.99%</td>
+      <td>0.66</td>
+      <td>-35.69%</td>
+      <td>$1,575,708</td>
+      <td>$1,475,708</td>
+    </tr>
+    <tr>
+      <td>LLM Analyst Benchmark</td>
+      <td>$100,000</td>
+      <td>4.84%</td>
+      <td>4.05%</td>
+      <td>0.66</td>
+      <td>-10.21%</td>
+      <td>$403,101</td>
+      <td>$303,101</td>
     </tr>
     <tr>
       <td>Dividend-Income Optimiser</td>
       <td>$100,000</td>
-      <td>10.60%</td>
-      <td>15.35%</td>
-      <td>0.59</td>
-      <td>-45.88%</td>
-      <td>$1,951,982</td>
-      <td>$1,851,982</td>
+      <td>10.80%</td>
+      <td>14.31%</td>
+      <td>0.64</td>
+      <td>-43.00%</td>
+      <td>$2,058,089</td>
+      <td>$1,958,089</td>
     </tr>
     <tr>
-      <td>Final Resolved Portfolio</td>
-      <td>$186,060,522</td>
-      <td>8.34%</td>
-      <td>11.32%</td>
-      <td>0.58</td>
-      <td>-37.34%</td>
-      <td>$1,976,496,316</td>
-      <td>$1,790,435,794</td>
-    </tr>
-    <tr>
-      <td>DRL Baseline Portfolio</td>
-      <td>$186,060,522</td>
-      <td>8.34%</td>
-      <td>11.32%</td>
-      <td>0.58</td>
-      <td>-37.34%</td>
-      <td>$1,976,496,316</td>
-      <td>$1,790,435,794</td>
+      <td>Regime-Aware Optimiser</td>
+      <td>$100,000</td>
+      <td>10.48%</td>
+      <td>13.75%</td>
+      <td>0.64</td>
+      <td>-43.32%</td>
+      <td>$1,891,914</td>
+      <td>$1,791,914</td>
     </tr>
     <tr>
       <td>DRL Raw Challenger</td>
       <td>$186,060,522</td>
-      <td>8.05%</td>
-      <td>10.77%</td>
-      <td>0.57</td>
-      <td>-35.80%</td>
-      <td>$1,826,083,914</td>
-      <td>$1,640,023,392</td>
+      <td>8.90%</td>
+      <td>11.25%</td>
+      <td>0.62</td>
+      <td>-34.35%</td>
+      <td>$2,303,279,904</td>
+      <td>$2,117,219,382</td>
+    </tr>
+    <tr>
+      <td>DRL Baseline Portfolio</td>
+      <td>$186,060,522</td>
+      <td>9.22%</td>
+      <td>11.82%</td>
+      <td>0.62</td>
+      <td>-35.82%</td>
+      <td>$2,506,737,048</td>
+      <td>$2,320,676,526</td>
+    </tr>
+    <tr>
+      <td>Final Resolved Portfolio</td>
+      <td>$186,060,522</td>
+      <td>9.22%</td>
+      <td>11.82%</td>
+      <td>0.62</td>
+      <td>-35.82%</td>
+      <td>$2,506,737,048</td>
+      <td>$2,320,676,526</td>
+    </tr>
+    <tr>
+      <td>Clean-Sheet Quant</td>
+      <td>$100,000</td>
+      <td>6.30%</td>
+      <td>8.26%</td>
+      <td>0.52</td>
+      <td>-31.20%</td>
+      <td>$606,712</td>
+      <td>$506,712</td>
     </tr>
     <tr>
       <td>Trend and Risk-Controlled Regional Indices</td>
@@ -210,7 +210,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>The performance table converts each assigned starting balance into a fully net ending balance. CAGR is the smooth annual growth rate, volatility measures return variation, Sharpe compares excess return with total variability, and maximum drawdown is the deepest peak-to-trough loss. Portfolio-Aware Overlay records the highest common-window CAGR at 14.42% alongside a -26.94% maximum drawdown.</p>
+  <p class='interpretation'>The performance table converts each assigned starting balance into a fully net ending balance. CAGR is the smooth annual growth rate, volatility measures return variation, Sharpe compares excess return with total variability, and maximum drawdown is the deepest peak-to-trough loss. Portfolio-Aware Overlay records the highest common-window CAGR at 15.30% alongside a -25.73% maximum drawdown.</p>
   <div class='figure'><img src='plots/wealth_paths.png' alt='Portfolio wealth paths'><p class='caption'>Indexed growth uses each portfolio's assigned capital only for PnL; this chart rebases every series to 100 for comparability.</p></div>
   <div class='two'>
     <div class='figure'><img src='plots/ending_pnl.png' alt='Ending PnL'></div>
@@ -239,133 +239,133 @@
   <tbody>
     <tr>
       <td>S&amp;P 500 Index</td>
-      <td>11.96%</td>
-      <td>0.71</td>
-      <td>0.97</td>
-      <td>1.13</td>
-      <td>0.48</td>
+      <td>13.17%</td>
+      <td>0.74</td>
+      <td>1.00</td>
+      <td>1.17</td>
+      <td>0.53</td>
       <td>-24.77%</td>
-      <td>6.53%</td>
-      <td>8.77%</td>
+      <td>7.01%</td>
+      <td>9.44%</td>
       <td></td>
       <td></td>
       <td></td>
     </tr>
     <tr>
       <td>LLM Analyst Benchmark</td>
-      <td>6.66%</td>
-      <td>0.79</td>
-      <td>0.89</td>
-      <td>1.45</td>
-      <td>0.88</td>
-      <td>-7.55%</td>
-      <td>2.25%</td>
-      <td>3.05%</td>
-      <td>99.97%</td>
-      <td>83.645</td>
-      <td>99.07%</td>
+      <td>6.02%</td>
+      <td>0.86</td>
+      <td>0.92</td>
+      <td>1.69</td>
+      <td>0.90</td>
+      <td>-6.65%</td>
+      <td>1.51%</td>
+      <td>2.02%</td>
+      <td>99.99%</td>
+      <td>71.970</td>
+      <td>99.42%</td>
     </tr>
     <tr>
       <td>Dow Jones Industrial Average</td>
-      <td>10.09%</td>
-      <td>0.60</td>
-      <td>0.86</td>
-      <td>0.96</td>
-      <td>0.43</td>
+      <td>11.03%</td>
+      <td>0.61</td>
+      <td>0.88</td>
+      <td>0.98</td>
+      <td>0.48</td>
       <td>-23.20%</td>
-      <td>5.48%</td>
-      <td>8.35%</td>
+      <td>5.45%</td>
+      <td>9.12%</td>
       <td></td>
       <td></td>
       <td></td>
     </tr>
     <tr>
       <td>Current Portfolio</td>
-      <td>14.03%</td>
-      <td>0.77</td>
-      <td>0.81</td>
-      <td>1.27</td>
-      <td>0.49</td>
+      <td>15.19%</td>
+      <td>0.80</td>
+      <td>0.85</td>
+      <td>1.33</td>
+      <td>0.53</td>
       <td>-28.91%</td>
-      <td>6.87%</td>
-      <td>9.21%</td>
+      <td>6.99%</td>
+      <td>9.44%</td>
       <td>99.99%</td>
       <td>64.858</td>
-      <td>99.79%</td>
+      <td>99.75%</td>
     </tr>
     <tr>
       <td>Clean-Sheet Quant</td>
-      <td>9.01%</td>
-      <td>0.66</td>
-      <td>0.69</td>
-      <td>1.16</td>
-      <td>0.52</td>
-      <td>-17.28%</td>
-      <td>4.38%</td>
-      <td>6.02%</td>
-      <td>99.94%</td>
-      <td>92.123</td>
-      <td>98.62%</td>
+      <td>7.75%</td>
+      <td>0.68</td>
+      <td>0.72</td>
+      <td>1.20</td>
+      <td>0.57</td>
+      <td>-13.56%</td>
+      <td>2.97%</td>
+      <td>4.42%</td>
+      <td>99.71%</td>
+      <td>126.055</td>
+      <td>95.32%</td>
     </tr>
     <tr>
       <td>Final Resolved Portfolio</td>
-      <td>8.68%</td>
-      <td>0.58</td>
-      <td>0.62</td>
-      <td>0.97</td>
-      <td>0.43</td>
-      <td>-20.40%</td>
-      <td>4.91%</td>
-      <td>6.74%</td>
-      <td>99.88%</td>
-      <td>104.048</td>
-      <td>97.78%</td>
+      <td>9.35%</td>
+      <td>0.56</td>
+      <td>0.59</td>
+      <td>0.95</td>
+      <td>0.35</td>
+      <td>-26.66%</td>
+      <td>5.29%</td>
+      <td>7.29%</td>
+      <td>99.96%</td>
+      <td>87.488</td>
+      <td>98.71%</td>
     </tr>
     <tr>
       <td>DAX Performance Index</td>
-      <td>7.36%</td>
-      <td>0.37</td>
-      <td>0.40</td>
-      <td>0.57</td>
-      <td>0.20</td>
+      <td>9.84%</td>
+      <td>0.47</td>
+      <td>0.50</td>
+      <td>0.72</td>
+      <td>0.27</td>
       <td>-36.98%</td>
-      <td>8.21%</td>
-      <td>10.99%</td>
+      <td>8.29%</td>
+      <td>11.70%</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>FTSE 100 Index</td>
+      <td>5.08%</td>
+      <td>0.25</td>
+      <td>0.28</td>
+      <td>0.35</td>
+      <td>0.15</td>
+      <td>-33.92%</td>
+      <td>6.81%</td>
+      <td>10.49%</td>
       <td></td>
       <td></td>
       <td></td>
     </tr>
     <tr>
       <td>Trend and Risk-Controlled Regional Indices</td>
-      <td>2.95%</td>
-      <td>0.15</td>
-      <td>0.15</td>
-      <td>0.21</td>
-      <td>0.13</td>
-      <td>-23.30%</td>
-      <td>4.37%</td>
-      <td>6.42%</td>
+      <td>3.42%</td>
+      <td>0.17</td>
+      <td>0.18</td>
+      <td>0.24</td>
+      <td>0.16</td>
+      <td>-21.59%</td>
+      <td>3.33%</td>
+      <td>5.66%</td>
       <td>93.87%</td>
       <td>401.646</td>
-      <td>70.10%</td>
-    </tr>
-    <tr>
-      <td>FTSE 100 Index</td>
-      <td>2.13%</td>
-      <td>0.09</td>
-      <td>0.10</td>
-      <td>0.12</td>
-      <td>0.06</td>
-      <td>-37.85%</td>
-      <td>6.78%</td>
-      <td>9.76%</td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <td>68.27%</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Sharpe uses all volatility; Lo-adjusted Sharpe allows for serially related monthly returns; Sortino counts downside variability; and Calmar divides CAGR by maximum drawdown. Monthly VaR is the 5% loss threshold, while expected shortfall is the average loss beyond it. PSR measures confidence that Sharpe clears a hurdle, MinTRL estimates the required history, and DSR discounts non-normal returns and multiple trials. SPDR S&P 500 ETF adjusted-close proxy has the strongest Lo-adjusted Sharpe at 1.13.</p>
+  <p class='interpretation'>Sharpe uses all volatility; Lo-adjusted Sharpe allows for serially related monthly returns; Sortino counts downside variability; and Calmar divides CAGR by maximum drawdown. Monthly VaR is the 5% loss threshold, while expected shortfall is the average loss beyond it. PSR measures confidence that Sharpe clears a hurdle, MinTRL estimates the required history, and DSR discounts non-normal returns and multiple trials. SPDR S&P 500 ETF adjusted-close proxy has the strongest Lo-adjusted Sharpe at 1.15.</p>
   <h3>Annual Fee Assumption</h3>
   <div class='table-wrap'><table class="dataframe data-table">
   <thead>
@@ -425,134 +425,123 @@
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
-      <td>$41,187,351</td>
-      <td>$141,417,818</td>
-      <td>$182,605,169</td>
+      <td>$38,553,953</td>
+      <td>$120,672,689</td>
+      <td>$159,226,642</td>
       <td>29</td>
-      <td>$8,809,206,344</td>
-      <td>$8,192,397,366</td>
-      <td>$616,808,978</td>
-      <td>25.000</td>
-    </tr>
-    <tr>
-      <td>drl_baseline</td>
-      <td>$19,357,180</td>
-      <td>$49,663,293</td>
-      <td>$69,020,473</td>
-      <td>29</td>
-      <td>$2,125,307,539</td>
-      <td>$1,976,496,316</td>
-      <td>$148,811,223</td>
+      <td>$7,568,184,699</td>
+      <td>$7,038,270,415</td>
+      <td>$529,914,283</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
-      <td>$19,357,180</td>
-      <td>$49,663,293</td>
-      <td>$69,020,473</td>
+      <td>$24,289,198</td>
+      <td>$60,184,855</td>
+      <td>$84,474,053</td>
       <td>29</td>
-      <td>$2,125,307,539</td>
-      <td>$1,976,496,316</td>
-      <td>$148,811,223</td>
+      <td>$2,695,470,314</td>
+      <td>$2,506,737,048</td>
+      <td>$188,733,267</td>
+      <td>25.000</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>$24,289,198</td>
+      <td>$60,184,855</td>
+      <td>$84,474,053</td>
+      <td>29</td>
+      <td>$2,695,470,314</td>
+      <td>$2,506,737,048</td>
+      <td>$188,733,267</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
-      <td>$17,817,900</td>
-      <td>$47,249,335</td>
-      <td>$65,067,235</td>
+      <td>$22,360,940</td>
+      <td>$56,945,361</td>
+      <td>$79,306,301</td>
       <td>29</td>
-      <td>$1,963,570,525</td>
-      <td>$1,826,083,914</td>
-      <td>$137,486,611</td>
-      <td>25.000</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>$11,928</td>
-      <td>$44,804</td>
-      <td>$56,732</td>
-      <td>29</td>
-      <td>$2,098,948</td>
-      <td>$1,951,982</td>
-      <td>$146,966</td>
+      <td>$2,476,694,798</td>
+      <td>$2,303,279,904</td>
+      <td>$173,414,894</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>optimised_risk_parity</td>
-      <td>$9,372</td>
-      <td>$44,646</td>
-      <td>$54,018</td>
+      <td>$14,893</td>
+      <td>$62,478</td>
+      <td>$77,371</td>
       <td>29</td>
-      <td>$1,999,153</td>
-      <td>$1,859,175</td>
-      <td>$139,978</td>
+      <td>$2,913,138</td>
+      <td>$2,709,164</td>
+      <td>$203,974</td>
       <td>25.000</td>
     </tr>
     <tr>
-      <td>optimised_regime_aware</td>
-      <td>$9,820</td>
-      <td>$39,656</td>
-      <td>$49,477</td>
+      <td>optimised_dividend_income</td>
+      <td>$12,001</td>
+      <td>$47,619</td>
+      <td>$59,620</td>
       <td>29</td>
-      <td>$1,842,219</td>
-      <td>$1,713,229</td>
-      <td>$128,990</td>
+      <td>$2,213,043</td>
+      <td>$2,058,089</td>
+      <td>$154,954</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>optimised_score_weighted</td>
-      <td>$8,514</td>
-      <td>$36,781</td>
-      <td>$45,295</td>
+      <td>$10,907</td>
+      <td>$44,169</td>
+      <td>$55,076</td>
       <td>29</td>
-      <td>$1,699,609</td>
-      <td>$1,580,605</td>
-      <td>$119,004</td>
+      <td>$2,094,336</td>
+      <td>$1,947,693</td>
+      <td>$146,643</td>
+      <td>25.000</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>$10,870</td>
+      <td>$42,584</td>
+      <td>$53,455</td>
+      <td>29</td>
+      <td>$2,034,357</td>
+      <td>$1,891,914</td>
+      <td>$142,443</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>optimised_mean_variance</td>
-      <td>$7,114</td>
-      <td>$30,427</td>
-      <td>$37,541</td>
+      <td>$9,623</td>
+      <td>$36,904</td>
+      <td>$46,527</td>
       <td>29</td>
-      <td>$1,375,130</td>
-      <td>$1,278,845</td>
-      <td>$96,285</td>
-      <td>25.000</td>
-    </tr>
-    <tr>
-      <td>clean_sheet</td>
-      <td>$4,804</td>
-      <td>$28,957</td>
-      <td>$33,761</td>
-      <td>29</td>
-      <td>$1,192,091</td>
-      <td>$1,108,623</td>
-      <td>$83,469</td>
+      <td>$1,753,111</td>
+      <td>$1,630,361</td>
+      <td>$122,751</td>
       <td>25.000</td>
     </tr>
     <tr>
       <td>optimised_cvar_constrained</td>
-      <td>$6,569</td>
-      <td>$28,591</td>
-      <td>$35,160</td>
+      <td>$9,755</td>
+      <td>$36,123</td>
+      <td>$45,878</td>
       <td>29</td>
-      <td>$1,256,762</td>
-      <td>$1,168,765</td>
-      <td>$87,997</td>
+      <td>$1,694,343</td>
+      <td>$1,575,708</td>
+      <td>$118,636</td>
       <td>25.000</td>
     </tr>
     <tr>
-      <td>llm_benchmark</td>
-      <td>$1,620</td>
-      <td>$16,937</td>
-      <td>$18,557</td>
+      <td>clean_sheet</td>
+      <td>$2,315</td>
+      <td>$18,882</td>
+      <td>$21,198</td>
       <td>29</td>
-      <td>$525,046</td>
-      <td>$488,283</td>
-      <td>$36,763</td>
+      <td>$652,392</td>
+      <td>$606,712</td>
+      <td>$45,680</td>
       <td>25.000</td>
     </tr>
     <tr>
@@ -564,6 +553,17 @@
       <td>$385,838</td>
       <td>$358,822</td>
       <td>$27,016</td>
+      <td>25.000</td>
+    </tr>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>$1,256</td>
+      <td>$15,791</td>
+      <td>$17,047</td>
+      <td>29</td>
+      <td>$433,451</td>
+      <td>$403,101</td>
+      <td>$30,350</td>
       <td>25.000</td>
     </tr>
   </tbody>
@@ -588,159 +588,159 @@
   <tbody>
     <tr>
       <td>Nasdaq Composite Index</td>
-      <td>15.79%</td>
-      <td>18.12%</td>
-      <td>0.80</td>
+      <td>17.26%</td>
+      <td>18.70%</td>
+      <td>0.83</td>
       <td>-33.10%</td>
-      <td>$580,668</td>
+      <td>$491,538</td>
     </tr>
     <tr>
       <td>SPDR S&amp;P 500 ETF adjusted-close proxy</td>
-      <td>13.83%</td>
-      <td>14.81%</td>
-      <td>0.82</td>
+      <td>14.98%</td>
+      <td>15.32%</td>
+      <td>0.84</td>
       <td>-23.93%</td>
-      <td>$473,159</td>
+      <td>$403,919</td>
     </tr>
     <tr>
       <td>S&amp;P 500 Index</td>
-      <td>11.96%</td>
-      <td>14.82%</td>
-      <td>0.71</td>
+      <td>13.17%</td>
+      <td>15.34%</td>
+      <td>0.74</td>
       <td>-24.77%</td>
-      <td>$387,934</td>
+      <td>$344,577</td>
     </tr>
     <tr>
       <td>S&amp;P 500 Index</td>
-      <td>11.96%</td>
-      <td>14.82%</td>
-      <td>0.71</td>
+      <td>13.17%</td>
+      <td>15.34%</td>
+      <td>0.74</td>
       <td>-24.77%</td>
-      <td>$387,934</td>
+      <td>$344,577</td>
     </tr>
     <tr>
       <td>iShares MSCI ACWI adjusted-close proxy</td>
-      <td>10.52%</td>
-      <td>14.24%</td>
-      <td>0.64</td>
+      <td>12.43%</td>
+      <td>14.56%</td>
+      <td>0.72</td>
       <td>-25.74%</td>
-      <td>$332,000</td>
+      <td>$322,642</td>
     </tr>
     <tr>
       <td>Dow Jones Industrial Average</td>
-      <td>10.09%</td>
-      <td>14.67%</td>
-      <td>0.60</td>
+      <td>11.03%</td>
+      <td>15.17%</td>
+      <td>0.61</td>
       <td>-23.20%</td>
-      <td>$316,875</td>
-    </tr>
-    <tr>
-      <td>Nikkei 225 Index</td>
-      <td>8.49%</td>
-      <td>17.39%</td>
-      <td>0.44</td>
-      <td>-34.01%</td>
-      <td>$265,996</td>
-    </tr>
-    <tr>
-      <td>Russell 2000 Index</td>
-      <td>8.35%</td>
-      <td>20.03%</td>
-      <td>0.40</td>
-      <td>-33.76%</td>
-      <td>$261,710</td>
+      <td>$284,746</td>
     </tr>
     <tr>
       <td>DAX Performance Index</td>
-      <td>7.36%</td>
-      <td>19.14%</td>
-      <td>0.37</td>
+      <td>9.84%</td>
+      <td>19.25%</td>
+      <td>0.47</td>
       <td>-36.98%</td>
-      <td>$234,367</td>
+      <td>$255,717</td>
+    </tr>
+    <tr>
+      <td>Nikkei 225 Index</td>
+      <td>9.58%</td>
+      <td>18.03%</td>
+      <td>0.47</td>
+      <td>-34.01%</td>
+      <td>$249,720</td>
     </tr>
     <tr>
       <td>iShares MSCI EAFE adjusted-close proxy</td>
-      <td>6.99%</td>
-      <td>14.65%</td>
-      <td>0.40</td>
+      <td>9.34%</td>
+      <td>14.89%</td>
+      <td>0.52</td>
       <td>-27.62%</td>
-      <td>$225,043</td>
+      <td>$244,238</td>
     </tr>
     <tr>
-      <td>Swiss Market Index</td>
-      <td>5.58%</td>
-      <td>14.31%</td>
-      <td>0.32</td>
-      <td>-25.92%</td>
-      <td>$191,793</td>
-    </tr>
-    <tr>
-      <td>Equal-Weight Regional Index Basket</td>
-      <td>5.52%</td>
-      <td>14.75%</td>
-      <td>0.31</td>
-      <td>-28.51%</td>
-      <td>$190,623</td>
+      <td>Russell 2000 Index</td>
+      <td>9.16%</td>
+      <td>20.81%</td>
+      <td>0.41</td>
+      <td>-33.76%</td>
+      <td>$240,286</td>
     </tr>
     <tr>
       <td>EURO STOXX 50 Index</td>
-      <td>4.80%</td>
-      <td>18.60%</td>
-      <td>0.24</td>
+      <td>8.17%</td>
+      <td>18.90%</td>
+      <td>0.39</td>
       <td>-34.44%</td>
-      <td>$175,560</td>
+      <td>$219,270</td>
+    </tr>
+    <tr>
+      <td>Swiss Market Index</td>
+      <td>7.79%</td>
+      <td>14.60%</td>
+      <td>0.43</td>
+      <td>-25.92%</td>
+      <td>$211,667</td>
     </tr>
     <tr>
       <td>CAC 40 Index</td>
-      <td>4.64%</td>
-      <td>18.09%</td>
-      <td>0.23</td>
+      <td>7.05%</td>
+      <td>18.45%</td>
+      <td>0.34</td>
       <td>-30.37%</td>
-      <td>$172,405</td>
+      <td>$197,691</td>
+    </tr>
+    <tr>
+      <td>Equal-Weight Regional Index Basket</td>
+      <td>6.96%</td>
+      <td>14.46%</td>
+      <td>0.38</td>
+      <td>-28.51%</td>
+      <td>$195,989</td>
     </tr>
     <tr>
       <td>STOXX Europe 600 Index</td>
-      <td>4.33%</td>
-      <td>16.07%</td>
-      <td>0.22</td>
+      <td>6.95%</td>
+      <td>16.37%</td>
+      <td>0.35</td>
       <td>-31.71%</td>
-      <td>$166,219</td>
-    </tr>
-    <tr>
-      <td>Shanghai Composite Index</td>
-      <td>3.95%</td>
-      <td>21.42%</td>
-      <td>0.20</td>
-      <td>-51.25%</td>
-      <td>$159,187</td>
+      <td>$195,851</td>
     </tr>
     <tr>
       <td>FTSE 100 Index</td>
-      <td>2.13%</td>
-      <td>15.56%</td>
-      <td>0.09</td>
-      <td>-37.85%</td>
-      <td>$128,794</td>
+      <td>5.08%</td>
+      <td>15.63%</td>
+      <td>0.25</td>
+      <td>-33.92%</td>
+      <td>$164,058</td>
     </tr>
     <tr>
       <td>FTSE 250 Index</td>
-      <td>1.77%</td>
-      <td>19.69%</td>
-      <td>0.09</td>
+      <td>3.48%</td>
+      <td>20.13%</td>
+      <td>0.16</td>
       <td>-42.31%</td>
-      <td>$123,400</td>
+      <td>$140,812</td>
+    </tr>
+    <tr>
+      <td>Shanghai Composite Index</td>
+      <td>2.38%</td>
+      <td>17.33%</td>
+      <td>0.09</td>
+      <td>-34.52%</td>
+      <td>$126,460</td>
     </tr>
     <tr>
       <td>Hang Seng Index</td>
-      <td>0.27%</td>
-      <td>21.05%</td>
-      <td>0.02</td>
+      <td>1.58%</td>
+      <td>21.23%</td>
+      <td>0.07</td>
       <td>-55.51%</td>
-      <td>$103,332</td>
+      <td>$116,995</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Each standalone index is converted to USD and replayed as an uncharged buy-and-hold reference on $100,000. Price-index and total-return conventions differ, so these are broad path comparisons rather than perfectly dividend-consistent alpha tests. Nasdaq Composite Index has the highest common-window CAGR at 15.79%.</p>
+  <p class='interpretation'>Each standalone index is converted to USD and replayed as an uncharged buy-and-hold reference on $100,000. Price-index and total-return conventions differ, so these are broad path comparisons rather than perfectly dividend-consistent alpha tests. Nasdaq Composite Index has the highest common-window CAGR at 17.26%.</p>
   <div class='figure'><img src='plots/drawdowns.png' alt='Drawdowns'></div>
   <div class='figure'><img src='plots/annual_returns.png' alt='Annual return heatmap'></div>
   <h3>Portfolio-Relative Regional Benchmark Results</h3>
@@ -761,136 +761,136 @@
     <tr>
       <td>Portfolio-Aware Overlay</td>
       <td>Portfolio-Aware Overlay Regional Index Blend</td>
-      <td>8.90%</td>
-      <td>0.86</td>
-      <td>7.01%</td>
-      <td>1.14</td>
-      <td>161.42%</td>
-      <td>$578,603,131</td>
+      <td>8.10%</td>
+      <td>0.85</td>
+      <td>6.34%</td>
+      <td>1.07</td>
+      <td>99.49%</td>
+      <td>$385,219,752</td>
     </tr>
     <tr>
       <td>LLM Analyst Benchmark</td>
       <td>LLM Analyst Benchmark Regional Index Blend</td>
-      <td>4.22%</td>
-      <td>0.86</td>
-      <td>3.87%</td>
-      <td>0.99</td>
-      <td>57.32%</td>
-      <td>$79,012</td>
+      <td>2.98%</td>
+      <td>0.92</td>
+      <td>3.05%</td>
+      <td>0.90</td>
+      <td>30.80%</td>
+      <td>$42,243</td>
     </tr>
     <tr>
       <td>Current Portfolio</td>
       <td>Current Portfolio Regional Index Blend</td>
-      <td>9.10%</td>
-      <td>0.85</td>
-      <td>9.15%</td>
-      <td>0.89</td>
-      <td>162.74%</td>
-      <td>$556,961,826</td>
+      <td>8.13%</td>
+      <td>0.87</td>
+      <td>8.82%</td>
+      <td>0.79</td>
+      <td>99.50%</td>
+      <td>$381,655,098</td>
     </tr>
     <tr>
       <td>Dividend-Income Optimiser</td>
       <td>Dividend-Income Optimiser Regional Index Blend</td>
-      <td>6.05%</td>
-      <td>0.93</td>
-      <td>7.07%</td>
-      <td>0.80</td>
-      <td>95.48%</td>
-      <td>$162,399</td>
-    </tr>
-    <tr>
-      <td>Regime-Aware Optimiser</td>
-      <td>Regime-Aware Optimiser Regional Index Blend</td>
-      <td>5.83%</td>
-      <td>0.85</td>
-      <td>7.63%</td>
-      <td>0.66</td>
-      <td>83.40%</td>
-      <td>$141,794</td>
+      <td>5.24%</td>
+      <td>0.84</td>
+      <td>6.60%</td>
+      <td>0.65</td>
+      <td>55.27%</td>
+      <td>$90,807</td>
     </tr>
     <tr>
       <td>Clean-Sheet Quant</td>
       <td>Clean-Sheet Quant Regional Index Blend</td>
-      <td>5.40%</td>
-      <td>0.78</td>
-      <td>7.01%</td>
-      <td>0.62</td>
-      <td>68.49%</td>
-      <td>$114,504</td>
+      <td>4.22%</td>
+      <td>0.76</td>
+      <td>5.68%</td>
+      <td>0.54</td>
+      <td>35.96%</td>
+      <td>$55,773</td>
     </tr>
     <tr>
       <td>Score-Weighted Optimiser</td>
       <td>Score-Weighted Optimiser Regional Index Blend</td>
-      <td>5.44%</td>
-      <td>0.82</td>
-      <td>7.80%</td>
-      <td>0.56</td>
-      <td>70.36%</td>
-      <td>$128,901</td>
+      <td>4.72%</td>
+      <td>0.81</td>
+      <td>7.19%</td>
+      <td>0.47</td>
+      <td>42.47%</td>
+      <td>$75,230</td>
     </tr>
     <tr>
-      <td>Mean-Variance Optimiser</td>
-      <td>Mean-Variance Optimiser Regional Index Blend</td>
-      <td>5.82%</td>
-      <td>0.72</td>
-      <td>8.24%</td>
-      <td>0.49</td>
-      <td>68.53%</td>
-      <td>$127,655</td>
+      <td>Regime-Aware Optimiser</td>
+      <td>Regime-Aware Optimiser Regional Index Blend</td>
+      <td>4.56%</td>
+      <td>0.84</td>
+      <td>7.77%</td>
+      <td>0.44</td>
+      <td>41.16%</td>
+      <td>$74,648</td>
     </tr>
     <tr>
       <td>CVaR-Constrained Optimiser</td>
       <td>CVaR-Constrained Optimiser Regional Index Blend</td>
-      <td>5.09%</td>
-      <td>0.73</td>
-      <td>7.47%</td>
-      <td>0.46</td>
-      <td>58.03%</td>
-      <td>$103,443</td>
+      <td>4.48%</td>
+      <td>0.81</td>
+      <td>7.17%</td>
+      <td>0.44</td>
+      <td>38.50%</td>
+      <td>$71,344</td>
     </tr>
     <tr>
       <td>DRL Raw Challenger</td>
       <td>DRL Raw Challenger Regional Index Blend</td>
-      <td>4.68%</td>
-      <td>0.71</td>
-      <td>7.15%</td>
-      <td>0.42</td>
-      <td>49.25%</td>
-      <td>$161,636,507</td>
-    </tr>
-    <tr>
-      <td>Final Resolved Portfolio</td>
-      <td>Final Resolved Portfolio Regional Index Blend</td>
-      <td>4.88%</td>
-      <td>0.70</td>
-      <td>7.53%</td>
-      <td>0.41</td>
-      <td>52.30%</td>
-      <td>$173,476,358</td>
+      <td>3.95%</td>
+      <td>0.79</td>
+      <td>7.10%</td>
+      <td>0.35</td>
+      <td>30.09%</td>
+      <td>$102,292,575</td>
     </tr>
     <tr>
       <td>DRL Baseline Portfolio</td>
       <td>DRL Baseline Portfolio Regional Index Blend</td>
-      <td>4.88%</td>
-      <td>0.70</td>
-      <td>7.53%</td>
-      <td>0.41</td>
-      <td>52.30%</td>
-      <td>$173,476,358</td>
+      <td>4.13%</td>
+      <td>0.79</td>
+      <td>7.47%</td>
+      <td>0.35</td>
+      <td>31.86%</td>
+      <td>$109,841,171</td>
+    </tr>
+    <tr>
+      <td>Final Resolved Portfolio</td>
+      <td>Final Resolved Portfolio Regional Index Blend</td>
+      <td>4.13%</td>
+      <td>0.79</td>
+      <td>7.47%</td>
+      <td>0.35</td>
+      <td>31.86%</td>
+      <td>$109,841,171</td>
     </tr>
     <tr>
       <td>Risk-Parity Optimiser</td>
       <td>Risk-Parity Optimiser Regional Index Blend</td>
-      <td>4.63%</td>
-      <td>0.71</td>
-      <td>7.40%</td>
-      <td>0.32</td>
-      <td>39.54%</td>
-      <td>$87,056</td>
+      <td>3.83%</td>
+      <td>0.83</td>
+      <td>6.80%</td>
+      <td>0.35</td>
+      <td>28.01%</td>
+      <td>$59,673</td>
+    </tr>
+    <tr>
+      <td>Mean-Variance Optimiser</td>
+      <td>Mean-Variance Optimiser Regional Index Blend</td>
+      <td>4.38%</td>
+      <td>0.77</td>
+      <td>7.78%</td>
+      <td>0.34</td>
+      <td>32.34%</td>
+      <td>$62,631</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Each portfolio is compared with an index blend matching its regional weights. Alpha is annualized return not explained by beta, tracking error is active-return volatility, and information ratio is active return per unit of tracking error. Portfolio-Aware Overlay has the highest information ratio at 1.14 and relative PnL of $578,603,131.</p>
+  <p class='interpretation'>Each portfolio is compared with an index blend matching its regional weights. Alpha is annualized return not explained by beta, tracking error is active-return volatility, and information ratio is active return per unit of tracking error. Portfolio-Aware Overlay has the highest information ratio at 1.07 and relative PnL of $385,219,752.</p>
 
   <h2>Interest Rates and Market Regimes</h2>
   <div class='figure'><img src='plots/interest_rate_history.png' alt='Interest-rate history'></div>
@@ -914,11 +914,11 @@
       <td>High (&gt;=4%)</td>
       <td>Clean-Sheet Quant</td>
       <td>105</td>
-      <td>17.06%</td>
-      <td>8.81%</td>
-      <td>1.30</td>
-      <td>-4.97%</td>
-      <td>-0.050</td>
+      <td>12.72%</td>
+      <td>6.38%</td>
+      <td>1.16</td>
+      <td>-4.33%</td>
+      <td>-0.031</td>
     </tr>
     <tr>
       <td>High (&gt;=4%)</td>
@@ -964,21 +964,21 @@
       <td>High (&gt;=4%)</td>
       <td>Final Resolved Portfolio</td>
       <td>105</td>
-      <td>16.44%</td>
-      <td>8.81%</td>
-      <td>1.23</td>
-      <td>-8.84%</td>
-      <td>-0.070</td>
+      <td>17.49%</td>
+      <td>9.74%</td>
+      <td>1.22</td>
+      <td>-10.15%</td>
+      <td>-0.082</td>
     </tr>
     <tr>
       <td>High (&gt;=4%)</td>
       <td>LLM Analyst Benchmark</td>
       <td>105</td>
-      <td>8.52%</td>
-      <td>3.36%</td>
-      <td>1.03</td>
-      <td>-2.94%</td>
-      <td>-0.025</td>
+      <td>8.03%</td>
+      <td>3.19%</td>
+      <td>0.94</td>
+      <td>-2.17%</td>
+      <td>-0.012</td>
     </tr>
     <tr>
       <td>High (&gt;=4%)</td>
@@ -1004,11 +1004,11 @@
       <td>Low (&lt;2%)</td>
       <td>Clean-Sheet Quant</td>
       <td>198</td>
-      <td>5.02%</td>
-      <td>11.63%</td>
-      <td>0.43</td>
-      <td>-32.33%</td>
-      <td>-0.127</td>
+      <td>3.38%</td>
+      <td>9.03%</td>
+      <td>0.35</td>
+      <td>-28.08%</td>
+      <td>-0.104</td>
     </tr>
     <tr>
       <td>Low (&lt;2%)</td>
@@ -1054,21 +1054,21 @@
       <td>Low (&lt;2%)</td>
       <td>Final Resolved Portfolio</td>
       <td>198</td>
-      <td>5.04%</td>
-      <td>12.43%</td>
-      <td>0.41</td>
-      <td>-32.34%</td>
-      <td>-0.131</td>
+      <td>5.95%</td>
+      <td>12.80%</td>
+      <td>0.47</td>
+      <td>-31.05%</td>
+      <td>-0.117</td>
     </tr>
     <tr>
       <td>Low (&lt;2%)</td>
       <td>LLM Analyst Benchmark</td>
       <td>198</td>
-      <td>3.99%</td>
-      <td>5.91%</td>
-      <td>0.59</td>
-      <td>-13.29%</td>
-      <td>-0.054</td>
+      <td>3.20%</td>
+      <td>4.22%</td>
+      <td>0.63</td>
+      <td>-10.21%</td>
+      <td>-0.037</td>
     </tr>
     <tr>
       <td>Low (&lt;2%)</td>
@@ -1094,11 +1094,11 @@
       <td>Moderate (2-4%)</td>
       <td>Clean-Sheet Quant</td>
       <td>51</td>
-      <td>5.29%</td>
-      <td>10.84%</td>
-      <td>0.25</td>
-      <td>-10.13%</td>
-      <td>-0.060</td>
+      <td>4.98%</td>
+      <td>8.20%</td>
+      <td>0.27</td>
+      <td>-10.65%</td>
+      <td>-0.056</td>
     </tr>
     <tr>
       <td>Moderate (2-4%)</td>
@@ -1144,21 +1144,21 @@
       <td>Moderate (2-4%)</td>
       <td>Final Resolved Portfolio</td>
       <td>51</td>
-      <td>5.30%</td>
-      <td>11.06%</td>
-      <td>0.25</td>
-      <td>-13.59%</td>
-      <td>-0.072</td>
+      <td>5.71%</td>
+      <td>11.44%</td>
+      <td>0.28</td>
+      <td>-12.86%</td>
+      <td>-0.080</td>
     </tr>
     <tr>
       <td>Moderate (2-4%)</td>
       <td>LLM Analyst Benchmark</td>
       <td>51</td>
-      <td>5.44%</td>
-      <td>5.97%</td>
-      <td>0.42</td>
-      <td>-4.49%</td>
-      <td>-0.031</td>
+      <td>4.80%</td>
+      <td>4.70%</td>
+      <td>0.39</td>
+      <td>-5.40%</td>
+      <td>-0.028</td>
     </tr>
     <tr>
       <td>Moderate (2-4%)</td>
@@ -1182,7 +1182,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>This table groups non-contiguous months by the lagged 3-month Treasury-bill yield level and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is High (>=4%), with a conditional geometric return of 16.44% across 105 months.</p>
+  <p class='interpretation'>This table groups non-contiguous months by the lagged 3-month Treasury-bill yield level and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is High (>=4%), with a conditional geometric return of 17.49% across 105 months.</p>
   <h3>Interest-Rate Direction Performance</h3>
   <div class='table-wrap'><table class="dataframe data-table">
   <thead>
@@ -1202,11 +1202,11 @@
       <td>Falling</td>
       <td>Clean-Sheet Quant</td>
       <td>78</td>
-      <td>0.48%</td>
-      <td>14.01%</td>
-      <td>-0.03</td>
-      <td>-36.32%</td>
-      <td>-0.127</td>
+      <td>-0.44%</td>
+      <td>11.12%</td>
+      <td>-0.15</td>
+      <td>-31.92%</td>
+      <td>-0.104</td>
     </tr>
     <tr>
       <td>Falling</td>
@@ -1252,21 +1252,21 @@
       <td>Falling</td>
       <td>Final Resolved Portfolio</td>
       <td>78</td>
-      <td>0.89%</td>
-      <td>14.01%</td>
-      <td>-0.00</td>
-      <td>-40.50%</td>
-      <td>-0.131</td>
+      <td>2.23%</td>
+      <td>14.46%</td>
+      <td>0.09</td>
+      <td>-41.23%</td>
+      <td>-0.117</td>
     </tr>
     <tr>
       <td>Falling</td>
       <td>LLM Analyst Benchmark</td>
       <td>78</td>
-      <td>7.39%</td>
-      <td>6.77%</td>
-      <td>0.81</td>
-      <td>-13.29%</td>
-      <td>-0.054</td>
+      <td>4.96%</td>
+      <td>4.72%</td>
+      <td>0.65</td>
+      <td>-10.21%</td>
+      <td>-0.037</td>
     </tr>
     <tr>
       <td>Falling</td>
@@ -1292,11 +1292,11 @@
       <td>Rising</td>
       <td>Clean-Sheet Quant</td>
       <td>79</td>
-      <td>13.70%</td>
-      <td>10.72%</td>
-      <td>0.92</td>
-      <td>-14.08%</td>
-      <td>-0.055</td>
+      <td>10.42%</td>
+      <td>7.91%</td>
+      <td>0.84</td>
+      <td>-9.98%</td>
+      <td>-0.041</td>
     </tr>
     <tr>
       <td>Rising</td>
@@ -1342,21 +1342,21 @@
       <td>Rising</td>
       <td>Final Resolved Portfolio</td>
       <td>79</td>
-      <td>13.25%</td>
-      <td>11.42%</td>
-      <td>0.83</td>
-      <td>-16.83%</td>
-      <td>-0.070</td>
+      <td>11.41%</td>
+      <td>11.93%</td>
+      <td>0.66</td>
+      <td>-22.38%</td>
+      <td>-0.082</td>
     </tr>
     <tr>
       <td>Rising</td>
       <td>LLM Analyst Benchmark</td>
       <td>79</td>
-      <td>6.65%</td>
-      <td>4.85%</td>
-      <td>0.60</td>
-      <td>-7.55%</td>
-      <td>-0.030</td>
+      <td>7.24%</td>
+      <td>4.21%</td>
+      <td>0.82</td>
+      <td>-3.95%</td>
+      <td>-0.017</td>
     </tr>
     <tr>
       <td>Rising</td>
@@ -1382,11 +1382,11 @@
       <td>Stable</td>
       <td>Clean-Sheet Quant</td>
       <td>185</td>
-      <td>9.30%</td>
-      <td>9.44%</td>
-      <td>0.84</td>
-      <td>-16.68%</td>
-      <td>-0.072</td>
+      <td>7.15%</td>
+      <td>7.05%</td>
+      <td>0.81</td>
+      <td>-11.22%</td>
+      <td>-0.061</td>
     </tr>
     <tr>
       <td>Stable</td>
@@ -1432,21 +1432,21 @@
       <td>Stable</td>
       <td>Final Resolved Portfolio</td>
       <td>185</td>
-      <td>9.34%</td>
-      <td>10.28%</td>
-      <td>0.78</td>
-      <td>-16.95%</td>
-      <td>-0.079</td>
+      <td>10.97%</td>
+      <td>10.85%</td>
+      <td>0.88</td>
+      <td>-15.65%</td>
+      <td>-0.067</td>
     </tr>
     <tr>
       <td>Stable</td>
       <td>LLM Analyst Benchmark</td>
       <td>185</td>
-      <td>4.32%</td>
-      <td>4.96%</td>
-      <td>0.59</td>
-      <td>-9.21%</td>
-      <td>-0.049</td>
+      <td>3.84%</td>
+      <td>3.78%</td>
+      <td>0.64</td>
+      <td>-6.45%</td>
+      <td>-0.028</td>
     </tr>
     <tr>
       <td>Stable</td>
@@ -1470,7 +1470,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>This table groups non-contiguous months by the prior 12-month change in the Treasury-bill yield and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Rising, with a conditional geometric return of 13.25% across 79 months.</p>
+  <p class='interpretation'>This table groups non-contiguous months by the prior 12-month change in the Treasury-bill yield and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Rising, with a conditional geometric return of 11.41% across 79 months.</p>
   <h3>Lagged Market Regime Performance</h3>
   <div class='figure'><img src='plots/market_regime_performance.png' alt='Performance across market regimes'></div>
   <div class='table-wrap'><table class="dataframe data-table">
@@ -1491,11 +1491,11 @@
       <td>Bear / Calm</td>
       <td>Clean-Sheet Quant</td>
       <td>37</td>
-      <td>-5.16%</td>
-      <td>12.93%</td>
-      <td>-0.46</td>
-      <td>-25.87%</td>
-      <td>-0.088</td>
+      <td>-2.60%</td>
+      <td>10.32%</td>
+      <td>-0.34</td>
+      <td>-18.60%</td>
+      <td>-0.070</td>
     </tr>
     <tr>
       <td>Bear / Calm</td>
@@ -1541,21 +1541,21 @@
       <td>Bear / Calm</td>
       <td>Final Resolved Portfolio</td>
       <td>37</td>
-      <td>-2.52%</td>
-      <td>13.09%</td>
-      <td>-0.24</td>
-      <td>-21.67%</td>
-      <td>-0.079</td>
+      <td>1.69%</td>
+      <td>14.55%</td>
+      <td>0.08</td>
+      <td>-23.60%</td>
+      <td>-0.088</td>
     </tr>
     <tr>
       <td>Bear / Calm</td>
       <td>LLM Analyst Benchmark</td>
       <td>37</td>
-      <td>1.48%</td>
-      <td>6.79%</td>
-      <td>0.03</td>
-      <td>-8.29%</td>
-      <td>-0.049</td>
+      <td>0.94%</td>
+      <td>4.02%</td>
+      <td>-0.11</td>
+      <td>-5.25%</td>
+      <td>-0.023</td>
     </tr>
     <tr>
       <td>Bear / Calm</td>
@@ -1581,11 +1581,11 @@
       <td>Bear / Volatile</td>
       <td>Clean-Sheet Quant</td>
       <td>43</td>
-      <td>12.02%</td>
-      <td>14.22%</td>
-      <td>0.74</td>
-      <td>-16.72%</td>
-      <td>-0.127</td>
+      <td>8.25%</td>
+      <td>11.47%</td>
+      <td>0.59</td>
+      <td>-15.48%</td>
+      <td>-0.104</td>
     </tr>
     <tr>
       <td>Bear / Volatile</td>
@@ -1631,21 +1631,21 @@
       <td>Bear / Volatile</td>
       <td>Final Resolved Portfolio</td>
       <td>43</td>
-      <td>10.81%</td>
-      <td>15.56%</td>
-      <td>0.62</td>
-      <td>-22.51%</td>
-      <td>-0.131</td>
+      <td>8.49%</td>
+      <td>16.13%</td>
+      <td>0.47</td>
+      <td>-25.23%</td>
+      <td>-0.117</td>
     </tr>
     <tr>
       <td>Bear / Volatile</td>
       <td>LLM Analyst Benchmark</td>
       <td>43</td>
-      <td>9.63%</td>
-      <td>6.12%</td>
-      <td>1.24</td>
-      <td>-5.55%</td>
-      <td>-0.054</td>
+      <td>8.00%</td>
+      <td>5.08%</td>
+      <td>1.18</td>
+      <td>-5.47%</td>
+      <td>-0.037</td>
     </tr>
     <tr>
       <td>Bear / Volatile</td>
@@ -1671,11 +1671,11 @@
       <td>Bull / Calm</td>
       <td>Clean-Sheet Quant</td>
       <td>226</td>
-      <td>9.24%</td>
-      <td>9.97%</td>
-      <td>0.72</td>
-      <td>-27.31%</td>
-      <td>-0.096</td>
+      <td>6.80%</td>
+      <td>7.41%</td>
+      <td>0.63</td>
+      <td>-20.91%</td>
+      <td>-0.071</td>
     </tr>
     <tr>
       <td>Bull / Calm</td>
@@ -1721,21 +1721,21 @@
       <td>Bull / Calm</td>
       <td>Final Resolved Portfolio</td>
       <td>226</td>
-      <td>8.94%</td>
-      <td>10.37%</td>
-      <td>0.67</td>
-      <td>-29.82%</td>
-      <td>-0.083</td>
+      <td>9.34%</td>
+      <td>10.74%</td>
+      <td>0.68</td>
+      <td>-33.52%</td>
+      <td>-0.102</td>
     </tr>
     <tr>
       <td>Bull / Calm</td>
       <td>LLM Analyst Benchmark</td>
       <td>226</td>
-      <td>4.90%</td>
-      <td>4.80%</td>
-      <td>0.57</td>
-      <td>-10.95%</td>
-      <td>-0.034</td>
+      <td>4.86%</td>
+      <td>3.90%</td>
+      <td>0.68</td>
+      <td>-9.29%</td>
+      <td>-0.027</td>
     </tr>
     <tr>
       <td>Bull / Calm</td>
@@ -1761,11 +1761,11 @@
       <td>Bull / Volatile</td>
       <td>Clean-Sheet Quant</td>
       <td>36</td>
-      <td>11.98%</td>
-      <td>9.96%</td>
-      <td>0.98</td>
-      <td>-4.56%</td>
-      <td>-0.046</td>
+      <td>8.61%</td>
+      <td>7.38%</td>
+      <td>0.88</td>
+      <td>-3.99%</td>
+      <td>-0.040</td>
     </tr>
     <tr>
       <td>Bull / Volatile</td>
@@ -1811,21 +1811,21 @@
       <td>Bull / Volatile</td>
       <td>Final Resolved Portfolio</td>
       <td>36</td>
-      <td>12.48%</td>
-      <td>11.00%</td>
-      <td>0.94</td>
-      <td>-8.11%</td>
-      <td>-0.057</td>
+      <td>15.55%</td>
+      <td>11.26%</td>
+      <td>1.16</td>
+      <td>-7.47%</td>
+      <td>-0.055</td>
     </tr>
     <tr>
       <td>Bull / Volatile</td>
       <td>LLM Analyst Benchmark</td>
       <td>36</td>
-      <td>9.14%</td>
-      <td>6.27%</td>
-      <td>1.09</td>
-      <td>-3.50%</td>
-      <td>-0.030</td>
+      <td>5.38%</td>
+      <td>4.15%</td>
+      <td>0.80</td>
+      <td>-2.80%</td>
+      <td>-0.028</td>
     </tr>
     <tr>
       <td>Bull / Volatile</td>
@@ -1849,7 +1849,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>This table groups non-contiguous months by lagged S&P 500 momentum and volatility and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Bull / Volatile, with a conditional geometric return of 12.48% across 36 months.</p>
+  <p class='interpretation'>This table groups non-contiguous months by lagged S&P 500 momentum and volatility and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Bull / Volatile, with a conditional geometric return of 15.55% across 36 months.</p>
   <h3>Retrospective Economic-Cycle Performance</h3>
   <div class='table-wrap'><table class="dataframe data-table">
   <thead>
@@ -1869,11 +1869,11 @@
       <td>Expansion</td>
       <td>Clean-Sheet Quant</td>
       <td>326</td>
-      <td>9.74%</td>
-      <td>10.20%</td>
-      <td>0.75</td>
-      <td>-17.28%</td>
-      <td>-0.096</td>
+      <td>7.29%</td>
+      <td>7.76%</td>
+      <td>0.66</td>
+      <td>-13.56%</td>
+      <td>-0.071</td>
     </tr>
     <tr>
       <td>Expansion</td>
@@ -1919,21 +1919,21 @@
       <td>Expansion</td>
       <td>Final Resolved Portfolio</td>
       <td>326</td>
-      <td>9.44%</td>
-      <td>10.80%</td>
-      <td>0.69</td>
-      <td>-20.40%</td>
-      <td>-0.083</td>
+      <td>10.53%</td>
+      <td>11.39%</td>
+      <td>0.74</td>
+      <td>-26.66%</td>
+      <td>-0.102</td>
     </tr>
     <tr>
       <td>Expansion</td>
       <td>LLM Analyst Benchmark</td>
       <td>326</td>
-      <td>5.50%</td>
-      <td>5.02%</td>
-      <td>0.65</td>
-      <td>-9.21%</td>
-      <td>-0.049</td>
+      <td>4.99%</td>
+      <td>3.89%</td>
+      <td>0.71</td>
+      <td>-6.65%</td>
+      <td>-0.028</td>
     </tr>
     <tr>
       <td>Expansion</td>
@@ -1959,11 +1959,11 @@
       <td>Recession</td>
       <td>Clean-Sheet Quant</td>
       <td>28</td>
-      <td>-5.00%</td>
-      <td>16.18%</td>
-      <td>-0.32</td>
-      <td>-35.18%</td>
-      <td>-0.127</td>
+      <td>-4.50%</td>
+      <td>12.57%</td>
+      <td>-0.41</td>
+      <td>-28.72%</td>
+      <td>-0.104</td>
     </tr>
     <tr>
       <td>Recession</td>
@@ -2009,21 +2009,21 @@
       <td>Recession</td>
       <td>Final Resolved Portfolio</td>
       <td>28</td>
-      <td>-3.69%</td>
-      <td>16.14%</td>
-      <td>-0.23</td>
-      <td>-33.89%</td>
-      <td>-0.131</td>
+      <td>-4.95%</td>
+      <td>15.78%</td>
+      <td>-0.33</td>
+      <td>-34.26%</td>
+      <td>-0.117</td>
     </tr>
     <tr>
       <td>Recession</td>
       <td>LLM Analyst Benchmark</td>
       <td>28</td>
-      <td>5.81%</td>
-      <td>8.02%</td>
-      <td>0.57</td>
-      <td>-13.29%</td>
-      <td>-0.054</td>
+      <td>3.05%</td>
+      <td>5.66%</td>
+      <td>0.32</td>
+      <td>-10.21%</td>
+      <td>-0.037</td>
     </tr>
     <tr>
       <td>Recession</td>
@@ -2047,7 +2047,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>This table groups non-contiguous months by the retrospective NBER recession indicator and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Expansion, with a conditional geometric return of 9.44% across 326 months.</p>
+  <p class='interpretation'>This table groups non-contiguous months by the retrospective NBER recession indicator and annualizes the observations in each group. It is a conditional description, not a continuous investable path or a causal estimate. For Final Resolved Portfolio, the strongest group is Expansion, with a conditional geometric return of 10.53% across 326 months.</p>
 
   <h2>Major Macro Events</h2>
   <div class='figure'><img src='plots/macro_event_timeline.png' alt='Wealth through major macro events'><p class='caption'>Shading includes the Asian crisis, dot-com bust, global financial crisis, COVID-19, political shocks, and war windows through the 2026 US-Iran conflict.</p></div>
@@ -2187,11 +2187,11 @@
       <td>Asian financial crisis</td>
       <td>Final Resolved Portfolio</td>
       <td>16</td>
-      <td>11.64%</td>
-      <td>-2.48%</td>
-      <td>-0.025</td>
-      <td>$195,423,521</td>
-      <td>$22,741,363</td>
+      <td>14.37%</td>
+      <td>-3.63%</td>
+      <td>-0.029</td>
+      <td>$198,366,990</td>
+      <td>$28,505,975</td>
     </tr>
     <tr>
       <td>Asian financial crisis</td>
@@ -2217,11 +2217,11 @@
       <td>Dot-com bust</td>
       <td>Final Resolved Portfolio</td>
       <td>32</td>
-      <td>-5.29%</td>
-      <td>-17.59%</td>
-      <td>-0.066</td>
-      <td>$228,947,233</td>
-      <td>$-12,112,391</td>
+      <td>-11.44%</td>
+      <td>-19.95%</td>
+      <td>-0.070</td>
+      <td>$260,956,517</td>
+      <td>$-29,854,375</td>
     </tr>
     <tr>
       <td>Dot-com bust</td>
@@ -2247,11 +2247,11 @@
       <td>9/11 and Afghanistan war shock</td>
       <td>Final Resolved Portfolio</td>
       <td>5</td>
-      <td>-4.71%</td>
-      <td>-4.71%</td>
-      <td>-0.039</td>
-      <td>$245,405,797</td>
-      <td>$-11,555,094</td>
+      <td>-6.08%</td>
+      <td>-6.08%</td>
+      <td>-0.050</td>
+      <td>$263,701,486</td>
+      <td>$-16,038,481</td>
     </tr>
     <tr>
       <td>9/11 and Afghanistan war shock</td>
@@ -2277,11 +2277,11 @@
       <td>Iraq invasion shock</td>
       <td>Final Resolved Portfolio</td>
       <td>3</td>
-      <td>5.67%</td>
-      <td>-2.38%</td>
-      <td>-0.024</td>
-      <td>$214,592,509</td>
-      <td>$12,174,247</td>
+      <td>6.58%</td>
+      <td>-3.01%</td>
+      <td>-0.030</td>
+      <td>$226,429,227</td>
+      <td>$14,888,149</td>
     </tr>
     <tr>
       <td>Iraq invasion shock</td>
@@ -2307,11 +2307,11 @@
       <td>Global financial crisis</td>
       <td>Final Resolved Portfolio</td>
       <td>20</td>
-      <td>-15.31%</td>
-      <td>-36.41%</td>
-      <td>-0.131</td>
-      <td>$551,030,427</td>
-      <td>$-84,388,160</td>
+      <td>-15.51%</td>
+      <td>-35.16%</td>
+      <td>-0.117</td>
+      <td>$598,712,305</td>
+      <td>$-92,854,165</td>
     </tr>
     <tr>
       <td>Global financial crisis</td>
@@ -2337,11 +2337,11 @@
       <td>Euro-area sovereign debt crisis</td>
       <td>Final Resolved Portfolio</td>
       <td>31</td>
-      <td>-0.71%</td>
-      <td>-16.95%</td>
+      <td>-0.16%</td>
+      <td>-15.65%</td>
       <td>-0.066</td>
-      <td>$522,939,974</td>
-      <td>$-3,711,369</td>
+      <td>$578,227,765</td>
+      <td>$-912,738</td>
     </tr>
     <tr>
       <td>Euro-area sovereign debt crisis</td>
@@ -2367,11 +2367,11 @@
       <td>Crimea invasion and annexation shock</td>
       <td>Final Resolved Portfolio</td>
       <td>3</td>
-      <td>5.36%</td>
+      <td>6.30%</td>
       <td>0.00%</td>
-      <td>0.013</td>
-      <td>$670,396,335</td>
-      <td>$35,906,038</td>
+      <td>0.012</td>
+      <td>$757,992,925</td>
+      <td>$47,732,206</td>
     </tr>
     <tr>
       <td>Crimea invasion and annexation shock</td>
@@ -2397,11 +2397,11 @@
       <td>Brexit referendum shock</td>
       <td>Final Resolved Portfolio</td>
       <td>3</td>
-      <td>3.52%</td>
-      <td>-0.40%</td>
-      <td>-0.004</td>
-      <td>$818,966,854</td>
-      <td>$28,824,198</td>
+      <td>10.53%</td>
+      <td>-0.34%</td>
+      <td>-0.003</td>
+      <td>$924,953,093</td>
+      <td>$97,442,077</td>
     </tr>
     <tr>
       <td>Brexit referendum shock</td>
@@ -2427,11 +2427,11 @@
       <td>COVID-19 market crash</td>
       <td>Final Resolved Portfolio</td>
       <td>4</td>
-      <td>-12.01%</td>
-      <td>-15.04%</td>
-      <td>-0.083</td>
-      <td>$1,040,535,607</td>
-      <td>$-124,954,845</td>
+      <td>-11.75%</td>
+      <td>-15.38%</td>
+      <td>-0.102</td>
+      <td>$1,367,180,250</td>
+      <td>$-160,705,750</td>
     </tr>
     <tr>
       <td>COVID-19 market crash</td>
@@ -2457,11 +2457,11 @@
       <td>Russia-Ukraine full-scale invasion shock</td>
       <td>Final Resolved Portfolio</td>
       <td>6</td>
-      <td>-9.61%</td>
-      <td>-9.61%</td>
-      <td>-0.036</td>
-      <td>$1,189,642,420</td>
-      <td>$-114,336,293</td>
+      <td>-12.10%</td>
+      <td>-12.10%</td>
+      <td>-0.037</td>
+      <td>$1,613,164,218</td>
+      <td>$-195,207,491</td>
     </tr>
     <tr>
       <td>Russia-Ukraine full-scale invasion shock</td>
@@ -2487,11 +2487,11 @@
       <td>Gaza war shock</td>
       <td>Final Resolved Portfolio</td>
       <td>5</td>
-      <td>4.23%</td>
-      <td>-2.37%</td>
-      <td>-0.024</td>
-      <td>$1,187,602,775</td>
-      <td>$50,229,930</td>
+      <td>4.87%</td>
+      <td>-2.15%</td>
+      <td>-0.022</td>
+      <td>$1,506,402,435</td>
+      <td>$73,432,147</td>
     </tr>
     <tr>
       <td>Gaza war shock</td>
@@ -2517,11 +2517,11 @@
       <td>Israel-Iran war shock</td>
       <td>Final Resolved Portfolio</td>
       <td>1</td>
-      <td>0.99%</td>
+      <td>2.15%</td>
       <td>0.00%</td>
-      <td>0.010</td>
-      <td>$1,666,217,603</td>
-      <td>$16,445,233</td>
+      <td>0.021</td>
+      <td>$2,086,907,840</td>
+      <td>$44,828,759</td>
     </tr>
     <tr>
       <td>Israel-Iran war shock</td>
@@ -2547,11 +2547,11 @@
       <td>2026 US-Iran war shock</td>
       <td>Final Resolved Portfolio</td>
       <td>3</td>
-      <td>4.78%</td>
-      <td>-4.27%</td>
-      <td>-0.043</td>
-      <td>$1,801,956,971</td>
-      <td>$86,072,281</td>
+      <td>5.70%</td>
+      <td>-4.89%</td>
+      <td>-0.049</td>
+      <td>$2,268,575,177</td>
+      <td>$129,296,690</td>
     </tr>
     <tr>
       <td>2026 US-Iran war shock</td>
@@ -2565,7 +2565,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Event return compounds all overlapping monthly observations, event drawdown measures the loss within that window, and event PnL applies the return to actual simulated AUM at the start of the window. The weakest configured event for the final portfolio is Global financial crisis, returning -15.31% with a -36.41% within-window drawdown.</p>
+  <p class='interpretation'>Event return compounds all overlapping monthly observations, event drawdown measures the loss within that window, and event PnL applies the return to actual simulated AUM at the start of the window. The weakest configured event for the final portfolio is Global financial crisis, returning -15.51% with a -35.16% within-window drawdown.</p>
 
   <h2>The Three Backtests</h2>
   <div class='two'>
@@ -2603,111 +2603,111 @@
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
-      <td>7.83%</td>
-      <td>13.96%</td>
-      <td>19.70%</td>
-      <td>-60.02%</td>
+      <td>7.50%</td>
+      <td>13.35%</td>
+      <td>18.77%</td>
+      <td>-58.96%</td>
       <td>0.02%</td>
       <td>100.00%</td>
     </tr>
     <tr>
-      <td>optimised_dividend_income</td>
-      <td>4.94%</td>
-      <td>10.67%</td>
-      <td>16.76%</td>
-      <td>-59.45%</td>
-      <td>0.18%</td>
-      <td>99.80%</td>
-    </tr>
-    <tr>
       <td>optimised_risk_parity</td>
-      <td>6.70%</td>
-      <td>10.49%</td>
-      <td>14.31%</td>
-      <td>-41.19%</td>
+      <td>7.47%</td>
+      <td>11.94%</td>
+      <td>16.40%</td>
+      <td>-44.58%</td>
       <td>0.00%</td>
-      <td>96.00%</td>
+      <td>99.42%</td>
     </tr>
     <tr>
-      <td>optimised_regime_aware</td>
-      <td>5.45%</td>
-      <td>10.11%</td>
-      <td>15.15%</td>
-      <td>-51.63%</td>
-      <td>0.02%</td>
-      <td>99.54%</td>
+      <td>optimised_dividend_income</td>
+      <td>5.61%</td>
+      <td>10.84%</td>
+      <td>16.45%</td>
+      <td>-55.33%</td>
+      <td>0.06%</td>
+      <td>99.88%</td>
     </tr>
     <tr>
       <td>optimised_score_weighted</td>
-      <td>5.44%</td>
-      <td>9.81%</td>
-      <td>14.57%</td>
-      <td>-46.43%</td>
+      <td>6.51%</td>
+      <td>10.68%</td>
+      <td>14.82%</td>
+      <td>-42.63%</td>
       <td>0.00%</td>
-      <td>98.26%</td>
+      <td>99.56%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>5.70%</td>
+      <td>10.61%</td>
+      <td>15.47%</td>
+      <td>-54.21%</td>
+      <td>0.06%</td>
+      <td>99.92%</td>
     </tr>
     <tr>
       <td>optimised_mean_variance</td>
-      <td>5.13%</td>
-      <td>9.13%</td>
-      <td>13.04%</td>
-      <td>-48.03%</td>
-      <td>0.02%</td>
-      <td>94.26%</td>
+      <td>5.85%</td>
+      <td>10.06%</td>
+      <td>14.12%</td>
+      <td>-45.89%</td>
+      <td>0.00%</td>
+      <td>98.46%</td>
     </tr>
     <tr>
       <td>optimised_cvar_constrained</td>
-      <td>4.65%</td>
-      <td>8.78%</td>
-      <td>12.85%</td>
-      <td>-48.33%</td>
-      <td>0.08%</td>
-      <td>94.66%</td>
-    </tr>
-    <tr>
-      <td>clean_sheet</td>
-      <td>4.22%</td>
-      <td>8.56%</td>
-      <td>13.00%</td>
-      <td>-48.13%</td>
-      <td>0.06%</td>
-      <td>99.16%</td>
-    </tr>
-    <tr>
-      <td>drl_baseline</td>
-      <td>4.15%</td>
-      <td>8.45%</td>
-      <td>12.70%</td>
-      <td>-49.10%</td>
-      <td>0.10%</td>
-      <td>94.08%</td>
+      <td>5.58%</td>
+      <td>9.96%</td>
+      <td>14.22%</td>
+      <td>-47.77%</td>
+      <td>0.00%</td>
+      <td>99.18%</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
-      <td>4.15%</td>
-      <td>8.45%</td>
-      <td>12.70%</td>
-      <td>-49.10%</td>
-      <td>0.10%</td>
-      <td>94.08%</td>
+      <td>4.76%</td>
+      <td>9.36%</td>
+      <td>13.80%</td>
+      <td>-49.15%</td>
+      <td>0.00%</td>
+      <td>98.92%</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>4.76%</td>
+      <td>9.36%</td>
+      <td>13.80%</td>
+      <td>-49.15%</td>
+      <td>0.00%</td>
+      <td>98.92%</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
-      <td>4.09%</td>
-      <td>8.16%</td>
-      <td>12.20%</td>
-      <td>-47.29%</td>
+      <td>4.67%</td>
+      <td>9.04%</td>
+      <td>13.24%</td>
+      <td>-47.19%</td>
+      <td>0.00%</td>
+      <td>98.94%</td>
+    </tr>
+    <tr>
+      <td>clean_sheet</td>
+      <td>3.27%</td>
+      <td>6.39%</td>
+      <td>9.37%</td>
+      <td>-40.89%</td>
       <td>0.08%</td>
-      <td>93.64%</td>
+      <td>92.42%</td>
     </tr>
     <tr>
       <td>llm_benchmark</td>
-      <td>3.80%</td>
-      <td>5.53%</td>
-      <td>7.32%</td>
-      <td>-17.05%</td>
+      <td>3.39%</td>
+      <td>4.88%</td>
+      <td>6.29%</td>
+      <td>-14.18%</td>
       <td>0.00%</td>
-      <td>98.96%</td>
+      <td>99.82%</td>
     </tr>
     <tr>
       <td>trend_risk_controlled_indices</td>
@@ -2739,161 +2739,161 @@
   <tbody>
     <tr>
       <td>current_portfolio</td>
-      <td>7.99%</td>
-      <td>14.71%</td>
-      <td>19.04%</td>
-      <td>-74.18%</td>
-      <td>$1,795,405,251</td>
-      <td>$10,651,681,541</td>
-      <td>$31,778,952,779</td>
-      <td>0.92%</td>
+      <td>7.95%</td>
+      <td>14.79%</td>
+      <td>19.22%</td>
+      <td>-74.83%</td>
+      <td>$1,774,820,428</td>
+      <td>$10,892,738,803</td>
+      <td>$33,227,104,427</td>
+      <td>1.14%</td>
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
-      <td>7.84%</td>
-      <td>14.29%</td>
-      <td>18.63%</td>
-      <td>-71.43%</td>
-      <td>$1,725,294,089</td>
-      <td>$9,568,813,085</td>
-      <td>$28,703,239,109</td>
-      <td>0.90%</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>4.92%</td>
-      <td>11.18%</td>
-      <td>15.45%</td>
-      <td>-76.02%</td>
-      <td>$412,597</td>
-      <td>$2,279,710</td>
-      <td>$6,922,512</td>
-      <td>1.60%</td>
+      <td>7.35%</td>
+      <td>13.70%</td>
+      <td>17.99%</td>
+      <td>-71.44%</td>
+      <td>$1,509,515,172</td>
+      <td>$8,218,883,424</td>
+      <td>$24,473,224,027</td>
+      <td>0.94%</td>
     </tr>
     <tr>
       <td>optimised_risk_parity</td>
-      <td>6.51%</td>
-      <td>10.72%</td>
-      <td>13.87%</td>
-      <td>-58.17%</td>
-      <td>$643,378</td>
-      <td>$2,015,400</td>
-      <td>$4,613,955</td>
-      <td>0.54%</td>
+      <td>7.46%</td>
+      <td>12.28%</td>
+      <td>15.79%</td>
+      <td>-62.97%</td>
+      <td>$834,830</td>
+      <td>$3,047,219</td>
+      <td>$7,550,938</td>
+      <td>0.68%</td>
     </tr>
     <tr>
-      <td>optimised_regime_aware</td>
-      <td>5.33%</td>
-      <td>10.59%</td>
-      <td>14.20%</td>
-      <td>-68.25%</td>
-      <td>$463,075</td>
-      <td>$1,947,489</td>
-      <td>$5,023,568</td>
-      <td>1.08%</td>
+      <td>optimised_dividend_income</td>
+      <td>5.77%</td>
+      <td>11.37%</td>
+      <td>15.26%</td>
+      <td>-70.06%</td>
+      <td>$523,813</td>
+      <td>$2,394,458</td>
+      <td>$6,607,261</td>
+      <td>1.16%</td>
     </tr>
     <tr>
       <td>optimised_score_weighted</td>
-      <td>5.38%</td>
-      <td>10.25%</td>
-      <td>13.57%</td>
-      <td>-65.55%</td>
-      <td>$469,340</td>
-      <td>$1,776,676</td>
-      <td>$4,272,036</td>
-      <td>0.98%</td>
+      <td>6.61%</td>
+      <td>11.04%</td>
+      <td>14.15%</td>
+      <td>-58.44%</td>
+      <td>$661,140</td>
+      <td>$2,196,319</td>
+      <td>$4,954,718</td>
+      <td>0.72%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>5.66%</td>
+      <td>11.01%</td>
+      <td>14.74%</td>
+      <td>-67.58%</td>
+      <td>$507,803</td>
+      <td>$2,179,824</td>
+      <td>$5,773,047</td>
+      <td>1.14%</td>
     </tr>
     <tr>
       <td>optimised_mean_variance</td>
-      <td>5.11%</td>
-      <td>9.40%</td>
-      <td>12.52%</td>
-      <td>-61.53%</td>
-      <td>$435,594</td>
-      <td>$1,416,859</td>
-      <td>$3,242,269</td>
-      <td>0.88%</td>
+      <td>5.59%</td>
+      <td>10.35%</td>
+      <td>13.78%</td>
+      <td>-62.84%</td>
+      <td>$497,462</td>
+      <td>$1,825,275</td>
+      <td>$4,512,920</td>
+      <td>0.76%</td>
     </tr>
     <tr>
       <td>optimised_cvar_constrained</td>
-      <td>4.77%</td>
-      <td>9.04%</td>
-      <td>12.10%</td>
-      <td>-61.39%</td>
-      <td>$395,059</td>
-      <td>$1,284,077</td>
-      <td>$2,906,135</td>
-      <td>0.80%</td>
-    </tr>
-    <tr>
-      <td>clean_sheet</td>
-      <td>4.82%</td>
-      <td>8.83%</td>
-      <td>11.85%</td>
-      <td>-58.24%</td>
-      <td>$401,048</td>
-      <td>$1,215,083</td>
-      <td>$2,722,622</td>
-      <td>0.70%</td>
-    </tr>
-    <tr>
-      <td>drl_baseline</td>
-      <td>4.51%</td>
-      <td>8.69%</td>
-      <td>11.79%</td>
-      <td>-61.68%</td>
-      <td>$683,655,569</td>
-      <td>$2,176,299,559</td>
-      <td>$4,986,315,165</td>
+      <td>5.57%</td>
+      <td>10.23%</td>
+      <td>13.54%</td>
+      <td>-62.13%</td>
+      <td>$494,390</td>
+      <td>$1,770,203</td>
+      <td>$4,239,091</td>
       <td>0.76%</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
-      <td>4.45%</td>
-      <td>8.68%</td>
-      <td>11.75%</td>
-      <td>-61.69%</td>
-      <td>$672,222,890</td>
-      <td>$2,169,573,669</td>
-      <td>$4,931,275,600</td>
-      <td>0.80%</td>
+      <td>5.21%</td>
+      <td>9.62%</td>
+      <td>12.87%</td>
+      <td>-62.22%</td>
+      <td>$833,495,715</td>
+      <td>$2,798,707,841</td>
+      <td>$6,614,782,556</td>
+      <td>0.86%</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>5.15%</td>
+      <td>9.62%</td>
+      <td>12.90%</td>
+      <td>-62.60%</td>
+      <td>$817,550,251</td>
+      <td>$2,794,355,306</td>
+      <td>$6,671,077,089</td>
+      <td>0.86%</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
-      <td>4.38%</td>
-      <td>8.36%</td>
-      <td>11.31%</td>
-      <td>-58.06%</td>
-      <td>$658,662,304</td>
-      <td>$1,989,721,257</td>
-      <td>$4,393,785,604</td>
-      <td>0.76%</td>
+      <td>5.14%</td>
+      <td>9.27%</td>
+      <td>12.43%</td>
+      <td>-59.87%</td>
+      <td>$817,102,022</td>
+      <td>$2,541,910,585</td>
+      <td>$5,903,954,873</td>
+      <td>0.78%</td>
+    </tr>
+    <tr>
+      <td>clean_sheet</td>
+      <td>3.66%</td>
+      <td>6.49%</td>
+      <td>8.84%</td>
+      <td>-50.76%</td>
+      <td>$289,061</td>
+      <td>$639,299</td>
+      <td>$1,215,913</td>
+      <td>0.92%</td>
     </tr>
     <tr>
       <td>llm_benchmark</td>
-      <td>3.97%</td>
-      <td>5.60%</td>
-      <td>7.02%</td>
-      <td>-28.07%</td>
-      <td>$314,940</td>
-      <td>$498,955</td>
-      <td>$739,575</td>
-      <td>0.18%</td>
+      <td>3.66%</td>
+      <td>4.88%</td>
+      <td>5.97%</td>
+      <td>-20.94%</td>
+      <td>$289,083</td>
+      <td>$407,388</td>
+      <td>$553,143</td>
+      <td>0.20%</td>
     </tr>
     <tr>
       <td>trend_risk_controlled_indices</td>
-      <td>1.58%</td>
-      <td>4.61%</td>
-      <td>7.05%</td>
-      <td>-56.02%</td>
-      <td>$158,885</td>
-      <td>$378,022</td>
-      <td>$746,199</td>
-      <td>1.62%</td>
+      <td>1.54%</td>
+      <td>4.64%</td>
+      <td>6.95%</td>
+      <td>-56.03%</td>
+      <td>$156,977</td>
+      <td>$381,284</td>
+      <td>$725,245</td>
+      <td>2.38%</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Monte Carlo uses correlated Student-t shocks, AR(1) persistence, and EWMA volatility to create fat-tailed, volatility-clustered paths. It is a modeled stress distribution, not a forecast promise. The lowest simulated 5th-percentile CAGR is trend_risk_controlled_indices at 1.58%.</p>
+  <p class='interpretation'>Monte Carlo uses correlated Student-t shocks, AR(1) persistence, and EWMA volatility to create fat-tailed, volatility-clustered paths. It is a modeled stress distribution, not a forecast promise. The lowest simulated 5th-percentile CAGR is trend_risk_controlled_indices at 1.54%.</p>
   <h3>Untouched Embargo Comparison</h3>
   <div class='figure'><img src='plots/embargo.png' alt='Embargo comparison'></div>
   <div class='table-wrap'><table class="dataframe data-table">
@@ -2913,19 +2913,19 @@
       <td>clean_sheet</td>
       <td>development</td>
       <td>318</td>
-      <td>8.01%</td>
-      <td>11.06%</td>
-      <td>0.58</td>
-      <td>-36.03%</td>
+      <td>5.69%</td>
+      <td>8.48%</td>
+      <td>0.47</td>
+      <td>-31.20%</td>
     </tr>
     <tr>
       <td>clean_sheet</td>
       <td>untouched_embargo</td>
       <td>36</td>
-      <td>12.86%</td>
-      <td>8.34%</td>
-      <td>0.98</td>
-      <td>-4.10%</td>
+      <td>11.85%</td>
+      <td>5.82%</td>
+      <td>1.21</td>
+      <td>-2.68%</td>
     </tr>
     <tr>
       <td>current_portfolio</td>
@@ -2949,199 +2949,199 @@
       <td>drl_baseline</td>
       <td>development</td>
       <td>318</td>
-      <td>7.46%</td>
-      <td>11.41%</td>
-      <td>0.52</td>
-      <td>-37.34%</td>
+      <td>8.48%</td>
+      <td>11.85%</td>
+      <td>0.59</td>
+      <td>-35.82%</td>
     </tr>
     <tr>
       <td>drl_baseline</td>
       <td>untouched_embargo</td>
       <td>36</td>
-      <td>16.46%</td>
-      <td>10.42%</td>
-      <td>1.10</td>
-      <td>-7.35%</td>
+      <td>15.95%</td>
+      <td>11.63%</td>
+      <td>0.96</td>
+      <td>-8.34%</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
       <td>development</td>
       <td>318</td>
-      <td>7.19%</td>
-      <td>10.86%</td>
-      <td>0.52</td>
-      <td>-35.80%</td>
+      <td>8.19%</td>
+      <td>11.27%</td>
+      <td>0.59</td>
+      <td>-34.35%</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
       <td>untouched_embargo</td>
       <td>36</td>
-      <td>15.91%</td>
-      <td>9.95%</td>
-      <td>1.10</td>
-      <td>-6.92%</td>
+      <td>15.42%</td>
+      <td>11.10%</td>
+      <td>0.96</td>
+      <td>-7.90%</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
       <td>development</td>
       <td>318</td>
-      <td>7.46%</td>
-      <td>11.41%</td>
-      <td>0.52</td>
-      <td>-37.34%</td>
+      <td>8.48%</td>
+      <td>11.85%</td>
+      <td>0.59</td>
+      <td>-35.82%</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>16.46%</td>
-      <td>10.42%</td>
-      <td>1.10</td>
-      <td>-7.35%</td>
-    </tr>
-    <tr>
-      <td>llm_benchmark</td>
-      <td>development</td>
-      <td>318</td>
-      <td>5.30%</td>
-      <td>5.35%</td>
-      <td>0.64</td>
-      <td>-13.29%</td>
-    </tr>
-    <tr>
-      <td>llm_benchmark</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>7.48%</td>
-      <td>4.96%</td>
-      <td>0.60</td>
-      <td>-3.92%</td>
-    </tr>
-    <tr>
-      <td>optimised_cvar_constrained</td>
-      <td>development</td>
-      <td>318</td>
-      <td>7.78%</td>
-      <td>11.66%</td>
-      <td>0.54</td>
-      <td>-37.09%</td>
-    </tr>
-    <tr>
-      <td>optimised_cvar_constrained</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>17.07%</td>
-      <td>10.55%</td>
-      <td>1.14</td>
-      <td>-7.47%</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>development</td>
-      <td>318</td>
-      <td>10.15%</td>
-      <td>15.65%</td>
-      <td>0.58</td>
-      <td>-45.88%</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>14.63%</td>
-      <td>12.53%</td>
-      <td>0.81</td>
-      <td>-9.46%</td>
-    </tr>
-    <tr>
-      <td>optimised_mean_variance</td>
-      <td>development</td>
-      <td>318</td>
-      <td>8.32%</td>
-      <td>12.02%</td>
-      <td>0.57</td>
-      <td>-37.88%</td>
-    </tr>
-    <tr>
-      <td>optimised_mean_variance</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>15.41%</td>
-      <td>10.57%</td>
-      <td>1.00</td>
-      <td>-7.99%</td>
-    </tr>
-    <tr>
-      <td>optimised_regime_aware</td>
-      <td>development</td>
-      <td>318</td>
-      <td>9.42%</td>
-      <td>14.03%</td>
-      <td>0.58</td>
-      <td>-39.50%</td>
-    </tr>
-    <tr>
-      <td>optimised_regime_aware</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>16.40%</td>
-      <td>11.65%</td>
-      <td>0.99</td>
-      <td>-8.36%</td>
-    </tr>
-    <tr>
-      <td>optimised_risk_parity</td>
-      <td>development</td>
-      <td>318</td>
-      <td>10.11%</td>
-      <td>11.42%</td>
-      <td>0.74</td>
-      <td>-29.10%</td>
-    </tr>
-    <tr>
-      <td>optimised_risk_parity</td>
-      <td>untouched_embargo</td>
-      <td>36</td>
-      <td>13.16%</td>
-      <td>11.57%</td>
-      <td>0.75</td>
-      <td>-8.19%</td>
-    </tr>
-    <tr>
-      <td>optimised_score_weighted</td>
-      <td>development</td>
-      <td>318</td>
-      <td>9.14%</td>
-      <td>13.20%</td>
-      <td>0.58</td>
-      <td>-33.64%</td>
-    </tr>
-    <tr>
-      <td>optimised_score_weighted</td>
       <td>untouched_embargo</td>
       <td>36</td>
       <td>15.95%</td>
-      <td>11.66%</td>
+      <td>11.63%</td>
       <td>0.96</td>
-      <td>-8.43%</td>
+      <td>-8.34%</td>
+    </tr>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>development</td>
+      <td>318</td>
+      <td>4.75%</td>
+      <td>4.09%</td>
+      <td>0.69</td>
+      <td>-10.21%</td>
+    </tr>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>5.65%</td>
+      <td>3.75%</td>
+      <td>0.32</td>
+      <td>-2.80%</td>
+    </tr>
+    <tr>
+      <td>optimised_cvar_constrained</td>
+      <td>development</td>
+      <td>318</td>
+      <td>9.05%</td>
+      <td>12.01%</td>
+      <td>0.62</td>
+      <td>-35.69%</td>
+    </tr>
+    <tr>
+      <td>optimised_cvar_constrained</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>16.60%</td>
+      <td>11.85%</td>
+      <td>0.99</td>
+      <td>-8.74%</td>
+    </tr>
+    <tr>
+      <td>optimised_dividend_income</td>
+      <td>development</td>
+      <td>318</td>
+      <td>10.54%</td>
+      <td>14.58%</td>
+      <td>0.63</td>
+      <td>-43.00%</td>
+    </tr>
+    <tr>
+      <td>optimised_dividend_income</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>13.10%</td>
+      <td>11.80%</td>
+      <td>0.73</td>
+      <td>-10.16%</td>
+    </tr>
+    <tr>
+      <td>optimised_mean_variance</td>
+      <td>development</td>
+      <td>318</td>
+      <td>9.34%</td>
+      <td>12.28%</td>
+      <td>0.63</td>
+      <td>-33.96%</td>
+    </tr>
+    <tr>
+      <td>optimised_mean_variance</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>15.27%</td>
+      <td>11.33%</td>
+      <td>0.93</td>
+      <td>-8.55%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>development</td>
+      <td>318</td>
+      <td>9.77%</td>
+      <td>14.00%</td>
+      <td>0.60</td>
+      <td>-43.32%</td>
+    </tr>
+    <tr>
+      <td>optimised_regime_aware</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>16.94%</td>
+      <td>11.32%</td>
+      <td>1.06</td>
+      <td>-7.56%</td>
+    </tr>
+    <tr>
+      <td>optimised_risk_parity</td>
+      <td>development</td>
+      <td>318</td>
+      <td>11.77%</td>
+      <td>12.55%</td>
+      <td>0.80</td>
+      <td>-31.79%</td>
+    </tr>
+    <tr>
+      <td>optimised_risk_parity</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>12.39%</td>
+      <td>11.87%</td>
+      <td>0.68</td>
+      <td>-10.77%</td>
+    </tr>
+    <tr>
+      <td>optimised_score_weighted</td>
+      <td>development</td>
+      <td>318</td>
+      <td>9.99%</td>
+      <td>12.47%</td>
+      <td>0.67</td>
+      <td>-32.62%</td>
+    </tr>
+    <tr>
+      <td>optimised_score_weighted</td>
+      <td>untouched_embargo</td>
+      <td>36</td>
+      <td>16.04%</td>
+      <td>10.98%</td>
+      <td>1.02</td>
+      <td>-8.99%</td>
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
       <td>development</td>
       <td>318</td>
-      <td>13.36%</td>
-      <td>15.60%</td>
-      <td>0.76</td>
-      <td>-47.39%</td>
+      <td>12.60%</td>
+      <td>15.65%</td>
+      <td>0.72</td>
+      <td>-46.36%</td>
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
       <td>untouched_embargo</td>
       <td>36</td>
-      <td>16.64%</td>
-      <td>14.45%</td>
-      <td>0.84</td>
-      <td>-12.09%</td>
+      <td>17.71%</td>
+      <td>13.94%</td>
+      <td>0.93</td>
+      <td>-10.61%</td>
     </tr>
     <tr>
       <td>trend_risk_controlled_indices</td>
@@ -3179,10 +3179,10 @@
   </thead>
   <tbody>
     <tr>
-      <td>portfolio_aware_overlay</td>
-      <td>0.77</td>
+      <td>optimised_risk_parity</td>
+      <td>0.79</td>
       <td>100.00%</td>
-      <td>62.567</td>
+      <td>60.789</td>
       <td>True</td>
       <td>99.84%</td>
       <td>99.96%</td>
@@ -3193,107 +3193,107 @@
       <td>99.99%</td>
       <td>64.858</td>
       <td>True</td>
-      <td>99.79%</td>
+      <td>99.75%</td>
       <td>99.94%</td>
     </tr>
     <tr>
-      <td>optimised_risk_parity</td>
+      <td>portfolio_aware_overlay</td>
       <td>0.74</td>
       <td>99.99%</td>
-      <td>66.349</td>
+      <td>68.279</td>
       <td>True</td>
-      <td>99.75%</td>
-      <td>99.93%</td>
-    </tr>
-    <tr>
-      <td>llm_benchmark</td>
-      <td>0.63</td>
-      <td>99.97%</td>
-      <td>83.645</td>
-      <td>True</td>
-      <td>99.07%</td>
-      <td>99.72%</td>
+      <td>99.67%</td>
+      <td>99.91%</td>
     </tr>
     <tr>
       <td>optimised_score_weighted</td>
-      <td>0.62</td>
-      <td>99.96%</td>
-      <td>86.104</td>
+      <td>0.71</td>
+      <td>99.99%</td>
+      <td>68.489</td>
       <td>True</td>
-      <td>98.90%</td>
-      <td>99.66%</td>
+      <td>99.62%</td>
+      <td>99.90%</td>
+    </tr>
+    <tr>
+      <td>llm_benchmark</td>
+      <td>0.66</td>
+      <td>99.99%</td>
+      <td>71.970</td>
+      <td>True</td>
+      <td>99.42%</td>
+      <td>99.85%</td>
+    </tr>
+    <tr>
+      <td>optimised_cvar_constrained</td>
+      <td>0.66</td>
+      <td>99.97%</td>
+      <td>79.876</td>
+      <td>True</td>
+      <td>99.18%</td>
+      <td>99.76%</td>
+    </tr>
+    <tr>
+      <td>optimised_mean_variance</td>
+      <td>0.66</td>
+      <td>99.97%</td>
+      <td>80.112</td>
+      <td>True</td>
+      <td>99.17%</td>
+      <td>99.76%</td>
     </tr>
     <tr>
       <td>optimised_regime_aware</td>
-      <td>0.61</td>
+      <td>0.64</td>
+      <td>99.97%</td>
+      <td>83.865</td>
+      <td>True</td>
+      <td>98.94%</td>
+      <td>99.69%</td>
+    </tr>
+    <tr>
+      <td>optimised_dividend_income</td>
+      <td>0.64</td>
       <td>99.96%</td>
-      <td>86.611</td>
+      <td>86.108</td>
       <td>True</td>
       <td>98.85%</td>
       <td>99.65%</td>
     </tr>
     <tr>
-      <td>clean_sheet</td>
-      <td>0.61</td>
-      <td>99.94%</td>
-      <td>92.123</td>
+      <td>drl_challenger_raw</td>
+      <td>0.62</td>
+      <td>99.96%</td>
+      <td>87.463</td>
       <td>True</td>
-      <td>98.62%</td>
-      <td>99.55%</td>
-    </tr>
-    <tr>
-      <td>optimised_mean_variance</td>
-      <td>0.61</td>
-      <td>99.93%</td>
-      <td>94.177</td>
-      <td>True</td>
-      <td>98.50%</td>
-      <td>99.50%</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>0.59</td>
-      <td>99.92%</td>
-      <td>96.175</td>
-      <td>True</td>
-      <td>98.33%</td>
-      <td>99.44%</td>
-    </tr>
-    <tr>
-      <td>optimised_cvar_constrained</td>
-      <td>0.59</td>
-      <td>99.91%</td>
-      <td>98.518</td>
-      <td>True</td>
-      <td>98.22%</td>
-      <td>99.39%</td>
-    </tr>
-    <tr>
-      <td>final_portfolio</td>
-      <td>0.58</td>
-      <td>99.88%</td>
-      <td>104.048</td>
-      <td>True</td>
-      <td>97.78%</td>
-      <td>99.22%</td>
+      <td>98.72%</td>
+      <td>99.61%</td>
     </tr>
     <tr>
       <td>drl_baseline</td>
-      <td>0.58</td>
-      <td>99.88%</td>
-      <td>104.048</td>
+      <td>0.62</td>
+      <td>99.96%</td>
+      <td>87.488</td>
       <td>True</td>
-      <td>97.78%</td>
-      <td>99.22%</td>
+      <td>98.71%</td>
+      <td>99.61%</td>
     </tr>
     <tr>
-      <td>drl_challenger_raw</td>
-      <td>0.57</td>
-      <td>99.88%</td>
-      <td>104.519</td>
+      <td>final_portfolio</td>
+      <td>0.62</td>
+      <td>99.96%</td>
+      <td>87.488</td>
       <td>True</td>
-      <td>97.75%</td>
-      <td>99.21%</td>
+      <td>98.71%</td>
+      <td>99.61%</td>
+    </tr>
+    <tr>
+      <td>clean_sheet</td>
+      <td>0.52</td>
+      <td>99.71%</td>
+      <td>126.055</td>
+      <td>True</td>
+      <td>95.32%</td>
+      <td>98.24%</td>
     </tr>
     <tr>
       <td>trend_risk_controlled_indices</td>
@@ -3301,8 +3301,8 @@
       <td>93.87%</td>
       <td>401.646</td>
       <td>False</td>
-      <td>70.10%</td>
-      <td>82.35%</td>
+      <td>68.27%</td>
+      <td>81.52%</td>
     </tr>
   </tbody>
 </table></div>
@@ -3326,15 +3326,15 @@
   </thead>
   <tbody>
     <tr>
-      <td>144</td>
+      <td>120</td>
       <td>13</td>
       <td>12</td>
-      <td>0.0002</td>
-      <td>24.57%</td>
-      <td>1.37</td>
-      <td>0.71</td>
-      <td>48.37%</td>
-      <td>LOW</td>
+      <td>0.0036</td>
+      <td>28.68%</td>
+      <td>1.18</td>
+      <td>0.72</td>
+      <td>38.95%</td>
+      <td>MODERATE</td>
       <td>NOT_ESTABLISHED</td>
     </tr>
   </tbody>
@@ -3354,117 +3354,117 @@
   <tbody>
     <tr>
       <td>Portfolio-Aware Overlay</td>
-      <td>7.97%</td>
-      <td>1.14</td>
-      <td>0.0002</td>
+      <td>6.77%</td>
+      <td>1.07</td>
+      <td>0.0036</td>
       <td>True</td>
-      <td>49.57%</td>
+      <td>53.68%</td>
       <td></td>
     </tr>
     <tr>
       <td>LLM Analyst Benchmark</td>
-      <td>3.83%</td>
-      <td>0.99</td>
-      <td>0.0014</td>
+      <td>2.73%</td>
+      <td>0.90</td>
+      <td>0.0160</td>
       <td>True</td>
-      <td>26.84%</td>
+      <td>27.81%</td>
       <td></td>
     </tr>
     <tr>
       <td>Current Portfolio</td>
-      <td>8.11%</td>
-      <td>0.89</td>
-      <td>0.0028</td>
+      <td>6.99%</td>
+      <td>0.79</td>
+      <td>0.0360</td>
       <td>True</td>
-      <td>0.00%</td>
+      <td>0.87%</td>
       <td></td>
     </tr>
     <tr>
       <td>Dividend-Income Optimiser</td>
-      <td>5.68%</td>
-      <td>0.80</td>
-      <td>0.0068</td>
-      <td>True</td>
-      <td>17.42%</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Regime-Aware Optimiser</td>
-      <td>5.00%</td>
-      <td>0.66</td>
-      <td>0.0350</td>
-      <td>True</td>
-      <td>0.65%</td>
+      <td>4.28%</td>
+      <td>0.65</td>
+      <td>0.1052</td>
+      <td>False</td>
+      <td>7.36%</td>
       <td></td>
     </tr>
     <tr>
       <td>Clean-Sheet Quant</td>
-      <td>4.32%</td>
-      <td>0.62</td>
-      <td>0.0510</td>
+      <td>3.09%</td>
+      <td>0.54</td>
+      <td>0.2014</td>
       <td>False</td>
-      <td>5.41%</td>
+      <td>10.06%</td>
       <td></td>
     </tr>
     <tr>
       <td>Score-Weighted Optimiser</td>
-      <td>4.34%</td>
-      <td>0.56</td>
-      <td>0.0876</td>
-      <td>False</td>
-      <td>0.00%</td>
-      <td></td>
-    </tr>
-    <tr>
-      <td>Mean-Variance Optimiser</td>
-      <td>4.07%</td>
-      <td>0.49</td>
-      <td>0.1444</td>
+      <td>3.40%</td>
+      <td>0.47</td>
+      <td>0.2797</td>
       <td>False</td>
       <td>0.11%</td>
       <td></td>
     </tr>
     <tr>
-      <td>CVaR-Constrained Optimiser</td>
-      <td>3.47%</td>
-      <td>0.46</td>
-      <td>0.1842</td>
+      <td>Regime-Aware Optimiser</td>
+      <td>3.44%</td>
+      <td>0.44</td>
+      <td>0.3221</td>
       <td>False</td>
       <td>0.00%</td>
       <td></td>
     </tr>
     <tr>
+      <td>CVaR-Constrained Optimiser</td>
+      <td>3.13%</td>
+      <td>0.44</td>
+      <td>0.3289</td>
+      <td>False</td>
+      <td>0.11%</td>
+      <td></td>
+    </tr>
+    <tr>
       <td>DRL Raw Challenger</td>
-      <td>2.98%</td>
-      <td>0.42</td>
-      <td>0.2533</td>
+      <td>2.49%</td>
+      <td>0.35</td>
+      <td>0.4579</td>
       <td>False</td>
       <td>0.00%</td>
       <td></td>
     </tr>
     <tr>
       <td>Final Resolved Portfolio</td>
-      <td>3.10%</td>
-      <td>0.41</td>
-      <td>0.2609</td>
+      <td>2.61%</td>
+      <td>0.35</td>
+      <td>0.4607</td>
       <td>False</td>
       <td>0.00%</td>
       <td></td>
     </tr>
     <tr>
       <td>DRL Baseline Portfolio</td>
-      <td>3.10%</td>
-      <td>0.41</td>
-      <td>0.2609</td>
+      <td>2.61%</td>
+      <td>0.35</td>
+      <td>0.4607</td>
       <td>False</td>
       <td>0.00%</td>
       <td>final_portfolio</td>
     </tr>
     <tr>
       <td>Risk-Parity Optimiser</td>
-      <td>2.38%</td>
-      <td>0.32</td>
-      <td>0.4371</td>
+      <td>2.35%</td>
+      <td>0.35</td>
+      <td>0.4663</td>
+      <td>False</td>
+      <td>0.00%</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>Mean-Variance Optimiser</td>
+      <td>2.63%</td>
+      <td>0.34</td>
+      <td>0.4769</td>
       <td>False</td>
       <td>0.00%</td>
       <td></td>
@@ -3488,251 +3488,241 @@
     <tr>
       <td>Current Portfolio</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>8.79%</td>
-      <td>0.85</td>
-      <td>3.469</td>
-      <td>0.0005</td>
+      <td>120</td>
+      <td>7.81%</td>
+      <td>0.87</td>
+      <td>2.781</td>
+      <td>0.0054</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Portfolio-Aware Overlay</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>8.62%</td>
-      <td>0.86</td>
-      <td>4.456</td>
+      <td>120</td>
+      <td>7.74%</td>
+      <td>0.85</td>
+      <td>4.155</td>
       <td>0.0000</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Dividend-Income Optimiser</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>5.92%</td>
-      <td>0.93</td>
-      <td>3.233</td>
-      <td>0.0012</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>Regime-Aware Optimiser</td>
-      <td>common_investable_window</td>
-      <td>144</td>
-      <td>5.54%</td>
-      <td>0.85</td>
-      <td>3.055</td>
-      <td>0.0022</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>Mean-Variance Optimiser</td>
-      <td>common_investable_window</td>
-      <td>144</td>
-      <td>5.28%</td>
-      <td>0.73</td>
-      <td>2.817</td>
-      <td>0.0049</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>Score-Weighted Optimiser</td>
-      <td>common_investable_window</td>
-      <td>144</td>
-      <td>5.09%</td>
-      <td>0.82</td>
-      <td>2.745</td>
+      <td>120</td>
+      <td>4.87%</td>
+      <td>0.84</td>
+      <td>2.748</td>
       <td>0.0060</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
-      <td>Clean-Sheet Quant</td>
+      <td>Score-Weighted Optimiser</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.98%</td>
-      <td>0.78</td>
-      <td>2.685</td>
-      <td>0.0073</td>
+      <td>120</td>
+      <td>4.26%</td>
+      <td>0.81</td>
+      <td>2.631</td>
+      <td>0.0085</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>Regime-Aware Optimiser</td>
+      <td>common_investable_window</td>
+      <td>120</td>
+      <td>4.19%</td>
+      <td>0.84</td>
+      <td>2.237</td>
+      <td>0.0253</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>CVaR-Constrained Optimiser</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.57%</td>
-      <td>0.73</td>
-      <td>3.079</td>
-      <td>0.0021</td>
+      <td>120</td>
+      <td>4.05%</td>
+      <td>0.81</td>
+      <td>2.605</td>
+      <td>0.0092</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>Mean-Variance Optimiser</td>
+      <td>common_investable_window</td>
+      <td>120</td>
+      <td>3.85%</td>
+      <td>0.77</td>
+      <td>2.208</td>
+      <td>0.0272</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>Clean-Sheet Quant</td>
+      <td>common_investable_window</td>
+      <td>120</td>
+      <td>3.67%</td>
+      <td>0.76</td>
+      <td>2.142</td>
+      <td>0.0322</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>DRL Baseline Portfolio</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.30%</td>
-      <td>0.70</td>
-      <td>3.001</td>
-      <td>0.0027</td>
+      <td>120</td>
+      <td>3.64%</td>
+      <td>0.79</td>
+      <td>2.376</td>
+      <td>0.0175</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Final Resolved Portfolio</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.30%</td>
-      <td>0.70</td>
-      <td>3.001</td>
-      <td>0.0027</td>
+      <td>120</td>
+      <td>3.64%</td>
+      <td>0.79</td>
+      <td>2.376</td>
+      <td>0.0175</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>DRL Raw Challenger</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.11%</td>
-      <td>0.70</td>
-      <td>3.006</td>
-      <td>0.0027</td>
+      <td>120</td>
+      <td>3.46%</td>
+      <td>0.79</td>
+      <td>2.375</td>
+      <td>0.0176</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Risk-Parity Optimiser</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>4.06%</td>
-      <td>0.71</td>
-      <td>2.710</td>
-      <td>0.0067</td>
+      <td>120</td>
+      <td>3.43%</td>
+      <td>0.83</td>
+      <td>1.639</td>
+      <td>0.1012</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>LLM Analyst Benchmark</td>
       <td>common_investable_window</td>
-      <td>144</td>
-      <td>3.94%</td>
-      <td>0.87</td>
-      <td>4.619</td>
-      <td>0.0000</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>CVaR-Constrained Optimiser</td>
-      <td>last_36_months</td>
-      <td>36</td>
-      <td>7.68%</td>
-      <td>0.55</td>
-      <td>2.602</td>
-      <td>0.0093</td>
+      <td>120</td>
+      <td>2.78%</td>
+      <td>0.94</td>
+      <td>2.881</td>
+      <td>0.0040</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Regime-Aware Optimiser</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>7.26%</td>
-      <td>0.60</td>
-      <td>2.284</td>
-      <td>0.0224</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>Final Resolved Portfolio</td>
-      <td>last_36_months</td>
-      <td>36</td>
-      <td>7.18%</td>
-      <td>0.55</td>
-      <td>2.490</td>
-      <td>0.0128</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>DRL Baseline Portfolio</td>
-      <td>last_36_months</td>
-      <td>36</td>
-      <td>7.18%</td>
-      <td>0.55</td>
-      <td>2.490</td>
-      <td>0.0128</td>
+      <td>7.48%</td>
+      <td>0.58</td>
+      <td>2.143</td>
+      <td>0.0321</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Score-Weighted Optimiser</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>6.97%</td>
-      <td>0.55</td>
-      <td>1.984</td>
-      <td>0.0473</td>
+      <td>6.28%</td>
+      <td>0.62</td>
+      <td>1.968</td>
+      <td>0.0491</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
-      <td>DRL Raw Challenger</td>
+      <td>CVaR-Constrained Optimiser</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>6.85%</td>
-      <td>0.55</td>
-      <td>2.506</td>
-      <td>0.0122</td>
+      <td>6.15%</td>
+      <td>0.69</td>
+      <td>1.935</td>
+      <td>0.0530</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Clean-Sheet Quant</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>6.27%</td>
-      <td>0.38</td>
-      <td>1.862</td>
-      <td>0.0626</td>
+      <td>5.92%</td>
+      <td>0.27</td>
+      <td>2.575</td>
+      <td>0.0100</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>DRL Baseline Portfolio</td>
+      <td>last_36_months</td>
+      <td>36</td>
+      <td>5.65%</td>
+      <td>0.68</td>
+      <td>1.843</td>
+      <td>0.0653</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>Final Resolved Portfolio</td>
+      <td>last_36_months</td>
+      <td>36</td>
+      <td>5.65%</td>
+      <td>0.68</td>
+      <td>1.843</td>
+      <td>0.0653</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Mean-Variance Optimiser</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>5.97%</td>
-      <td>0.57</td>
-      <td>1.967</td>
-      <td>0.0492</td>
+      <td>5.39%</td>
+      <td>0.60</td>
+      <td>1.522</td>
+      <td>0.1280</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
-      <td>Dividend-Income Optimiser</td>
+      <td>DRL Raw Challenger</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>5.15%</td>
-      <td>0.69</td>
-      <td>1.771</td>
-      <td>0.0765</td>
+      <td>5.38%</td>
+      <td>0.68</td>
+      <td>1.847</td>
+      <td>0.0647</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Portfolio-Aware Overlay</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>3.08%</td>
-      <td>0.96</td>
-      <td>0.635</td>
-      <td>0.5256</td>
+      <td>3.91%</td>
+      <td>0.90</td>
+      <td>0.873</td>
+      <td>0.3828</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
+    <tr>
+      <td>Dividend-Income Optimiser</td>
+      <td>last_36_months</td>
+      <td>36</td>
+      <td>3.65%</td>
+      <td>0.70</td>
+      <td>1.491</td>
+      <td>0.1360</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
       <td>Risk-Parity Optimiser</td>
       <td>last_36_months</td>
       <td>36</td>
-      <td>2.80%</td>
-      <td>0.63</td>
-      <td>0.835</td>
-      <td>0.4039</td>
-      <td>RETROSPECTIVE_ONLY</td>
-    </tr>
-    <tr>
-      <td>LLM Analyst Benchmark</td>
-      <td>last_36_months</td>
-      <td>36</td>
-      <td>2.06%</td>
-      <td>0.57</td>
-      <td>1.419</td>
-      <td>0.1558</td>
+      <td>1.17%</td>
+      <td>0.73</td>
+      <td>0.380</td>
+      <td>0.7042</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
     <tr>
@@ -3745,9 +3735,19 @@
       <td>0.9386</td>
       <td>RETROSPECTIVE_ONLY</td>
     </tr>
+    <tr>
+      <td>LLM Analyst Benchmark</td>
+      <td>last_36_months</td>
+      <td>36</td>
+      <td>0.09%</td>
+      <td>0.70</td>
+      <td>0.055</td>
+      <td>0.9558</td>
+      <td>RETROSPECTIVE_ONLY</td>
+    </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>Newey-West regressions test alpha against each portfolio-specific regional index blend while allowing serial correlation. The block-bootstrap max-t test controls selection across the whole strategy family, and CSCV repeatedly selects in one half of the history and ranks that winner in the other half. 5 unique results clear the max-t family-wise test. CSCV estimates PBO at 24.57%, while the median selected information ratio falls from 1.37 in-sample to 0.71 out-of-sample. The largest measured common-window alpha is 8.79% for Current Portfolio. Every long portfolio path is still a retrospective holdings replay, so these tests measure path robustness, not deployable stock-selection alpha.</p>
+  <p class='interpretation'>Newey-West regressions test alpha against each portfolio-specific regional index blend while allowing serial correlation. The block-bootstrap max-t test controls selection across the whole strategy family, and CSCV repeatedly selects in one half of the history and ranks that winner in the other half. 3 unique results clear the max-t family-wise test. CSCV estimates PBO at 28.68%, while the median selected information ratio falls from 1.18 in-sample to 0.72 out-of-sample. The largest measured common-window alpha is 7.81% for Current Portfolio. Every long portfolio path is still a retrospective holdings replay, so these tests measure path robustness, not deployable stock-selection alpha.</p>
 
   <h2>Data Quality and Causality</h2>
   <h3>Execution and Liquidity</h3>
@@ -3773,91 +3773,83 @@
     </tr>
     <tr>
       <td>portfolio_aware_overlay</td>
-      <td>$182,605,169</td>
-      <td>19.54%</td>
+      <td>$159,226,642</td>
+      <td>20.63%</td>
       <td>5.00%</td>
-      <td>1948</td>
-      <td>25.99%</td>
-    </tr>
-    <tr>
-      <td>drl_baseline</td>
-      <td>$69,020,473</td>
-      <td>22.20%</td>
-      <td>5.00%</td>
-      <td>1966</td>
-      <td>26.14%</td>
+      <td>1955</td>
+      <td>27.83%</td>
     </tr>
     <tr>
       <td>final_portfolio</td>
-      <td>$69,020,473</td>
-      <td>22.20%</td>
+      <td>$84,474,053</td>
+      <td>23.30%</td>
       <td>5.00%</td>
-      <td>1966</td>
-      <td>26.14%</td>
+      <td>2136</td>
+      <td>35.47%</td>
+    </tr>
+    <tr>
+      <td>drl_baseline</td>
+      <td>$84,474,053</td>
+      <td>23.30%</td>
+      <td>5.00%</td>
+      <td>2136</td>
+      <td>35.47%</td>
     </tr>
     <tr>
       <td>drl_challenger_raw</td>
-      <td>$65,067,235</td>
-      <td>21.71%</td>
+      <td>$79,306,301</td>
+      <td>22.85%</td>
       <td>5.00%</td>
-      <td>1870</td>
-      <td>24.64%</td>
-    </tr>
-    <tr>
-      <td>optimised_dividend_income</td>
-      <td>$56,732</td>
-      <td>32.02%</td>
-      <td>2.95%</td>
-      <td>0</td>
-      <td>0.00%</td>
+      <td>1998</td>
+      <td>33.47%</td>
     </tr>
     <tr>
       <td>optimised_risk_parity</td>
-      <td>$54,018</td>
-      <td>27.12%</td>
+      <td>$77,371</td>
+      <td>29.28%</td>
       <td>5.00%</td>
-      <td>4</td>
+      <td>3</td>
       <td>4.57%</td>
     </tr>
     <tr>
-      <td>optimised_regime_aware</td>
-      <td>$49,477</td>
-      <td>29.65%</td>
+      <td>optimised_dividend_income</td>
+      <td>$59,620</td>
+      <td>30.55%</td>
+      <td>5.00%</td>
+      <td>1</td>
+      <td>3.98%</td>
+    </tr>
+    <tr>
+      <td>optimised_score_weighted</td>
+      <td>$55,076</td>
+      <td>28.80%</td>
       <td>5.00%</td>
       <td>13</td>
       <td>2.66%</td>
     </tr>
     <tr>
-      <td>optimised_score_weighted</td>
-      <td>$45,295</td>
-      <td>28.92%</td>
+      <td>optimised_regime_aware</td>
+      <td>$53,455</td>
+      <td>30.40%</td>
       <td>5.00%</td>
-      <td>9</td>
-      <td>0.48%</td>
+      <td>14</td>
+      <td>2.66%</td>
     </tr>
     <tr>
       <td>optimised_mean_variance</td>
-      <td>$37,541</td>
-      <td>29.11%</td>
+      <td>$46,527</td>
+      <td>29.95%</td>
       <td>5.00%</td>
-      <td>3</td>
-      <td>2.66%</td>
+      <td>5</td>
+      <td>4.09%</td>
     </tr>
     <tr>
       <td>optimised_cvar_constrained</td>
-      <td>$35,160</td>
-      <td>28.36%</td>
+      <td>$45,878</td>
+      <td>30.10%</td>
       <td>5.00%</td>
-      <td>4</td>
+      <td>3</td>
       <td>2.66%</td>
-    </tr>
-    <tr>
-      <td>clean_sheet</td>
-      <td>$33,761</td>
-      <td>25.89%</td>
-      <td>5.00%</td>
-      <td>9</td>
-      <td>4.04%</td>
     </tr>
     <tr>
       <td>trend_risk_controlled_indices</td>
@@ -3868,12 +3860,20 @@
       <td>0.00%</td>
     </tr>
     <tr>
+      <td>clean_sheet</td>
+      <td>$21,198</td>
+      <td>20.60%</td>
+      <td>5.00%</td>
+      <td>11</td>
+      <td>4.01%</td>
+    </tr>
+    <tr>
       <td>llm_benchmark</td>
-      <td>$18,557</td>
-      <td>14.32%</td>
-      <td>0.83%</td>
-      <td>0</td>
-      <td>0.00%</td>
+      <td>$17,047</td>
+      <td>11.68%</td>
+      <td>5.00%</td>
+      <td>12</td>
+      <td>4.17%</td>
     </tr>
   </tbody>
 </table></div>
@@ -3892,12 +3892,12 @@
   </thead>
   <tbody>
     <tr>
-      <td>600018.SS</td>
-      <td>2006-10-26 00:00:00</td>
+      <td>0883.HK</td>
+      <td>2016-08-01 00:00:00</td>
       <td>persistent_level_shift_historical_rescale</td>
-      <td>-76.85%</td>
+      <td>-52.50%</td>
       <td>0.00%</td>
-      <td>0.232</td>
+      <td>0.475</td>
     </tr>
     <tr>
       <td>DG.PA</td>
@@ -3956,6 +3956,14 @@
       <td>2.024</td>
     </tr>
     <tr>
+      <td>LOGN.SW</td>
+      <td>2001-01-08 00:00:00</td>
+      <td>persistent_level_shift_historical_rescale</td>
+      <td>-97.63%</td>
+      <td>0.00%</td>
+      <td>0.024</td>
+    </tr>
+    <tr>
       <td>SHEL.L</td>
       <td>1997-07-01 00:00:00</td>
       <td>persistent_level_shift_historical_rescale</td>
@@ -3997,7 +4005,7 @@
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>The adjusted-price process made 13 explicit repairs. Each row records the raw move, rule, repaired return, and scale factor so provider anomalies remain auditable.</p>
+  <p class='interpretation'>The adjusted-price process made 14 explicit repairs. Each row records the raw move, rule, repaired return, and scale factor so provider anomalies remain auditable.</p>
   <div class='figure'><img src='plots/investable_starts.png' alt='Investable starts'></div>
   <div class='figure'><img src='plots/causal_graph.png' alt='Causal graph'></div>
   <h3>Bias and Limitation Register</h3>
@@ -4132,32 +4140,42 @@
   <tbody>
     <tr>
       <td>wolf_cvar</td>
-      <td>60</td>
-      <td>13.29%</td>
-      <td>10.07%</td>
-      <td>1.32</td>
-      <td>-10.07%</td>
-      <td>0.82%</td>
+      <td>89</td>
+      <td>11.17%</td>
+      <td>10.36%</td>
+      <td>1.08</td>
+      <td>-15.15%</td>
+      <td>0.83%</td>
+      <td>reconstructed_pit_proxy</td>
+    </tr>
+    <tr>
+      <td>wolf_regional_alpha</td>
+      <td>89</td>
+      <td>11.09%</td>
+      <td>11.22%</td>
+      <td>0.99</td>
+      <td>-16.23%</td>
+      <td>0.92%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
     <tr>
       <td>equal_weight_eligible</td>
-      <td>60</td>
-      <td>15.72%</td>
-      <td>12.73%</td>
-      <td>1.23</td>
-      <td>-14.85%</td>
-      <td>0.68%</td>
+      <td>89</td>
+      <td>14.97%</td>
+      <td>14.79%</td>
+      <td>1.01</td>
+      <td>-22.01%</td>
+      <td>1.03%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
     <tr>
       <td>cap_weight_eligible</td>
-      <td>60</td>
-      <td>10.22%</td>
-      <td>11.06%</td>
-      <td>0.92</td>
-      <td>-15.05%</td>
-      <td>0.75%</td>
+      <td>89</td>
+      <td>9.44%</td>
+      <td>12.15%</td>
+      <td>0.78</td>
+      <td>-17.94%</td>
+      <td>0.73%</td>
       <td>reconstructed_pit_proxy</td>
     </tr>
   </tbody>
@@ -4182,30 +4200,42 @@
     <tr>
       <td>wolf_cvar</td>
       <td>cap_weight_eligible</td>
-      <td>60</td>
-      <td>2.67%</td>
-      <td>5.33%</td>
-      <td>2.094</td>
-      <td>0.0362</td>
-      <td>0.06%</td>
+      <td>89</td>
+      <td>1.38%</td>
+      <td>4.00%</td>
+      <td>2.200</td>
+      <td>0.0278</td>
+      <td>0.09%</td>
       <td>NOT_SIGNIFICANT</td>
       <td>NOT_ESTABLISHED</td>
     </tr>
     <tr>
       <td>wolf_cvar</td>
       <td>equal_weight_eligible</td>
-      <td>60</td>
-      <td>-2.44%</td>
-      <td>4.38%</td>
-      <td>1.376</td>
-      <td>0.1687</td>
-      <td>0.14%</td>
+      <td>89</td>
+      <td>-3.94%</td>
+      <td>2.88%</td>
+      <td>1.248</td>
+      <td>0.2122</td>
+      <td>-0.20%</td>
+      <td>NOT_SIGNIFICANT</td>
+      <td>NOT_ESTABLISHED</td>
+    </tr>
+    <tr>
+      <td>wolf_cvar</td>
+      <td>wolf_regional_alpha</td>
+      <td>89</td>
+      <td>-0.01%</td>
+      <td>1.67%</td>
+      <td>1.132</td>
+      <td>0.2578</td>
+      <td>-0.09%</td>
       <td>NOT_SIGNIFICANT</td>
       <td>NOT_ESTABLISHED</td>
     </tr>
   </tbody>
 </table></div>
-  <p class='interpretation'>The point-in-time table contains 60 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -2.44% and the alpha verdict is NOT_SIGNIFICANT. Against cap-weight eligible stocks, annualised active return is 2.67% and the verdict is NOT_SIGNIFICANT. Native live evidence and at least 60 months are required before alpha can be considered deployable.</p>
+  <p class='interpretation'>The point-in-time table contains 89 dated decision months and remains separate from the long holdings replay. It is the more relevant evidence for decisions made with contemporaneous data. Against equal-weight eligible stocks, annualised active return is -3.94% and the alpha verdict is NOT_SIGNIFICANT. Against cap-weight eligible stocks, annualised active return is 1.38% and the verdict is NOT_SIGNIFICANT. Native live evidence and at least 60 months are required before alpha can be considered deployable.</p>
 
   <p class='footnote'>Research evidence only. The paper used as the methodological specification is <em>The Three Types of Backtests</em> (Joubert, Sestovic, Barziy, Distaso, and Lopez de Prado, 29 July 2024). Raw Yahoo Finance and FRED histories remain outside Git; compact outputs, manifests, and checksums are included.</p>
 </main>

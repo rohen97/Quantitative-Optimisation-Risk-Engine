@@ -1,6 +1,6 @@
 agent,agent_weight,agent_status
-stable_low_chaos_agent,0.6850811895337253,mvp_active
-crisis_high_chaos_agent,0.31346671539923976,mvp_active
-inflation_agent,0.0014514011613939906,future_ready
-regional_stress_agent,6.939056408937672e-07,future_ready
+stable_low_chaos_agent,0.6850897506581705,mvp_active
+crisis_high_chaos_agent,0.3134581361286732,mvp_active
+inflation_agent,0.001451419298844197,future_ready
+regional_stress_agent,6.939143122930635e-07,future_ready
 credit_stress_agent,0.0,future_ready

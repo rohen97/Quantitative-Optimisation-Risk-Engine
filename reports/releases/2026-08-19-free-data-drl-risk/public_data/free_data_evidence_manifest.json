@@ -1,0 +1,8 @@
+{
+  "generated_at": "2026-08-19T06:28:54.972829+00:00",
+  "observed_sources": 5,
+  "publication_boundary": "aggregate_counts_only_no_credentials_raw_payloads_or_database",
+  "sources": 6,
+  "summary_path": "free_data_evidence_summary.csv",
+  "summary_sha256": "4c26e932f32e3f37dfbb0e33740a27fe7dc9c1f518ed37597f4216c8830e3800"
+}

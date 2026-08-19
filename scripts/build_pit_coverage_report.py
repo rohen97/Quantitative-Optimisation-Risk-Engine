@@ -87,32 +87,52 @@ def main() -> int:
         """
         SELECT COUNT(DISTINCT s.security_id) AS securities
         FROM securities s
-        JOIN security_identifiers i USING (security_id)
+        JOIN identifier_vintages i USING (security_id)
         WHERE s.instrument_type = 'Equity'
           AND s.listing_status = 'Active'
           AND s.region IN ('Mainland China', 'Hong Kong')
-          AND i.identifier_type = 'bloomberg_ticker'
+          AND i.identifier_type IN ('figi', 'composite_figi', 'share_class_figi')
+          AND i.source = 'openfigi_current_snapshot'
         """
     ).iloc[0, 0]
     fundamental = repository.query(
         """
-        SELECT fiscal_period_type, available_from,
+        SELECT source, fiscal_period_type,
                COUNT(1) AS row_count,
-               COUNT(DISTINCT security_id) AS entity_count
+               COUNT(DISTINCT security_id) AS entity_count,
+               MIN(available_from) AS earliest_available_from,
+               MAX(available_from) AS latest_available_from
         FROM fundamental_vintages
         GROUP BY 1, 2
-        ORDER BY 2, 1
+        ORDER BY 1, 2
         """
     )
     macro = repository.query(
         """
-        SELECT series_id, COUNT(1) AS row_count,
+        SELECT source, series_id, COUNT(1) AS row_count,
                COUNT(DISTINCT observation_date) AS observation_count,
                MIN(observation_date) AS earliest_observation,
                MAX(observation_date) AS latest_observation
         FROM macro_release_vintages
-        GROUP BY 1
-        ORDER BY 1
+        GROUP BY 1, 2
+        ORDER BY 1, 2
+        """
+    )
+    china_hk_prices = repository.query(
+        """
+        SELECT s.region, p.source,
+               COUNT(1) AS row_count,
+               COUNT(DISTINCT p.security_id) AS entity_count,
+               COUNT(1) FILTER (WHERE p.volume > 0) AS positive_volume_rows,
+               COUNT(DISTINCT p.security_id) FILTER (WHERE p.volume > 0) AS positive_volume_entities,
+               MIN(p.trade_date) AS earliest_observation,
+               MAX(p.trade_date) AS latest_observation
+        FROM prices_daily p
+        JOIN securities s USING (security_id)
+        WHERE s.region IN ('Mainland China', 'Hong Kong')
+          AND p.source IN ('akshare', 'yfinance')
+        GROUP BY 1, 2
+        ORDER BY 1, 2
         """
     )
     generated = pd.Timestamp.now("UTC").strftime("%Y-%m-%d %H:%M UTC")
@@ -121,9 +141,9 @@ def main() -> int:
         "",
         f"Generated: {generated}",
         "",
-        "This report contains aggregate coverage only. Licensed Bloomberg observations remain in the ignored local DuckDB and are not published.",
+        "This report contains aggregate coverage only. Credentials, raw provider payloads, the local DuckDB and licensed observations are not published.",
         "",
-        f"Active Mainland China and Hong Kong inventory: **{int(universe):,} securities**; canonical Bloomberg-mapped target: **{int(mapped_universe):,}**.",
+        f"Active Mainland China and Hong Kong inventory: **{int(universe):,} securities**; current OpenFIGI-mapped inventory: **{int(mapped_universe):,}**.",
         "",
         "## Dataset Coverage",
         "",
@@ -131,7 +151,11 @@ def main() -> int:
         "",
         "## Fundamental Snapshots",
         "",
-        _markdown_table(fundamental) if not fundamental.empty else "No Bloomberg database-as-of fundamentals have been stored.",
+        _markdown_table(fundamental) if not fundamental.empty else "No observed fundamental vintages have been stored.",
+        "",
+        "## China And Hong Kong Market History",
+        "",
+        _markdown_table(china_hk_prices) if not china_hk_prices.empty else "No public China/Hong Kong history has been stored.",
         "",
         "## Macro Series",
         "",
@@ -139,20 +163,21 @@ def main() -> int:
         "",
         "## Evidence Grades",
         "",
-        "- Bloomberg fundamentals: genuine `FUNDAMENTAL_DATABASE_DATE` snapshots. Each row is usable only from its database-as-of date.",
+        "- Fundamental vintages retain their source and `available_from` timestamp; SEC rows require observed filing accessions, while any local Bloomberg rows use their database-as-of date.",
         "- FRED GDP, real GDP, CPI, core CPI, unemployment and monthly Fed funds: ALFRED release/revision vintages.",
         "- Daily rates, curves, FX, VIX and market credit spreads: non-revising observations available on the observation date.",
-        "- Bloomberg market cap/free float: dated historical observations, not reconstructed from today's shares.",
+        "- AKShare bars are observed unadjusted daily price/volume records; they do not establish historical index membership.",
+        "- Any local licensed market-cap/free-float rows are aggregate-only release evidence and are never published as observations.",
         "- Corporate actions: event-time reconstruction using declaration dates; later vendor corrections are not yet separately versioned.",
         "- Identifier mappings: current retrieval snapshots only. Historical effective-date mappings remain incomplete.",
         "- Decision archives: retrospective cryptographic registration of existing walk-forward artifacts; availability is the archive timestamp, not the original rebalance date.",
         "",
         "## Open Production Gaps",
         "",
-        "- Complete monthly Bloomberg fundamental snapshots from July 2018 onward. The current session stopped at Bloomberg's daily data capacity and is safely resumable.",
+        "- Complete original filing and amendment vintages from July 2018 onward; SEC automated access remains blocked until a truthful identifying user agent is configured and accepted.",
         "- Historical constituent/delisted-security membership and historical ticker/ISIN mappings for a survivorship-clean 1997 universe.",
         "- Timestamped entity-mapped news and immutable sentiment vintages. No production sentiment rows are currently present.",
-        "- Genuine pre-1997 China/Hong Kong fundamentals are not established by the current entitlements; the 1997 test remains reconstructed rather than fully genuine PIT.",
+        "- Genuine pre-1997 China/Hong Kong fundamentals are not established by the free stack; the 1997 test remains reconstructed rather than fully genuine PIT.",
         "",
         "## DRL Decision",
         "",

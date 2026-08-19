@@ -1,0 +1,21 @@
+security_id,ticker,portfolio_aware_recommendation,clean_sheet_recommendation,optimiser_weight,drl_weight,final_weight,llm_recommendation,consensus_category,disagreement_flag,disagreement_commentary
+000333.SHE,000333.SHE,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+000538.SHE,000538.SHE,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+0728.HK,0728.HK,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+1113.HK,1113.HK,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+3988.HK,3988.HK,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+600018.SHG,600018.SHG,Hold,,0.0499999999999999,0.0475,0.05,,No Consensus,True,No Consensus
+600036.SHG,600036.SHG,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+601816.SHG,601816.SHG,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+601818.SHG,601818.SHG,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+AD.AS,AD.AS,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+ALV.XETRA,ALV.XETRA,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+CA.PA,CA.PA,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+ELE.MC,ELE.MC,Hold,,0.0499999999999999,0.0475,0.05,,No Consensus,True,No Consensus
+ESSITY-B.ST,ESSITY-B.ST,Hold,,0.0499999999999999,0.0475,0.05,,No Consensus,True,No Consensus
+HEN3.XETRA,HEN3.XETRA,Hold,,0.0499999999999999,0.0475,0.05,,No Consensus,True,No Consensus
+HIG.US,HIG.US,Buy,,0.0499999999999999,0.0474999999999999,0.0499999999999999,,Portfolio-Aware Only,True,Portfolio-Aware Only
+IMB.LSE,IMB.LSE,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+NOVN.SW,NOVN.SW,Hold,,0.0499999999999999,0.0475,0.05,,No Consensus,True,No Consensus
+ORA.PA,ORA.PA,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only
+SHELL.AS,SHELL.AS,Buy,,0.0499999999999999,0.0475,0.05,,Portfolio-Aware Only,True,Portfolio-Aware Only

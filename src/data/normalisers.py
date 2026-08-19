@@ -13,15 +13,35 @@ def _now() -> pd.Timestamp:
 
 
 def record_hash(frame: pd.DataFrame, columns: list[str]) -> pd.Series:
-    def serialise(value: object) -> str:
-        if pd.isna(value):
-            return ""
-        if isinstance(value, pd.Timestamp):
-            return value.isoformat()
-        return str(value)
+    if frame.empty:
+        return pd.Series(index=frame.index, dtype="object")
 
-    values = frame.loc[:, columns].apply(lambda column: column.map(serialise)).agg("|".join, axis=1)
-    return values.map(lambda value: hashlib.sha256(value.encode("utf-8")).hexdigest())
+    serialised: list[pd.Series] = []
+    for name in columns:
+        column = frame[name]
+        missing = column.isna()
+        if pd.api.types.is_datetime64_any_dtype(column.dtype):
+            values = pd.to_datetime(column)
+            if isinstance(values.dtype, pd.DatetimeTZDtype):
+                text = values.map(
+                    lambda value: "" if pd.isna(value) else value.isoformat()
+                )
+            else:
+                text = values.dt.strftime("%Y-%m-%dT%H:%M:%S.%f").str.replace(
+                    r"\.000000$", "", regex=True
+                )
+        else:
+            text = column.astype(str)
+        serialised.append(text.mask(missing, ""))
+
+    values = serialised[0]
+    for column in serialised[1:]:
+        values = values.str.cat(column, sep="|")
+    digests = [
+        hashlib.sha256(value.encode("utf-8")).hexdigest()
+        for value in values.to_numpy(dtype=str)
+    ]
+    return pd.Series(digests, index=frame.index, dtype="object")
 
 
 def rename_and_require(data: pd.DataFrame, column_mapping: Mapping[str, str] | None, required_columns: set[str]) -> pd.DataFrame:

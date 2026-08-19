@@ -16,6 +16,8 @@ data_sources:
     - finnhub
     - alpha_vantage
     - yfinance
+    - akshare
+    - openbb
     - tickdb
     - alpaca
     - itick
@@ -38,6 +40,39 @@ data_sources:
       asset_classes: [equities, indices, fx]
       regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
       notes: Research-grade public web data; cross-validate material prices.
+
+    akshare:
+      enabled: true
+      symbol_column: yfinance_ticker
+      credential_env: null
+      asset_classes: [equities]
+      regions: [Mainland China, Hong Kong]
+      adjust: ""
+      hk_endpoint: daily
+      a_share_endpoint: auto
+      max_workers: 8
+      a_share_max_workers: 4
+      retry_attempts: 3
+      notes: Free China and Hong Kong daily OHLCV. HK uses a measured eight-worker path with a serial V8 warm-up; Mainland requests are capped at four workers with bounded retries and Tencent fallback when Eastmoney is unavailable. Unadjusted bars avoid retrospective adjustment leakage while preferred-provider closes remain authoritative and AKShare fills volume.
+
+    openbb:
+      enabled: true
+      symbol_column: yfinance_ticker
+      credential_env: null
+      availability_env: OPENBB_ENABLED
+      upstream_provider: yfinance
+      asset_classes: [equities, indices]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+      notes: Optional normalization layer over an explicitly named upstream provider; OpenBB is not treated as an independent data source.
+
+    openfigi:
+      enabled: true
+      base_url: https://api.openfigi.com/v3
+      credential_env: null
+      api_key_env: OPENFIGI_API_KEY
+      asset_classes: [identifiers]
+      regions: [DACH, EU ex-DACH, UK, US, Mainland China, Hong Kong]
+      notes: Current identifier snapshot only. Free anonymous requests use conservative limits; an API key raises documented request limits.
 
     alpaca:
       enabled: true
@@ -83,6 +118,16 @@ data_sources:
       regions: [US]
       requests_per_second: 8
       notes: Free first-party fallback for observed SEC acceptance timestamps; the user agent must identify the application and a contact.
+
+    sec_edgar_companyfacts:
+      enabled: true
+      base_url: https://data.sec.gov/api/xbrl/companyfacts
+      credential_env: SEC_USER_AGENT
+      asset_classes: [fundamentals]
+      regions: [US]
+      requests_per_second: 8
+      preserve_filing_accessions: true
+      notes: First-party XBRL facts grouped by filing accession so amendments and restatements remain distinct point-in-time vintages.
 
     nasdaq_mergent:
       enabled: true

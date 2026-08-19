@@ -1,5 +1,7 @@
 ticker,company_name,sector,country,currency,target_weight,recommendation
 000333.SHE,Midea Group Co Ltd,Consumer Discretionary,China,CNY,0.05,Buy / Accumulate
+ALV.XETRA,Allianz SE VNA O.N.,Financials,Germany,EUR,0.05,Buy / Accumulate
 HIG.US,Hartford Financial Services Group,Financials,United States,USD,0.05,Buy / Accumulate
-601398.SHG,Industrial and Commercial Bank of China Ltd,Financials,China,CNY,0.05,Buy / Accumulate
-600036.SHG,China Merchants Bank Co Ltd,Financials,China,CNY,0.05,Buy / Accumulate
+HNR1.XETRA,Hannover Rück SE,Financials,Germany,EUR,0.05,Buy / Accumulate
+1398.HK,Industrial and Commercial Bank of China,Financials,Hong Kong,HKD,0.05,Buy / Accumulate
+AD.AS,Koninklijke Ahold Delhaize NV,Consumer Staples,Netherlands,EUR,0.05,Buy / Accumulate

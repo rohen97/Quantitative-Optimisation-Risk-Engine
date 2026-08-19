@@ -48,6 +48,9 @@ FONT_HEAD = 'Aptos Display'
 FONT_BODY = 'Aptos'
 
 RELEASE_RELATIVE = Path(
+    'reports/releases/2026-08-19-free-data-drl-risk'
+)
+FALLBACK_RELEASE_RELATIVE = Path(
     'reports/releases/2026-08-13-risk-pit-cost-validation'
 )
 PRIOR_RELEASE_RELATIVE = Path('reports/releases/2026-08-07-full-universe')
@@ -80,6 +83,7 @@ class DeckEvidence:
     pit_returns: pd.DataFrame
     pit_coverage: dict
     production_pit: pd.DataFrame
+    free_data_summary: pd.DataFrame
     alpha: pd.DataFrame
     overfitting: pd.Series
     performance: pd.DataFrame
@@ -98,6 +102,9 @@ class DeckEvidence:
     supervised_freeze: dict
     drl_acceptance: pd.Series
     drl_challengers: pd.DataFrame
+    drl_seeds: pd.DataFrame
+    drl_split: pd.DataFrame
+    drl_long_history: dict
     shadow_status: dict
 
     @property
@@ -151,9 +158,15 @@ def _require_files(paths: Iterable[Path]) -> None:
 def _read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding='utf-8'))
 
+
+def _read_csv_optional(path: Path) -> pd.DataFrame:
+    return pd.read_csv(path, low_memory=False) if path.exists() else pd.DataFrame()
+
 def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
     repo_root = Path(repo_root).resolve()
     release_root = repo_root / RELEASE_RELATIVE
+    if not release_root.exists():
+        release_root = repo_root / FALLBACK_RELEASE_RELATIVE
     prior_release_root = repo_root / PRIOR_RELEASE_RELATIVE
     backtest_root = repo_root / BACKTEST_RELATIVE
     outputs_root = repo_root / OUTPUTS_RELATIVE
@@ -198,6 +211,9 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         outputs_root / 'supervised_alpha/prospective_freeze_manifest.json',
         outputs_root / 'drl_acceptance_decision.csv',
         outputs_root / 'drl_simple_challenger_comparison.csv',
+        outputs_root / 'drl_training_summary.csv',
+        outputs_root / 'drl_split_manifest.csv',
+        release_root / 'public_data/drl_long_history_manifest.json',
         outputs_root / 'shadow_operation/shadow_operation_status.json',
     ]
     _require_files(required)
@@ -311,6 +327,9 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         production_pit=pd.read_csv(
             release_root / 'bloomberg_pit_coverage.csv'
         ),
+        free_data_summary=_read_csv_optional(
+            outputs_root / 'validation/free_data_evidence_summary.csv'
+        ),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
         ),
@@ -361,6 +380,15 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         drl_challengers=pd.read_csv(
             outputs_root / 'drl_simple_challenger_comparison.csv'
         ),
+        drl_seeds=pd.read_csv(
+            outputs_root / 'drl_training_summary.csv'
+        ),
+        drl_split=pd.read_csv(
+            outputs_root / 'drl_split_manifest.csv'
+        ),
+        drl_long_history=_read_json(
+            release_root / 'public_data/drl_long_history_manifest.json'
+        ),
         shadow_status=_read_json(
             outputs_root / 'shadow_operation/shadow_operation_status.json'
         ),
@@ -379,6 +407,21 @@ def _supervised_validation_rows(evidence: DeckEvidence) -> pd.DataFrame:
             'supervised_alpha_ensemble'
         )
     ].sort_values('horizon_months')
+
+
+def _scorecard_component(evidence: DeckEvidence, name: str) -> pd.Series:
+    rows = evidence.scorecard.loc[evidence.scorecard['component'].eq(name)]
+    if rows.empty:
+        raise ValueError(f'Missing validation scorecard component: {name}')
+    return rows.iloc[0]
+
+
+def _score_label(row: pd.Series) -> str:
+    return f'{float(row.score):g} / {float(row.maximum_score):g}'
+
+
+def _risk_gate_status(evidence: DeckEvidence) -> str:
+    return str(_scorecard_component(evidence, 'risk_backtesting').status)
 
 
 def _supervised_watchlist(evidence: DeckEvidence) -> pd.DataFrame:
@@ -587,11 +630,13 @@ def _save_figure(fig: plt.Figure, path: Path) -> Path:
 
 STRATEGY_LABELS = {
     'wolf_cvar': 'Wolf CVaR',
+    'wolf_regional_alpha': 'Wolf regional alpha',
     'equal_weight_eligible': 'Equal weight',
     'cap_weight_eligible': 'Cap weight',
 }
 STRATEGY_COLORS = {
     'wolf_cvar': '#' + GREEN,
+    'wolf_regional_alpha': '#' + TEAL,
     'equal_weight_eligible': '#' + BLUE,
     'cap_weight_eligible': '#' + GOLD,
 }
@@ -607,6 +652,7 @@ def _plot_pit_capital(
         data['net_return'], errors='coerce'
     ).fillna(0.0)
     fig, ax = plt.subplots(figsize=(10.8, 5.2))
+    endpoints: list[dict[str, object]] = []
     for strategy, group in data.groupby('strategy', sort=False):
         group = group.sort_values('date')
         wealth = evidence.current_aum * (
@@ -620,16 +666,58 @@ def _plot_pit_capital(
             linewidth=2.4,
             label=STRATEGY_LABELS[strategy],
         )
-        ax.text(
-            group['date'].iloc[-1],
-            wealth.iloc[-1] / 1_000_000,
-            '  ' + _usd(wealth.iloc[-1]),
-
-            color=STRATEGY_COLORS[strategy],
-            fontsize=9,
-            va='center',
-            weight='bold',
+        endpoints.append(
+            {
+                'strategy': strategy,
+                'date': group['date'].iloc[-1],
+                'actual_y': float(wealth.iloc[-1] / 1_000_000),
+                'label': _usd(wealth.iloc[-1]),
+            }
         )
+    if endpoints:
+        ordered = sorted(endpoints, key=lambda item: float(item['actual_y']))
+        values = np.asarray(
+            [float(item['actual_y']) for item in ordered], dtype=float
+        )
+        minimum_gap = max(float(np.ptp(values)) * 0.10, 18.0)
+        adjusted = values.copy()
+        cluster_start = 0
+        for index in range(1, len(values) + 1):
+            cluster_ends = (
+                index == len(values)
+                or values[index] - values[index - 1] >= minimum_gap
+            )
+            if not cluster_ends:
+                continue
+            count = index - cluster_start
+            if count > 1:
+                centre = float(values[cluster_start:index].mean())
+                offsets = (
+                    np.arange(count, dtype=float) - (count - 1) / 2.0
+                ) * minimum_gap
+                adjusted[cluster_start:index] = centre + offsets
+            cluster_start = index
+        for item, label_y in zip(ordered, adjusted, strict=True):
+            strategy = str(item['strategy'])
+            actual_y = float(item['actual_y'])
+            date = pd.Timestamp(item['date'])
+            if not np.isclose(label_y, actual_y):
+                ax.plot(
+                    [date, date],
+                    [actual_y, label_y],
+                    color=STRATEGY_COLORS[strategy],
+                    linewidth=0.8,
+                    alpha=0.65,
+                )
+            ax.text(
+                date,
+                label_y,
+                '  ' + str(item['label']),
+                color=STRATEGY_COLORS[strategy],
+                fontsize=9,
+                va='center',
+                weight='bold',
+            )
     _set_axes_style(ax)
     ax.set_ylabel('Illustrative AUM, USD millions', color='#536068')
     ax.set_title(
@@ -964,6 +1052,57 @@ def _plot_supervised_calibration(
     return _save_figure(fig, output_path)
 
 
+def _plot_drl_validation(
+    evidence: DeckEvidence, output_path: Path
+) -> Path:
+    seeds = evidence.drl_seeds.sort_values('seed')
+    labels = [f'PPO {int(seed)}' for seed in seeds['seed']]
+    values = pd.to_numeric(
+        seeds['validation_information_ratio'], errors='coerce'
+    ).fillna(0.0).tolist()
+    challengers = evidence.drl_challengers.loc[
+        evidence.drl_challengers['split'].eq('validation')
+        & evidence.drl_challengers['selected_parameter_by_validation']
+        .astype(str)
+        .str.lower()
+        .isin({'true', '1', 'yes'})
+    ]
+    for row in challengers.itertuples(index=False):
+        labels.append(str(row.algorithm).replace('_', ' ').title())
+        values.append(float(row.information_ratio))
+
+    fig, ax = plt.subplots(figsize=(8.8, 4.7))
+    colors = ['#' + (GREEN if value > 0 else RED) for value in values]
+    bars = ax.barh(labels, values, color=colors, height=0.62)
+    _set_axes_style(ax)
+    ax.axvline(0.0, color='#' + INK, linewidth=1.2)
+    ax.set_xlabel('Frozen-validation information ratio', color='#536068')
+    ax.set_title(
+        'No adaptive allocator beat the zero-active baseline',
+        loc='left',
+        fontsize=14,
+        color='#' + INK,
+        weight='bold',
+    )
+    for bar, value in zip(bars, values):
+        ax.text(
+            value - 0.03 if value < 0 else value + 0.03,
+            bar.get_y() + bar.get_height() / 2,
+            f'{value:.2f}',
+            va='center',
+            ha='right' if value < 0 else 'left',
+            fontsize=8.5,
+            color='#' + INK,
+            weight='bold',
+        )
+    lower = min(values + [0.0])
+    upper = max(values + [0.0])
+    span = max(upper - lower, 0.5)
+    ax.set_xlim(lower - span * 0.18, upper + span * 0.18)
+    fig.tight_layout()
+    return _save_figure(fig, output_path)
+
+
 def _build_plot_assets(
     evidence: DeckEvidence, plot_dir: Path
 ) -> tuple[Path, ...]:
@@ -987,6 +1126,9 @@ def _build_plot_assets(
         ),
         _plot_supervised_calibration(
             evidence, plot_dir / 'supervised_calibration.png'
+        ),
+        _plot_drl_validation(
+            evidence, plot_dir / 'drl_validation.png'
         ),
     )
     return assets
@@ -1119,7 +1261,8 @@ def _new_slide(
         presentation.slide_layouts[6]
     )
     _set_background(slide)
-    _add_header(slide, title, subtitle, number)
+    display_number = len(presentation.slides)
+    _add_header(slide, title, subtitle, display_number)
     _add_footer(slide, source)
     return slide
 
@@ -1348,6 +1491,7 @@ def _add_chevron(
 def _slide_cover(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
     slide = presentation.slides.add_slide(
         presentation.slide_layouts[6]
     )
@@ -1380,7 +1524,11 @@ def _slide_cover(
 
     _add_text(
         slide,
-        'DECISION: APPROVE A CONTROLLED LIVE PILOT',
+        (
+            'DECISION: APPROVE A CONTROLLED LIVE PILOT'
+            if fail_count == 0
+            else 'DECISION: CONTINUE PAPER AND SHADOW OPERATION'
+        ),
         1.12, 3.98, 5.15, 0.2,
         size=12, color=WHITE, bold=True,
     )
@@ -1389,7 +1537,10 @@ def _slide_cover(
     ].iloc[0]
     metrics = [
         (f'{int(all_row.active):,}', 'active equities'),
-        ('60', 'monthly decisions'),
+        (
+            f"{int(evidence.walk_forward_manifest['artifact_profile']['portfolio_months'])}",
+            'monthly decisions',
+        ),
         (f'{evidence.governance_score:g} / 100', 'governance score'),
         ('0', 'hard breaches'),
     ]
@@ -1419,6 +1570,12 @@ def _slide_cover(
 def _slide_decision(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    risk = _scorecard_component(evidence, 'risk_backtesting')
+    costs = _scorecard_component(evidence, 'portfolio_net_of_costs')
+    constraints = _scorecard_component(evidence, 'constraint_compliance')
+    pit = _scorecard_component(evidence, 'point_in_time')
+    blocking = evidence.scorecard.loc[evidence.scorecard['status'].eq('FAIL')]
+    pilot_ready = blocking.empty
     slide = _new_slide(
         presentation,
         'The decision in one page',
@@ -1429,23 +1586,30 @@ def _slide_decision(
     _add_callout(
         slide,
         'Recommendation',
-        'Approve a small, human-supervised live pilot. '
-        'Do not authorize unattended or full-scale deployment yet.',
+        (
+            'Approve a small, human-supervised live pilot. '
+            'Do not authorize unattended or full-scale deployment yet.'
+            if pilot_ready
+            else 'Continue paper and shadow operation. Do not allocate live '
+            'capital while validation components still fail.'
+        ),
         0.55, 1.43, 5.9, 1.18,
         fill=PALE_GREEN, accent=GREEN,
     )
 
     _add_text(
-        slide, 'Why it earns a pilot', 0.58, 2.91, 5.5, 0.32,
+        slide,
+        'What the evidence supports' if pilot_ready else 'What works today',
+        0.58, 2.91, 5.5, 0.32,
         size=18, bold=True, font=FONT_HEAD,
     )
     _add_bullets(
         slide,
         [
             'Repeatable screening across six equity regions',
-            'Adaptive VaR passes overall and chronological holdout tests',
-            'Turnover and modeled cost drag now meet both 1.5 targets',
-            'Zero hard breaches with auditable forecasts and trades',
+            f'Chronological VaR governance gate: {str(risk.status).title()}',
+            f'Net-of-cost implementation controls: {str(costs.status).title()}',
+            f'Hard portfolio constraints: {str(constraints.status).title()}',
         ],
         0.58, 3.34, 5.78, 2.62,
         size=14.5,
@@ -1460,11 +1624,11 @@ def _slide_decision(
         fill=PALE_RED, accent=RED,
     )
     rows = [
-        ('Process', 'Strong', 'Use'),
-        ('Risk backtest', '15 / 15', 'Pass'),
-        ('Cost controls', 'Both targets met', 'Pass'),
-        ('Hard constraints', '0 breaches', 'Pass'),
-        ('PIT evidence', '7.5 / 15', 'Improve'),
+        ('Process', 'Checksummed', 'Use'),
+        ('Risk backtest', _score_label(risk), str(risk.status).title()),
+        ('Cost controls', _score_label(costs), str(costs.status).title()),
+        ('Hard constraints', _score_label(constraints), str(constraints.status).title()),
+        ('PIT evidence', _score_label(pit), str(pit.status).title()),
         ('Deployable alpha', 'Not established', 'Do not claim'),
     ]
 
@@ -1475,7 +1639,13 @@ def _slide_decision(
         6.82, 2.91, 5.95, 2.95,
         widths=[2.2, 1.6, 1.6],
         font_size=11,
-        highlight_rows=[0, 1, 2, 3],
+        highlight_rows=[
+            index
+            for index, component in enumerate(
+                (None, risk, costs, constraints, pit, None)
+            )
+            if component is not None and str(component.status) == 'PASS'
+        ],
     )
     _add_callout(
         slide,
@@ -1551,6 +1721,86 @@ def _slide_workflow(
         0.58, 6.18, 12.0, 0.36,
         size=18, color=GREEN_DARK, bold=True, font=FONT_HEAD,
         align=PP_ALIGN.CENTER,
+    )
+
+
+def _slide_drl_results(
+    presentation: Presentation,
+    evidence: DeckEvidence,
+    chart: Path,
+) -> None:
+    split = evidence.drl_split.set_index('split')
+    seeds = evidence.drl_seeds.copy()
+    validation_ir = pd.to_numeric(
+        seeds['validation_information_ratio'], errors='coerce'
+    )
+    best_validation_ir = float(validation_ir.max())
+    constraint_violations = int(
+        pd.to_numeric(
+            seeds['constraint_violations'], errors='coerce'
+        ).fillna(0.0).sum()
+    )
+    bootstrap_environments = int(
+        pd.to_numeric(
+            seeds['bootstrap_environment_count'], errors='coerce'
+        ).fillna(0.0).max()
+    )
+    slide = _new_slide(
+        presentation,
+        'DRL learned safely, but did not earn capital',
+        'Five real PPO seeds and two simpler challengers failed frozen validation.',
+        4,
+        'Checksummed regional history, train-only bootstrap and validation-only selection',
+    )
+    _add_picture_contain(slide, chart, 0.42, 1.37, 7.0, 4.72)
+    kpis = [
+        (
+            f"{int(evidence.drl_long_history['monthly_observations'])}",
+            'regional history months',
+        ),
+        (f"{int(split.loc['train', 'observations'])}", 'training months'),
+        (f"{int(split.loc['validation', 'observations'])}", 'validation months'),
+        (
+            f"{int(split.loc['legacy_locked_oos', 'observations'])}",
+            'legacy OOS months',
+        ),
+    ]
+    for index, (value, label) in enumerate(kpis):
+        _add_kpi(
+            slide,
+            value,
+            label,
+            7.65 + (index % 2) * 2.58,
+            1.46 + (index // 2) * 1.24,
+            2.35,
+            fill=WHITE,
+            accent=BLUE if index < 2 else GOLD,
+        )
+    _add_callout(
+        slide,
+        'Measured result',
+        f'Best PPO validation information ratio was {best_validation_ir:.2f}. '
+        f'{bootstrap_environments} contiguous train-only bootstrap environments '
+        f'per seed produced {constraint_violations} constraint violations.',
+        7.65,
+        4.05,
+        5.12,
+        1.25,
+        fill=PALE_RED,
+        accent=RED,
+    )
+    _add_callout(
+        slide,
+        'Governed decision',
+        f"PPO receives {_pct(float(evidence.drl_acceptance['blend_weight_drl']), 0)}; "
+        f"the classical optimiser remains {_pct(float(evidence.drl_acceptance['blend_weight_baseline']), 0)}. "
+        'That is a successful safety decision, not a failed software run.',
+        0.55,
+        6.23,
+        12.22,
+        0.61,
+        fill=PALE_GOLD,
+        accent=GOLD,
     )
 
 
@@ -1933,15 +2183,32 @@ def _slide_evidence(
     profile = evidence.walk_forward_manifest['source_profile']
     artifact = evidence.walk_forward_manifest['artifact_profile']
     coverage = evidence.pit_coverage['coverage']
-    production = evidence.production_pit.set_index('dataset')
-    fundamental_vintages = int(
-        production.loc['fundamental_vintages', 'rows']
+    free_data = (
+        evidence.free_data_summary.set_index('source')
+        if not evidence.free_data_summary.empty
+        else pd.DataFrame()
     )
-    corporate_action_vintages = int(
-        production.loc['corporate_action_vintages', 'rows']
+
+    def free_metric(source: str, column: str) -> float:
+        if source not in free_data.index or column not in free_data:
+            return 0.0
+        value = pd.to_numeric(
+            free_data.loc[source, column], errors='coerce'
+        )
+        return float(value) if pd.notna(value) else 0.0
+
+    akshare_names = int(free_metric('akshare', 'entities'))
+    akshare_rows = int(free_metric('akshare', 'rows'))
+    yfinance_volume_names = int(
+        free_metric('yfinance', 'positive_volume_entities')
     )
-    market_cap_vintages = int(
-        production.loc['market_cap_vintages', 'rows']
+    openfigi_names = int(free_metric('openfigi', 'entities'))
+    macro_series = int(free_metric('fred_alfred', 'entities'))
+    openbb_benchmarks = int(free_metric('openbb', 'entities'))
+    sec_status = (
+        str(free_data.loc['sec_edgar', 'status'])
+        if 'sec_edgar' in free_data.index
+        else 'not measured'
     )
     all_row = evidence.universe.loc[
         evidence.universe['region'] == 'ALL'
@@ -1949,7 +2216,7 @@ def _slide_evidence(
     slide = _new_slide(
         presentation,
         'Evidence breadth and point-in-time progress',
-        'Bloomberg vintages expanded; survivorship-clean membership remains the main gap.',
+        'Public identifiers, macro vintages and China/HK volume improved; historical membership remains the main gap.',
         8,
         'Universe, walk-forward manifest and aggregate PIT coverage',
     )
@@ -1957,7 +2224,7 @@ def _slide_evidence(
         (f'{int(all_row.active):,}', 'active equities'),
         ('{:,}'.format(int(profile['security_count'])), 'walk-forward eligible'),
         ('{:,}'.format(int(artifact['forecast_rows'])), 'historical forecasts'),
-        (f'{fundamental_vintages:,}', 'Bloomberg fundamental vintages'),
+        (f'{openfigi_names:,}', 'current FIGI mappings'),
     ]
     for index, (value, label) in enumerate(kpis):
         _add_kpi(
@@ -1996,22 +2263,22 @@ def _slide_evidence(
         (
             'Observed acceptance times',
             f"{int(coverage['observed_acceptance_timestamps']):,}",
-            'Missing',
+            'Observed' if int(coverage['observed_acceptance_timestamps']) else 'Missing',
         ),
         (
             'Dated membership events',
             f"{int(coverage['historical_membership_events']):,}",
-            'Missing',
+            'Observed' if int(coverage['historical_membership_events']) else 'Missing',
         ),
         (
             'Inactive names with prices',
             f"{int(coverage['inactive_price_securities']):,}",
-            'Missing',
+            'Observed' if int(coverage['inactive_price_securities']) else 'Missing',
         ),
         (
             'Names with historical volume',
             f"{int(coverage['securities_with_historical_volume']):,}",
-            'Missing',
+            'Observed' if int(coverage['securities_with_historical_volume']) else 'Missing',
         ),
     ]
     _add_table(
@@ -2026,11 +2293,12 @@ def _slide_evidence(
 
     _add_callout(
         slide,
-        'Bloomberg checkpoint and publication boundary',
-        f'{fundamental_vintages:,} fundamental, {market_cap_vintages:,} market-cap '
-        f'and {corporate_action_vintages:,} corporate-action vintages are stored '
-        'locally. Daily capacity paused the remaining snapshots at a durable '
-        'checkpoint; only aggregate counts are published.',
+        'Free-data checkpoint and publication boundary',
+        f'yfinance volume: {yfinance_volume_names:,} China/HK names; '
+        f'AKShare: {akshare_rows:,} bars across {akshare_names:,} names; '
+        f'FRED/ALFRED: {macro_series} series; OpenBB: {openbb_benchmarks} benchmark checks; '
+        f'SEC: {sec_status}. OpenFIGI is a current snapshot, not historical membership. '
+        'Only aggregate counts and checksums are published.',
         0.55, 6.18, 12.22, 0.65,
         fill=PALE_GOLD, accent=GOLD,
     )
@@ -2558,12 +2826,24 @@ def _slide_governance(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
     locked = evidence.walk_forward_manifest['locked_risk_calibration']
+    risk_component = _scorecard_component(evidence, 'risk_backtesting')
+    risk_status = str(risk_component.status)
     pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
     warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
+    fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
+    critical_count = len(evidence.validation_manifest.get('critical_failures', []))
     slide = _new_slide(
         presentation,
-        'Risk calibration now passes; approval stays conditional',
-        'Adaptive VaR fixed exception clustering without hiding PIT and alpha limits.',
+        (
+            'Risk holdout passes; approval stays conditional'
+            if risk_status == 'PASS'
+            else 'Risk calibration still requires evidence'
+        ),
+        (
+            'Blocked development CV controls coverage without hiding PIT and alpha limits.'
+            if risk_status == 'PASS'
+            else 'The report shows failed coverage or independence tests rather than overriding them.'
+        ),
         18,
         'Validation scorecard and overall/holdout VaR tests',
     )
@@ -2584,6 +2864,7 @@ def _slide_governance(
                 f'{int(row.violations)}/{int(row.observations)}',
                 f'{float(row.p_value):.3f}',
                 f'{float(row.christoffersen_p_value):.3f}',
+                str(row.status).title(),
             )
         )
     _add_text(
@@ -2592,30 +2873,38 @@ def _slide_governance(
     )
     _add_table(
         slide,
-        ['Sample', 'VaR', 'Exceptions', 'Kupiec p', 'Indep. p'],
+        ['Sample', 'VaR', 'Exceptions', 'Kupiec p', 'Indep. p', 'Status'],
         risk_rows,
         6.93, 1.94, 5.84, 2.38,
-        widths=[1.15, 0.68, 1.02, 0.9, 0.9],
-        font_size=9.2,
-        highlight_rows=[0, 1, 2, 3],
+        widths=[1.0, 0.55, 0.88, 0.76, 0.76, 0.75],
+        font_size=8.5,
+        highlight_rows=[
+            index
+            for index, row in enumerate(evidence.risk_backtest.itertuples())
+            if str(row.status) == 'PASS'
+        ],
     )
     _add_callout(
         slide,
-        'Development-locked risk stack: 15 / 15',
+        f'Chronological holdout gate: {risk_status.title()} '
+        f'({_score_label(risk_component)})',
         'DCC-IGARCH Student-t, filtered historical simulation, EWMA '
         'Normal and EWMA Student-t are selected using trailing data. '
-        f'Development data selected a {float(locked["selected_scale_factor"]):.3f}x '
+        f'{int(locked.get("selection_folds", 1))} blocked development fold(s) selected a '
+        f'{float(locked["selected_scale_factor"]):.3f}x '
         f'scale and {float(locked["selected_exception_multiplier"]):.2f}x '
         f'buffer for {int(locked["selected_exception_days"])} day after a breach. '
-        'The holdout is chronological reconstructed evidence, not a '
-        'pristine future shadow period.',
+        'Overall rows remain diagnostics; the configured holdout is the gate. '
+        'It is reconstructed evidence, not a pristine future shadow period.',
         6.93, 4.65, 5.84, 1.50,
-        fill=PALE_GREEN, accent=GREEN,
+        fill=PALE_GREEN if risk_status == 'PASS' else PALE_RED,
+        accent=GREEN if risk_status == 'PASS' else RED,
     )
     _add_text(
         slide,
         f'Overall {evidence.governance_score:g}/100  |  {pass_count} pass  |  '
-        f'{warning_count} warnings  |  0 critical failures  |  full local suite passed',
+        f'{warning_count} warnings  |  {fail_count} fail  |  '
+        f'{critical_count} critical failures',
         0.58, 6.5, 12.05, 0.28,
         size=12.3, color=GREEN_DARK, bold=True,
         align=PP_ALIGN.CENTER,
@@ -2794,7 +3083,7 @@ def _slide_glossary(
     _add_callout(
         slide,
         'Three evidence layers',
-        '1. Dated 60-month proxy: primary model evidence.\n'
+        f"1. Dated {int(evidence.walk_forward_manifest['artifact_profile']['portfolio_months'])}-month proxy: primary model evidence.\n"
         '2. 1997 replay: stress and exposure history.\n'
         '3. Native live record: required before full alpha approval.',
         7.86, 1.49, 4.91, 1.62,
@@ -2813,7 +3102,7 @@ def _slide_glossary(
     _add_callout(
         slide,
         'Where to verify',
-        'The GitHub release contains the 42-page PDF, plain-language '
+        'The GitHub release contains the full PDF, plain-language '
         'interpretation, CSV evidence, plots, manifests and checksums.',
         7.86, 5.21, 4.91, 1.23,
         fill=PALE_GREEN, accent=GREEN,
@@ -2822,6 +3111,7 @@ def _slide_glossary(
 def _slide_close(
     presentation: Presentation, evidence: DeckEvidence
 ) -> None:
+    fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
     slide = presentation.slides.add_slide(
         presentation.slide_layouts[6]
     )
@@ -2832,7 +3122,11 @@ def _slide_close(
     )
     _add_text(
         slide,
-        'Approve a controlled live pilot.',
+        (
+            'Approve a controlled live pilot.'
+            if fail_count == 0
+            else 'Continue paper and shadow operation.'
+        ),
         0.89, 1.32, 8.7, 0.62,
         size=34, color=WHITE, bold=True, font=FONT_HEAD,
     )
@@ -2848,7 +3142,7 @@ def _slide_close(
     statements = [
         ('USE NOW', 'Ranking, diversification, adaptive risk and governance'),
         ('PROVE LIVE', 'Net benchmark edge in a genuine future shadow record'),
-        ('FIX NEXT', 'Observed PIT vintages and probability calibration'),
+        ('FIX NEXT', 'Observed PIT vintages and prospective model evidence'),
     ]
     for index, (heading, body) in enumerate(statements):
         x = 0.92 + index * 4.03
@@ -2934,7 +3228,8 @@ def _risk_markdown_row(
         f'| {label} | {confidence}% | '
         f'{int(row.violations)}/{int(row.observations)} | '
         f'{float(row.p_value):.3f} | '
-        f'{float(row.christoffersen_p_value):.3f} | Pass |'
+        f'{float(row.christoffersen_p_value):.3f} | '
+        f'{str(row.status).title()} |'
     )
 
 
@@ -2970,6 +3265,31 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     locked = evidence.walk_forward_manifest['locked_risk_calibration']
     pass_count = int(evidence.scorecard['status'].eq('PASS').sum())
     warning_count = int(evidence.scorecard['status'].eq('WARNING').sum())
+    fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
+    risk_component = _scorecard_component(evidence, 'risk_backtesting')
+    cost_component = _scorecard_component(evidence, 'portfolio_net_of_costs')
+    pit_component = _scorecard_component(evidence, 'point_in_time')
+    risk_status = str(risk_component.status)
+    free_data = (
+        evidence.free_data_summary.set_index('source')
+        if not evidence.free_data_summary.empty
+        else pd.DataFrame()
+    )
+
+    def aggregate_metric(source: str, column: str) -> int:
+        if source not in free_data.index or column not in free_data:
+            return 0
+        value = pd.to_numeric(free_data.loc[source, column], errors='coerce')
+        return int(value) if pd.notna(value) else 0
+
+    akshare_rows = aggregate_metric('akshare', 'rows')
+    akshare_names = aggregate_metric('akshare', 'entities')
+    yfinance_rows = aggregate_metric('yfinance', 'rows')
+    yfinance_volume_names = aggregate_metric(
+        'yfinance', 'positive_volume_entities'
+    )
+    openfigi_names = aggregate_metric('openfigi', 'entities')
+    macro_series = aggregate_metric('fred_alfred', 'entities')
     fee = evidence.backtest_manifest['annual_bank_fee']
     risk = evidence.risk_backtest.set_index(
         ['evaluation_segment', 'confidence_level']
@@ -3018,8 +3338,9 @@ def _report_markdown(evidence: DeckEvidence) -> str:
         [
             f'| Governance score | {prior_score:g}/100 | '
             f'{evidence.governance_score:g}/100 | Conditional approval |',
-            '| Risk backtesting | Warning, 7.5/15 | Pass, 15/15 | '
-            'Coverage and independence pass |',
+            f'| Risk backtesting | Warning, 7.5/15 | '
+            f'{risk_status.title()}, {_score_label(risk_component)} | '
+            'Chronological holdout is the governance gate |',
             f'| Annual turnover | '
             f'{float(prior_wolf.annualised_turnover):.2f}x | '
             f'{float(wolf.annualised_turnover):.2f}x | <=1.50x: pass |',
@@ -3148,16 +3469,31 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     full_supervised_due = pd.Timestamp(
         evidence.supervised_freeze['earliest_full_evidence_date']
     ).strftime('%d %B %Y')
+    decision = (
+        '**Approve a controlled, human-supervised live pilot.**'
+        if fail_count == 0
+        else '**Continue paper and shadow operation; do not allocate live capital yet.**'
+    )
+    risk_summary = (
+        'The chronological VaR gate passes.'
+        if risk_status == 'PASS'
+        else f'The chronological VaR gate is {risk_status.lower()}.'
+    )
+    cost_summary = (
+        'Net-of-cost controls pass.'
+        if str(cost_component.status) == 'PASS'
+        else f'Net-of-cost controls are {str(cost_component.status).lower()}.'
+    )
     return f'''# Wolf Quant Model Investment Principal Report
 
 As of {evidence.as_of_date}
 
 ## Decision
 
-**Approve a controlled, human-supervised live pilot.** Governance improved
+{decision} Governance moved
 from {prior_score:g}/100 to {evidence.governance_score:g}/100. {pass_count} components pass,
-{warning_count} remain warnings, and there are zero critical failures. Adaptive risk
-backtesting and the turnover/cost targets now pass. Full-scale or unattended
+{warning_count} remain warnings, and {fail_count} fail. {risk_summary} {cost_summary}
+Full-scale or unattended
 deployment remains unapproved because observed point-in-time evidence is
 incomplete and
 benchmark-relative alpha is not established.
@@ -3243,9 +3579,10 @@ cannot complete before {full_supervised_due}.
 ## Adaptive Risk Backtesting
 
 The trailing model-selection stack contains DCC-IGARCH Student-t, filtered
-historical simulation, EWMA Normal, and EWMA Student-t forecasts. Kupiec
-coverage and Christoffersen independence tests pass overall and on the 40%
-chronological holdout. Development data selected a
+historical simulation, EWMA Normal, and EWMA Student-t forecasts. The configured
+40% chronological holdout is the governance gate and its current status is
+**{risk_status}**; overall rows remain development-plus-holdout diagnostics.
+{int(locked.get('selection_folds', 1))} blocked development fold(s) selected a
 {float(locked['selected_scale_factor']):.3f}x global scale and a
 {float(locked['selected_exception_multiplier']):.2f}x buffer for
 {int(locked['selected_exception_days'])} day after an observed exception; those
@@ -3262,17 +3599,23 @@ shadow period. Live monitoring is still required.
 
 The evidence store now contains **{int(coverage['delisting_events']):,}** delisting events and
 **{int(coverage['fundamental_rows_with_filing_date']):,}** fundamental rows with filing dates.
-Bloomberg aggregate coverage adds **{fundamental_vintages:,}** database-as-of
+Legacy local Bloomberg aggregates contain **{fundamental_vintages:,}** database-as-of
 fundamental vintages, **{market_cap_vintages:,}** historical market-cap vintages,
-and **{corporate_action_vintages:,}** corporate-action vintages. The remaining
-snapshot pull is resumable from its daily-capacity checkpoint; licensed rows stay
-in the ignored local warehouse and are not published.
+and **{corporate_action_vintages:,}** corporate-action vintages. Bloomberg is
+disconnected; licensed rows remain ignored locally and are not published.
+The public stack records **{akshare_rows:,}** AKShare bars across
+**{akshare_names:,}** China/Hong Kong securities and **{yfinance_rows:,}**
+yfinance bars with positive volume for **{yfinance_volume_names:,}** securities,
+plus **{openfigi_names:,}** current FIGI matches and **{macro_series}** configured
+FRED/ALFRED series. OpenFIGI is a current snapshot and does not repair historical
+membership.
 Observed acceptance timestamps, dated
 index membership, inactive-name prices, and historical volume remain below
 their governance thresholds. EODHD populated delistings; the Nasdaq
 entitlement yielded five usable rows; Beam was unavailable; and SEC blocked
 this runner. Unavailable history is not represented as observed evidence.
-The point-in-time component therefore remains **7.5/15, warning**.
+The point-in-time component is **{_score_label(pit_component)},
+{str(pit_component.status).lower()}**.
 
 ## Current Target Portfolio
 
@@ -3298,8 +3641,9 @@ and PnL of {pnl_text}. The separate annual bank charge is {bank_fee_rate_text}, 
 {bank_fee_text} at the reference AUM. This is a scale illustration, not a
 forecast or a live-capacity result.
 
-The portfolio component remains **5/10, warning** even though both cost gates
-pass. Wolf returned {relative_return_text} per year relative to equal weight.
+The portfolio component is **{_score_label(cost_component)},
+{str(cost_component.status).lower()}**. Wolf returned {relative_return_text}
+per year relative to equal weight.
 The paired difference was not statistically significant
 (p={paired_p_value:.3f}).
 
@@ -3324,7 +3668,7 @@ skill.
 6. Require observed PIT vintages and a genuine future shadow record before
    making deployable alpha claims.
 
-The full local test suite passed. GitHub Actions remains the publication gate.
+The local test summary and GitHub Actions checks remain publication gates.
 Research output only. This report is not authorization for unattended trading
 or individualized investment advice.
 '''
@@ -3352,6 +3696,7 @@ def build_investment_principal_deck(
     _slide_cover(presentation, evidence)
     _slide_decision(presentation, evidence)
     _slide_workflow(presentation, evidence)
+    _slide_drl_results(presentation, evidence, plot_paths[6])
     _slide_supervised_stack(presentation, evidence)
     _slide_supervised_results(presentation, evidence, plot_paths[4])
     _slide_supervised_calibration(presentation, evidence, plot_paths[5])
@@ -3418,6 +3763,9 @@ def build_investment_principal_deck(
         / 'supervised_alpha/prospective_freeze_manifest.json',
         evidence.outputs_root / 'drl_acceptance_decision.csv',
         evidence.outputs_root / 'drl_simple_challenger_comparison.csv',
+        evidence.outputs_root / 'drl_training_summary.csv',
+        evidence.outputs_root / 'drl_split_manifest.csv',
+        evidence.release_root / 'public_data/drl_long_history_manifest.json',
         evidence.outputs_root
         / 'shadow_operation/shadow_operation_status.json',
         evidence.backtest_root / 'run_manifest.json',

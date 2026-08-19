@@ -1,0 +1,2 @@
+component,status,observation_count,commentary
+drl_governance,WARNING,11,DRL remains a challenger and cannot be promoted without realised out-of-sample comparison.

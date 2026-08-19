@@ -1,101 +1,101 @@
 ticker,baseline_weight,drl_target_weight,weight_change,material_change_flag,explanation
-000333.SHE,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-HIG.US,0.0499999999999999,0.0474999999999999,-0.0024999999999999953,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-601398.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-600036.SHG,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-AD.AS,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-3988.HK,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-601728.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-002352.SHE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-002415.SHE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-0728.HK,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-600050.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-AIG.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ALL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-600406.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-VZ.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+000333.SHE,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+ALV.XETRA,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+HIG.US,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 HNR1.XETRA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-VLO.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ABT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-600019.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ALV.XETRA,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 1398.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-2020.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-2318.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-NXT.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-1288.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-0939.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-0288.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-0291.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-IMB.LSE,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-1113.HK,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-1109.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-3968.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-600690.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-PGR.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-CVX.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-COP.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-SHELL.AS,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-601766.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-PUB.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-LOW.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-MET.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-603195.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-CA.PA,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-DG.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-FGR.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ORA.PA,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-BMY.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601288.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+AD.AS,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601398.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600036.SHG,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 T.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+601919.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+002142.SHE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600406.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+PGR.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+2318.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+0939.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+VZ.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+VLO.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+IMB.LSE,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+DG.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+CVX.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+BMY.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ALL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+AIG.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+CA.PA,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+ORA.PA,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+PUB.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+002352.SHE,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+600050.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+MET.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+002415.SHE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+FGR.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+601288.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ABT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+LOW.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+0728.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+603195.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+SHELL.AS,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 600741.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-HEN3.XETRA,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-601169.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-PG.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-1299.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601988.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ADP.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601816.SHG,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601728.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600019.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+1113.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600585.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+1288.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+EN.PA,0.04999999999999969,0.04749999999999972,-0.0024999999999999675,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+0001.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+DCC.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+HEN3.XETRA,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 601658.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-FDX.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+COP.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+NOVN.SW,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601816.SHG,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 STT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+FDX.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+TTE.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+XOM.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+PG.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 600919.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 601838.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-MRSH.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-MDT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-XOM.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-GSK.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+GILD.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 TTE.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-NOVN.SW,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-601166.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-DCC.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+0823.HK,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601998.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+000538.SHE,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 2057.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-BT-A.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-STAN.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+000001.SHE,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 DHL.XETRA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601211.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601939.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-MCD.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-AFL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-A5G.IR,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-FITB.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601818.SHG,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+PSON.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+CRH.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 GD.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-TTE.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-000538.SHE,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+BT-A.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+TFC.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+NOC.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 ROP.SW,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 BBVA.MC,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-GILD.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-USB.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601009.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-EN.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-TSCO.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-NOC.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-601998.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+MCD.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+BNZL.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+PM.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 AZN.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+NXT.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+SCHP.SW,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+MDT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+FITB.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+GSK.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600009.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+MTB.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+CFR.SW,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+BN.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ADM.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+LMT.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+CCEP.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+AFL.US,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+ESSITY-B.ST,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+601009.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+PRU.LSE,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+600030.SHG,0.0,0.0,0.0,False,No material DRL overlay change after projection.
+SEB-A.ST,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
+ELE.MC,0.049999999999999996,0.047500000000000014,-0.0024999999999999814,False,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 OR.PA,0.0,0.0,0.0,False,No material DRL overlay change after projection.
-ESSITY-B.ST,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-ELE.MC,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
-600018.SHG,0.05,0.0475,-0.0025000000000000022,True,"Negative overlay: volatility, CVaR, drawdown, dividend-cut or exclusion risk reduced weight."
 0002.HK,0.0,0.0,0.0,False,No material DRL overlay change after projection.
 NESN.SW,0.0,0.0,0.0,False,No material DRL overlay change after projection.

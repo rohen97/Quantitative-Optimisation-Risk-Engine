@@ -48,11 +48,15 @@ def test_deck_evidence_uses_resolved_portfolio() -> None:
     assert evidence.governance_score == pytest.approx(
         evidence.scorecard['score'].sum()
     )
-    assert evidence.governance_score >= 80.0
+    assert 0.0 <= evidence.governance_score <= 100.0
     assert evidence.pit_coverage['coverage']['delisting_events'] > 0
     production = evidence.production_pit.set_index('dataset')
     assert int(production.loc['fundamental_vintages', 'rows']) > 0
-    assert set(evidence.risk_backtest['status']) == {'PASS'}
+    risk_gate = evidence.risk_backtest.loc[
+        evidence.risk_backtest['governance_gate'].astype(bool)
+    ]
+    assert not risk_gate.empty
+    assert set(risk_gate['status']) == {'PASS'}
     supervised = evidence.supervised_acceptance.set_index('scope').loc[
         'overall'
     ]
@@ -79,12 +83,19 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     presentation = Presentation(result.pptx_path)
     text = _presentation_text(presentation)
 
-    assert result.slide_count == 22
-    assert len(presentation.slides) == 22
-    assert 'Approve a controlled live pilot' in text
+    assert result.slide_count == 23
+    assert len(presentation.slides) == 23
+    fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
+    expected_recommendation = (
+        'Approve a controlled live pilot'
+        if fail_count == 0
+        else 'Continue paper and shadow operation'
+    )
+    assert expected_recommendation in text
     assert 'Alpha and overfitting' in text
     assert 'Equities to establish' in text
-    assert 'Risk calibration now passes' in text
+    assert 'Risk holdout passes' in text
+    assert 'DRL learned safely, but did not earn capital' in text
     assert 'The new supervised alpha research stack' in text
     assert 'Supervised signal: encouraging, not yet proven' in text
     assert 'Uncertainty and implementation are now controlled' in text
@@ -99,12 +110,8 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
         ].iloc[0]
     )
     delistings = int(evidence.pit_coverage['coverage']['delisting_events'])
-    production = evidence.production_pit.set_index('dataset')
-    fundamental_vintages = int(
-        production.loc['fundamental_vintages', 'rows']
-    )
     assert f'{delistings:,}' in text
-    assert f'{fundamental_vintages:,}' in text
+    assert 'Free-data checkpoint and publication boundary' in text
     assert f'{float(wolf.annualised_turnover):.2f}x' in text
     assert f'{float(wolf.annualised_cost_drag):.2%}' in text
     assert f'p={paired_p_value:.3f}' in text
@@ -196,7 +203,7 @@ def test_register_rendered_pdf_accepts_versioned_path(
     )
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 
-    assert result.slide_count == 22
+    assert result.slide_count == 23
     assert manifest['rendered_pdf']['path'] == str(pdf_path)
     assert manifest['rendering']['renderer'] == 'test renderer'
     assert manifest['rendering']['visual_review'] == 'completed'

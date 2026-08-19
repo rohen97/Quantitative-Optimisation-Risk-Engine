@@ -37,3 +37,17 @@ def test_record_hash_handles_mixed_missing_values_deterministically():
 
     assert first.equals(second)
     assert first.str.fullmatch(r"[0-9a-f]{64}").all()
+
+
+def test_record_hash_preserves_canonical_timestamp_serialisation():
+    frame = pd.DataFrame(
+        {
+            "security_id": ["AAA"],
+            "trade_date": pd.to_datetime(["2026-01-01"]),
+            "close": [1.0],
+        }
+    )
+
+    digest = record_hash(frame, list(frame.columns)).iloc[0]
+
+    assert digest == "da54a724931397932169be8a3571d775c25f3e7b0319055e928e2ffaf411888a"

@@ -1,0 +1,33 @@
+{
+  "evidence_semantics": "Regional index and point-in-time macro proxy used for DRL training only; it is not historical constituent-level stock evidence.",
+  "generated_at": "2026-08-19T03:49:03.992707+00:00",
+  "macro_rows_available": 34528,
+  "monthly_observations": 348,
+  "panel_end": "2026-06-30 00:00:00",
+  "panel_sha256": "f11b93111fb209580d3dfe45965a87cd77624d9d78d6153efc4a21f98fe33e5b",
+  "panel_start": "1997-07-31 00:00:00",
+  "prehistory_proxies": [
+    {
+      "applied": true,
+      "boundary_method": "fallback_levels_rebased_to_first_primary_level",
+      "fallback_start": "1997-01-02 00:00:00",
+      "fallback_symbol": "^FCHI",
+      "primary_start": "2004-04-26 00:00:00",
+      "primary_symbol": "^STOXX",
+      "region": "EU ex-DACH"
+    }
+  ],
+  "regions": [
+    "DACH",
+    "EU ex-DACH",
+    "Hong Kong",
+    "Mainland China",
+    "UK",
+    "US"
+  ],
+  "rows": 2088,
+  "source_cache_sha256": {
+    "fred_fx": "c1141a654cb1e92fd3771caf0bb0dcd7989ef91d5d5ed61bc9d7d0115a3190bc",
+    "prices": "c703a9a51101e93c5d65a54e65a59364f395e513519b1074f9285bf6e1016d51"
+  }
+}

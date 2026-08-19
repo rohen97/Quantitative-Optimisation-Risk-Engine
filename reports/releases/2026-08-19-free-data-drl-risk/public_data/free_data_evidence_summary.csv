@@ -1,0 +1,7 @@
+source,role,status,rows,entities,positive_volume_rows,positive_volume_entities,coverage_fraction,start_date,end_date,evidence_semantics,limitation
+akshare,china_hk_ohlcv_turnover,observed,12188157,3374,11187956,3374,,1993-10-11 00:00:00,2026-08-18 00:00:00,observed_unadjusted_daily_bars,Coverage depends on public endpoint availability and does not prove historical membership.
+yfinance,china_hk_ohlcv_volume,observed,23222164,7929,16837664,5142,,1993-10-11 00:00:00,2026-08-18 00:00:00,observed_public_daily_bars_with_provider_volume,Current security mappings do not prove historical index or exchange membership.
+fred_alfred,macro_release_vintages,observed,149366,21,0,0,,1994-01-01 00:00:00,2026-08-12 00:00:00,point_in_time_macro_release_vintages,Only configured public series are represented.
+sec_edgar,us_fundamental_filing_vintages,blocked_or_unavailable,0,0,0,0,,,,filing_accession_vintages_when_observed,SEC automated-access policy or network throttling can block collection; blocked is not a pass.
+openfigi,identifier_mapping,observed,143720,48577,0,0,0.9242726944079761,,2026-08-19T04:26:03.697024+00:00,current_snapshot_not_historical_identifier_history,Current mapping snapshot only; unmatched jobs remain visible.
+openbb,benchmark_normalization_validation,pass,49786,7,43725,7,1.0,1997-01-02 00:00:00,2026-07-31 00:00:00,normalization_layer_not_independent_source,The named upstream provider remains the underlying observation source.

@@ -62,6 +62,8 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
     seeds = raw.get("seeds", {}) or {}
     training = raw.get("training", {}) or {}
     acceptance = raw.get("acceptance", {}) or {}
+    long_history = raw.get("long_history", {}) or {}
+    block_bootstrap = training.get("block_bootstrap", raw.get("block_bootstrap", {})) or {}
 
     decision_frequency = str(_coalesce(environment.get("decision_frequency"), raw.get("rebalance_frequency"), default="monthly"))
     monthly_delta = float(_coalesce(action.get("max_monthly_delta_weight"), raw.get("monthly_max_delta_weight"), default=0.01))
@@ -255,6 +257,27 @@ def normalize_drl_config(raw_config: dict[str, Any] | None) -> dict[str, Any]:
             _coalesce(risk_throttle.get("severe_minimum_cash_weight"), constraints.get("minimum_cash_weight_stress"), default=0.05)
         ),
         "extreme_minimum_cash_weight": float(_coalesce(risk_throttle.get("extreme_minimum_cash_weight"), default=0.20)),
+    }
+
+    merged["long_history"] = {
+        **long_history,
+        "enabled": bool(_coalesce(long_history.get("enabled"), default=False)),
+        "panel_path": str(
+            _coalesce(
+                long_history.get("panel_path"),
+                default="data/processed/drl/regional_long_history.parquet",
+            )
+        ),
+        "training_start": str(_coalesce(long_history.get("training_start"), default="1997-01-31")),
+        "proxy_history_only": bool(_coalesce(long_history.get("proxy_history_only"), default=True)),
+    }
+    merged["block_bootstrap"] = {
+        **block_bootstrap,
+        "enabled": bool(_coalesce(block_bootstrap.get("enabled"), default=False)),
+        "environment_count": max(int(_coalesce(block_bootstrap.get("environment_count"), default=4)), 1),
+        "block_length_periods": max(int(_coalesce(block_bootstrap.get("block_length_periods"), default=24)), 1),
+        "episode_periods": max(int(_coalesce(block_bootstrap.get("episode_periods"), default=120)), 1),
+        "training_only": True,
     }
     if env_flag("DRL_MOCK_MODE", False):
         merged["mode"] = "mock"

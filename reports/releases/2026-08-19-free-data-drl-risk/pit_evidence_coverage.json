@@ -1,0 +1,24 @@
+{
+  "coverage": {
+    "delisting_events": 59183,
+    "filing_metadata_rows": 0,
+    "filing_metadata_securities": 0,
+    "fundamental_rows": 32877,
+    "fundamental_rows_with_filing_date": 32321,
+    "fundamental_securities": 7323,
+    "historical_membership_events": 0,
+    "inactive_price_securities": 0,
+    "inactive_securities": 57066,
+    "observed_acceptance_timestamps": 0,
+    "price_securities": 55094,
+    "reference_event_rows": 59183,
+    "securities_with_historical_volume": 8494,
+    "symbol_change_events": 0,
+    "universe_securities": 112570,
+    "us_fundamental_securities": 253
+  },
+  "generated_at": "2026-08-19T06:28:47.059866+00:00",
+  "governance_note": "Coverage evidence is descriptive. Production PIT approval still requires observed availability, historical membership, inactive-security prices, and historical liquidity to meet configured thresholds.",
+  "source_status": {},
+  "started_at": "2026-08-19T06:28:45.710638+00:00"
+}
