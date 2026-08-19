@@ -9,18 +9,18 @@ This package compares every investable portfolio output currently produced by th
 | Portfolio | Start | CAGR | Sharpe | Max drawdown | Ending value | PnL |
 |---|---:|---:|---:|---:|---:|---:|
 | Current Portfolio | $186,060,522 | 14.06% | 0.75 | -42.57% | $9,013,102,206 | $8,827,041,684 |
-| Portfolio-Aware Overlay | $186,060,522 | 13.69% | 0.77 | -47.39% | $8,192,397,366 | $8,006,336,844 |
-| Clean-Sheet Quant | $100,000 | 8.50% | 0.61 | -36.03% | $1,108,623 | $1,008,623 |
-| LLM Analyst Benchmark | $100,000 | 5.52% | 0.63 | -13.29% | $488,283 | $388,283 |
-| CVaR-Constrained Optimiser | $100,000 | 8.69% | 0.59 | -37.09% | $1,168,765 | $1,068,765 |
-| Dividend-Income Optimiser | $100,000 | 10.60% | 0.59 | -45.88% | $1,951,982 | $1,851,982 |
-| Mean-Variance Optimiser | $100,000 | 9.02% | 0.61 | -37.88% | $1,278,845 | $1,178,845 |
-| Regime-Aware Optimiser | $100,000 | 10.11% | 0.61 | -39.50% | $1,713,229 | $1,613,229 |
-| Risk-Parity Optimiser | $100,000 | 10.41% | 0.74 | -29.10% | $1,859,175 | $1,759,175 |
-| Score-Weighted Optimiser | $100,000 | 9.81% | 0.62 | -33.64% | $1,580,605 | $1,480,605 |
-| Final Resolved Portfolio | $186,060,522 | 8.34% | 0.58 | -37.34% | $1,976,496,316 | $1,790,435,794 |
-| DRL Baseline Portfolio | $186,060,522 | 8.34% | 0.58 | -37.34% | $1,976,496,316 | $1,790,435,794 |
-| DRL Raw Challenger | $186,060,522 | 8.05% | 0.57 | -35.80% | $1,826,083,914 | $1,640,023,392 |
+| Portfolio-Aware Overlay | $186,060,522 | 13.11% | 0.74 | -46.36% | $7,038,270,415 | $6,852,209,893 |
+| Clean-Sheet Quant | $100,000 | 6.30% | 0.52 | -31.20% | $606,712 | $506,712 |
+| LLM Analyst Benchmark | $100,000 | 4.84% | 0.66 | -10.21% | $403,101 | $303,101 |
+| CVaR-Constrained Optimiser | $100,000 | 9.80% | 0.66 | -35.69% | $1,575,708 | $1,475,708 |
+| Dividend-Income Optimiser | $100,000 | 10.80% | 0.64 | -43.00% | $2,058,089 | $1,958,089 |
+| Mean-Variance Optimiser | $100,000 | 9.92% | 0.66 | -33.96% | $1,630,361 | $1,530,361 |
+| Regime-Aware Optimiser | $100,000 | 10.48% | 0.64 | -43.32% | $1,891,914 | $1,791,914 |
+| Risk-Parity Optimiser | $100,000 | 11.83% | 0.79 | -31.79% | $2,709,164 | $2,609,164 |
+| Score-Weighted Optimiser | $100,000 | 10.59% | 0.71 | -32.62% | $1,947,693 | $1,847,693 |
+| Final Resolved Portfolio | $186,060,522 | 9.22% | 0.62 | -35.82% | $2,506,737,048 | $2,320,676,526 |
+| DRL Baseline Portfolio | $186,060,522 | 9.22% | 0.62 | -35.82% | $2,506,737,048 | $2,320,676,526 |
+| DRL Raw Challenger | $186,060,522 | 8.90% | 0.62 | -34.35% | $2,303,279,904 | $2,117,219,382 |
 | Trend and Risk-Controlled Regional Indices | $100,000 | 4.43% | 0.30 | -23.30% | $358,822 | $258,822 |
 
 ## Evidence Included

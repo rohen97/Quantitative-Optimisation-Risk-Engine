@@ -1,0 +1,14 @@
+{
+  "anonymous_safety_cap_applied": false,
+  "attempted_jobs": 1,
+  "authenticated": true,
+  "eligible_remaining_at_start": 55504,
+  "evidence_semantics": "current_snapshot_not_historical_identifier_history",
+  "failed_chunks": 0,
+  "generated_at": "2026-08-19T06:21:13.969418+00:00",
+  "identifier_rows_written": 3,
+  "matched_jobs": 1,
+  "request_count": 1,
+  "started_at": "2026-08-19T06:21:12.290192+00:00",
+  "warning_samples": []
+}

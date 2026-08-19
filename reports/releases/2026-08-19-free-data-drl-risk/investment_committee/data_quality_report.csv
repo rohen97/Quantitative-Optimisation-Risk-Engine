@@ -1,0 +1,8 @@
+dataset,available,row_count,freshness_checked,file_path,status
+current_portfolio,True,8,False,reports/outputs/current_portfolio.csv,pass
+final_portfolio_weights,True,20,True,reports/outputs/final_portfolio_weights.csv,pass
+final_recommendations,True,1402,True,reports/outputs/final_recommendations.csv,pass
+risk_report,True,1,False,reports/outputs/risk_report.csv,pass
+stress_report,True,12,False,reports/outputs/stress_report.csv,pass
+regime_summary,True,1,False,reports/outputs/regime_summary.csv,pass
+model_run_lineage,True,1,True,reports/outputs/model_run_lineage.csv,pass

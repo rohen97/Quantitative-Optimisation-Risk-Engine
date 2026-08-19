@@ -84,6 +84,30 @@ def _base_forecasts(forecasts: pd.DataFrame) -> pd.DataFrame:
     return base
 
 
+def _blocked_selection_slices(
+    row_count: int,
+    *,
+    folds: int,
+    warmup_rows: int,
+) -> tuple[slice, ...]:
+    if folds < 1:
+        raise ValueError("Risk calibration selection folds must be positive.")
+    if warmup_rows < 0:
+        raise ValueError("Risk calibration selection warmup cannot be negative.")
+    if folds == 1:
+        return (slice(0, row_count),)
+    minimum_fold_rows = 20
+    maximum_warmup = max(row_count - folds * minimum_fold_rows, 0)
+    start = min(warmup_rows, maximum_warmup)
+    boundaries = np.linspace(start, row_count, folds + 1, dtype=int)
+    slices = tuple(
+        slice(int(left), int(right))
+        for left, right in zip(boundaries[:-1], boundaries[1:], strict=True)
+        if right - left >= minimum_fold_rows
+    )
+    return slices or (slice(0, row_count),)
+
+
 def _apply_exception_response(
     forecasts: pd.DataFrame,
     *,
@@ -135,8 +159,10 @@ def apply_locked_risk_calibration(
     minimum_holdout_rows: int,
     exception_multipliers: Iterable[float] = (1.0,),
     exception_days: Iterable[int] = (0,),
+    selection_folds: int = 1,
+    selection_warmup_rows: int = 0,
 ) -> tuple[pd.DataFrame, dict[str, object]]:
-    """Select on development data, then lock scale and feedback for holdout."""
+    """Select on blocked development folds, then lock feedback for holdout."""
 
     required = {"date", "realised_return", *RISK_FORECAST_COLUMNS}
     missing = required.difference(forecasts.columns)
@@ -181,7 +207,13 @@ def apply_locked_risk_calibration(
 
     base = _base_forecasts(ordered)
     training = base.iloc[:training_rows]
+    selection_slices = _blocked_selection_slices(
+        training_rows,
+        folds=int(selection_folds),
+        warmup_rows=int(selection_warmup_rows),
+    )
     scores: dict[tuple[float, float, int], float] = {}
+    fold_scores: dict[tuple[float, float, int], list[float]] = {}
     for factor, response in product(candidates, sorted(response_candidates)):
         multiplier, duration = response
         adjusted, _, _, _ = _apply_exception_response(
@@ -190,7 +222,12 @@ def apply_locked_risk_calibration(
             exception_multiplier=multiplier,
             exception_days=duration,
         )
-        scores[(factor, multiplier, duration)] = _scale_score(adjusted, 1.0)
+        candidate = (factor, multiplier, duration)
+        fold_scores[candidate] = [
+            _scale_score(adjusted.iloc[selection_slice], 1.0)
+            for selection_slice in selection_slices
+        ]
+        scores[candidate] = float(np.mean(fold_scores[candidate]))
     selected, selected_multiplier, selected_days = min(
         scores,
         key=lambda candidate: (
@@ -256,6 +293,10 @@ def apply_locked_risk_calibration(
         separators=(",", ":"),
     )
     ordered["risk_locked_calibration_scores"] = score_payload
+    ordered["risk_locked_selection_folds"] = len(selection_slices)
+    ordered["risk_locked_selection_warmup_rows"] = int(
+        selection_slices[0].start or 0
+    )
     metadata: dict[str, object] = {
         "selected_scale_factor": selected,
         "selected_exception_multiplier": selected_multiplier,
@@ -265,6 +306,11 @@ def apply_locked_risk_calibration(
         "holdout_rows": holdout_rows,
         "training_end_date": ordered.iloc[training_rows - 1]["date"],
         "holdout_start_date": ordered.iloc[training_rows]["date"],
-        "selection_basis": "development_training_only",
+        "selection_basis": "blocked_development_training_only",
+        "selection_folds": len(selection_slices),
+        "selection_warmup_rows": int(selection_slices[0].start or 0),
+        "selected_fold_scores": fold_scores[
+            (selected, selected_multiplier, selected_days)
+        ],
     }
     return ordered, metadata

@@ -11,14 +11,14 @@
     "reference_aum_usd": 186060522.0
   },
   "command": "python scripts/run_portfolio_backtest_1997.py",
-  "common_investable_start": "2014-08-31",
+  "common_investable_start": "2016-08-31",
   "current_portfolio_nav_usd": 186060522.0,
   "deployable_alpha_status": "NOT_ESTABLISHED",
   "end_date": "2026-07-31",
   "evidence_boundary": "Long-history outputs are retrospective holdings replays; dated model evidence is separate.",
   "fixed_research_capital_usd": 100000.0,
-  "generated_at_utc": "2026-08-13T18:41:05.430220+00:00",
-  "git_commit": "5b9b4a6342aa8f2080adbfbcded630a3073ccfa0",
+  "generated_at_utc": "2026-08-19T07:15:53.554995+00:00",
+  "git_commit": "f269d954aa720506aa3aad90a07b93132b77deec",
   "macro_event_count": 13,
   "macro_event_method": "Monthly returns are selected when their period overlaps the configured event window; windows are descriptive and not causal estimates.",
   "macro_regimes": {
@@ -36,8 +36,8 @@
   "market_data": {
     "cache_artifacts": [
       {
-        "name": "yfinance_a1bdf591bc0ec52a.parquet",
-        "sha256": "c1986702041c69cdabd73dc0437b759a9dcc3ddb930e2b93e58e6d8796e317a2"
+        "name": "yfinance_3b6179b298117634.parquet",
+        "sha256": "939cf4a0574f8f1ab94b4baf2a0c416e5f29683c857131290af873e166392bf3"
       },
       {
         "name": "fred_b386464b6689c333.parquet",
@@ -58,10 +58,10 @@
       "USREC"
     ],
     "outlier_policy": "explicit_level_shift_repair",
-    "price_adjustment_count": 13,
+    "price_adjustment_count": 14,
     "provider": "yfinance",
-    "requested_symbol_count": 81,
-    "returned_symbol_count": 81
+    "requested_symbol_count": 76,
+    "returned_symbol_count": 76
   },
   "monte_carlo": {
     "ewma_lambda": 0.94,
@@ -81,7 +81,7 @@
     "sha256": "07003e270e6f1e106d8e4bdb0f34e33e5e3f3dea3b92f117568badf05d18ceeb",
     "title": "The Three Types of Backtests"
   },
-  "point_in_time_months": 60,
+  "point_in_time_months": 89,
   "portfolio_output_count": 13,
   "requested_years": 29.57700205338809,
   "resampling": {
@@ -102,51 +102,51 @@
     },
     {
       "path": "reports/outputs/drl_baseline_portfolio.csv",
-      "sha256": "b0843daa6fff0ea128469d2a894e8c44ebebde87ccbdcd6a4eb63109a4dd7941"
+      "sha256": "b1e4279ea7fc95842b2490463d72448180c5f77eea11655b2439648de9941aa2"
     },
     {
       "path": "reports/outputs/drl_challenger_portfolio.csv",
-      "sha256": "3e7a74591e284e82b3fb0a1f45344d43678a86c8513ca226203befda64e34290"
+      "sha256": "563588417214842d435529931e43aa8cf9df568750dbd60d13d65775767dbeb9"
     },
     {
       "path": "reports/outputs/final_portfolio_weights.csv",
-      "sha256": "57c6754989895105f3e120a5f2247650aa940b539c8576f9b53c4ade67df40cd"
+      "sha256": "89037bffb039bdf85fb2fd5f6e7d099b69e507a96faacdf08e7e79602a2f796b"
     },
     {
       "path": "reports/outputs/optimised_portfolio_cvar_constrained.csv",
-      "sha256": "14a85a5dcc392a895518336123cbf6a782b53dd7f196d5eb2b8f8e9276757300"
+      "sha256": "505796bae7645e49f7ef2b027c35fb0db8f9c22da4bb0edad2a6d82583375908"
     },
     {
       "path": "reports/outputs/optimised_portfolio_dividend_income.csv",
-      "sha256": "df3d956040edfefacd1055d9b494d28646d4bc4532928a06210651ca48a0d6cf"
+      "sha256": "15b7e2b74378cf9e34d4c96e213998d1dfef0882fed163908803d00d5ad9a34f"
     },
     {
       "path": "reports/outputs/optimised_portfolio_mean_variance.csv",
-      "sha256": "f341d607452e93b3c15e04a19b3f2261d2ef698d79b872081c05a348e8f93c19"
+      "sha256": "f6959a5c458a4c133a53bd547ee8942c7e6f385203b4a4a0fc37cf43a9df1f4a"
     },
     {
       "path": "reports/outputs/optimised_portfolio_regime_aware.csv",
-      "sha256": "a7fa41603d8681bc46fd92bf2cc93ef183bbf5481fb8434c8a3c8e471c4a88ae"
+      "sha256": "fbbd2abd990f176ac535af1140fb80c6dba662df3e7a12e89f6cae458fa44f71"
     },
     {
       "path": "reports/outputs/optimised_portfolio_risk_parity.csv",
-      "sha256": "3d46d9ff35c6d6933865c5dae729b91d6aa0fbe534a09b90b24bd9f224ecf858"
+      "sha256": "dd4b2da149699f029ae76c9a75ab58c3d56f8cb0ca7719fe82f68871d1de24a4"
     },
     {
       "path": "reports/outputs/optimised_portfolio_score_weighted.csv",
-      "sha256": "5f06efd4545dc900ec936bcc311c20d11ac3fabe0012be27e19de6912b12fc96"
+      "sha256": "47b3e57d147b4b9d4c39ff9495e556ee7026d3b86ff3465b0b32c4955d078cf1"
     },
     {
       "path": "reports/outputs/proposed_portfolio.csv",
-      "sha256": "8081fce64a30607f2b2a3c9f9823098687d954394f81efefbdb3d93c63d54763"
+      "sha256": "09e44752431f95b89c589f01de4f22db77add568a7dbd6bd086fc2b625edd5d9"
     },
     {
       "path": "reports/outputs/recommendations_clean_sheet.csv",
-      "sha256": "c1f2f7f1ef894f63dab6d2f59138fbade22cbd6318be246e7349352460604037"
+      "sha256": "6d6c4277b018041fc29f3e516d472c29d13dc7adb7f2240ab33074ae8d6f6d18"
     },
     {
       "path": "reports/outputs/recommendations_llm_benchmark.csv",
-      "sha256": "baf8a9f9562788a2c35010b598949745cc1a1527a7ec84afef12306eb365fec1"
+      "sha256": "c92529d705f236a1682eaf73f0184812abd838e976db14c0eb2bc3fc8e948abc"
     }
   ],
   "standalone_benchmark_count": 19,

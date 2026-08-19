@@ -17,7 +17,7 @@ def test_risk_evaluation_reports_chronological_holdout_separately():
             'expected_shortfall_99': np.full(observations, -0.0267),
         }
     )
-    result, _ = _evaluate_risk(
+    result, status = _evaluate_risk(
         frame,
         {
             'violation_rate_tolerance': 1.0,
@@ -39,3 +39,12 @@ def test_risk_evaluation_reports_chronological_holdout_separately():
         ]
         == 280
     ).all()
+    assert result.loc[
+        result['evaluation_segment'].eq('chronological_holdout'),
+        'governance_gate',
+    ].all()
+    assert not result.loc[
+        result['evaluation_segment'].eq('overall'),
+        'governance_gate',
+    ].any()
+    assert status == 'PASS'

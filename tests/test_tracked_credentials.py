@@ -4,10 +4,14 @@ from pathlib import Path
 SENSITIVE_KEYS = {
     'ALPACA_API_KEY_ID',
     'ALPACA_API_SECRET_KEY',
+    'BEAM_API_KEY',
     'EODHD_API_TOKEN',
     'FINNHUB_API_KEY',
     'FRED_API_KEY',
     'ITICK_API_TOKEN',
+    'NASDAQ_DATA_LINK_API_KEY',
+    'OPENFIGI_API_KEY',
+    'OPEN_FIGI_API_KEY',
     'TICKDB_API_KEY',
 }
 

@@ -144,20 +144,24 @@ python scripts/run_hedge_engine.py
 
 Run DRL allocation overlay outputs:
 
-```bash
+```powershell
+python scripts/build_drl_long_history.py --download-start 1994-01-01 --panel-start 1997-01-31
 python scripts/run_drl_environment_check.py
 python scripts/run_drl_training.py
 python scripts/run_drl_backtest.py
 python scripts/run_drl_explainability.py
-python scripts/run_drl_pipeline.py
+python scripts/run_drl_pipeline.py --total-timesteps 50000 --parallel-seed-workers 2
 ```
 
 The tracked configuration runs historical walk-forward mode. It uses the hashed
-60-month train, 14-month validation, two-month embargo and 12-month legacy OOS
-split, then compares five PPO seeds with a contextual bandit and convex residual
-allocator. Explicit `USE_MOCK_DATA=true` or `DRL_MOCK_MODE=true` is required for
-mock fallback. The prospective shadow record, not the already-inspected legacy
-OOS window, is the next deployment evidence.
+regional panel beginning in July 1997, with 268 training months, 65 validation
+months, two one-month embargoes and a 12-month legacy OOS record. Four contiguous
+train-only block-bootstrap environments are used per PPO seed. Validation and OOS
+dates are never bootstrap candidates. Five PPO seeds are compared with a contextual
+bandit and convex residual allocator; all selection is validation-only. Explicit
+`USE_MOCK_DATA=true` or `DRL_MOCK_MODE=true` is required for mock fallback. The
+prospective shadow record, not the already-inspected legacy OOS window, is the next
+deployment evidence.
 
 Run the supervised equity-alpha challengers against the cached observed
 walk-forward panel and realised outcomes:
@@ -215,6 +219,45 @@ cp .env.example .env
 python scripts/pull_external_data.py --status-only
 ```
 
+Install and run the free point-in-time and China/Hong Kong stack:
+
+```powershell
+python -m pip install -e ".[free-data,openbb]"
+$env:SEC_USER_AGENT='The Wolf Quant Model research-contact@example.com'
+python scripts/run_free_data_stack.py --start 1994-01-01
+python scripts/run_free_data_stack.py --phases sec --max-sec-symbols 100
+python scripts/run_free_data_stack.py --phases akshare --max-akshare-symbols 0
+```
+
+For a full Mainland volume repair, use yfinance for the fast historical pass and
+AKShare only for residual names. Both commands select only securities with fewer
+than 120 positive-volume observations and checkpoint every batch in DuckDB:
+
+```powershell
+$env:DATA_PRICE_PROVIDERS='yfinance'
+$env:YFINANCE_LOOKBACK_DAYS='12000'
+python scripts/run_price_backfill.py `
+  --max-symbols 0 --batch-size 20 --sleep-seconds 0.25 `
+  --skip-migrations --regions 'Mainland China' `
+  --listing-status Active Inactive --refresh-missing-volume `
+  --minimum-volume-rows 120 --ignore-skip-list
+
+$env:DATA_PRICE_PROVIDERS='akshare'
+$env:AKSHARE_A_SHARE_ENDPOINT='tencent'
+python scripts/run_price_backfill.py `
+  --max-symbols 0 --batch-size 20 --sleep-seconds 0.05 `
+  --skip-migrations --regions 'Mainland China' `
+  --listing-status Active Inactive --refresh-missing-volume `
+  --minimum-volume-rows 120 --ignore-skip-list
+```
+
+Runs are phase-checkpointed in
+`reports/outputs/validation/free_data_stack_status.json`. OpenFIGI output is a
+current mapping snapshot, not historical identifier membership. OpenBB records its
+named upstream provider and does not count as an independent observation. SEC may
+temporarily return HTTP 403 for automated traffic; stop retries, retain the blocked
+status, and resume later with a truthful identifying user agent.
+
 Populate any credentials you hold in the local `.env`:
 
 - `EODHD_API_TOKEN`
@@ -222,6 +265,8 @@ Populate any credentials you hold in the local `.env`:
 - `ALPHA_VANTAGE_API_KEY`
 - `FRED_API_KEY`
 - `ITICK_API_TOKEN`
+- `OPENFIGI_API_KEY` (optional; anonymous mapping uses stricter limits)
+- `SEC_USER_AGENT` (application name and monitored contact, not a secret)
 - existing Alpaca credentials
 
 No-key providers are Frankfurter, ECB, ONS, Bank of England, China Data and HKMA. Their concrete series/dataset selections live in `configs/data_sources.yaml`; ONS and HKMA use catalogue-specific endpoint paths supplied by the ingestion request.
@@ -241,8 +286,13 @@ Provider responsibilities:
 - DACH/EU: EODHD, Finnhub and yfinance for equities; ECB for official macro/rates; Frankfurter for FX.
 - UK: EODHD, Finnhub and yfinance for equities; ONS and Bank of England for official economic/rate data.
 - US: EODHD, Finnhub, yfinance and Alpaca for equities; FRED for macro, rates, credit and volatility.
-- Mainland China: EODHD, Finnhub, yfinance and iTick for equities; China Data and FRED for macro series.
-- Hong Kong: EODHD, Finnhub, yfinance and iTick for equities; HKMA and FRED for macro/financial-system series.
+- Mainland China: EODHD, Finnhub, yfinance, AKShare and iTick for equities; China Data and FRED for macro series.
+- Hong Kong: EODHD, Finnhub, yfinance, AKShare and iTick for equities; HKMA and FRED for macro/financial-system series.
+
+OpenBB is an optional normalisation and cross-validation layer over a named upstream
+provider for every region. AKShare bars are deliberately unadjusted and primarily
+fill observed volume/turnover; preferred adjusted closes remain authoritative when
+both providers cover the same security-date.
 
 The Medium examples informed the iTick response parser, retry/backoff policy, local persistence and cross-provider checks. They are not treated as authoritative data feeds or licensing documentation.
 
@@ -275,6 +325,10 @@ Install or remove Windows scheduled tasks:
 scripts/windows/install_production_tasks.ps1
 scripts/windows/uninstall_production_tasks.ps1
 ```
+
+The installer resolves the repository from its own location and uses the local
+`.venv`. It registers daily runs at 07:00, weekly runs on Saturday at 09:00,
+and the governed monthly shadow run on the first Sunday at 10:00.
 
 Production operations are documented in `docs/PRODUCTION_OPERATIONS.md`.
 

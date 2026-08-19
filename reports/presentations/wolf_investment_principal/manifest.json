@@ -1,30 +1,30 @@
 {
   "schema_version": 2,
-  "generated_at_utc": "2026-08-17T07:39:23.399793+00:00",
-  "as_of_date": "17 August 2026",
+  "generated_at_utc": "2026-08-19T07:34:33.310701+00:00",
+  "as_of_date": "19 August 2026",
   "approval_status": "CONDITIONALLY_APPROVED",
-  "governance_score": 87.5,
-  "slide_count": 22,
+  "governance_score": 75.0,
+  "slide_count": 23,
   "presentation": {
     "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx",
-    "sha256": "0e1d59eaec74d4485f65878e7cbdfbc2817edcc790bceb43c42d2289ed2edaf3",
-    "bytes": 1184740
+    "sha256": "efb9016adf3ad71e5d2a3699e7dc19f379a5d22b9da93e05c93248e19132f0fc",
+    "bytes": 1266647
   },
   "report": {
     "path": "reports/presentations/wolf_investment_principal/investment_principal_report.md",
-    "sha256": "4881866874cacea134f4f3c5d918832d2e10e1f349bc8fa000108fcb3109dce2",
-    "bytes": 9439
+    "sha256": "886775102451fe9a4d2a638b716eb411c4d4a431e71700294740dda83e7b7423",
+    "bytes": 9731
   },
   "recommendations": {
     "path": "reports/presentations/wolf_investment_principal/recommendation_snapshot.csv",
-    "sha256": "f9a1cc320b4507db709162a54661052886f0113131b4b602a2f0bb8d0b714dc5",
-    "bytes": 8291,
+    "sha256": "4e3728f0c4e1569e285f636700f0aeb49f59b38ab1e7fb6002139cf98c504cd4",
+    "bytes": 8369,
     "publication_scope": "governed target, regional challenger and six-name research watchlist"
   },
   "restricted_inputs": [
     {
       "name": "regional_alpha_security_level_output",
-      "sha256": "878bc5a4515e78eea0ed6a8e023fe208b0fe79769c9a0d1996a4fb5ed7272386",
+      "sha256": "cb1a0a0518b9679be25b90f6eadb9aa423b86062b9e7627e4cff5803c7a94e47",
       "publication_status": "local_only_licensed_derived"
     },
     {
@@ -35,32 +35,32 @@
   ],
   "inputs": [
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/validation/validation_manifest.json",
-      "sha256": "27d444210a43197533feae22969efc04349c35b5442c042a28172bb90c196e6f"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/validation/validation_manifest.json",
+      "sha256": "e397165083885d491336f0622402d740ef1b7812d85b3fe7da37cbe999b3dc00"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/validation/risk_backtesting_report.csv",
-      "sha256": "70177ff79a67a8dd09960af5970586de4d3a374f1c5e564bdef2a4a143bcfb50"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/validation/risk_backtesting_report.csv",
+      "sha256": "b3b4ece938c27148e151f013e57d720c517b1194a0164705003953c0b122b379"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/validation/benchmark_significance_report.csv",
-      "sha256": "503becd9e9e57354f8c2c5aee71b17b34ab66a2c08617407af94580e6d9572e7"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/validation/benchmark_significance_report.csv",
+      "sha256": "88819f6dc045135b2970a1e0af787c8d02d77e9c628210530fdd4c77b7fcf755"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/validation/transaction_cost_validation.csv",
-      "sha256": "0fccb20e91585a0f613e32c99dcea2705975efa036b9a3f7777c77241d7244b6"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/validation/transaction_cost_validation.csv",
+      "sha256": "fffd6e2faf94085e8e6ffd5bfcc0497710a19885eb0ad1ad7e3b9abaae3a8f25"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/walk_forward_manifest.json",
-      "sha256": "00acc0ff87e0880bea39f6b423b3dd3464fea40bb95596f8d484cd2bcb600b21"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/walk_forward_manifest.json",
+      "sha256": "b73293eeecca9d4bce0c3bd981bbef9497395b51ca156963c37ff32cd9a393d9"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/universe_summary.csv",
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/universe_summary.csv",
       "sha256": "f9aaee70848d2e844228eec365c5a4dc4d7a23d025a21ad5298d4bb65aff9840"
     },
     {
-      "path": "reports/releases/2026-08-13-risk-pit-cost-validation/pit_evidence_coverage.json",
-      "sha256": "f98bc26eebdab57ae8e5371c2011de42ba75e27ee7f01a1f94528e396c39c086"
+      "path": "reports/releases/2026-08-19-free-data-drl-risk/pit_evidence_coverage.json",
+      "sha256": "6c32cc391e1b4a10a7f80de634905eaf48d4366313c437e5b1a3c3fc5904d007"
     },
     {
       "path": "reports/releases/2026-08-07-full-universe/validation/validation_manifest.json",
@@ -72,11 +72,11 @@
     },
     {
       "path": "reports/outputs/final_portfolio_weights.csv",
-      "sha256": "57c6754989895105f3e120a5f2247650aa940b539c8576f9b53c4ade67df40cd"
+      "sha256": "89037bffb039bdf85fb2fd5f6e7d099b69e507a96faacdf08e7e79602a2f796b"
     },
     {
       "path": "reports/outputs/portfolio_trade_list.csv",
-      "sha256": "3bd69fb7d15c7eda1fe7d84cbe28c912743204d6dbfa73f08d147fa2b78c8a54"
+      "sha256": "eabb876b6c4d6db7df61dce763f95e68f27e7a0f8a6142231e0cf13b5de87143"
     },
     {
       "path": "reports/outputs/supervised_alpha/dataset_profile.csv",
@@ -108,11 +108,23 @@
     },
     {
       "path": "reports/outputs/drl_acceptance_decision.csv",
-      "sha256": "a38c9b7918d4e72e39dc7b18b8e80bd9938eb67c417efb63d608cb462d145599"
+      "sha256": "cbd021bd36bd833ea63089812f4b75798820c58d7b3fe16582c1cb47d03aae6b"
     },
     {
       "path": "reports/outputs/drl_simple_challenger_comparison.csv",
-      "sha256": "c7e471414ec1126f06e9a56e40d23bc1fcb07669b5108c571605b925a5a199c1"
+      "sha256": "9b19a8e5c069ae429efdc9b30a9dcff7076b1e88886e9d33d52c4bde097089d5"
+    },
+    {
+      "path": "reports/outputs/drl_training_summary.csv",
+      "sha256": "e8f8b1a1d37c189a2933682ab82dc18ddebc103ce3f58e49dcb9da7e17171e4f"
+    },
+    {
+      "path": "reports/outputs/drl_split_manifest.csv",
+      "sha256": "a1e7538bcbded4a73668375b4f28bc437aec29ceb171402073e25d59e4b38f4d"
+    },
+    {
+      "path": "reports/outputs/validation/drl_long_history_manifest.json",
+      "sha256": "4e2d252aca4799cd364af71554e5828bbfe72fb934ab9d8c6d5c238ce1e0bcea"
     },
     {
       "path": "reports/outputs/shadow_operation/shadow_operation_status.json",
@@ -120,33 +132,33 @@
     },
     {
       "path": "reports/backtests/1997_to_latest/run_manifest.json",
-      "sha256": "7aadcdfc34d583c7debe1a69bb4003ebaf7f5d46db8e3246920c175fe390f8c3"
+      "sha256": "0f0ed683f9081b48482b680b116668a0a9a678c0b4fec5c63792ccf11352dc47"
     },
     {
       "path": "reports/backtests/1997_to_latest/point_in_time_alpha_significance.csv",
-      "sha256": "1a37c71f2133b88136cc654a5c4387be76955722f5de839ff6c2f86049a89cac"
+      "sha256": "1de9f3c67169a501ae850f6d16213362252a77c80d8776f2d65b39ea1ef7d097"
     },
     {
       "path": "reports/backtests/1997_to_latest/strategy_overfitting_summary.csv",
-      "sha256": "85a0766e352fefb0c48bd4fd70f1e75754daee391e9505e695c980e4416687b2"
+      "sha256": "3b579d94b411a92c22636b0483cac22b10cf3c0b095d3ef784ce765aa3c729a9"
     }
   ],
   "plots": [
     {
       "path": "reports/presentations/wolf_investment_principal/plots/pit_capital_projection.png",
-      "sha256": "4dd21d7f0cf50f5e652757df7554300d31b8393c7d86a16978716f164c423b9d"
+      "sha256": "ef5738e980e38c0062c3560ccb366a1a0cf28d244cd3e774974b17b0bdefa66a"
     },
     {
       "path": "reports/presentations/wolf_investment_principal/plots/pit_metric_comparison.png",
-      "sha256": "052ad4580f78ff97fe42526a494af2945ae7a30b9dfa3719b8b4d9539112aa10"
+      "sha256": "937154fd4c2ff7f2c03396d41a27f68fdef7262e4484bca8864fbf6a0f91128c"
     },
     {
       "path": "reports/presentations/wolf_investment_principal/plots/overfitting_haircut.png",
-      "sha256": "fa6bd382489782880f7f096d76ef8a6271ae1e7781e0b2ceb92dde2590bcf604"
+      "sha256": "992688afe5349be4a7cb298303165fba1cc8e6b6c41eed77508b57f02236e4de"
     },
     {
       "path": "reports/presentations/wolf_investment_principal/plots/implementation_cost_drag.png",
-      "sha256": "1f320faba99cee06da83e6f5c42e6323eae404508f82e406a724b08fec981cb4"
+      "sha256": "6e173b531d86b1aaee9c7e24dc27f05d9cc95f25d47e5b3a48e03592818659fb"
     },
     {
       "path": "reports/presentations/wolf_investment_principal/plots/supervised_rank_ic.png",
@@ -155,16 +167,20 @@
     {
       "path": "reports/presentations/wolf_investment_principal/plots/supervised_calibration.png",
       "sha256": "ce3ec3c0e4b5e00e4e6250f1e51cf5761e2f9ac9c67e060e859ce61e6ba2ed41"
+    },
+    {
+      "path": "reports/presentations/wolf_investment_principal/plots/drl_validation.png",
+      "sha256": "c0fa4901c78a66fb4d40664ec278b6046834c2e4c8eff41958f39e82db5ede9a"
     }
   ],
   "rendered_pdf": {
-    "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-17.pdf",
-    "sha256": "2d72670bfb68392cebdf52c1f4e8bb6f7ac5df2f7c66e07b5eab79ef61904479",
-    "bytes": 1212553
+    "path": "reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-19.pdf",
+    "sha256": "a030af5e6b251ff754d0886496b72eadf8051a67579515aa05d6420089988c5a",
+    "bytes": 1290312
   },
   "rendering": {
     "renderer": "Microsoft PowerPoint 16.0",
-    "slide_count": 22,
+    "slide_count": 23,
     "visual_review": "completed"
   }
 }

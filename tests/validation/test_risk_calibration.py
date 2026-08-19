@@ -33,6 +33,8 @@ def test_locked_risk_calibration_does_not_use_holdout_outcomes_for_selection() -
         "holdout_fraction": 0.40,
         "minimum_training_rows": 60,
         "minimum_holdout_rows": 40,
+        "selection_folds": 3,
+        "selection_warmup_rows": 12,
     }
 
     calibrated, metadata = apply_locked_risk_calibration(original, **options)
@@ -41,7 +43,10 @@ def test_locked_risk_calibration_does_not_use_holdout_outcomes_for_selection() -
     assert metadata["selected_scale_factor"] == altered_metadata[
         "selected_scale_factor"
     ]
-    assert metadata["selection_basis"] == "development_training_only"
+    assert metadata["selection_basis"] == "blocked_development_training_only"
+    assert metadata["selection_folds"] == 3
+    assert metadata["selection_warmup_rows"] == 12
+    assert len(metadata["selected_fold_scores"]) == 3
     training = calibrated["risk_calibration_segment"].eq("development_training")
     holdout = ~training
     assert calibrated.loc[training, "var_95"].equals(

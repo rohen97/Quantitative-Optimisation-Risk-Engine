@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import logging
 import sys
 from pathlib import Path
@@ -68,6 +69,21 @@ PIPELINE_STAGES = [
 ]
 
 
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run the constrained regional DRL overlay and governance decision."
+    )
+    parser.add_argument("--total-timesteps", type=int, default=None)
+    parser.add_argument("--parallel-seed-workers", type=int, default=None)
+    parser.add_argument("--seeds", nargs="+", type=int, default=None)
+    parser.add_argument(
+        "--smoke",
+        action="store_true",
+        help="Run one seed for 256 timesteps; outputs remain labelled as a smoke run.",
+    )
+    return parser.parse_args(argv)
+
+
 def _read_output(output_dir: Path, filename: str) -> pd.DataFrame:
     path = output_dir / filename
     return pd.read_csv(path) if path.exists() else pd.DataFrame()
@@ -104,12 +120,28 @@ def _update_final_recommendations(output_dir: Path, outputs: dict[str, pd.DataFr
     write_csv(updated, output_dir, "final_recommendations.csv")
 
 
-def main() -> dict[str, pd.DataFrame | str]:
+def main(argv: list[str] | None = None) -> dict[str, pd.DataFrame | str]:
+    args = parse_args(argv)
     for index, stage in enumerate(PIPELINE_STAGES, start=1):
         logging.info("DRL stage %02d: %s", index, stage)
 
     base_config = load_yaml("configs/base.yaml")
     drl_config = load_yaml("configs/drl.yaml").get("drl", load_yaml("configs/drl.yaml"))
+    if args.total_timesteps is not None:
+        drl_config.setdefault("ppo", {})["total_timesteps"] = max(args.total_timesteps, 1)
+    if args.parallel_seed_workers is not None:
+        drl_config.setdefault("training", {})["parallel_seed_workers"] = max(
+            args.parallel_seed_workers, 1
+        )
+    if args.seeds:
+        drl_config.setdefault("seeds", {})["values"] = list(dict.fromkeys(args.seeds))
+    if args.smoke:
+        drl_config.setdefault("ppo", {}).update(
+            {"total_timesteps": 256, "minimum_random_seeds": 1, "n_steps": 64, "batch_size": 64}
+        )
+        drl_config.setdefault("seeds", {})["values"] = [11]
+        drl_config.setdefault("training", {})["parallel_seed_workers"] = 1
+        drl_config["run_label"] = "smoke_not_deployment_evidence"
     optimisation_config = load_yaml("configs/optimisation.yaml")
     output_dir = ensure_output_dir(base_config)
     frames = _load_upstream_frames(output_dir)

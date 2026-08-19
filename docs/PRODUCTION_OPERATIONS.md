@@ -78,6 +78,10 @@ scripts/windows/install_production_tasks.ps1
 scripts/windows/uninstall_production_tasks.ps1
 ```
 
+The task actions are location-independent and call the repository's `.venv`
+interpreter. The monthly task follows `configs/production.yaml`: first Sunday
+at 10:00 Asia/Singapore.
+
 Linux cron examples are documented in `scripts/linux/wolf_model_cron.example`.
 
 ## Output Pointers

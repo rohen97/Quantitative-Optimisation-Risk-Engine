@@ -29,6 +29,7 @@ from src.drl.regime_gating import calculate_regime_agent_weights, calculate_risk
 from src.drl.regional_ppo import (
     build_regional_panel,
     build_regional_split_manifest,
+    load_and_combine_regional_history,
 )
 from src.drl.state_builder import build_drl_state, build_state_schema
 from src.drl.training import chronological_train_validation_test_split, run_seed_training
@@ -471,6 +472,10 @@ def run_drl_pipeline(
         effective_config.get("ppo", {}).get("use_stable_baselines", False)
     ):
         historical_panel = build_regional_panel(out)
+    historical_panel = load_and_combine_regional_history(
+        historical_panel,
+        effective_config,
+    )
     split_manifest = (
         build_regional_split_manifest(historical_panel, effective_config)
         if not historical_panel.empty

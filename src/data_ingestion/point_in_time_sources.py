@@ -11,7 +11,7 @@ from typing import Any
 
 import pandas as pd
 
-from src.data.normalisers import normalise_fundamentals
+from src.data.normalisers import normalise_fundamentals, record_hash
 from src.data.schemas import SCHEMAS
 from src.data_ingestion.http_client import DataSourceRequestError, HttpClient
 from src.utils.env import get_env
@@ -19,6 +19,7 @@ from src.utils.env import get_env
 
 BEAM_SEC_SOURCE = "beam_sec_metadata"
 SEC_SUBMISSIONS_SOURCE = "sec_edgar_submissions"
+SEC_COMPANYFACTS_SOURCE = "sec_edgar_companyfacts"
 NASDAQ_MERGENT_SOURCE = "nasdaq_mergent_f1"
 EODHD_REFERENCE_SOURCE = "eodhd_reference_history"
 
@@ -27,6 +28,7 @@ BEAM_SEC_METADATA_URL = (
 )
 SEC_TICKER_MAP_URL = "https://www.sec.gov/files/company_tickers.json"
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions"
+SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts"
 NASDAQ_MERGENT_URL = "https://data.nasdaq.com/api/v3/datatables/MER/F1.json"
 EODHD_BASE_URL = "https://eodhd.com/api"
 
@@ -333,6 +335,307 @@ class SecSubmissionsClient:
         if not rows:
             return _empty("filing_metadata")
         return pd.DataFrame(rows)[list(SCHEMAS["filing_metadata"].column_names)]
+
+
+_SEC_FACT_TAGS: dict[str, tuple[str, ...]] = {
+    "revenue": (
+        "RevenueFromContractWithCustomerExcludingAssessedTax",
+        "Revenues",
+        "SalesRevenueNet",
+    ),
+    "operating_income": ("OperatingIncomeLoss",),
+    "net_income": ("NetIncomeLoss", "ProfitLoss"),
+    "operating_cash_flow": ("NetCashProvidedByUsedInOperatingActivities",),
+    "capital_expenditure": (
+        "PaymentsToAcquirePropertyPlantAndEquipment",
+        "PaymentsForAdditionsToPropertyPlantAndEquipment",
+    ),
+    "total_assets": ("Assets",),
+    "total_liabilities": ("Liabilities",),
+    "total_debt": (
+        "LongTermDebtAndFinanceLeaseObligations",
+        "LongTermDebt",
+        "DebtAndFinanceLeaseObligations",
+    ),
+    "_debt_current": (
+        "LongTermDebtAndFinanceLeaseObligationsCurrent",
+        "LongTermDebtCurrent",
+        "ShortTermBorrowings",
+        "DebtCurrent",
+    ),
+    "_debt_noncurrent": (
+        "LongTermDebtAndFinanceLeaseObligationsNoncurrent",
+        "LongTermDebtNoncurrent",
+        "DebtNoncurrent",
+    ),
+    "cash_and_equivalents": (
+        "CashAndCashEquivalentsAtCarryingValue",
+        "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+    ),
+    "shareholders_equity": (
+        "StockholdersEquity",
+        "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    ),
+    "dividends_paid": ("PaymentsOfDividends", "PaymentsOfDividendsCommonStock"),
+    "diluted_shares": ("WeightedAverageNumberOfDilutedSharesOutstanding",),
+    "interest_expense": ("InterestExpenseNonOperating", "InterestAndDebtExpense"),
+}
+
+
+def _sec_fact_tag_index() -> dict[str, tuple[str, int]]:
+    return {
+        tag: (metric, rank)
+        for metric, tags in _SEC_FACT_TAGS.items()
+        for rank, tag in enumerate(tags)
+    }
+
+
+def _sec_period_type(form: str) -> str | None:
+    clean = form.upper().replace("/A", "")
+    if clean in {"10-K", "20-F", "40-F"}:
+        return "annual"
+    if clean == "10-Q":
+        return "quarterly"
+    return None
+
+
+def _sec_fact_duration(record: Mapping[str, Any]) -> int | None:
+    start = _timestamp(record.get("start"))
+    end = _timestamp(record.get("end"))
+    if start is None or end is None:
+        return None
+    return max((end.normalize() - start.normalize()).days, 0)
+
+
+def _select_sec_fact(records: list[dict[str, Any]], period_type: str) -> dict[str, Any]:
+    def ordering(record: dict[str, Any]) -> tuple[int, int]:
+        duration = record.get("duration_days")
+        if duration is None:
+            duration_order = 0
+        elif period_type == "annual":
+            duration_order = -int(duration)
+        else:
+            duration_order = int(duration)
+        return int(record["tag_rank"]), duration_order
+
+    return min(records, key=ordering)
+
+
+@dataclass(frozen=True)
+class SecCompanyFactsResult:
+    fundamental_vintages: pd.DataFrame
+    fundamentals_reported: pd.DataFrame
+    facts_seen: int
+    filing_vintages: int
+
+
+@dataclass
+class SecCompanyFactsClient:
+    """Build filing-accession vintages from the SEC's first-party XBRL facts."""
+
+    client: HttpClient
+    base_url: str = SEC_COMPANYFACTS_URL
+
+    def _headers(self) -> dict[str, str]:
+        user_agent = get_env("SEC_USER_AGENT", "") or ""
+        if not user_agent:
+            raise DataSourceRequestError(
+                "SEC_USER_AGENT is required and must identify the application and contact."
+            )
+        return {"User-Agent": user_agent}
+
+    def fundamentals(
+        self,
+        security_id: str,
+        cik: str | int,
+        *,
+        start_date: date,
+        end_date: date,
+        retrieved_at: pd.Timestamp,
+        ingestion_run_id: str,
+        acceptance_by_accession: Mapping[str, object] | None = None,
+    ) -> SecCompanyFactsResult:
+        padded_cik = str(cik).zfill(10)
+        payload = self.client.get(
+            f"{self.base_url}/CIK{padded_cik}.json",
+            headers=self._headers(),
+        ).json()
+        if not isinstance(payload, Mapping):
+            raise DataSourceRequestError("SEC companyfacts returned a non-object response.")
+        facts = payload.get("facts")
+        if not isinstance(facts, Mapping):
+            raise DataSourceRequestError("SEC companyfacts omitted facts.")
+        namespaces = [
+            values
+            for name, values in facts.items()
+            if str(name).lower() in {"us-gaap", "ifrs-full"} and isinstance(values, Mapping)
+        ]
+        tag_index = _sec_fact_tag_index()
+        flat: list[dict[str, Any]] = []
+        for namespace in namespaces:
+            for tag, fact in namespace.items():
+                target = tag_index.get(str(tag))
+                if target is None or not isinstance(fact, Mapping):
+                    continue
+                units = fact.get("units")
+                if not isinstance(units, Mapping):
+                    continue
+                metric, tag_rank = target
+                for unit, records in units.items():
+                    if not isinstance(records, list):
+                        continue
+                    for record in records:
+                        if not isinstance(record, Mapping):
+                            continue
+                        form = str(record.get("form") or "").upper()
+                        period_type = _sec_period_type(form)
+                        accession = str(record.get("accn") or "").strip()
+                        fiscal_end = _timestamp(record.get("end"))
+                        filed = _timestamp(record.get("filed"))
+                        value = _number(record.get("val"))
+                        if (
+                            period_type is None
+                            or not accession
+                            or fiscal_end is None
+                            or filed is None
+                            or value is None
+                            or fiscal_end.date() < start_date
+                            or fiscal_end.date() > end_date
+                        ):
+                            continue
+                        flat.append(
+                            {
+                                "accession": accession,
+                                "fiscal_period_end": fiscal_end.normalize(),
+                                "fiscal_period_type": period_type,
+                                "filing_date": filed.normalize(),
+                                "metric": metric,
+                                "value": value,
+                                "unit": str(unit).upper(),
+                                "tag_rank": tag_rank,
+                                "duration_days": _sec_fact_duration(record),
+                            }
+                        )
+
+        retrieved = _timestamp(retrieved_at) or pd.Timestamp(retrieved_at)
+        acceptance_map = {
+            str(accession): _timestamp(timestamp)
+            for accession, timestamp in (acceptance_by_accession or {}).items()
+        }
+        grouped: dict[tuple[str, pd.Timestamp, str, pd.Timestamp], list[dict[str, Any]]] = {}
+        for fact in flat:
+            key = (
+                fact["accession"],
+                fact["fiscal_period_end"],
+                fact["fiscal_period_type"],
+                fact["filing_date"],
+            )
+            grouped.setdefault(key, []).append(fact)
+
+        rows: list[dict[str, Any]] = []
+        for (accession, fiscal_end, period_type, filing_date), records in grouped.items():
+            metrics: dict[str, float] = {}
+            currency_counts: dict[str, int] = {}
+            for metric in _SEC_FACT_TAGS:
+                candidates = [record for record in records if record["metric"] == metric]
+                if not candidates:
+                    continue
+                selected = _select_sec_fact(candidates, period_type)
+                metrics[metric] = float(selected["value"])
+                unit = str(selected["unit"])
+                if metric != "diluted_shares" and re.fullmatch(r"[A-Z]{3}", unit):
+                    currency_counts[unit] = currency_counts.get(unit, 0) + 1
+            if "total_debt" not in metrics:
+                debt_parts = [metrics.get("_debt_current"), metrics.get("_debt_noncurrent")]
+                if any(value is not None for value in debt_parts):
+                    metrics["total_debt"] = sum(value or 0.0 for value in debt_parts)
+            if "operating_cash_flow" in metrics and "capital_expenditure" in metrics:
+                metrics["free_cash_flow"] = metrics["operating_cash_flow"] - abs(
+                    metrics["capital_expenditure"]
+                )
+            canonical_metrics = {
+                key: value for key, value in metrics.items() if not key.startswith("_")
+            }
+            if len(canonical_metrics) < 3:
+                continue
+            observed_acceptance = acceptance_map.get(accession)
+            available_from = observed_acceptance or filing_date + pd.Timedelta(days=1)
+            currency = max(currency_counts, key=currency_counts.get) if currency_counts else None
+            rows.append(
+                {
+                    "security_id": str(security_id).upper(),
+                    "provider_symbol": accession,
+                    "fiscal_period_end": fiscal_end,
+                    "fiscal_period_type": period_type,
+                    "available_from": available_from,
+                    "announcement_at": observed_acceptance or filing_date,
+                    "revision_at": available_from,
+                    "currency": currency,
+                    **canonical_metrics,
+                    "source": SEC_COMPANYFACTS_SOURCE,
+                    "retrieved_at": retrieved,
+                    "ingestion_run_id": ingestion_run_id,
+                    "vintage_semantics": "observed_filing_accession_companyfacts",
+                }
+            )
+
+        vintage_frame = pd.DataFrame(rows)
+        if vintage_frame.empty:
+            empty_vintages = _empty("fundamental_vintages")
+            empty_model = _empty("fundamentals_reported")
+            return SecCompanyFactsResult(empty_vintages, empty_model, len(flat), 0)
+        metric_columns = [
+            column
+            for column in SCHEMAS["fundamentals_reported"].column_names
+            if column
+            not in {
+                "security_id",
+                "fiscal_period_end",
+                "fiscal_period_type",
+                "filing_date",
+                "available_from",
+                "currency",
+                "source",
+                "retrieved_at",
+                "ingestion_run_id",
+                "vintage_id",
+                "row_hash",
+            }
+        ]
+        for column in metric_columns:
+            if column not in vintage_frame:
+                vintage_frame[column] = pd.NA
+        vintage_frame["row_hash"] = record_hash(
+            vintage_frame,
+            [
+                "security_id",
+                "provider_symbol",
+                "fiscal_period_end",
+                "fiscal_period_type",
+                "available_from",
+                *metric_columns,
+                "source",
+            ],
+        )
+        vintage_frame["vintage_id"] = vintage_frame["row_hash"]
+        vintage_frame = vintage_frame[list(SCHEMAS["fundamental_vintages"].column_names)]
+
+        model_frame = vintage_frame.copy()
+        model_frame["filing_date"] = pd.to_datetime(model_frame["announcement_at"]).dt.normalize()
+        model_frame["source"] = SEC_COMPANYFACTS_SOURCE
+        model_frame["row_hash"] = record_hash(
+            model_frame,
+            [
+                "security_id",
+                "fiscal_period_end",
+                "fiscal_period_type",
+                "available_from",
+                "vintage_id",
+                "source",
+            ],
+        )
+        model_frame = model_frame[list(SCHEMAS["fundamentals_reported"].column_names)]
+        return SecCompanyFactsResult(vintage_frame, model_frame, len(flat), len(vintage_frame))
 
 
 MERGENT_MAPCODES: dict[int, str] = {

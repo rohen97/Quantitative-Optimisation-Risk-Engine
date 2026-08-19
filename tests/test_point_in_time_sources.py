@@ -8,6 +8,7 @@ from src.data_ingestion.point_in_time_sources import (
     BeamSecMetadataClient,
     EodhdReferenceHistoryClient,
     NasdaqMergentClient,
+    SecCompanyFactsClient,
     SecSubmissionsClient,
 )
 from src.validation.leakage import point_in_time_evidence_report
@@ -110,6 +111,75 @@ def test_sec_submissions_preserve_observed_acceptance(monkeypatch):
         "2020-10-29 18:06:25"
     )
     assert frame.loc[0, "source"] == "sec_edgar_submissions"
+
+
+class _SecCompanyFactsHttp:
+    def get(self, url, headers=None):
+        assert "companyfacts" in url
+        assert headers and headers["User-Agent"] == "wolf-test contact@example.test"
+
+        def records(first, second):
+            return [
+                {
+                    "start": "2019-09-29",
+                    "end": "2020-09-26",
+                    "val": first,
+                    "accn": "0000320193-20-000096",
+                    "form": "10-K",
+                    "filed": "2020-10-30",
+                },
+                {
+                    "start": "2019-09-29",
+                    "end": "2020-09-26",
+                    "val": second,
+                    "accn": "0000320193-20-000097",
+                    "form": "10-K/A",
+                    "filed": "2020-11-02",
+                },
+            ]
+
+        return _Response(
+            {
+                "facts": {
+                    "us-gaap": {
+                        "RevenueFromContractWithCustomerExcludingAssessedTax": {
+                            "units": {"USD": records(1000.0, 1010.0)}
+                        },
+                        "NetIncomeLoss": {"units": {"USD": records(100.0, 105.0)}},
+                        "NetCashProvidedByUsedInOperatingActivities": {
+                            "units": {"USD": records(120.0, 125.0)}
+                        },
+                        "PaymentsToAcquirePropertyPlantAndEquipment": {
+                            "units": {"USD": records(20.0, 20.0)}
+                        },
+                        "Assets": {"units": {"USD": records(2000.0, 2005.0)}},
+                    }
+                }
+            }
+        )
+
+
+def test_sec_companyfacts_preserves_original_and_amended_filing_vintages(monkeypatch):
+    monkeypatch.setenv("SEC_USER_AGENT", "wolf-test contact@example.test")
+    result = SecCompanyFactsClient(_SecCompanyFactsHttp()).fundamentals(
+        "AAPL.US",
+        "320193",
+        start_date=date(2020, 1, 1),
+        end_date=date(2020, 12, 31),
+        retrieved_at=pd.Timestamp("2026-08-19"),
+        ingestion_run_id="run-companyfacts",
+        acceptance_by_accession={
+            "0000320193-20-000096": pd.Timestamp("2020-10-29T18:06:25Z")
+        },
+    )
+    frame = result.fundamentals_reported.sort_values("available_from").reset_index(drop=True)
+    assert len(frame) == 2
+    assert result.filing_vintages == 2
+    assert frame.loc[0, "available_from"] == pd.Timestamp("2020-10-29 18:06:25")
+    assert frame.loc[1, "available_from"] == pd.Timestamp("2020-11-03")
+    assert frame.loc[0, "free_cash_flow"] == 100.0
+    assert frame.loc[1, "revenue"] == 1010.0
+    assert frame["vintage_id"].nunique() == 2
 
 
 class _NasdaqHttp:

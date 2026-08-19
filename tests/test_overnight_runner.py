@@ -72,6 +72,7 @@ def test_overnight_plan_writes_report_and_skips_completed_step(tmp_path: Path):
     config = {
         'overnight': {
             'max_hours': 0.01,
+            'disabled_resource_groups': ['bloomberg'],
             'checkpoint_path': 'data/locks/test_checkpoint.json',
             'output_directory': 'reports/outputs/overnight',
             'log_directory': 'reports/logs/overnight',
@@ -94,7 +95,17 @@ def test_overnight_plan_writes_report_and_skips_completed_step(tmp_path: Path):
     assert run_overnight_plan(config, tmp_path) == 0
     second = json.loads(checkpoint_path.read_text(encoding='utf-8'))
     assert second['steps']['probe']['attempts'] == 1
-    assert (tmp_path / 'reports/outputs/overnight/overnight_execution_report.md').exists()
+    report_root = tmp_path / 'reports/outputs/overnight'
+    report = json.loads(
+        (report_root / 'overnight_execution_report.json').read_text(
+            encoding='utf-8'
+        )
+    )
+    markdown = (report_root / 'overnight_execution_report.md').read_text(
+        encoding='utf-8'
+    )
+    assert report['disabled_resource_groups'] == ['bloomberg']
+    assert 'Disabled resource groups: `bloomberg`' in markdown
 
 
 def test_pending_steps_can_share_one_external_cooldown(tmp_path: Path):

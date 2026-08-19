@@ -463,6 +463,7 @@ def _write_report(
     steps: Sequence[OvernightStep],
     status: str,
     started_at: datetime,
+    disabled_resource_groups: Sequence[str] = (),
 ) -> tuple[Path, Path]:
     output_directory.mkdir(parents=True, exist_ok=True)
     completed_at = datetime.now(timezone.utc)
@@ -490,6 +491,7 @@ def _write_report(
         'completed_at': completed_at.isoformat(),
         'duration_seconds': (completed_at - started_at).total_seconds(),
         'config_hash': checkpoint.config_hash,
+        'disabled_resource_groups': sorted(disabled_resource_groups),
         'steps': rows,
     }
     json_path = output_directory / 'overnight_execution_report.json'
@@ -502,6 +504,8 @@ def _write_report(
         f'- Started (UTC): `{payload["started_at"]}`',
         f'- Completed (UTC): `{payload["completed_at"]}`',
         f'- Runtime: `{payload["duration_seconds"]:.1f}` seconds',
+        '- Disabled resource groups: '
+        + (', '.join(f'`{value}`' for value in payload['disabled_resource_groups']) or 'none'),
         '',
         '| Step | Required | External | Status | Attempts | Exit | Seconds | Min free GB |',
         '|---|---:|---:|---|---:|---:|---:|---:|',
@@ -755,6 +759,7 @@ def run_overnight_plan(
             steps,
             status,
             started_at,
+            tuple(sorted(disabled_resource_groups)),
         )
         heartbeat(
             {

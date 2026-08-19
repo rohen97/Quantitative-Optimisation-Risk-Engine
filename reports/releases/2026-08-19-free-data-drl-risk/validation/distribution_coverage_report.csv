@@ -1,0 +1,5 @@
+horizon,observation_count,status,p5_coverage,p50_coverage,p95_coverage,interval_coverage,quantile_crossing_count,commentary
+3M,65762,PASS,0.010933365773547032,0.5086676195979442,0.9644171405979137,0.9534837748243666,0,Quantile ordering and empirical coverage passed.
+6M,65762,PASS,0.013776953255679571,0.5035430795900367,0.9510355524467018,0.9372585991910222,0,Quantile ordering and empirical coverage passed.
+9M,65762,PASS,0.018490921808947416,0.49375019007937715,0.9346279006112953,0.9161369788023479,0,Quantile ordering and empirical coverage passed.
+12M,65341,PASS,0.023798227758987465,0.4904883610596716,0.919147242925575,0.8953490151665876,0,Quantile ordering and empirical coverage passed.

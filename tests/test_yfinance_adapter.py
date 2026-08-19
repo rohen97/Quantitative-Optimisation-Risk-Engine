@@ -9,7 +9,10 @@ def test_yfinance_daily_bars_normalize_single_symbol(monkeypatch):
     def fake_download(**kwargs):
         assert kwargs["tickers"] == ["AAPL"]
         return pd.DataFrame(
-            {"Close": [100.0, 110.0]},
+            {
+                "Close": [100.0, 110.0],
+                "Volume": [1_000_000, 1_100_000],
+            },
             index=pd.to_datetime(["2026-01-02", "2026-01-03"]),
         )
 
@@ -27,17 +30,23 @@ def test_yfinance_daily_bars_normalize_single_symbol(monkeypatch):
         "return",
     ]
     assert bars["ticker"].tolist() == ["AAPL", "AAPL"]
+    assert bars["volume"].tolist() == [1_000_000, 1_100_000]
     assert bars["return"].iloc[0] == 0
     assert round(float(bars["return"].iloc[1]), 4) == 0.1
 
 
 def test_yfinance_daily_bars_normalize_multi_symbol(monkeypatch):
-    columns = pd.MultiIndex.from_product([["Close"], ["AAPL", "MSFT"]])
+    columns = pd.MultiIndex.from_product(
+        [["Close", "Volume"], ["AAPL", "MSFT"]]
+    )
 
     def fake_download(**kwargs):
         assert kwargs["tickers"] == ["AAPL", "MSFT"]
         return pd.DataFrame(
-            [[100.0, 200.0], [105.0, 210.0]],
+            [
+                [100.0, 200.0, 1_000_000, 2_000_000],
+                [105.0, 210.0, 1_100_000, 2_100_000],
+            ],
             index=pd.to_datetime(["2026-01-02", "2026-01-03"]),
             columns=columns,
         )
@@ -46,6 +55,10 @@ def test_yfinance_daily_bars_normalize_multi_symbol(monkeypatch):
     bars = YFinanceMarketDataAdapter(YFinanceConfig()).load_daily_bars(["MSFT", "AAPL"], start="2026-01-01", end="2026-01-04")
     assert set(bars["ticker"]) == {"AAPL", "MSFT"}
     assert len(bars) == 4
+    assert bars.groupby("ticker")["volume"].sum().to_dict() == {
+        "AAPL": 2_100_000,
+        "MSFT": 4_100_000,
+    }
     assert bars.groupby("ticker")["return"].first().eq(0).all()
 
 

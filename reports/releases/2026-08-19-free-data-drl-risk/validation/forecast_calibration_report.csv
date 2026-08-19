@@ -1,0 +1,5 @@
+horizon,status,observation_count,mean_forecast,mean_realised,forecast_bias,commentary
+3M,WARNING,65762,0.026449461940016936,0.04210579706458942,-0.01565633512457248,"Positive signal remains, but thresholds missed: rank_ic."
+6M,WARNING,65762,0.05286769189429841,0.08590077757327834,-0.03303308567897993,"Positive signal remains, but thresholds missed: rank_ic."
+9M,WARNING,65762,0.07853745432081588,0.13502619495366605,-0.05648874063285017,"Positive signal remains, but thresholds missed: rank_ic."
+12M,WARNING,65341,0.10339878909601316,0.18145592731875174,-0.07805713822273858,"Positive signal remains, but thresholds missed: rank_ic."

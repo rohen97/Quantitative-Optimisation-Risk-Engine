@@ -1,5 +1,5 @@
 overnight:
-  max_hours: 12
+  max_hours: 24
   disabled_resource_groups: [bloomberg]
   checkpoint_path: data/locks/overnight_checkpoint.json
   output_directory: reports/outputs/overnight
@@ -15,6 +15,7 @@ overnight:
     PIPELINE_INPUT_SOURCE: duckdb
     PIPELINE_MAX_SECURITIES: "0"
     PIPELINE_MIN_PRICE_ROWS: "120"
+    BLOOMBERG_DESKTOP_ENABLED: "false"
     LOKY_MAX_CPU_COUNT: "8"
     OMP_NUM_THREADS: "1"
     MKL_NUM_THREADS: "1"
@@ -27,7 +28,7 @@ overnight:
 
   steps:
     - name: refresh_price_summaries
-      command: ["{python}", scripts/refresh_model_input_summaries.py]
+      command: ["{python}", scripts/refresh_model_input_summaries.py, --force]
       required: true
       timeout_minutes: 30
       max_attempts: 2
@@ -115,6 +116,18 @@ overnight:
       timeout_minutes: 10
       max_attempts: 2
 
+    - name: free_data_evidence
+      command: ["{python}", scripts/build_free_data_evidence.py]
+      required: true
+      timeout_minutes: 30
+      max_attempts: 2
+
+    - name: credential_history_audit
+      command: ["{python}", scripts/audit_git_credentials.py]
+      required: true
+      timeout_minutes: 30
+      max_attempts: 1
+
     - name: two_phase_preprocessing
       command:
         - "{python}"
@@ -134,14 +147,10 @@ overnight:
         - "{python}"
         - scripts/run_two_phase_pipeline.py
         - phase2
+      environment:
+        DRL_MOCK_MODE: "true"
       required: true
       timeout_minutes: 240
-      max_attempts: 2
-
-    - name: standalone_drl_validation
-      command: ["{python}", scripts/run_drl_pipeline.py]
-      required: true
-      timeout_minutes: 120
       max_attempts: 2
 
     - name: walk_forward_full
@@ -154,14 +163,24 @@ overnight:
       timeout_minutes: 720
       max_attempts: 2
 
+    - name: standalone_drl_validation
+      command: ["{python}", scripts/run_drl_pipeline.py]
+      environment:
+        DRL_MOCK_MODE: "false"
+        USE_MOCK_DATA: "false"
+      required: true
+      timeout_minutes: 120
+      max_attempts: 2
+
     - name: full_governance_validation
       command:
         - "{python}"
         - scripts/run_model_validation.py
         - --mode
-        - full
+        - release_candidate
         - --backend
         - duckdb
+        - --strict
       required: true
       timeout_minutes: 360
       max_attempts: 2
@@ -193,7 +212,7 @@ overnight:
         - "{python}"
         - scripts/build_release_evidence.py
         - --release-id
-        - 2026-08-13-risk-pit-cost-validation
+        - 2026-08-19-free-data-drl-risk
       required: true
       timeout_minutes: 30
       max_attempts: 2

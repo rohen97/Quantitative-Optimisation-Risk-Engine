@@ -1,0 +1,68 @@
+{
+  "error": null,
+  "generated_at": "2026-08-19T03:51:28.739501+00:00",
+  "missing_symbols": [],
+  "openbb_role": "normalization_layer_not_independent_source",
+  "provider": "yfinance",
+  "requested_symbols": [
+    "^GSPC",
+    "^DJI",
+    "^FTSE",
+    "^GDAXI",
+    "^STOXX",
+    "000001.SS",
+    "^HSI"
+  ],
+  "status": "pass",
+  "summary": [
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 5684,
+      "rows": 7045,
+      "start": "1997-07-02 00:00:00",
+      "ticker": "000001.SS"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 7441,
+      "rows": 7441,
+      "start": "1997-01-02 00:00:00",
+      "ticker": "^DJI"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 6965,
+      "rows": 7471,
+      "start": "1997-01-02 00:00:00",
+      "ticker": "^FTSE"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 6779,
+      "rows": 7503,
+      "start": "1997-01-02 00:00:00",
+      "ticker": "^GDAXI"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 7440,
+      "rows": 7441,
+      "start": "1997-01-02 00:00:00",
+      "ticker": "^GSPC"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 6168,
+      "rows": 7287,
+      "start": "1997-01-02 00:00:00",
+      "ticker": "^HSI"
+    },
+    {
+      "end": "2026-07-31 00:00:00",
+      "positive_volume_rows": 3248,
+      "rows": 5598,
+      "start": "2004-04-26 00:00:00",
+      "ticker": "^STOXX"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import pandas as pd
 from src.data_ingestion.alpaca_adapter import ALPACA_PY_AVAILABLE, AlpacaMarketDataAdapter, AlpacaSdkMarketDataAdapter
 from src.data_ingestion.bloomberg_adapter import BloombergDesktopAdapter
 from src.data_ingestion.external_adapters import AlphaVantageAdapter, EodhdAdapter, FinnhubAdapter, ITickAdapter, TickDbAdapter
+from src.data_ingestion.free_market_adapters import AkshareMarketDataAdapter, OpenBBMarketDataAdapter
 from src.data_ingestion.http_client import DataSourceRequestError, HttpClient, HttpClientConfig
 from src.data_ingestion.mock_data import generate_mock_prices
 from src.data_ingestion.provider_registry import load_data_source_registry
@@ -48,6 +49,57 @@ def _load_provider(
         return data
     if provider_name == "bloomberg":
         return BloombergDesktopAdapter().load_daily_bars(symbols)
+    if provider_name == "akshare":
+        adjust = str(provider.settings.get("adjust", "")) if provider else ""
+        configured_endpoint = (
+            str(provider.settings.get("hk_endpoint", "auto"))
+            if provider
+            else "auto"
+        )
+        hk_endpoint = str(
+            get_env("AKSHARE_HK_ENDPOINT", configured_endpoint)
+            or configured_endpoint
+        )
+        configured_a_share_endpoint = (
+            str(provider.settings.get("a_share_endpoint", "auto"))
+            if provider
+            else "auto"
+        )
+        a_share_endpoint = str(
+            get_env("AKSHARE_A_SHARE_ENDPOINT", configured_a_share_endpoint)
+            or configured_a_share_endpoint
+        )
+        configured_workers = int(provider.settings.get("max_workers", 8)) if provider else 8
+        max_workers = int(
+            get_env("AKSHARE_MAX_WORKERS", str(configured_workers))
+            or configured_workers
+        )
+        configured_a_share_workers = (
+            int(provider.settings.get("a_share_max_workers", 4)) if provider else 4
+        )
+        a_share_max_workers = int(
+            get_env(
+                "AKSHARE_A_SHARE_MAX_WORKERS",
+                str(configured_a_share_workers),
+            )
+            or configured_a_share_workers
+        )
+        configured_retries = int(provider.settings.get("retry_attempts", 3)) if provider else 3
+        retry_attempts = int(
+            get_env("AKSHARE_RETRY_ATTEMPTS", str(configured_retries))
+            or configured_retries
+        )
+        return AkshareMarketDataAdapter(
+            adjust=adjust,
+            hk_endpoint=hk_endpoint,
+            a_share_endpoint=a_share_endpoint,
+            max_workers=max_workers,
+            a_share_max_workers=a_share_max_workers,
+            retry_attempts=retry_attempts,
+        ).load_daily_bars(symbols)
+    if provider_name == "openbb":
+        upstream = str(provider.settings.get("upstream_provider", "yfinance")) if provider else "yfinance"
+        return OpenBBMarketDataAdapter(provider=upstream).load_daily_bars(symbols)
     if provider is None:
         raise NotImplementedError(f"Unsupported price data provider: {provider_name}")
     if provider_name == "eodhd":
@@ -81,6 +133,8 @@ def _load_provider(
 
 def _provider_symbols(universe: pd.DataFrame, provider_name: str, registry) -> tuple[list[str], dict[str, str]]:
     definition = registry.providers.get(provider_name)
+    if definition is not None and definition.regions and "region" in universe.columns:
+        universe = universe.loc[universe["region"].astype(str).isin(definition.regions)].copy()
     configured_column = definition.settings.get("symbol_column") if definition is not None else None
     symbol_column = str(configured_column) if configured_column and configured_column in universe.columns else "ticker"
     if symbol_column == "ticker":
@@ -113,14 +167,26 @@ def _combine_provider_prices(frames: list[pd.DataFrame], provider_order: list[st
             len(discrepancies),
             tolerance * 100.0,
         )
-    combined["_missing_volume"] = pd.to_numeric(
+    combined["_numeric_volume"] = pd.to_numeric(
         combined.get("volume", pd.Series(float("nan"), index=combined.index)),
         errors="coerce",
-    ).fillna(0.0).le(0.0)
-    selected = (
-        combined.sort_values(["ticker", "date", "_missing_volume", "provider_rank"])
+    )
+    volume = (
+        combined.loc[combined["_numeric_volume"].fillna(0.0).gt(0.0)]
+        .sort_values(["ticker", "date", "provider_rank"])
         .drop_duplicates(["ticker", "date"], keep="first")
-        .drop(columns=["provider_rank", "_missing_volume"])
+        .set_index(["ticker", "date"])["_numeric_volume"]
+    )
+    selected = (
+        combined.sort_values(["ticker", "date", "provider_rank"])
+        .drop_duplicates(["ticker", "date"], keep="first")
+        .set_index(["ticker", "date"])
+    )
+    if not volume.empty:
+        selected["volume"] = volume.reindex(selected.index).combine_first(selected["_numeric_volume"])
+    selected = (
+        selected.reset_index()
+        .drop(columns=["provider_rank", "_numeric_volume"])
         .sort_values(["ticker", "date"])
         .reset_index(drop=True)
     )

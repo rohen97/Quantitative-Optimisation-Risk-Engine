@@ -444,7 +444,20 @@ def _evaluate_risk(
                 }
             )
     frame = pd.DataFrame(rows)
-    return frame, _aggregate_status(frame['status'].tolist())
+    requested_gate = str(
+        config.get('governance_segment', 'chronological_holdout')
+    )
+    available_segments = set(frame['evaluation_segment'].astype(str))
+    governance_segment = (
+        requested_gate
+        if requested_gate in available_segments
+        else 'overall'
+    )
+    frame['governance_gate'] = frame['evaluation_segment'].eq(
+        governance_segment
+    )
+    gate_status = frame.loc[frame['governance_gate'], 'status'].tolist()
+    return frame, _aggregate_status(gate_status)
 
 
 def _evaluate_portfolio(

@@ -105,9 +105,14 @@ class DuckDBRepository:
             connection.register("_incoming_frame", data)
             try:
                 if primary_key:
-                    conditions = " AND ".join([f"{name}.{column} = _incoming_frame.{column}" for column in primary_key])
-                    connection.execute(f"DELETE FROM {name} USING _incoming_frame WHERE {conditions}")
-                connection.execute(f"INSERT INTO {name} BY NAME SELECT * FROM _incoming_frame")
+                    connection.execute(
+                        f"INSERT OR REPLACE INTO {name} BY NAME "
+                        "SELECT * FROM _incoming_frame"
+                    )
+                else:
+                    connection.execute(
+                        f"INSERT INTO {name} BY NAME SELECT * FROM _incoming_frame"
+                    )
             finally:
                 connection.unregister("_incoming_frame")
 

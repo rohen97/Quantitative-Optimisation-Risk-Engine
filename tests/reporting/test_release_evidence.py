@@ -2,7 +2,9 @@ import pandas as pd
 import pytest
 
 from src.reporting.release_evidence import (
+    PUBLIC_RESEARCH_OUTPUTS,
     _normalise_text_whitespace,
+    _release_artifact_files,
     build_universe_summary,
 )
 from src.utils.config import ROOT
@@ -39,3 +41,20 @@ def test_build_universe_summary_requires_stable_security_identifiers():
         build_universe_summary(
             pd.DataFrame({'region': ['US'], 'listing_status': ['Active']})
         )
+
+
+def test_security_level_licensed_challenger_is_not_in_public_release() -> None:
+    assert 'optimised_portfolio_regional_alpha.csv' not in PUBLIC_RESEARCH_OUTPUTS
+
+
+def test_release_manifest_excludes_only_its_own_manifest(tmp_path) -> None:
+    root_manifest = tmp_path / 'manifest.json'
+    nested_manifest = tmp_path / 'nested' / 'manifest.json'
+    nested_manifest.parent.mkdir()
+    root_manifest.write_text('{}', encoding='utf-8')
+    nested_manifest.write_text('{}', encoding='utf-8')
+
+    files = _release_artifact_files(tmp_path)
+
+    assert root_manifest not in files
+    assert nested_manifest in files

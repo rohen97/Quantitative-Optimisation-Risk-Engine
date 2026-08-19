@@ -2892,6 +2892,12 @@ def run_walk_forward(config: WalkForwardConfig | None = None) -> WalkForwardResu
             minimum_holdout_rows=int(
                 risk_config.get('locked_minimum_holdout_rows', 252)
             ),
+            selection_folds=int(
+                risk_config.get('locked_selection_folds', 3)
+            ),
+            selection_warmup_rows=int(
+                risk_config.get('locked_selection_warmup_rows', 252)
+            ),
         )
     else:
         locked_risk_calibration = {

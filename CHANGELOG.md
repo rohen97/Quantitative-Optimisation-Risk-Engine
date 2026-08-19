@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.7.0 - 2026-08-19 - Free Data, DRL And Governed Research Release
+
+### Added
+
+- A checkpointed public-data stack for FRED/ALFRED macro vintages, SEC filing vintages, current OpenFIGI mappings, OpenBB benchmark checks, yfinance history and AKShare China/Hong Kong volume.
+- A checksummed 1997-2026 six-region DRL panel, five isolated PPO seeds, contextual-bandit and convex-residual challengers, block-bootstrap training environments and a prospective shadow-operation gate.
+- Governed benchmark-relative supervised challengers spanning OLS screening, Ridge, Elastic Net, Huber, tree ensembles and XGBoost models under expanding-window purged validation.
+- A 23-slide investment-principal deck, rendered PDF, written interpretation and publication-safe stock-recommendation snapshot.
+- A resumable overnight workflow with bounded workers, memory guardrails, durable checkpoints, credential auditing and release packaging.
+
+### Changed
+
+- Replaced repeated 100M-plus-row price scans with a coverage-aware DuckDB summary path that produces 55,094 security summaries in about 16 seconds on the measured workstation.
+- Added yfinance-first and AKShare-residual China/Hong Kong volume ingestion while retaining adjusted-close source precedence.
+- Carried month-end marks only across bounded internal trading suspensions; pre-listing and post-history periods remain missing.
+- Calibrated drawdown probabilities with a train-only selector and retained the untouched chronological risk holdout as the governance gate.
+- Excluded security-level licensed-derived challenger files from the public release while retaining aggregate results and checksums.
+
+### Validation
+
+- The reconstructed walk-forward contains 263,048 forecasts, 262,627 aligned outcomes, 89 monthly portfolio decisions and 1,773 daily risk observations.
+- Governance is `CONDITIONALLY_APPROVED` at 75.0/100: risk, distribution calibration, data integrity and constraints pass; PIT, forecast strength and net benchmark edge remain limited; stability fails when 2023 is excluded.
+- Annual turnover is 1.01x and annualised cost drag is 0.83%. The 95% and 99% chronological-holdout VaR gates pass, while adverse overall-history diagnostics remain disclosed.
+- Train-only isotonic drawdown calibration reaches 2.63% ECE on the locked holdout.
+- All five PPO seeds, the contextual bandit and the convex residual allocator fail to beat the frozen baseline after costs; the classical optimiser retains 100% weight and DRL remains at 0%.
+- Public evidence records 48,577 current OpenFIGI matches, 149,366 FRED/ALFRED rows, 12,188,157 AKShare bars and 23,222,164 China/HK yfinance bars. Mainland volume readiness is 100%; Hong Kong is 96.1%.
+- The full deterministic Windows test suite contains 453 tests; release and presentation manifests verify every published SHA-256 digest.
+
+### Known Limitations
+
+- Historical membership, original filing acceptance timestamps and inactive-security price coverage remain insufficient for genuine 1997 point-in-time proof.
+- OpenFIGI is a current identifier snapshot, SEC ingestion remains unavailable without a monitored contact identity, and prospective shadow evidence is still 0/3 completed cycles.
+- Repository history still contains redacted credential-pattern findings that require owner-side provider rotation and coordinated history remediation.
+
 ## 1.7.0rc1 - 2026-08-12 - Portfolio Backtest Evidence Release Candidate
 
 ### Added

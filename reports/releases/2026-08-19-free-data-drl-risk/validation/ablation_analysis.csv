@@ -1,0 +1,12 @@
+component_removed,status,notes
+sentiment,NOT_EVALUATED,No historical ablation evidence available.
+alternative_data,NOT_EVALUATED,No historical ablation evidence available.
+narrative_reframing,NOT_EVALUATED,No historical ablation evidence available.
+regime_features,NOT_EVALUATED,No historical ablation evidence available.
+distributional_forecasts,NOT_EVALUATED,No historical ablation evidence available.
+dividend_features,NOT_EVALUATED,No historical ablation evidence available.
+quality_features,NOT_EVALUATED,No historical ablation evidence available.
+tail_risk_constraints,NOT_EVALUATED,No historical ablation evidence available.
+transaction_costs,NOT_EVALUATED,No historical ablation evidence available.
+chaos_gating,NOT_EVALUATED,No historical ablation evidence available.
+drl_overlay,NOT_EVALUATED,No historical ablation evidence available.

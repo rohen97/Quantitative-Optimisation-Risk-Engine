@@ -1,0 +1,4 @@
+strategy,baseline,observations,mean_difference,t_statistic,p_value,difference_ci_lower,difference_ci_upper,bootstrap_block_size,bootstrap_significant,status
+wolf_cvar,equal_weight_eligible,89,-0.0032848155672335786,-1.1576737947412066,0.2501296703597403,-0.008744111874132555,0.0007947799101351949,6,False,WARNING
+wolf_regional_alpha,equal_weight_eligible,89,-0.0032732294333075013,-1.3656056668306629,0.17554321037286347,-0.008879443942846788,0.0012241271739965216,6,False,WARNING
+wolf_regional_alpha,wolf_cvar,89,1.1586133926077617e-05,0.008617948290406147,0.9931434642627135,-0.001985065067092135,0.0022755377635310446,6,False,WARNING

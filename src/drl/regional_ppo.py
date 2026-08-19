@@ -29,6 +29,11 @@ except ImportError:  # pragma: no cover - optional dependency
     gym = None
     spaces = None
 
+try:
+    from stable_baselines3.common.vec_env import DummyVecEnv
+except ImportError:  # pragma: no cover - optional dependency
+    DummyVecEnv = None
+
 
 REGIONAL_SLEEVES = (
     "US",
@@ -48,6 +53,41 @@ REGIONAL_FEATURES = (
     "dividend_safety_score",
     "liquidity_score",
     "regime_suitability_score",
+    "benchmark_relative_momentum_12m",
+    "realized_volatility_3m",
+    "downside_volatility_12m",
+    "macro_policy_rate",
+    "macro_yield_curve_slope",
+    "macro_credit_spread",
+    "macro_market_volatility",
+)
+
+REGIONAL_FEATURE_DEFAULTS = {
+    "expected_total_return_12m": 0.0,
+    "expected_volatility_12m": 0.20,
+    "cvar_5_12m": -0.25,
+    "final_recommendation_score": 50.0,
+    "momentum_6m": 0.0,
+    "dividend_safety_score": 50.0,
+    "liquidity_score": 50.0,
+    "regime_suitability_score": 50.0,
+    "benchmark_relative_momentum_12m": 0.0,
+    "realized_volatility_3m": 0.20,
+    "downside_volatility_12m": 0.15,
+    "macro_policy_rate": 0.0,
+    "macro_yield_curve_slope": 0.0,
+    "macro_credit_spread": 0.0,
+    "macro_market_volatility": 0.0,
+}
+
+LONG_HISTORY_ENRICHMENT_FEATURES = (
+    "benchmark_relative_momentum_12m",
+    "realized_volatility_3m",
+    "downside_volatility_12m",
+    "macro_policy_rate",
+    "macro_yield_curve_slope",
+    "macro_credit_spread",
+    "macro_market_volatility",
 )
 
 
@@ -72,6 +112,91 @@ class RegionalSplit:
 def _safe_numeric(frame: pd.DataFrame, column: str, default: float = 0.0) -> pd.Series:
     values = frame[column] if column in frame else pd.Series(default, index=frame.index)
     return pd.to_numeric(values, errors="coerce").fillna(default)
+
+
+def ensure_regional_feature_columns(panel: pd.DataFrame) -> pd.DataFrame:
+    output = panel.copy()
+    for feature, default in REGIONAL_FEATURE_DEFAULTS.items():
+        values = output[feature] if feature in output else pd.Series(default, index=output.index)
+        output[feature] = pd.to_numeric(values, errors="coerce").fillna(default)
+    return output
+
+
+def load_and_combine_regional_history(
+    walk_forward_panel: pd.DataFrame,
+    config: Mapping[str, Any],
+) -> pd.DataFrame:
+    """Prepend proxy history while retaining walk-forward rows for every overlapping date."""
+    history_config = dict(config.get("long_history", {}) or {})
+    if not bool(history_config.get("enabled", config.get("long_history_enabled", False))):
+        return ensure_regional_feature_columns(walk_forward_panel)
+    configured_path = history_config.get(
+        "panel_path",
+        config.get("long_history_panel_path", "data/processed/drl/regional_long_history.parquet"),
+    )
+    path = Path(str(configured_path))
+    if not path.exists():
+        LOGGER.warning("Configured DRL long-history panel is missing: %s", path)
+        return ensure_regional_feature_columns(walk_forward_panel)
+    long_panel = pd.read_parquet(path)
+    if long_panel.empty:
+        return ensure_regional_feature_columns(walk_forward_panel)
+    long_panel["date"] = pd.to_datetime(long_panel["date"]).dt.normalize()
+    long_panel = ensure_regional_feature_columns(long_panel)
+    if walk_forward_panel.empty:
+        return long_panel.sort_values(["date", "sleeve"]).reset_index(drop=True)
+
+    walk = walk_forward_panel.copy()
+    walk["date"] = pd.to_datetime(walk["date"]).dt.normalize()
+    walk = ensure_regional_feature_columns(walk)
+    enrichment_columns = ["date", "sleeve", *LONG_HISTORY_ENRICHMENT_FEATURES]
+    enrichment = long_panel[enrichment_columns].drop_duplicates(["date", "sleeve"], keep="last")
+    walk = walk.merge(enrichment, on=["date", "sleeve"], how="left", suffixes=("", "_history"))
+    for feature in LONG_HISTORY_ENRICHMENT_FEATURES:
+        historical = f"{feature}_history"
+        walk[feature] = pd.to_numeric(walk[historical], errors="coerce").combine_first(walk[feature])
+        walk = walk.drop(columns=historical)
+    walk["panel_source"] = walk.get("panel_source", "walk_forward_stock_portfolio")
+    walk["evidence_tier"] = walk.get("evidence_tier", "reconstructed_pit_stock_panel")
+    walk["stock_signal_evidence_available"] = True
+    earliest_walk_date = walk["date"].min()
+    prefix = long_panel.loc[long_panel["date"].lt(earliest_walk_date)].copy()
+    combined = pd.concat([prefix, walk], ignore_index=True, sort=False)
+    return ensure_regional_feature_columns(combined).sort_values(["date", "sleeve"]).reset_index(drop=True)
+
+
+def block_bootstrap_regional_panel(
+    panel: pd.DataFrame,
+    *,
+    block_length: int,
+    periods: int,
+    seed: int,
+) -> pd.DataFrame:
+    """Sample contiguous training blocks; source dates remain auditable on every row."""
+    source = panel.sort_values(["date", "sleeve"]).copy()
+    dates = tuple(pd.DatetimeIndex(source["date"].unique()).sort_values())
+    if not dates:
+        return source
+    block = min(max(int(block_length), 1), len(dates))
+    target_periods = max(int(periods), block)
+    rng = np.random.default_rng(int(seed))
+    sampled_dates: list[pd.Timestamp] = []
+    maximum_start = max(len(dates) - block, 0)
+    while len(sampled_dates) < target_periods:
+        start = int(rng.integers(0, maximum_start + 1)) if maximum_start > 0 else 0
+        sampled_dates.extend(dates[start : start + block])
+    sampled_dates = sampled_dates[:target_periods]
+    synthetic_dates = pd.date_range("2000-01-31", periods=target_periods, freq="ME")
+    frames: list[pd.DataFrame] = []
+    for synthetic_date, source_date in zip(synthetic_dates, sampled_dates, strict=True):
+        rows = source.loc[source["date"].eq(source_date)].copy()
+        rows["bootstrap_source_date"] = pd.Timestamp(source_date)
+        rows["date"] = pd.Timestamp(synthetic_date)
+        frames.append(rows)
+    result = pd.concat(frames, ignore_index=True)
+    result["bootstrap_seed"] = int(seed)
+    result["panel_source"] = result.get("panel_source", "training_block_bootstrap")
+    return result.sort_values(["date", "sleeve"]).reset_index(drop=True)
 
 
 def _walk_forward_dir(output_dir: Path) -> Path:
@@ -221,7 +346,7 @@ def build_regional_panel(output_dir: str | Path) -> pd.DataFrame:
         return panel
     final_date = panel["date"].max()
     panel = panel.loc[panel["date"].lt(final_date)].copy()
-    return panel.sort_values(["date", "sleeve"]).reset_index(drop=True)
+    return ensure_regional_feature_columns(panel).sort_values(["date", "sleeve"]).reset_index(drop=True)
 
 
 def chronological_regional_split(
@@ -328,6 +453,7 @@ def build_regional_split_manifest(
     panel: pd.DataFrame,
     config: Mapping[str, Any],
 ) -> pd.DataFrame:
+    panel = ensure_regional_feature_columns(panel)
     split = regional_split_from_config(panel, config)
     columns = [
         column
@@ -370,6 +496,7 @@ def build_regional_split_manifest(
 
 
 def fit_regional_scaler(panel: pd.DataFrame, train_dates: tuple[pd.Timestamp, ...]) -> RegionalScalingStats:
+    panel = ensure_regional_feature_columns(panel)
     train = panel.loc[panel["date"].isin(train_dates)]
     values = train[list(REGIONAL_FEATURES)].apply(pd.to_numeric, errors="coerce").fillna(0.0)
     mean = values.mean().to_numpy(dtype=float)
@@ -378,7 +505,7 @@ def fit_regional_scaler(panel: pd.DataFrame, train_dates: tuple[pd.Timestamp, ..
 
 
 def apply_regional_scaler(panel: pd.DataFrame, scaler: RegionalScalingStats) -> pd.DataFrame:
-    output = panel.copy()
+    output = ensure_regional_feature_columns(panel)
     values = output[list(scaler.feature_names)].apply(pd.to_numeric, errors="coerce").fillna(0.0)
     scaled = (values.to_numpy(dtype=float) - scaler.mean) / scaler.std
     for index, feature in enumerate(scaler.feature_names):
@@ -397,7 +524,7 @@ class RegionalResidualEnv(_BaseEnv):
     def __init__(self, panel: pd.DataFrame, constraints: Mapping[str, Any], config: Mapping[str, Any]):
         if gym is None or spaces is None:
             raise ImportError("gymnasium is required for historical regional PPO training.")
-        self.panel = panel.sort_values(["date", "sleeve"]).reset_index(drop=True)
+        self.panel = ensure_regional_feature_columns(panel).sort_values(["date", "sleeve"]).reset_index(drop=True)
         self.constraints = dict(constraints)
         self.config = dict(config)
         self.dates = tuple(pd.DatetimeIndex(self.panel["date"].unique()).sort_values())
@@ -682,6 +809,51 @@ def map_regional_overlay_to_assets(
     return actions
 
 
+def _build_training_environment(
+    train_panel: pd.DataFrame,
+    constraints: Mapping[str, Any],
+    environment_config: Mapping[str, Any],
+    seed: int,
+) -> tuple[Any, dict[str, object]]:
+    bootstrap = dict(environment_config.get("block_bootstrap", {}) or {})
+    enabled = bool(bootstrap.get("enabled", False))
+    if not enabled or DummyVecEnv is None:
+        return RegionalResidualEnv(train_panel, constraints, environment_config), {
+            "bootstrap_enabled": False,
+            "bootstrap_environment_count": 1,
+            "bootstrap_block_length": 0,
+            "bootstrap_episode_periods": int(train_panel["date"].nunique()),
+        }
+    environment_count = max(int(bootstrap.get("environment_count", 4)), 1)
+    block_length = max(int(bootstrap.get("block_length_periods", 24)), 1)
+    episode_periods = max(
+        int(bootstrap.get("episode_periods", min(train_panel["date"].nunique(), 120))),
+        block_length,
+    )
+    factories = []
+    for index in range(environment_count):
+        sampled = block_bootstrap_regional_panel(
+            train_panel,
+            block_length=block_length,
+            periods=episode_periods,
+            seed=int(seed) + index * 10_007,
+        )
+
+        def factory(frame=sampled):
+            return RegionalResidualEnv(frame, constraints, environment_config)
+
+        factories.append(factory)
+    return DummyVecEnv(factories), {
+        "bootstrap_enabled": True,
+        "bootstrap_environment_count": environment_count,
+        "bootstrap_block_length": block_length,
+        "bootstrap_episode_periods": episode_periods,
+        "bootstrap_source_start": pd.Timestamp(train_panel["date"].min()).date().isoformat(),
+        "bootstrap_source_end": pd.Timestamp(train_panel["date"].max()).date().isoformat(),
+        "bootstrap_validation_or_test_sampled": False,
+    }
+
+
 def _train_regional_seed(
     seed: int,
     scaled: pd.DataFrame,
@@ -699,7 +871,12 @@ def _train_regional_seed(
     train_panel = scaled.loc[scaled["date"].isin(split.train_dates)].copy()
     validation_panel = scaled.loc[scaled["date"].isin(split.validation_dates)].copy()
     test_panel = scaled.loc[scaled["date"].isin(split.test_dates)].copy()
-    train_env = RegionalResidualEnv(train_panel, constraints, environment_config)
+    train_env, bootstrap_metadata = _build_training_environment(
+        train_panel,
+        constraints,
+        environment_config,
+        int(seed),
+    )
     agent = StableBaselinesPPOAgent(train_env, int(seed), ppo_config).train()
     train_path = evaluate_regional_policy(
         agent,
@@ -744,6 +921,7 @@ def _train_regional_seed(
         "runtime_seconds": time.perf_counter() - started,
         "random_split_used": False,
         "test_period_model_selection_used": False,
+        **bootstrap_metadata,
         "validation_information_ratio": validation_metrics.get("information_ratio", 0.0),
         "test_information_ratio": test_metrics.get("information_ratio", 0.0),
         "test_total_net_return": test_metrics.get("total_net_return", 0.0),

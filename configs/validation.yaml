@@ -85,6 +85,8 @@ validation:
       locked_holdout_fraction: 0.40
       locked_minimum_training_rows: 504
       locked_minimum_holdout_rows: 252
+      locked_selection_folds: 3
+      locked_selection_warmup_rows: 252
       exception_response_multiplier: 1.10
       exception_response_days: 1
 
@@ -123,6 +125,7 @@ validation:
     christoffersen_pvalue_threshold: 0.05
     chronological_holdout_fraction: 0.40
     minimum_holdout_observations: 252
+    governance_segment: chronological_holdout
     expected_shortfall_bootstrap_samples: 1000
 
   portfolio:
