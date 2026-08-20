@@ -47,6 +47,19 @@ PALE_RED = 'F8EAEA'
 FONT_HEAD = 'Aptos Display'
 FONT_BODY = 'Aptos'
 
+SUPERVISED_FAMILY_LABELS = {
+    'ols_screened': 'OLS screened',
+    'ridge': 'Ridge',
+    'elastic_net': 'Elastic Net',
+    'huber': 'Huber',
+    'random_forest': 'Random Forest',
+    'extra_trees': 'Extra Trees',
+    'hist_gradient_boosting': 'Hist. Gradient Boost',
+    'xgboost': 'XGBoost',
+    'xgb_ranker': 'XGB Ranker',
+    'ensemble': 'Ensemble',
+}
+
 RELEASE_RELATIVE = Path(
     'reports/releases/2026-08-19-free-data-drl-risk'
 )
@@ -407,6 +420,27 @@ def _supervised_validation_rows(evidence: DeckEvidence) -> pd.DataFrame:
             'supervised_alpha_ensemble'
         )
     ].sort_values('horizon_months')
+
+
+def _supervised_family_winners(evidence: DeckEvidence) -> pd.DataFrame:
+    """Return the selected specification for each family and horizon."""
+
+    rows = evidence.supervised_validation.copy()
+    complete = rows['complete_validation'].astype(str).str.lower().isin(
+        {'true', '1', 'yes'}
+    )
+    rows = rows.loc[complete].copy()
+    for column in ('horizon_months', 'mean_rank_ic', 'selection_score'):
+        rows[column] = pd.to_numeric(rows[column], errors='coerce')
+    return (
+        rows.sort_values(
+            ['horizon_months', 'family', 'selection_score', 'mean_rank_ic'],
+            ascending=[True, True, False, False],
+        )
+        .drop_duplicates(['horizon_months', 'family'])
+        .sort_values(['horizon_months', 'family'])
+        .reset_index(drop=True)
+    )
 
 
 def _scorecard_component(evidence: DeckEvidence, name: str) -> pd.Series:
@@ -976,6 +1010,86 @@ def _plot_supervised_rank_ic(
     return _save_figure(fig, output_path)
 
 
+def _plot_supervised_model_comparison(
+    evidence: DeckEvidence, output_path: Path
+) -> Path:
+    winners = _supervised_family_winners(evidence)
+    family_order = list(SUPERVISED_FAMILY_LABELS)
+    horizons = [3, 6, 9, 12]
+    comparison = (
+        winners.pivot(
+            index='family',
+            columns='horizon_months',
+            values='mean_rank_ic',
+        )
+        .reindex(index=family_order, columns=horizons)
+        .astype(float)
+    )
+    values = comparison.to_numpy()
+    finite = values[np.isfinite(values)]
+    if finite.size == 0:
+        raise ValueError('No complete supervised validation results to plot.')
+
+    fig, ax = plt.subplots(figsize=(7.8, 5.45))
+    image = ax.imshow(
+        values,
+        aspect='auto',
+        cmap='YlGnBu',
+        vmin=float(finite.min()),
+        vmax=float(finite.max()),
+    )
+    ax.set_xticks(
+        np.arange(len(horizons)),
+        [f'{horizon}m' for horizon in horizons],
+    )
+    ax.set_yticks(
+        np.arange(len(family_order)),
+        [SUPERVISED_FAMILY_LABELS[family] for family in family_order],
+    )
+    ax.tick_params(axis='both', length=0, labelsize=9)
+    ax.xaxis.tick_top()
+    ax.xaxis.set_label_position('top')
+    ax.set_xlabel('Forecast horizon', color='#536068', labelpad=8)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+
+    column_maxima = np.nanmax(values, axis=0)
+    midpoint = float(finite.min() + (finite.max() - finite.min()) * 0.58)
+    for row_index in range(values.shape[0]):
+        for column_index in range(values.shape[1]):
+            value = values[row_index, column_index]
+            if not np.isfinite(value):
+                continue
+            ax.text(
+                column_index,
+                row_index,
+                f'{value:.3f}',
+                ha='center',
+                va='center',
+                fontsize=8.3,
+                color='white' if value >= midpoint else '#' + INK,
+                weight=(
+                    'bold'
+                    if math.isclose(value, column_maxima[column_index])
+                    else 'normal'
+                ),
+            )
+    colorbar = fig.colorbar(image, ax=ax, fraction=0.035, pad=0.025)
+    colorbar.outline.set_visible(False)
+    colorbar.ax.tick_params(labelsize=8, length=0)
+    colorbar.set_label('Mean rank IC', fontsize=8.5, color='#536068')
+    ax.set_title(
+        'Validation rank IC by selected family specification',
+        loc='left',
+        pad=38,
+        fontsize=14,
+        color='#' + INK,
+        weight='bold',
+    )
+    fig.tight_layout()
+    return _save_figure(fig, output_path)
+
+
 def _plot_supervised_calibration(
     evidence: DeckEvidence, output_path: Path
 ) -> Path:
@@ -1129,6 +1243,9 @@ def _build_plot_assets(
         ),
         _plot_drl_validation(
             evidence, plot_dir / 'drl_validation.png'
+        ),
+        _plot_supervised_model_comparison(
+            evidence, plot_dir / 'supervised_model_comparison.png'
         ),
     )
     return assets
@@ -1670,7 +1787,7 @@ def _slide_workflow(
     steps = [
         ('1  OBSERVE', 'Prices, filings, macro and portfolio'),
         ('2  FEATURE', 'Point-in-time quality, value and risk signals'),
-        ('3  FORECAST', '3, 6, 9 and 12 month distributions'),
+        ('3  FORECAST', 'Distributional and supervised 3/6/9/12m signals'),
 
         ('4  COMPARE', 'Portfolio-aware, clean-sheet and LLM branches'),
         ('5  CONSTRAIN', 'CVaR, liquidity and concentration limits'),
@@ -1721,6 +1838,153 @@ def _slide_workflow(
         0.58, 6.18, 12.0, 0.36,
         size=18, color=GREEN_DARK, bold=True, font=FONT_HEAD,
         align=PP_ALIGN.CENTER,
+    )
+
+
+def _slide_system_architecture(
+    presentation: Presentation, evidence: DeckEvidence
+) -> None:
+    slide = _new_slide(
+        presentation,
+        'Design architecture: ML remains inside the governed stack',
+        'Nine supervised families and adaptive allocators challenge, but cannot bypass, the classical baseline.',
+        4,
+        'Repository architecture and governed supervised-alpha runner',
+    )
+    panels = [
+        (
+            '1  EVIDENCE',
+            [
+                'Prices, volume and actions',
+                'Filings and macro vintages',
+                'Portfolio and benchmarks',
+                'UTC lineage and snapshots',
+            ],
+            GREEN,
+        ),
+        (
+            '2  RESEARCH PANEL',
+            [
+                'Point-in-time features',
+                'Regional and sector peers',
+                'Matured forward labels',
+                '3/6/9/12m horizons',
+            ],
+            TEAL,
+        ),
+        (
+            '3  MODEL LAYER',
+            [
+                'Distributional forecasts',
+                'Linear and robust models',
+                'Tree ensembles and XGBoost',
+                'PPO, bandit and convex',
+            ],
+            BLUE,
+        ),
+        (
+            '4  PORTFOLIO',
+            [
+                'Scorecard and branches',
+                'CVaR baseline: 100%',
+                'Supervised overlay: 0%',
+                'DRL overlay: 0%',
+            ],
+            GOLD,
+        ),
+        (
+            '5  GOVERNANCE',
+            [
+                'Costs and uncertainty',
+                'Risk and stress tests',
+                'Acceptance gates',
+                'Final IC package',
+            ],
+            RED,
+        ),
+    ]
+    panel_width = 2.18
+    panel_step = 2.515
+    for index, (heading, bullets, accent) in enumerate(panels):
+        x = 0.54 + index * panel_step
+        _add_rect(slide, x, 1.48, panel_width, 3.14, fill=WHITE, line=BORDER)
+        _add_rect(slide, x, 1.48, panel_width, 0.10, fill=accent, line=accent)
+        _add_text(
+            slide,
+            heading,
+            x + 0.14,
+            1.83,
+            panel_width - 0.28,
+            0.42,
+            size=12.5,
+            bold=True,
+            font=FONT_HEAD,
+        )
+        _add_bullets(
+            slide,
+            bullets,
+            x + 0.14,
+            2.43,
+            panel_width - 0.28,
+            1.72,
+            size=9.7,
+            spacing=8,
+        )
+        if index < len(panels) - 1:
+            _add_chevron(slide, x + 2.215, 2.77, 0.23)
+
+    artifact_panels = [
+        (
+            'TRAIN AND CONFIGURE',
+            'scripts/run_supervised_alpha.py\nconfigs/ml_forecasting.yaml',
+            GREEN,
+        ),
+        (
+            'MODEL CODE AND LOCAL BUNDLES',
+            'src/models/supervised_alpha.py\ndata/processed/supervised_alpha/*.joblib',
+            BLUE,
+        ),
+        (
+            'PUBLISHED AGGREGATE EVIDENCE',
+            'reports/outputs/supervised_alpha/\nvalidation, OOS, calibration and plots',
+            GOLD,
+        ),
+    ]
+    for index, (heading, body, accent) in enumerate(artifact_panels):
+        x = 0.55 + index * 4.15
+        _add_rect(slide, x, 4.94, 3.90, 1.16, fill=WHITE, line=BORDER)
+        _add_rect(slide, x, 4.94, 0.055, 1.16, fill=accent, line=accent)
+        _add_text(
+            slide,
+            heading,
+            x + 0.17,
+            5.10,
+            3.56,
+            0.22,
+            size=9.3,
+            bold=True,
+            color=accent,
+        )
+        _add_text(
+            slide,
+            body,
+            x + 0.17,
+            5.44,
+            3.56,
+            0.48,
+            size=8.6,
+            color=INK,
+        )
+    _add_callout(
+        slide,
+        'Current decision',
+        'All ML challengers remain research-only until their independent prospective evidence gates pass.',
+        0.55,
+        6.38,
+        12.20,
+        0.46,
+        fill=PALE_RED,
+        accent=RED,
     )
 
 
@@ -1912,6 +2176,86 @@ def _slide_supervised_stack(
         6.12,
         12.22,
         0.68,
+        fill=PALE_RED,
+        accent=RED,
+    )
+
+
+def _slide_supervised_model_comparison(
+    presentation: Presentation,
+    evidence: DeckEvidence,
+    chart: Path,
+) -> None:
+    winners = _supervised_family_winners(evidence)
+    ensemble_validation = winners.loc[
+        winners['family'].eq('ensemble')
+    ].set_index('horizon_months')
+    ensemble_oos = _supervised_ensemble_rows(evidence).set_index(
+        'horizon_months'
+    )
+    individual = winners.loc[~winners['family'].eq('ensemble')].copy()
+    best_individual = (
+        individual.sort_values(
+            ['horizon_months', 'mean_rank_ic'],
+            ascending=[True, False],
+        )
+        .drop_duplicates('horizon_months')
+        .set_index('horizon_months')
+    )
+    table_rows = []
+    for horizon in (3, 6, 9, 12):
+        best = best_individual.loc[horizon]
+        validation = ensemble_validation.loc[horizon]
+        oos = ensemble_oos.loc[horizon]
+        table_rows.append(
+            (
+                f'{horizon}m',
+                f"{SUPERVISED_FAMILY_LABELS[str(best.family)]} / {float(best.mean_rank_ic):.3f}",
+                f'{float(validation.mean_rank_ic):.3f}',
+                f'{float(oos.mean_rank_ic):.3f}',
+                str(int(oos.independent_observations)),
+            )
+        )
+
+    slide = _new_slide(
+        presentation,
+        'How the supervised models compared',
+        'Validation rank IC is positive across most families, but no model is approved for capital.',
+        6,
+        'Expanding purged validation and already-inspected legacy OOS diagnostics',
+    )
+    _add_picture_contain(slide, chart, 0.42, 1.34, 7.23, 4.82)
+    _add_table(
+        slide,
+        ['Horizon', 'Best individual', 'Ensemble val.', 'Legacy OOS', 'Indep.'],
+        table_rows,
+        7.88,
+        1.48,
+        4.90,
+        3.12,
+        widths=[0.68, 1.66, 1.0, 0.90, 0.66],
+        font_size=8.2,
+    )
+    _add_callout(
+        slide,
+        'What won validation',
+        'Huber led raw rank IC at 3, 6 and 9 months; Elastic Net led at 12 months. '
+        'The ensemble diversifies model risk instead of chasing one winner.',
+        7.88,
+        4.90,
+        4.90,
+        1.18,
+        fill=PALE_BLUE,
+        accent=BLUE,
+    )
+    _add_callout(
+        slide,
+        'Governance result',
+        'Only four independent 3-month legacy OOS cohorts exist, so the supervised deployment blend stays at 0%.',
+        0.55,
+        6.40,
+        12.20,
+        0.46,
         fill=PALE_RED,
         accent=RED,
     )
@@ -3429,6 +3773,35 @@ def _report_markdown(evidence: DeckEvidence) -> str:
     supervised_decision = evidence.supervised_acceptance.loc[
         evidence.supervised_acceptance['scope'].eq('overall')
     ].iloc[0]
+    supervised_winners = _supervised_family_winners(evidence)
+    supervised_ensemble_validation = supervised_winners.loc[
+        supervised_winners['family'].eq('ensemble')
+    ].set_index('horizon_months')
+    supervised_individual = supervised_winners.loc[
+        ~supervised_winners['family'].eq('ensemble')
+    ].copy()
+    supervised_best_individual = (
+        supervised_individual.sort_values(
+            ['horizon_months', 'mean_rank_ic'],
+            ascending=[True, False],
+        )
+        .drop_duplicates('horizon_months')
+        .set_index('horizon_months')
+    )
+    supervised_oos_by_horizon = supervised_oos.set_index('horizon_months')
+    supervised_family_rows = []
+    for horizon in (3, 6, 9, 12):
+        best = supervised_best_individual.loc[horizon]
+        validation = supervised_ensemble_validation.loc[horizon]
+        legacy = supervised_oos_by_horizon.loc[horizon]
+        supervised_family_rows.append(
+            f'| {horizon}m | {SUPERVISED_FAMILY_LABELS[str(best.family)]} | '
+            f'{float(best.mean_rank_ic):.3f} | '
+            f'{float(validation.mean_rank_ic):.3f} | '
+            f'{float(legacy.mean_rank_ic):.3f} | '
+            f'{int(legacy.independent_observations)} |'
+        )
+    supervised_family_result_rows = '\n'.join(supervised_family_rows)
     watchlist = _supervised_watchlist(evidence)
     watchlist_rows = '\n'.join(
         f'| `{row.ticker}` | {row.region} | '
@@ -3523,6 +3896,14 @@ features and realised outcomes.
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 {supervised_result_rows}
 
+The selected family-level validation specifications compare as follows. Rank IC
+measures whether higher predicted ranks were followed by higher realised
+benchmark-relative returns; larger positive values are better.
+
+| Horizon | Strongest individual | Individual validation IC | Ensemble validation IC | Ensemble legacy OOS IC | Independent OOS |
+| --- | --- | ---: | ---: | ---: | ---: |
+{supervised_family_result_rows}
+
 The 3-month rank IC is positive, but four independent cohorts produce an exact
 sign-test p-value above 5%. Longer horizons have only two, one and one
 independent observations. Net cohort returns are not compounded portfolio CAGR.
@@ -3536,6 +3917,20 @@ target at every horizon. That correction also reveals low precision: average
 Recurring 3/6/9-month turnover is below 1.5x and includes spread, FX, impact
 and the separate 25bp annual bank fee. Twelve-month recurring turnover remains
 unestimable from one cohort.
+
+Implementation and artifact locations:
+
+- Training and portfolio runner: `scripts/run_supervised_alpha.py`
+- Model implementation: `src/models/supervised_alpha.py`
+- Families, hyperparameters and validation gates: `configs/ml_forecasting.yaml`
+- Local trained bundles: `data/processed/supervised_alpha/*.joblib`
+- Local resumable checkpoints: `data/interim/supervised_alpha_checkpoints/`
+- Published aggregate results: `reports/outputs/supervised_alpha/`
+- Comparison and calibration plots: `reports/outputs/supervised_alpha/plots/`
+
+Security-level predictions and governed optimiser inputs remain local-only;
+the repository publishes aggregate validation, OOS, calibration, acceptance and
+model-manifest evidence.
 
 ## Portfolio Outputs And Stock Recommendations
 
@@ -3696,8 +4091,12 @@ def build_investment_principal_deck(
     _slide_cover(presentation, evidence)
     _slide_decision(presentation, evidence)
     _slide_workflow(presentation, evidence)
+    _slide_system_architecture(presentation, evidence)
     _slide_drl_results(presentation, evidence, plot_paths[6])
     _slide_supervised_stack(presentation, evidence)
+    _slide_supervised_model_comparison(
+        presentation, evidence, plot_paths[7]
+    )
     _slide_supervised_results(presentation, evidence, plot_paths[4])
     _slide_supervised_calibration(presentation, evidence, plot_paths[5])
     _slide_portfolio_outputs(presentation, evidence)

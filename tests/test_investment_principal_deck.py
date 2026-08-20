@@ -83,8 +83,8 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     presentation = Presentation(result.pptx_path)
     text = _presentation_text(presentation)
 
-    assert result.slide_count == 23
-    assert len(presentation.slides) == 23
+    assert result.slide_count == 25
+    assert len(presentation.slides) == 25
     fail_count = int(evidence.scorecard['status'].eq('FAIL').sum())
     expected_recommendation = (
         'Approve a controlled live pilot'
@@ -96,7 +96,9 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     assert 'Equities to establish' in text
     assert 'Risk holdout passes' in text
     assert 'DRL learned safely, but did not earn capital' in text
+    assert 'Design architecture: ML remains inside the governed stack' in text
     assert 'The new supervised alpha research stack' in text
+    assert 'How the supervised models compared' in text
     assert 'Supervised signal: encouraging, not yet proven' in text
     assert 'Uncertainty and implementation are now controlled' in text
     assert 'Recommendations: target portfolio versus research challengers' in text
@@ -119,6 +121,7 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     assert result.report_path.exists()
     assert result.manifest_path.exists()
     assert all(path.exists() for path in result.plot_paths)
+    assert (tmp_path / 'plots/supervised_model_comparison.png').exists()
     recommendations = pd.read_csv(tmp_path / 'recommendation_snapshot.csv')
     regional_count = int(
         pd.to_numeric(
@@ -156,6 +159,8 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     ) in report
     assert f'(p={paired_p_value:.3f})' in report
     assert '## Supervised Benchmark-Relative Alpha' in report
+    assert 'Implementation and artifact locations' in report
+    assert '`src/models/supervised_alpha.py`' in report
     assert '## Portfolio Outputs And Stock Recommendations' in report
     assert '## DRL And Prospective Evidence' in report
     assert '30 November 2026' in report
@@ -203,7 +208,7 @@ def test_register_rendered_pdf_accepts_versioned_path(
     )
     manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
 
-    assert result.slide_count == 23
+    assert result.slide_count == 25
     assert manifest['rendered_pdf']['path'] == str(pdf_path)
     assert manifest['rendering']['renderer'] == 'test renderer'
     assert manifest['rendering']['visual_review'] == 'completed'

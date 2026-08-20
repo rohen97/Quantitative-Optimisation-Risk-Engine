@@ -38,13 +38,13 @@ The complete, checksummed result is in
 
 The investment-principal package presents the results in plain language:
 [PowerPoint briefing](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing.pptx),
-[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-19.pdf),
+[rendered PDF](reports/presentations/wolf_investment_principal/wolf_quant_model_ic_briefing_2026-08-20.pdf),
 [written decision report](reports/presentations/wolf_investment_principal/investment_principal_report.md),
 and [publication-safe recommendation snapshot](reports/presentations/wolf_investment_principal/recommendation_snapshot.csv).
-The 23-slide briefing includes the supervised model stack, OOS diagnostics,
-calibrated uncertainty, DRL challengers, portfolio differences and stock
-recommendations. It recommends continued paper and shadow operation; no live,
-unattended or full-scale deployment is approved.
+The 25-slide briefing includes a system-design diagram, an all-family supervised
+model comparison, OOS diagnostics, calibrated uncertainty, DRL challengers,
+portfolio differences and stock recommendations. It recommends continued paper
+and shadow operation; no live, unattended or full-scale deployment is approved.
 
 ![Validation scorecard](reports/releases/2026-08-19-free-data-drl-risk/plots/validation_scorecard.png)
 
@@ -266,6 +266,22 @@ research iteration and the 12-independent-cohort gate is unmet. The supervised
 blend therefore remains exactly 0%. See the published aggregate
 [challenger report](reports/outputs/supervised_alpha/supervised_alpha_report.md)
 and its [publication boundary](reports/outputs/supervised_alpha/PUBLICATION.md).
+The [model-family comparison plot](reports/presentations/wolf_investment_principal/plots/supervised_model_comparison.png)
+shows the selected validation specification for every family and horizon.
+
+| Supervised-alpha component | Location |
+|---|---|
+| Training implementation | [`src/models/supervised_alpha.py`](src/models/supervised_alpha.py) |
+| Runner and governed optimiser handoff | [`scripts/run_supervised_alpha.py`](scripts/run_supervised_alpha.py) |
+| Families, grids and validation gates | [`configs/ml_forecasting.yaml`](configs/ml_forecasting.yaml) |
+| Local trained model bundles | `data/processed/supervised_alpha/*.joblib` |
+| Local resume checkpoints | `data/interim/supervised_alpha_checkpoints/` |
+| Published aggregate results | [`reports/outputs/supervised_alpha/`](reports/outputs/supervised_alpha/) |
+
+The principal result files are `family_winners.csv`, `validation_summary.csv`,
+`oos_summary.csv`, `quantile_metrics.csv`, `acceptance_decision.csv`,
+`ensemble_weights.csv`, `model_manifest.csv` and `supervised_alpha_report.md`.
+Security-level predictions and governed optimiser inputs remain local-only.
 
 Run the portfolio optimisation and constraint engine:
 
