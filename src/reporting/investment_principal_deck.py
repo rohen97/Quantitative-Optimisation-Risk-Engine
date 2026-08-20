@@ -191,6 +191,13 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         outputs_root / 'supervised_alpha/latest_predictions.csv'
     )
     validation_root = release_root / 'validation'
+    free_data_summary_path = (
+        outputs_root / 'validation/free_data_evidence_summary.csv'
+    )
+    if not free_data_summary_path.exists():
+        free_data_summary_path = (
+            release_root / 'public_data/free_data_evidence_summary.csv'
+        )
     required = [
         validation_root / 'validation_manifest.json',
         release_root / 'walk_forward_manifest.json',
@@ -227,6 +234,7 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         outputs_root / 'drl_training_summary.csv',
         outputs_root / 'drl_split_manifest.csv',
         release_root / 'public_data/drl_long_history_manifest.json',
+        free_data_summary_path,
         outputs_root / 'shadow_operation/shadow_operation_status.json',
     ]
     _require_files(required)
@@ -340,9 +348,7 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         production_pit=pd.read_csv(
             release_root / 'bloomberg_pit_coverage.csv'
         ),
-        free_data_summary=_read_csv_optional(
-            outputs_root / 'validation/free_data_evidence_summary.csv'
-        ),
+        free_data_summary=pd.read_csv(free_data_summary_path),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
         ),
@@ -513,6 +519,12 @@ def _recommendation_snapshot(evidence: DeckEvidence) -> pd.DataFrame:
         ).fillna(0.0)
         > 0.0
     ].copy()
+    if 'regional_alpha_score' in regional_source:
+        regional_score = regional_source['regional_alpha_score']
+    elif 'model_score' in regional_source:
+        regional_score = regional_source['model_score']
+    else:
+        regional_score = pd.Series(np.nan, index=regional_source.index)
     regional = pd.DataFrame(
         {
             'as_of_date': evidence.as_of_date,
@@ -527,9 +539,7 @@ def _recommendation_snapshot(evidence: DeckEvidence) -> pd.DataFrame:
             'target_weight': pd.to_numeric(
                 regional_source['target_weight'], errors='coerce'
             ),
-            'model_score': pd.to_numeric(
-                regional_source.get('regional_alpha_score'), errors='coerce'
-            ),
+            'model_score': pd.to_numeric(regional_score, errors='coerce'),
             'cost_adjusted_predicted_excess_return_3m': np.nan,
             'q05_excess_return_3m': np.nan,
             'q95_excess_return_3m': np.nan,

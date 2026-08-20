@@ -167,7 +167,9 @@ def test_deck_builds_with_expected_sections(tmp_path: Path) -> None:
     assert '31 August 2029' in report
 
 
-def test_deck_loads_from_public_recommendation_snapshot(monkeypatch) -> None:
+def test_deck_loads_from_public_recommendation_snapshot(
+    monkeypatch, tmp_path: Path
+) -> None:
     restricted = {
         (
             REPO_ROOT
@@ -176,6 +178,10 @@ def test_deck_loads_from_public_recommendation_snapshot(monkeypatch) -> None:
         (
             REPO_ROOT
             / 'reports/outputs/supervised_alpha/latest_predictions.csv'
+        ).resolve(),
+        (
+            REPO_ROOT
+            / 'reports/outputs/validation/free_data_evidence_summary.csv'
         ).resolve(),
     }
     original_exists = Path.exists
@@ -191,6 +197,14 @@ def test_deck_loads_from_public_recommendation_snapshot(monkeypatch) -> None:
     assert len(evidence.regional_alpha) == 20
     assert len(evidence.supervised_latest) == 6
     assert set(evidence.supervised_latest['horizon_months']) == {3}
+    assert int(evidence.free_data_summary['rows'].sum()) > 0
+
+    build_investment_principal_deck(REPO_ROOT, tmp_path)
+    rebuilt = pd.read_csv(tmp_path / 'recommendation_snapshot.csv')
+    regional = rebuilt.loc[
+        rebuilt['recommendation_class'].eq('regional_alpha_challenger')
+    ]
+    assert regional['model_score'].notna().all()
 
 
 def test_register_rendered_pdf_accepts_versioned_path(
