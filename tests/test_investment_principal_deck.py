@@ -198,6 +198,11 @@ def test_deck_loads_from_public_recommendation_snapshot(
     assert len(evidence.supervised_latest) == 6
     assert set(evidence.supervised_latest['horizon_months']) == {3}
     assert int(evidence.free_data_summary['rows'].sum()) > 0
+    assert evidence.free_data_summary_source == (
+        REPO_ROOT
+        / 'reports/releases/2026-08-19-free-data-drl-risk/public_data'
+        / 'free_data_evidence_summary.csv'
+    )
 
     build_investment_principal_deck(REPO_ROOT, tmp_path)
     rebuilt = pd.read_csv(tmp_path / 'recommendation_snapshot.csv')

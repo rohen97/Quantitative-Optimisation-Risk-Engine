@@ -96,6 +96,7 @@ class DeckEvidence:
     pit_returns: pd.DataFrame
     pit_coverage: dict
     production_pit: pd.DataFrame
+    free_data_summary_source: Path
     free_data_summary: pd.DataFrame
     alpha: pd.DataFrame
     overfitting: pd.Series
@@ -348,6 +349,7 @@ def load_deck_evidence(repo_root: str | Path) -> DeckEvidence:
         production_pit=pd.read_csv(
             release_root / 'bloomberg_pit_coverage.csv'
         ),
+        free_data_summary_source=free_data_summary_path,
         free_data_summary=pd.read_csv(free_data_summary_path),
         alpha=pd.read_csv(
             backtest_root / 'point_in_time_alpha_significance.csv'
@@ -4154,6 +4156,7 @@ def build_investment_principal_deck(
         evidence.release_root / 'walk_forward_manifest.json',
         evidence.release_root / 'universe_summary.csv',
         evidence.release_root / 'pit_evidence_coverage.json',
+        evidence.free_data_summary_source,
         evidence.repo_root
         / PRIOR_RELEASE_RELATIVE
         / 'validation/validation_manifest.json',
