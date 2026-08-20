@@ -44,6 +44,17 @@ features and realised outcomes.
 | 9m | 4 | 1 | 0.226 | 0.500 | 24.8% | 0.35x | 91.9% | 100% |
 | 12m | 1 | 1 | 0.253 | 0.500 | 37.0% | N/A | 90.5% | 117% |
 
+The selected family-level validation specifications compare as follows. Rank IC
+measures whether higher predicted ranks were followed by higher realised
+benchmark-relative returns; larger positive values are better.
+
+| Horizon | Strongest individual | Individual validation IC | Ensemble validation IC | Ensemble legacy OOS IC | Independent OOS |
+| --- | --- | ---: | ---: | ---: | ---: |
+| 3m | Huber | 0.121 | 0.098 | 0.157 | 4 |
+| 6m | Huber | 0.146 | 0.111 | 0.182 | 2 |
+| 9m | Huber | 0.158 | 0.123 | 0.226 | 1 |
+| 12m | Elastic Net | 0.139 | 0.145 | 0.253 | 1 |
+
 The 3-month rank IC is positive, but four independent cohorts produce an exact
 sign-test p-value above 5%. Longer horizons have only two, one and one
 independent observations. Net cohort returns are not compounded portfolio CAGR.
@@ -57,6 +68,20 @@ target at every horizon. That correction also reveals low precision: average
 Recurring 3/6/9-month turnover is below 1.5x and includes spread, FX, impact
 and the separate 25bp annual bank fee. Twelve-month recurring turnover remains
 unestimable from one cohort.
+
+Implementation and artifact locations:
+
+- Training and portfolio runner: `scripts/run_supervised_alpha.py`
+- Model implementation: `src/models/supervised_alpha.py`
+- Families, hyperparameters and validation gates: `configs/ml_forecasting.yaml`
+- Local trained bundles: `data/processed/supervised_alpha/*.joblib`
+- Local resumable checkpoints: `data/interim/supervised_alpha_checkpoints/`
+- Published aggregate results: `reports/outputs/supervised_alpha/`
+- Comparison and calibration plots: `reports/outputs/supervised_alpha/plots/`
+
+Security-level predictions and governed optimiser inputs remain local-only;
+the repository publishes aggregate validation, OOS, calibration, acceptance and
+model-manifest evidence.
 
 ## Portfolio Outputs And Stock Recommendations
 

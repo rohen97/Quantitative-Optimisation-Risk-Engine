@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Updated the architecture diagrams to show the supervised model zoo, fold-local training, family selection, ensemble, governed optimiser handoff and local-versus-published artifact boundary.
+- Expanded the investment-principal briefing from 23 to 25 slides with a PPT-native system architecture and a plotted all-family supervised-model comparison across 3/6/9/12-month horizons.
+- Documented the exact supervised training implementation, runner, configuration, local model/checkpoint directories and aggregate result locations.
+
 ## 1.7.0 - 2026-08-19 - Free Data, DRL And Governed Research Release
 
 ### Added

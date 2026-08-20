@@ -5,14 +5,14 @@ The repository is organised as a modular quant platform, with production logic i
 For visual pipeline diagrams, data-flow graphs and stage-by-stage diagnostic checks, see `docs/ARCHITECTURE_DIAGRAMS.md`.
 
 - `data`: backend configuration, schemas, validators, normalisers, lineage, point-in-time views, snapshot building, CSV/DuckDB repositories, ingestion helpers and shadow comparison utilities.
-- `data_ingestion`: universe, mock data, yfinance price ingestion, Alpaca integration and vendor adapter interfaces.
+- `data_ingestion`: universe, yfinance/TickDB/AKShare/OpenBB price and volume ingestion, SEC filing vintages, FRED/ALFRED macro vintages, OpenFIGI identifiers and vendor adapter interfaces.
 - `branches`: portfolio-aware quant, clean-sheet quant, mock LLM analyst benchmark and branch comparison engines.
 - `portfolio`: current holdings loading, exposure and concentration diagnostics.
 - `features`: financial, dividend, valuation, liquidity, risk and portfolio-fit features.
 - `sentiment` and `alternative_data`: mock/local text ingestion, entity mapping, rule-based sentiment, event classification, rolling alternative-data features and risk overlays.
 - `narrative`: financial concept extraction, occurrence/reoccurrence tracking, narrative frame construction, mock embeddings, semantic distance, temporal reframing and Markov transition analysis.
 - `regime`: factor-regime lens, Wolf Chaos Index, informational regime drivers, fused dashboard, transition matrix and stock-level regime suitability scoring.
-- `models`: conservative scorecard, ML forecasting, distributional risk forecasts, probabilistic validation, VaR/ES backtesting and walk-forward interfaces.
+- `models`: conservative scorecard, distributional risk forecasts, benchmark-relative supervised alpha, probabilistic validation, VaR/ES backtesting and walk-forward interfaces.
 - `optimisation`: score-weighted, risk-parity, mean-variance, CVaR/ES, dividend-income and regime-aware portfolio construction, trade-list generation and constraint reporting.
 - `risk`: VaR, CVaR, Expected Shortfall, drawdown, risk contributions, scenario library, risk reports and stress tests.
 - `hedging`: equity-only hedges, optional institutional hedge placeholders and defensive substitution recommendations.
@@ -31,7 +31,7 @@ Migration is configuration controlled through `configs/data.yaml`. `legacy_csv` 
 
 The data foundation has three layers. The raw layer stores retrieval metadata in DuckDB and keeps large payloads under `data/raw_archive/`. The clean layer contains typed, deduplicated tables such as `securities`, `security_identifiers`, `prices_daily`, `fundamentals_reported`, `dividends`, `fx_rates`, `macro_observations`, `news_documents` and `news_security_map`. The model-ready layer contains point-in-time snapshots for features, regimes, forecasts, scorecards, portfolios, optimisation, risk, stress tests, hedges, DRL and final recommendations.
 
-The external-provider boundary is defined in `configs/data_sources.yaml` and implemented under `src/data_ingestion/`. Provider adapters normalise data before it reaches persistence or model code. The price router can query all credentialed sources, compare overlapping closes and select observations by explicit provider priority. Macro adapters retain source, retrieval time, availability date and vintage date so revisions are inserted as new point-in-time records. Current coverage combines yfinance, Alpaca, EODHD, Finnhub, iTick, Frankfurter, FRED, ECB, ONS, Bank of England, China Data and HKMA across every active region.
+The external-provider boundary is defined in `configs/data_sources.yaml` and implemented under `src/data_ingestion/`. Provider adapters normalise data before it reaches persistence or model code. The price router can query credentialed sources, compare overlapping closes and select observations by explicit provider priority. Macro adapters retain source, retrieval time, availability date and vintage date so revisions are inserted as new point-in-time records. Current public-data coverage combines yfinance, TickDB, AKShare, OpenBB provider checks, SEC EDGAR, OpenFIGI, FRED/ALFRED, ECB, ONS, Bank of England, Frankfurter, China Data and HKMA; optional Alpaca, EODHD, Finnhub and iTick adapters remain available when credentialed.
 
 ## Branching Pipeline
 
@@ -45,9 +45,9 @@ The branch comparison engine flags agreement, disagreement and final review requ
 
 ## Feature Store
 
-The feature store converts mock or future vendor data into stock-level monthly features. Current modules cover dividend quality, cash-flow quality, balance-sheet strength, valuation, risk, liquidity, sentiment/narrative overlays, regime suitability and portfolio fit.
+The feature store converts observed, reconstructed point-in-time and explicitly labelled mock inputs into stock-level monthly features. Current modules cover dividend quality, cash-flow quality, balance-sheet strength, valuation, risk, liquidity, sentiment/narrative overlays, regime suitability and portfolio fit.
 
-The output is `reports/outputs/features_monthly.csv`. Missing ML, regime and sentiment production signals use neutral placeholder scores until those engines are implemented.
+The primary output is `reports/outputs/features_monthly.csv`. Missing optional signals receive documented neutral values. Supervised-alpha training uses the separate point-in-time research panel and realised-outcome store so target maturity, purge rules and prospective freezes remain auditable.
 
 ## Conservative Scorecard
 
@@ -57,15 +57,25 @@ Scoring weights are configured around dividend safety, cash-flow quality, balanc
 
 ## ML Forecasting And Distributional Risk
 
-The ML engine forecasts conditional return distributions rather than only point returns. In mock mode it estimates expected total return, volatility, dividend-cut probability, large-drawdown probability and distribution parameters for Normal, Student-t and an upgradeable skewed Student-t placeholder.
+The distributional engine forecasts conditional return distributions rather than only point returns. In deterministic mode it estimates expected total return, volatility, dividend-cut probability, large-drawdown probability and distribution parameters for Normal, Student-t and an upgradeable skewed Student-t placeholder.
 
-Inspired by distributional deep-learning research, the architecture is designed for future CNN, LSTM, Transformer and xLSTM forecasters that output `mu`, `sigma`, `nu` and `xi`. The current implementation does not add TensorFlow or PyTorch and does not train deep models. It derives P5/P50/P95, VaR, CVaR, Expected Shortfall, tail-risk scores, skewness-risk scores, PIT/LPS/CRPS-style validation proxies and VaR/ES backtest reports from deterministic mock inputs.
+Inspired by distributional deep-learning research, this path is designed for future CNN, LSTM, Transformer and xLSTM forecasters that output `mu`, `sigma`, `nu` and `xi`. The current distributional path does not add TensorFlow or PyTorch. It derives P5/P50/P95, VaR, CVaR, Expected Shortfall, tail-risk scores, skewness-risk scores, PIT/LPS/CRPS-style validation proxies and VaR/ES backtest reports from deterministic inputs.
 
 Research-only extension outputs cover sensitivity analysis, additional asset-class hooks, quantile-forecasting placeholders and distribution-driven trading signal scaffolding. These are not execution instructions and do not override hard filters.
 
+## Supervised Benchmark-Relative Alpha
+
+The supervised research engine is implemented in `src/models/supervised_alpha.py`, orchestrated by `scripts/run_supervised_alpha.py` and configured under `supervised_alpha` in `configs/ml_forecasting.yaml`. It trains OLS with train-only screening, Ridge, Elastic Net, robust Huber regression, Random Forest, Extra Trees, histogram gradient boosting, XGBoost regression and XGBoost learning-to-rank models at 3/6/9/12-month horizons.
+
+Each expanding-window fold fits preprocessing and feature screening on training observations only. Labels must mature before the validation block, and the frozen legacy OOS window is separated by an embargo. One specification per family is selected from validation, then rank-normalised linear, tree and ranker winners form the ensemble. Predictions are adjusted for spread, FX, market impact, turnover and the annual bank fee before the acceptance gate is evaluated.
+
+Trained bundles are local artifacts under `data/processed/supervised_alpha/`; resumable checkpoints are under `data/interim/supervised_alpha_checkpoints/`. Aggregate validation, family comparison, OOS, calibration, acceptance, model-manifest and plot artifacts are published under `reports/outputs/supervised_alpha/`. Security-level predictions and optimiser inputs remain local-only because they can contain licensed-derived information.
+
+The runner merges the primary-horizon prediction into the optimiser input through `apply_governed_supervised_alpha_overlay`. A rejected or insufficient-evidence decision is a mathematical no-op: the baseline expected return remains unchanged and the supervised deployment blend stays at zero. The generic full-pipeline runner does not silently invoke or promote this research challenger.
+
 ## Portfolio Optimisation And Constraints
 
-The optimiser converts scorecard, distributional forecasts, regime suitability, narrative risk, alternative-data risk and current holdings into target weights and trade actions. It runs equal-weight fallback, score-weighted, risk-parity, mean-variance, CVaR/Expected Shortfall constrained, dividend-income and regime-aware constructors.
+The optimiser converts scorecard, distributional forecasts, regime suitability, narrative risk, alternative-data risk and current holdings into target weights and trade actions. It runs equal-weight fallback, score-weighted, risk-parity, mean-variance, CVaR/Expected Shortfall constrained, dividend-income and regime-aware constructors. Governed supervised alpha can alter expected returns only after its acceptance gate assigns a positive blend.
 
 Hard constraints cover long-only weights, single-name caps, liquidity, active equity status and exclusion flags. Soft constraints report portfolio dividend yield, volatility, VaR, CVaR, Expected Shortfall, turnover, HHI, effective holdings and concentration exposures. The final trade list translates current weight versus target weight into Buy, Increase, Reduce, Sell, Hold or Avoid actions with risk flags and rationale.
 
@@ -113,19 +123,19 @@ Regime outputs feed the scorecard, portfolio-aware branch, clean-sheet branch, m
 
 ## Investment Committee Reporting
 
-The Investment Committee reporting layer is a read-only consumer of precomputed model artifacts. It loads current portfolio, scorecard, branch comparison, final recommendation, optimiser, risk, stress, hedge, regime, DRL and data-quality outputs from the configured data backend, resolves changing column names through a reporting column resolver and renders a deterministic report bundle.
+The Investment Committee reporting layer is a read-only consumer of precomputed model artifacts. It loads current portfolio, scorecard, branch comparison, final recommendation, optimiser, risk, stress, hedge, regime, supervised-alpha, DRL and data-quality outputs from the configured data backend, resolves changing column names through a reporting column resolver and renders a deterministic report bundle.
 
 The reporting pipeline is intentionally downstream of the model stack:
 
 1. load precomputed outputs
 2. validate availability and schema quality
-3. resolve selected baseline and DRL challenger portfolios
-4. summarise exposures, forecasts, branch agreement, risk, stress, hedges and DRL governance
+3. resolve selected baseline, supervised and DRL challenger portfolios
+4. summarise exposures, forecasts, model-family comparisons, branch agreement, risk, stress, hedges and challenger governance
 5. generate charts and non-causal narrative
 6. render HTML and optional PDF
 7. write an immutable bundle plus a copied `latest` view
 
-Opening the dashboard or rendering a report does not rerun forecasts, optimisation, risk, stress tests, DRL policies or external data ingestion. The report preserves the final selected weights source and keeps baseline optimiser, DRL challenger and accepted/rejected/blended status separate.
+Opening the dashboard or rendering a report does not rerun forecasts, supervised training, optimisation, risk, stress tests, DRL policies or external data ingestion. The report preserves the final selected weights source and keeps baseline optimiser, supervised challenger, DRL challenger and accepted/rejected/blended status separate.
 
 Final portfolio resolution follows explicit final weights, accepted/blended DRL, selected constrained optimiser, CVaR-constrained, regime-aware, score-weighted and equal-weight fallback order. Invalid, negative or non-unit-sum weights are rejected. HTML and the JSON bundle are required pipeline artifacts; PDF and dashboard dependencies are optional.
 
