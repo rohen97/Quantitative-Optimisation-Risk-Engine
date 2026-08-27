@@ -1,4 +1,4 @@
-# The Wolf Quant Model
+# Systematic-Cross-market-Optimisation-Portfolio-Engine
 
 Portfolio-aware, regime-aware and sentiment-aware conservative listed-equity selection MVP for DACH, EU ex-DACH, UK, US, Mainland China and Hong Kong.
 
